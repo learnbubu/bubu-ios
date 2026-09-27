@@ -133,6 +133,7 @@ struct CharInfo: Codable {
     let p: String?      // pinyin
     let c: [[String]]?  // parts: [part, role] where role m = meaning, s = sound
     let h: String?      // how it's built
+    let t: String?      // type: g = a picture character
 }
 
 final class CharData {
