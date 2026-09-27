@@ -1,0 +1,45 @@
+# Codemagic cloud builds for 步步 Bùbù (iOS). Docs: https://docs.codemagic.io/yaml-basic-configuration/yaml-getting-started/
+workflows:
+  # Needs no Apple account: builds for the iPhone simulator, launches the app and
+  # takes screenshots, so compile errors and the running app can be checked
+  # without a Mac at hand.
+  ios-simulator-check:
+    name: iOS simulator check
+    instance_type: mac_mini_m2
+    max_build_duration: 40
+    environment:
+      xcode: latest
+      node: 22
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+    scripts:
+      - name: Install
+        script: npm ci
+      - name: Copy the web app into the iOS project
+        script: npx cap sync ios
+      - name: Build for the simulator
+        script: |
+          set -o pipefail
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO build | tee build.log | grep -E "error:|warning: .*(deprecated|Swift)|BUILD (SUCCEEDED|FAILED)" || true
+          test -d build/Build/Products/Debug-iphonesimulator/App.app
+      - name: Launch in the simulator and take screenshots
+        script: |
+          mkdir -p screenshots
+          TYPE=$(xcrun simctl list devicetypes | grep -E "iPhone 1[5-9]( |$)" | grep -v Plus | grep -v Max | tail -1 | sed -E 's/.*\((com\.apple[^)]*)\).*/\1/')
+          UDID=$(xcrun simctl create bubu "$TYPE")
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" build/Build/Products/Debug-iphonesimulator/App.app
+          xcrun simctl launch "$UDID" com.domchivers.bubu
+          sleep 15; xcrun simctl io "$UDID" screenshot screenshots/1-launch.png
+          sleep 20; xcrun simctl io "$UDID" screenshot screenshots/2-after-35s.png
+          xcrun simctl ui "$UDID" appearance dark; sleep 5
+          xcrun simctl io "$UDID" screenshot screenshots/3-dark.png
+    artifacts:
+      - screenshots/*.png
+      - build.log
