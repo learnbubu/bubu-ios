@@ -40,6 +40,7 @@ struct PageView: View {
         case .converse: ConversePage()
         case .pick: PickPage()
         case .studyChoice: StudyChoicePage()
+        case .avatar: AvatarBuilderPage()
         case .flash(let ids): FlashPage(ids: ids)
         case .match(let ids): MatchPage(ids: ids)
         default: ComingSoon(title: "Coming soon", icon: "hammer")

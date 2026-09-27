@@ -15,6 +15,7 @@ struct Prefs: Codable, Equatable {
     var autoRelight = true      // an ember relights a missed day by itself
     var lessons: [String]?      // "What to study": the lessons chosen (nil or empty = all)
     var focuses: [String]?      // and the skills switched on (nil or empty = all)
+    var avatar: AvatarConfig?   // your avatar's look
 
     init() {}
     init(from decoder: Decoder) throws {
@@ -30,6 +31,7 @@ struct Prefs: Codable, Equatable {
         autoRelight = (try? c.decode(Bool.self, forKey: .autoRelight)) ?? true
         lessons = try? c.decode([String].self, forKey: .lessons)
         focuses = try? c.decode([String].self, forKey: .focuses)
+        avatar = try? c.decode(AvatarConfig.self, forKey: .avatar)
     }
 
     var colorScheme: ColorScheme? { theme == "light" ? .light : theme == "dark" ? .dark : nil }

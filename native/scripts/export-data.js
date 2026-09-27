@@ -100,6 +100,43 @@ async function imageSet(name, lightSrc, darkSrc) {
   const SND = path.resolve(__dirname, "../Bubu/Resources/Sounds");
   fs.mkdirSync(SND, { recursive: true });
   for (const f of fs.readdirSync(path.join(WEB, "sounds"))) fs.copyFileSync(path.join(WEB, "sounds", f), path.join(SND, f));
+  // the avatar wardrobe: every layer and its thumbnail, and the data with asset names for paths
+  {
+    const src = fs.readFileSync(path.join(WEB, "avatar-modular-data.js"), "utf8").replace("const MODULAR_AVATAR_DATA", "globalThis.__AV");
+    eval(src);
+    const D = globalThis.__AV;
+    const name = p => p ? "av-" + path.basename(p, ".webp") : null;
+    const conv = o => typeof o === "string" ? name(o) : o && typeof o === "object" && !Array.isArray(o)
+      ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, conv(v)])) : o;
+    const out = {};
+    for (const [k, v] of Object.entries(D)) {
+      if (k === "thumbnails") out.thumbnails = Object.fromEntries(Object.entries(v).map(([a, b]) => [name(a), name(b)]));
+      else if (k === "toneColours" || k === "defaults") out[k] = v;
+      else out[k] = conv(v);
+    }
+    // JSON object order is lost on the other side: keep each list's order explicitly
+    out.order = Object.fromEntries(["skin", "top", "bottom", "shoes", "eyes", "brows", "mouth", "accessory", "hair"].map(k => [k, Object.keys(D[k])]));
+    out.order.hairColours = Object.fromEntries(Object.entries(D.hair).map(([h, v]) => [h, Object.keys(v)]));
+    fs.writeFileSync(path.join(DATA, "avatar.json"), JSON.stringify(out));
+    const AV = path.join(WEB, "images", "avatar-modular-v006");
+    for (const f of fs.readdirSync(AV)) {
+      if (!f.endsWith(".webp")) continue;
+      const nm = "av-" + path.basename(f, ".webp");
+      const dir = path.join(ASSETS, nm + ".imageset");
+      fs.mkdirSync(dir, { recursive: true });
+      const thumb = f.includes("-thumb");
+      await sharp(path.join(AV, f)).resize(thumb ? 160 : 768).png({ compressionLevel: 9, palette: false }).toFile(path.join(dir, nm + ".png"));
+      fs.writeFileSync(path.join(dir, "Contents.json"), contents({ images: [{ idiom: "universal", filename: nm + ".png" }] }));
+      n++;
+    }
+  }
+  // the profile's artwork
+  {
+    const PR = path.join(WEB, "images", "profile");
+    for (const [nm, f] of [["profile-hero", "avatarBackground"], ["profile-path", "learningPathBackground"], ["profile-foliage", "quoteFoliage"]]) {
+      await imageSet(nm, path.join(PR, `light_${f}.webp`), path.join(PR, `dark_${f}.webp`)); n++;
+    }
+  }
   // the web's synthesised effects (synthSfx), rendered to WAV with the same tone recipes
   {
     const RATE = 44100;

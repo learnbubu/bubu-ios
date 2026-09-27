@@ -59,6 +59,7 @@ struct RootView: View {
     /// Screens the cloud screenshot run asks for with `-screen`.
     private func debugScreens() {
         #if DEBUG
+        if Launch.screen == "avatar" { router.tab = .profile; router.profilePath = [.avatar]; return }
         if Launch.screen == "tones" { router.homePath = [.tones]; return }
         if Launch.screen == "guide" { router.tab = .learn; router.learnPath = [.guide(1)]; return }
         if Launch.screen == "story", let r = Course.shared.data.readings.first { router.tab = .home; router.homePath = [.story(r.id)]; return }
@@ -90,7 +91,7 @@ struct RootView: View {
             }
             .tabItem { Label("Learn", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }.tag(Router.Tab.learn)
             NavigationStack(path: $router.profilePath) {
-                ComingSoon(title: "Profile", icon: "person.crop.circle").toolbar(.hidden, for: .navigationBar).pageDestinations()
+                ProfileView().toolbar(.hidden, for: .navigationBar).pageDestinations()
             }
             .tabItem { Label("Profile", systemImage: "person") }.tag(Router.Tab.profile)
             NavigationStack { SettingsView().toolbar(.hidden, for: .navigationBar) }
