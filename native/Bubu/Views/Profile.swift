@@ -80,7 +80,10 @@ struct ProfileView: View {
 
     private func hero(_ lv: (level: Int, into: Int, span: Int, next: Int)) -> some View {
         ZStack(alignment: .bottom) {
-            Image("profile-hero").resizable().scaledToFill().frame(height: 285).clipped()
+            // the picture fills the card without setting its width
+            Color.clear.frame(maxWidth: .infinity).frame(height: 285)
+                .overlay { Image("profile-hero").resizable().scaledToFill() }
+                .clipped()
             AvatarView(config: progress.avatar).frame(width: 310, height: 310).offset(y: 8)
             VStack(alignment: .leading, spacing: 2) {
                 Text(progress.name.isEmpty ? "Learner" : progress.name).font(.nunitoXB(24)).foregroundStyle(Color.ink)
@@ -136,7 +139,7 @@ struct ProfileView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
             .background {
-                Image("profile-path").resizable().scaledToFill()
+                Color.clear.overlay { Image("profile-path").resizable().scaledToFill() }.clipped()
                     .mask(LinearGradient(stops: [.init(color: .clear, location: 0.3), .init(color: .black, location: 0.9)], startPoint: .leading, endPoint: .trailing))
             }
             .background(Color.panel)
@@ -372,7 +375,9 @@ struct AvatarBuilderPage: View {
         let cfg = draft ?? progress.avatar
         VStack(spacing: 0) {
             ZStack {
-                Image("profile-hero").resizable().scaledToFill()
+                Color.clear.frame(maxWidth: .infinity)
+                    .overlay { Image("profile-hero").resizable().scaledToFill() }
+                    .clipped()
                 AvatarView(config: cfg).frame(width: 290, height: 290).offset(y: 20)
                     .animation(.spring(response: 0.3), value: cfg)
             }
