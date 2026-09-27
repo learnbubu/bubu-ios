@@ -412,10 +412,11 @@ struct PinyinText: View {
     var weight: Font.Weight = .semibold
     var body: some View {
         let words = pinyin.split(separator: " ", omittingEmptySubsequences: false).map(String.init)
+        let tones = ProgressStore.current?.prefs.toneColours ?? true
         var t = Text("")
         for (i, w) in words.enumerated() {
             if i > 0 { t = t + Text(" ") }
-            t = t + Text(w).foregroundColor(Color.tones[toneOf(w) - 1])
+            t = t + Text(w).foregroundColor(tones ? Color.tones[toneOf(w) - 1] : Color.gold)
         }
         return t.font(.nunito(size, weight))
     }
@@ -423,12 +424,33 @@ struct PinyinText: View {
 
 // MARK: - multiple choice
 
+/// The pinyin under the prompt, or, with pinyin switched off, a button to reveal it.
+struct PinyinHint: View {
+    let pinyin: String
+    let shown: Bool
+    @State private var revealed = false
+    var body: some View {
+        if shown || revealed {
+            PinyinText(pinyin: pinyin, size: 23.2)
+        } else {
+            Button { withAnimation { revealed = true } } label: {
+                Label("Show pinyin", systemImage: "eye").font(.nunito(14, .bold)).foregroundStyle(Color.muted)
+                    .padding(.horizontal, 14).padding(.vertical, 7)
+                    .overlay(Capsule().strokeBorder(Color.line, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+}
+
 struct ChoiceView: View {
     let ex: Exercise
     let picked: String?
     let answered: Bool
     var choose: (String) -> Void
+    @Environment(ProgressStore.self) private var progress
     private let course = Course.shared
+    private var showPinyin: Bool { progress.prefs.showPinyin }
 
     var body: some View {
         let w = ex.card.word
@@ -460,8 +482,8 @@ struct ChoiceView: View {
                     SpeakerButton(text: w.hanzi)
                 }
             }
-            if ex.dir == "recognize" {
-                PinyinText(pinyin: w.pinyin, size: 23.2).frame(minHeight: 44)
+            if ex.dir == "recognize" || (ex.dir == "recall" && !showPinyin) {
+                PinyinHint(pinyin: w.pinyin, shown: showPinyin).frame(minHeight: 44)
             }
             VStack(spacing: 8) {
                 ForEach(ex.options, id: \.self) { opt in option(opt) }
@@ -478,7 +500,7 @@ struct ChoiceView: View {
                 if ex.dir == "recall" {
                     VStack(spacing: 2) {
                         Text(opt).font(.hanzi(18.4, .semibold)).foregroundStyle(Color.ink)
-                        if let py = course.cards.first(where: { $0.word.hanzi == opt })?.word.pinyin {
+                        if showPinyin, let py = course.cards.first(where: { $0.word.hanzi == opt })?.word.pinyin {
                             Text(py).font(.nunito(13.1)).foregroundStyle(Color.muted)
                         }
                     }
@@ -625,6 +647,7 @@ struct SentenceView: View {
     @Binding var placed: [Exercise.Tile]
     let result: Bool?
     @Environment(ProgressStore.self) private var progress
+    @State private var pinyinOpen = false
     private let course = Course.shared
 
     /// whether a word of the sentence is itself a word not learned yet
@@ -649,6 +672,7 @@ struct SentenceView: View {
                             let new = isNew(w.hanzi)
                             VStack(spacing: 1) {
                                 Text(w.pinyin).font(.nunito(12.5)).foregroundStyle(new ? Color.newInk : Color.muted)
+                                    .opacity(progress.prefs.showPinyin || pinyinOpen ? 1 : 0)
                                 Text(w.hanzi).font(.hanzi(24.8)).foregroundStyle(new ? Color.newInk : Color.ink)
                                     .padding(.bottom, 2)
                                     .background(new ? Color.newBg : .clear)
@@ -659,6 +683,8 @@ struct SentenceView: View {
                             .padding(.horizontal, 3)
                         }
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture { withAnimation { pinyinOpen.toggle() } }
                 }
             }
             answerArea

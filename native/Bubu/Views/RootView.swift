@@ -52,7 +52,7 @@ struct RootView: View {
                 .tabItem { Label("Learn", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }.tag(Router.Tab.learn)
             ComingSoon(title: "Profile", icon: "person.crop.circle")
                 .tabItem { Label("Profile", systemImage: "person") }.tag(Router.Tab.profile)
-            ComingSoon(title: "Settings", icon: "gearshape")
+            SettingsView()
                 .tabItem { Label("Settings", systemImage: "gearshape") }.tag(Router.Tab.settings)
         }
         .sensoryFeedback(.selection, trigger: router.tab)
@@ -69,7 +69,9 @@ struct RootView: View {
             StudyView(session: s) { router.study = nil }
                 .environment(progress)
                 .charSheetHost()
+                .preferredColorScheme(progress.prefs.colorScheme)
         }
+        .preferredColorScheme(progress.prefs.colorScheme)
         .environment(router)
         .onAppear { debugScreens() }
     }

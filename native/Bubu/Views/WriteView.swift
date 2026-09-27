@@ -11,6 +11,7 @@ struct WriteView: View {
 
     @State private var index = 0
     @State private var finishedChars = 0
+    @Environment(ProgressStore.self) private var progress
     private var chars: [String] { ex.card.word.hanzi.filter(Course.isHan).map(String.init) }
 
     static let stageInfo: [(chip: String, note: String, hint: Int)] = [
@@ -35,7 +36,7 @@ struct WriteView: View {
             }
             GeometryReader { g in
                 let side = min(g.size.width - 8, 460)
-                WritingBox(char: ch, size: side, stage: stage) {
+                WritingBox(char: ch, size: side, stage: stage, checking: progress.prefs.checkStrokes) {
                     finishedChars = index + 1
                     if index == chars.count - 1 { done() }
                 }
@@ -87,8 +88,11 @@ struct WritingBox: View {
     @State private var done = false
     @State private var drawn = 0
 
-    init(char: String, size: CGFloat, stage: Int, complete: @escaping () -> Void) {
-        self.char = char; self.size = size; self.stage = stage; self.complete = complete
+    var checking = true
+    @State private var freeInk: [[CGPoint]] = []
+
+    init(char: String, size: CGFloat, stage: Int, checking: Bool = true, complete: @escaping () -> Void) {
+        self.char = char; self.size = size; self.stage = stage; self.checking = checking; self.complete = complete
         _intro = State(initialValue: stage == 0)
     }
 
@@ -108,6 +112,9 @@ struct WritingBox: View {
                 if hint && current < d.count {
                     strokes(d, [current], Color.accent.opacity(0.45)).transition(.opacity)
                 }
+                // free tracing: every stroke stays
+                Path { p in for s in freeInk { if let f = s.first { p.move(to: f); s.dropFirst().forEach { p.addLine(to: $0) } } } }
+                    .stroke(Color.accent, style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
                 // the pen
                 Path { p in if let f = ink.first { p.move(to: f); ink.dropFirst().forEach { p.addLine(to: $0) } } }
                     .stroke(inkMissed ? Color.again : Color.accent, style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
@@ -132,6 +139,17 @@ struct WritingBox: View {
         .sensoryFeedback(.impact(weight: .light), trigger: drawn)
         .sensoryFeedback(.error, trigger: misses) { _, n in n > 0 }
         .sensoryFeedback(.success, trigger: done) { _, n in n }
+        .overlay(alignment: .bottomTrailing) {
+            if !checking && !freeInk.isEmpty {
+                HStack(spacing: 6) {
+                    Button { _ = freeInk.popLast() } label: { Image(systemName: "arrow.uturn.backward") }
+                    Button { freeInk = [] } label: { Image(systemName: "xmark") }
+                }
+                .font(.system(size: 15, weight: .bold)).foregroundStyle(Color.muted)
+                .buttonStyle(.bordered).padding(8)
+            }
+        }
+        .onAppear { if !checking { complete() } }
     }
 
     private func strokes(_ d: CharStrokes, _ idx: [Int], _ color: Color) -> some View {
@@ -140,6 +158,7 @@ struct WritingBox: View {
     }
 
     private func check() {
+        if !checking { if !ink.isEmpty { freeInk.append(ink); ink = [] }; return }
         guard let d = data, !done, !ink.isEmpty else { return }
         let glyph = ink.map(space.toGlyph)
         if StrokeMatch.matches(glyph, char: d, stroke: current, leniency: 1.4, outlineVisible: stage == 0) {

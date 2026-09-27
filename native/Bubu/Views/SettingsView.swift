@@ -1,0 +1,221 @@
+import SwiftUI
+import AVFoundation
+import UniformTypeIdentifiers
+
+/// Settings, as the web's: your name, look, voice and speed, daily goal, the
+/// practice switches, and backups in the website's own format.
+struct SettingsView: View {
+    @Environment(ProgressStore.self) private var progress
+    @State private var importing = false
+    @State private var pending: (data: Data, summary: Backup.Summary)?
+    @State private var confirmReset = false
+    @State private var message: String?
+
+    var body: some View {
+        @Bindable var p = progress
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Settings").font(.nunitoXB(28)).foregroundStyle(Color.ink).padding(.top, 8)
+
+                section {
+                    row("Your name", "Shown in the greeting on the Home screen.", stack: true) {
+                        TextField("e.g. Dominic", text: $p.name)
+                            .font(.nunito(16)).textInputAutocapitalization(.words).autocorrectionDisabled()
+                            .padding(10).background(Color.bg, in: RoundedRectangle(cornerRadius: 12))
+                            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.line))
+                            .onChange(of: p.name) { _, v in if v.count > 24 { p.name = String(v.prefix(24)) }; progress.save() }
+                    }
+                    divider
+                    row("Appearance", "Light, dark, or follow your device.", stack: true) {
+                        Segments(options: [("system", "Auto"), ("light", "Light"), ("dark", "Dark")], value: $p.prefs.theme)
+                    }
+                }
+
+                section {
+                    row("Audio speed", "How fast words are spoken.", stack: true) {
+                        HStack {
+                            Image(systemName: "tortoise.fill").foregroundStyle(Color.muted)
+                            Slider(value: $p.prefs.rate, in: 0.4...1, step: 0.05, onEditingChanged: { editing in
+                                if !editing { Speech.shared.speak("你好，很高兴认识你") }
+                            })
+                            .tint(.accent)
+                            Image(systemName: "hare.fill").foregroundStyle(Color.muted)
+                        }
+                    }
+                    divider
+                    row("Chinese voice", "The voice that speaks the words. For the most natural sound, download an Enhanced or Premium Chinese voice in the iPhone's Settings → Accessibility → Spoken Content → Voices.", stack: true) {
+                        HStack {
+                            Picker("Voice", selection: Binding(get: { p.prefs.voiceURI ?? "" }, set: { p.prefs.voiceURI = $0.isEmpty ? nil : $0 })) {
+                                Text("Best available").tag("")
+                                ForEach(Speech.chineseVoices, id: \.identifier) { v in
+                                    Text(voiceName(v)).tag(v.identifier)
+                                }
+                            }
+                            .tint(.ink)
+                            Spacer()
+                            Button("Test") { Speech.shared.speak("你好，很高兴认识你") }
+                                .font(.nunito(15, .bold)).foregroundStyle(Color.accent)
+                        }
+                    }
+                }
+
+                section {
+                    row("Daily goal", "XP to earn each day for the bonus. Any finished session keeps your streak alive.", stack: true) {
+                        HStack(spacing: 6) {
+                            ForEach([(10, "Casual"), (20, "Regular"), (30, "Serious"), (50, "Intense")], id: \.0) { g in
+                                let on = p.prefs.dailyGoal == g.0
+                                Button { p.prefs.dailyGoal = g.0 } label: {
+                                    VStack(spacing: 1) {
+                                        Text(g.1).font(.nunitoXB(14))
+                                        Text("\(g.0) XP").font(.nunito(11, .semibold)).opacity(0.8)
+                                    }
+                                    .foregroundStyle(on ? Color.onAccent : Color.ink)
+                                    .frame(maxWidth: .infinity).padding(.vertical, 9)
+                                    .background(on ? Color.accent : Color.bg, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .sensoryFeedback(.selection, trigger: p.prefs.dailyGoal)
+                    }
+                }
+
+                section {
+                    toggle("Sound effects", "Chimes for right and wrong, and the end of a session.", $p.prefs.sound)
+                    divider
+                    toggle("Show pinyin", "Show pinyin under characters as a reading aid (off = a tougher test).", $p.prefs.showPinyin)
+                    divider
+                    toggle("Tone colours", "Colour pinyin and characters by tone: 1st red, 2nd orange, 3rd green, 4th blue.", $p.prefs.toneColours)
+                    divider
+                    toggle("Stroke checking", "Check each stroke as you write (off = free tracing).", $p.prefs.checkStrokes)
+                }
+
+                section {
+                    row("Back up progress", "Save everything to a file, in the same format as the website, so it restores in either.") {
+                        ShareLink(item: BackupFile(data: Backup.export(progress)), preview: SharePreview("Bùbù progress")) {
+                            Text("Export").font(.nunito(15, .bold)).foregroundStyle(Color.accent)
+                        }
+                    }
+                    divider
+                    row("Restore backup", "Replaces current progress with a saved file, from the app or the website.") {
+                        Button("Import") { importing = true }.font(.nunito(15, .bold)).foregroundStyle(Color.accent)
+                    }
+                    divider
+                    row("Reset progress", "Clears every word, lesson and streak. Your settings stay.") {
+                        Button("Reset") { confirmReset = true }.font(.nunito(15, .bold)).foregroundStyle(Color.again)
+                    }
+                }
+
+                Text("步步 Bùbù \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "") · Character breakdowns from Make Me a Hanzi")
+                    .font(.nunito(12)).foregroundStyle(Color.muted).frame(maxWidth: .infinity).padding(.top, 4)
+                Color.clear.frame(height: 90)
+            }
+            .padding(.horizontal, 18)
+        }
+        .scrollIndicators(.hidden)
+        .background(Color.bg.ignoresSafeArea())
+        .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
+            guard case .success(let url) = result else { return }
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            guard let data = try? Data(contentsOf: url), let s = Backup.summary(data) else {
+                message = "That isn't a progress backup."; return
+            }
+            pending = (data, s)
+        }
+        .alert("Restore backup from \(pending?.summary.date ?? "")?", isPresented: Binding(get: { pending != nil }, set: { if !$0 { pending = nil } })) {
+            Button("Restore", role: .destructive) {
+                if let d = pending?.data { message = Backup.restore(d, into: progress) ? "Backup restored." : "That backup couldn't be read." }
+                pending = nil
+            }
+            Button("Cancel", role: .cancel) { pending = nil }
+        } message: {
+            Text("\(pending?.summary.lessons ?? 0) lesson(s) complete, \(pending?.summary.words ?? 0) word(s) with progress.\n\nThis replaces the progress on this phone.")
+        }
+        .alert("Reset all progress?", isPresented: $confirmReset) {
+            Button("Reset", role: .destructive) { progress.resetProgress(); message = "Progress reset." }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Every word, lesson, streak and XP goes. This can't be undone, so export a backup first if you might want it.")
+        }
+        .overlay(alignment: .bottom) {
+            if let m = message {
+                Text(m).font(.nunito(15, .bold)).foregroundStyle(Color.onAccent)
+                    .padding(.horizontal, 16).padding(.vertical, 10)
+                    .background(Color.ink.opacity(0.9), in: Capsule())
+                    .padding(.bottom, 100)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .task { try? await Task.sleep(for: .seconds(2.4)); withAnimation { message = nil } }
+            }
+        }
+        .animation(.spring(response: 0.3), value: message)
+    }
+
+    private func voiceName(_ v: AVSpeechSynthesisVoice) -> String {
+        let q = v.quality == .premium ? " (Premium)" : v.quality == .enhanced ? " (Enhanced)" : ""
+        let place = v.language == "zh-CN" ? "" : v.language == "zh-TW" ? " · Taiwan" : v.language == "zh-HK" ? " · Hong Kong" : " · \(v.language)"
+        return v.name + q + place
+    }
+
+    // MARK: building blocks
+
+    private func section<C: View>(@ViewBuilder _ c: () -> C) -> some View {
+        VStack(alignment: .leading, spacing: 0, content: c)
+            .padding(.horizontal, 14)
+            .panel(radius: 18)
+    }
+
+    private var divider: some View { Rectangle().fill(Color.line).frame(height: 1) }
+
+    private func row<C: View>(_ label: String, _ desc: String, stack: Bool = false, @ViewBuilder control: () -> C) -> some View {
+        Group {
+            if stack {
+                VStack(alignment: .leading, spacing: 10) {
+                    labels(label, desc)
+                    control()
+                }
+            } else {
+                HStack(spacing: 12) {
+                    labels(label, desc)
+                    Spacer(minLength: 0)
+                    control()
+                }
+            }
+        }
+        .padding(.vertical, 13)
+    }
+
+    private func labels(_ label: String, _ desc: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label).font(.nunitoXB(16)).foregroundStyle(Color.ink)
+            Text(desc).font(.nunito(13)).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func toggle(_ label: String, _ desc: String, _ on: Binding<Bool>) -> some View {
+        row(label, desc) { Toggle("", isOn: on).labelsHidden().tint(.accent) }
+    }
+}
+
+/// A row of options, one chosen.
+struct Segments: View {
+    let options: [(String, String)]
+    @Binding var value: String
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(options, id: \.0) { o in
+                let on = value == o.0
+                Button { value = o.0 } label: {
+                    Text(o.1).font(.nunito(14.5, .bold)).foregroundStyle(on ? Color.ink : Color.muted)
+                        .frame(maxWidth: .infinity).padding(.vertical, 8)
+                        .background(on ? Color.panel : .clear, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .shadow(color: on ? .black.opacity(0.08) : .clear, radius: 3, y: 1)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(4)
+        .background(Color.bg, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+        .sensoryFeedback(.selection, trigger: value)
+    }
+}

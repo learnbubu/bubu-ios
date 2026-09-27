@@ -9,7 +9,32 @@ final class Speech {
     /// the web's default rate of 0.85, on AVSpeech's scale where 0.5 is normal speed
     var rate: Float = AVSpeechUtteranceDefaultSpeechRate * 0.85
 
-    lazy var voice: AVSpeechSynthesisVoice? = {
+    /// the voice chosen in Settings, if it's still installed
+    var voiceURI: String?
+    var voice: AVSpeechSynthesisVoice? {
+        if let id = voiceURI, let v = AVSpeechSynthesisVoice(identifier: id) { return v }
+        return bestVoice
+    }
+
+    /// Every Chinese voice on the phone, best first.
+    static var chineseVoices: [AVSpeechSynthesisVoice] {
+        AVSpeechSynthesisVoice.speechVoices()
+            .filter { $0.language.hasPrefix("zh") || $0.language.hasPrefix("cmn") }
+            .sorted { score($0) > score($1) }
+    }
+
+    static func score(_ v: AVSpeechSynthesisVoice) -> Int {
+        var s = v.language == "zh-CN" ? 3 : 1
+        switch v.quality {
+        case .premium: s += 10
+        case .enhanced: s += 8
+        default: break
+        }
+        if ["Tingting", "Meijia", "Lili", "Yu-shu"].contains(where: v.name.contains) { s += 4 }
+        return s
+    }
+
+    lazy var bestVoice: AVSpeechSynthesisVoice? = {
         let zh = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix("zh") || $0.language.hasPrefix("cmn") }
         func score(_ v: AVSpeechSynthesisVoice) -> Int {
             var s = 0

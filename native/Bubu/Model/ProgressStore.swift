@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import AVFoundation
 
 /// Everything a learner has done, saved as JSON in Application Support.
 /// Field names follow the web app's saved progress (srs, done, activity), so a
@@ -16,6 +17,10 @@ final class ProgressStore {
     private(set) var celebrated: String?              // the day the goal bonus was paid
     private(set) var boostUntil: Double = 0           // double XP until (ms)
     private(set) var hooks: [String: String] = [:]    // your own memory hooks, by character
+    var prefs = Prefs() { didSet { if prefs != oldValue { applyPrefs(); save() } } }
+
+    /// The store in use, for small views that read a setting (tone colours, pinyin).
+    @ObservationIgnored static weak var current: ProgressStore?
     var name: String = ""
 
     private let course: Course
@@ -33,6 +38,7 @@ final class ProgressStore {
         var celebrated: String?
         var boostUntil: Double?
         var hooks: [String: String]?
+        var prefs: Prefs?
     }
 
     init(course: Course, url: URL? = nil) {
@@ -40,6 +46,40 @@ final class ProgressStore {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         self.url = url ?? dir.appendingPathComponent("progress.json")
         load()
+        applyPrefs()
+        if url == nil { Self.current = self }
+    }
+
+    /// Settings that live outside the views: speech and sound.
+    private func applyPrefs() {
+        Speech.shared.rate = Float(prefs.rate) * AVSpeechUtteranceDefaultSpeechRate
+        Speech.shared.voiceURI = prefs.voiceURI
+        Sounds.shared.enabled = prefs.sound
+    }
+
+    /// The settings as the web stores them.
+    func prefsJSON() -> [String: Any] {
+        guard let d = try? JSONEncoder().encode(prefs),
+              let o = try? JSONSerialization.jsonObject(with: d) as? [String: Any] else { return [:] }
+        return o
+    }
+
+    /// Everything replaced at once, from a backup.
+    func replaceAll(srs: [String: SRSRecord], done: Set<String>, xpDays: [String: Int], days: [String: Int], lit: Set<String>,
+                    celebrated: String?, boostUntil: Double, qc: [String: [String: Int]], name: String,
+                    hooks: [String: String], prefs: Prefs) {
+        holdSaves()
+        self.srs = srs; self.done = done; self.xpDays = xpDays; self.days = days; self.lit = lit
+        self.celebrated = celebrated; self.boostUntil = boostUntil; self.qc = qc; self.name = name
+        self.hooks = hooks; self.prefs = prefs
+        pending = true
+        releaseSaves()
+    }
+
+    /// Start again from nothing, keeping your name and settings.
+    func resetProgress() {
+        replaceAll(srs: [:], done: [], xpDays: [:], days: [:], lit: [], celebrated: nil, boostUntil: 0, qc: [:],
+                   name: name, hooks: hooks, prefs: prefs)
     }
 
     // MARK: saving
@@ -48,6 +88,7 @@ final class ProgressStore {
               let s = try? JSONDecoder().decode(Saved.self, from: data) else { return }
         srs = s.srs; done = Set(s.done); xpDays = s.xpDays ?? [:]; name = s.name ?? ""; qc = s.qc ?? [:]
         lit = Set(s.lit ?? []); days = s.days ?? [:]; celebrated = s.celebrated; boostUntil = s.boostUntil ?? 0; hooks = s.hooks ?? [:]
+        prefs = s.prefs ?? Prefs()
     }
 
     @ObservationIgnored private var held = 0
@@ -62,7 +103,7 @@ final class ProgressStore {
     func save() {
         if held > 0 { pending = true; return }
         let s = Saved(srs: srs, done: done.sorted(), xpDays: xpDays, name: name, qc: qc,
-                      lit: lit.sorted(), days: days, celebrated: celebrated, boostUntil: boostUntil, hooks: hooks)
+                      lit: lit.sorted(), days: days, celebrated: celebrated, boostUntil: boostUntil, hooks: hooks, prefs: prefs)
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         if let data = try? JSONEncoder().encode(s) { try? data.write(to: url, options: .atomic) }
     }
@@ -187,7 +228,7 @@ final class ProgressStore {
     }
 
     // MARK: daily goal, week and quests
-    let dailyGoal = 20
+    var dailyGoal: Int { prefs.dailyGoal }
 
     func xp(on day: String) -> Int { xpDays[day] ?? 0 }
     var today: String { Self.dayKey(now()) }

@@ -92,7 +92,7 @@ struct ToneText: View {
         var k = 0
         var t = Text("")
         for c in chars {
-            if Course.isHan(c) && syl.count == hanCount {
+            if Course.isHan(c) && syl.count == hanCount && (ProgressStore.current?.prefs.toneColours ?? true) {
                 t = t + Text(String(c)).foregroundColor(Color.tones[toneOf(syl[k]) - 1])
                 k += 1
             } else {
