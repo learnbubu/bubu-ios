@@ -23,10 +23,12 @@ struct DoneView: View {
         VStack(spacing: 0) {
             Spacer(minLength: 0)
             Group {
+                if !r.simple.isEmpty { simple(r) } else {
                 switch stage {
                 case 0: stageOne(r)
                 case 1: stageTwo(r)
                 default: stageThree(r)
+                }
                 }
             }
             .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
@@ -40,6 +42,25 @@ struct DoneView: View {
         .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
         .padding(.top, 8).padding(.bottom, 8)
         .sensoryFeedback(.success, trigger: stage) { _, n in n == 1 }
+    }
+
+    /// The short result the skip test ends on (web: doneSimple).
+    private func simple(_ r: StudySession.Result) -> some View {
+        VStack(spacing: 0) {
+            Image(r.title == "Not yet" ? "panda-sad" : "done-panda").resizable().scaledToFit().frame(width: 160)
+            heading(r.title).padding(.top, 4)
+            HStack(spacing: 10) {
+                ForEach(Array(r.simple.enumerated()), id: \.offset) { _, s in
+                    VStack(spacing: 2) {
+                        Text(s.value).font(.nunito(24.8, .black)).foregroundStyle(Color.accent)
+                        Text(s.label.uppercased()).font(.nunitoXB(10.9)).tracking(1.1).foregroundStyle(Color.accent)
+                    }
+                    .frame(maxWidth: .infinity).padding(.vertical, 12)
+                    .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+            }
+            .padding(.top, 14)
+        }
     }
 
     private func heading(_ t: String) -> some View {
@@ -127,7 +148,9 @@ struct DoneView: View {
     @ViewBuilder
     private func buttons(_ r: StudySession.Result) -> some View {
         VStack(spacing: 8) {
-            if stage < 2 {
+            if !r.simple.isEmpty {
+                Button("← Back to path") { close() }.buttonStyle(WideButton())
+            } else if stage < 2 {
                 Button("Continue") { withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { stage += 1 } }
                     .buttonStyle(WideButton())
             } else {
@@ -138,8 +161,10 @@ struct DoneView: View {
                     Button("Next: \(l.name) →") { next(id) }
                         .buttonStyle(WideButton())
                 }
-                Button("Practice again", action: again)
-                    .buttonStyle(WideButton())
+                if !session.isQuiz {
+                    Button("Practice again", action: again)
+                        .buttonStyle(WideButton())
+                }
                 Button(session.mode == .lesson ? "← Back to path" : "← Back to home") { close() }
                     .buttonStyle(WideButton(ghost: true))
                     .padding(.top, 4)

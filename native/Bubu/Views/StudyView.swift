@@ -165,7 +165,7 @@ struct StudyView: View {
             Button {
                 if isSentence && !session.answered { checkSentence() } else { advance() }
             } label: {
-                Text(isSentence && !session.answered ? "Check" : "Continue")
+                Text(isSentence && !session.answered ? "Check" : session.isQuiz ? "Next →" : "Continue")
                     .font(.nunitoXB(16.8)).foregroundStyle(ink)
                     .frame(maxWidth: .infinity).padding(14)
                     .background(fill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))

@@ -9,6 +9,18 @@ final class Router {
     var tab: Tab
     var lesson: Lesson?
     var study: StudySession?
+    var homePath: [Page] = []
+    var learnPath: [Page] = []
+    var profilePath: [Page] = []
+
+    /// Slide a page in on the tab you're on (Settings has none: it goes to Home's).
+    func push(_ p: Page) {
+        switch tab {
+        case .learn: learnPath.append(p)
+        case .profile: profilePath.append(p)
+        default: tab = .home; homePath.append(p)
+        }
+    }
 
     /// Open a session, if there was one to start.
     func start(_ s: StudySession?) { if let s { lesson = nil; study = s } }
@@ -18,6 +30,8 @@ final class Router {
         switch mode {
         case "listen": start(StudySession.listening(p))
         case "write": start(StudySession.writing(p))
+        case "quiz": start(StudySession.quiz(p, cards: StudySession.reachedCards(p)))
+        case "chars": push(.chars)
         default: Moments.shared.toast("Coming in the next build.")
         }
     }
@@ -41,6 +55,7 @@ struct RootView: View {
     /// Screens the cloud screenshot run asks for with `-screen`.
     private func debugScreens() {
         #if DEBUG
+        if Launch.screen == "chars" { router.tab = .home; router.homePath = [.chars]; return }
         if Launch.screen == "char" { router.tab = .learn; CharNav.shared.open("好"); return }
         guard let screen = Launch.screen, ["study", "quiz", "sentence", "speak", "write", "done", "char"].contains(screen) else { return }
         let first = Course.shared.lessons[0].id
@@ -59,12 +74,18 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: $router.tab) {
-            HomeView()
-                .tabItem { Label("Home", systemImage: "house") }.tag(Router.Tab.home)
-            PathView()
-                .tabItem { Label("Learn", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }.tag(Router.Tab.learn)
-            ComingSoon(title: "Profile", icon: "person.crop.circle")
-                .tabItem { Label("Profile", systemImage: "person") }.tag(Router.Tab.profile)
+            NavigationStack(path: $router.homePath) {
+                HomeView().toolbar(.hidden, for: .navigationBar).pageDestinations()
+            }
+            .tabItem { Label("Home", systemImage: "house") }.tag(Router.Tab.home)
+            NavigationStack(path: $router.learnPath) {
+                PathView().toolbar(.hidden, for: .navigationBar).pageDestinations()
+            }
+            .tabItem { Label("Learn", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }.tag(Router.Tab.learn)
+            NavigationStack(path: $router.profilePath) {
+                ComingSoon(title: "Profile", icon: "person.crop.circle").toolbar(.hidden, for: .navigationBar).pageDestinations()
+            }
+            .tabItem { Label("Profile", systemImage: "person") }.tag(Router.Tab.profile)
             SettingsView()
                 .tabItem { Label("Settings", systemImage: "gearshape") }.tag(Router.Tab.settings)
         }

@@ -18,7 +18,8 @@ final class StudySession: Identifiable {
     }
 
     /// What the session is for. Only a lesson session can finish a lesson.
-    enum Mode { case lesson, review, mistakes, trouble, listen, write }
+    enum Mode { case lesson, review, mistakes, trouble, listen, write, quiz, placement }
+    var isQuiz: Bool { mode == .quiz || mode == .placement }
 
     let id = UUID()
     let lessonId: String
@@ -70,7 +71,16 @@ final class StudySession: Identifiable {
         let wordsLeft: Int
         let fire: ProgressStore.Fire?
         let mode: Mode
+        /// the skip test's short result: two numbers, no fire or quests
+        var simple: [(value: String, label: String)] = []
     }
+
+    // the skip test's tally
+    private var placeRange: [String] = []
+    private var placeTarget: String?
+    private var placeScores: [String: (ok: Int, total: Int)] = [:]
+    private var placeCorrect: Set<String> = []
+    private(set) var quizScore = 0
 
     init(lessonId: String, progress: ProgressStore, focuses: Set<String>? = nil, cards: [Card]? = nil,
          mode: Mode = .lesson, title: String = "Study") {
@@ -83,7 +93,7 @@ final class StudySession: Identifiable {
         let chosen = cards ?? StudySession.buildQueue(lessonId: lessonId, progress: progress, focuses: self.focuses)
         self.scope = mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId))
         self.source = chosen
-        self.queue = sessionOrder(chosen)
+        self.queue = mode == .quiz || mode == .placement ? chosen.map { .card($0) } : sessionOrder(chosen)
         self.sessionTotal = queue.filter { if case .card = $0 { return true } else { return false } }.count
         next()
     }
@@ -128,6 +138,28 @@ final class StudySession: Identifiable {
         let pool = studied.isEmpty ? cards : studied
         guard !pool.isEmpty else { return nil }
         return StudySession(lessonId: "", progress: p, focuses: ["write"], cards: Array(pool.shuffled().prefix(12)), mode: .write, title: "Writing")
+    }
+
+    /// A quiz on some words: up to 20, multiple choice only (web: startQuiz).
+    static func quiz(_ p: ProgressStore, cards: [Card], focuses: Set<String>? = nil) -> StudySession? {
+        guard cards.count >= 3 else { Moments.shared.toast("A quiz needs at least 3 words."); return nil }
+        let items = Array(cards.shuffled().prefix(20))
+        return StudySession(lessonId: "", progress: p, focuses: focuses, cards: items, mode: .quiz, title: "Quiz · \(items.count) questions")
+    }
+
+    /// The skip test: pass it to unlock a lesson and everything before it (web: startPlacement).
+    static func placement(_ p: ProgressStore, to target: String, label: String = "Skip test") -> StudySession? {
+        let order = Course.shared.lessons.map(\.id)
+        guard let ti = order.firstIndex(of: target) else { return nil }
+        let range = order[...ti].filter { !p.isDone($0) }
+        guard !range.isEmpty else { Moments.shared.toast("That's already unlocked."); return nil }
+        let perLesson = max(2, min(5, 20 / range.count))
+        let items = range.flatMap { lid in Course.shared.cards(in: lid).shuffled().prefix(perLesson) }.shuffled()
+        let s = StudySession(lessonId: "", progress: p, focuses: ["recognize", "recall"], cards: items, mode: .placement,
+                             title: "\(label) · \(items.count) question\(items.count == 1 ? "" : "s")")
+        s.placeRange = Array(range); s.placeTarget = target
+        s.placeScores = Dictionary(uniqueKeysWithValues: range.map { ($0, (0, 0)) })
+        return s
     }
 
     // MARK: building the session
@@ -221,6 +253,10 @@ final class StudySession: Identifiable {
 
     /// Which exercise a card gets, climbing a ladder as the word gets stronger (web: pickDirection).
     private func pickDirection(_ c: Card) -> String {
+        if isQuiz {
+            let mc = focuses.filter { !["write", "sentence", "speak"].contains($0) }
+            return mc.randomElement() ?? "recognize"
+        }
         let s = progress.srs[c.id]
         if mode == .mistakes, let m = s?.miss, dirByCard[c.id] == nil, missedDirPossible(c, m.d) {
             dirByCard[c.id] = m.d; lastDir = m.d; return m.d
@@ -265,10 +301,19 @@ final class StudySession: Identifiable {
         defer { progress.releaseSaves() }
         let wasNew = progress.srs[c.id] == nil
         lastCorrect = correct
-        let r = progress.answer(c.id, correct: correct, dir: dir, sessionStart: start, mistakesMode: mode == .mistakes)
-        if r.mistake { mistakes += 1 }
-        if r.fixed { fixedCount += 1 }
-        progress.recordReview()
+        if correct { quizScore += 1 }
+        if mode == .placement {
+            placeScores[c.lessonId, default: (0, 0)].total += 1
+            if correct { placeScores[c.lessonId, default: (0, 0)].ok += 1; placeCorrect.insert(c.id) }
+        } else if mode == .quiz {
+            progress.review(c.id, correct ? .good : .again)
+            progress.recordReview()
+        } else {
+            let r = progress.answer(c.id, correct: correct, dir: dir, sessionStart: start, mistakesMode: mode == .mistakes)
+            if r.mistake { mistakes += 1 }
+            if r.fixed { fixedCount += 1 }
+            progress.recordReview()
+        }
         // XP for the answer, more on a run
         var xp = 0
         if correct {
@@ -281,6 +326,11 @@ final class StudySession: Identifiable {
         sessionXP += xp
         progress.questEvent(dir, correct: correct)
         answeredCount += 1
+        if isQuiz {
+            stepsDone += 1                     // one go at each question
+            if !correct { againCount += 1 }
+            return xp
+        }
         if correct {
             stepsDone += 1
             if !cleared.contains(c.id) {
@@ -308,6 +358,7 @@ final class StudySession: Identifiable {
 
     private func finish() {
         current = nil
+        if mode == .placement { return finishPlacement() }
         let lessonCards = mode == .lesson ? course.cards(in: lessonId) : []
         let cleared = !lessonCards.isEmpty && lessonCards.allSatisfy { (progress.srs[$0.id]?.reps ?? 0) >= 1 }
         let justFinished = mode == .lesson && !progress.isDone(lessonId) && cleared
@@ -324,7 +375,7 @@ final class StudySession: Identifiable {
         }
         let fire = progress.lightFire()
         let left = justFinished ? 0 : lessonCards.filter { (progress.srs[$0.id]?.reps ?? 0) < 1 }.count
-        let title = mode == .mistakes ? "Mistakes practised" : [.review, .trouble].contains(mode) ? "Review complete"
+        let title = mode == .quiz ? "Quiz complete" : mode == .mistakes ? "Mistakes practised" : [.review, .trouble].contains(mode) ? "Review complete"
             : justFinished ? "Lesson complete" : left > 0 ? "Batch done" : "Session complete"
         let seconds = Int(((progress.now() - start) / 1000).rounded())
         let accuracy = answeredCount == 0 ? 100 : Int((Double(answeredCount - againCount) / Double(answeredCount) * 100).rounded())
@@ -333,6 +384,31 @@ final class StudySession: Identifiable {
                         mistakes: mistakes, fixed: fixedCount,
                         nextLessonId: justFinished ? nextLesson(after: lessonId) : nil, wordsLeft: left,
                         fire: fire, mode: mode)
+    }
+
+    /// The skip test's verdict: lessons pass at 70%, in order, stopping at the first that
+    /// doesn't; the words you got right in them are seeded as known (web: finishPlacement).
+    private func finishPlacement() {
+        var unlocked: [String] = []
+        for lid in placeRange {
+            let s = placeScores[lid] ?? (0, 0)
+            if s.total > 0 && Double(s.ok) / Double(s.total) >= 0.7 { unlocked.append(lid) } else { break }
+        }
+        progress.holdSaves()
+        unlocked.forEach(progress.markDone)
+        for id in placeCorrect { if let c = course.cardById[id], unlocked.contains(c.lessonId) { progress.seedKnown(id) } }
+        progress.releaseSaves()
+        let reached = placeTarget.map(unlocked.contains) ?? false
+        Sounds.shared.play(unlocked.isEmpty ? "wrong" : "complete")
+        Moments.shared.toast(unlocked.isEmpty ? "Keep studying from where you are — you'll get there."
+            : reached ? "Unlocked all the way to your target — nice!"
+            : "Unlocked what you're solid on — the rest needs a little more study.")
+        var r = Result(title: unlocked.isEmpty ? "Not yet" : reached ? "You tested out!" : "Skipped ahead",
+                       xp: sessionXP, seconds: 0, accuracy: 0, perfect: false, lessonFinished: false, fireJustLit: false,
+                       goalReached: false, mistakes: 0, fixed: 0, nextLessonId: nil, wordsLeft: 0, fire: nil, mode: mode)
+        r.simple = [("\(quizScore)/\(answeredCount)", "correct"),
+                    ("\(unlocked.count)", unlocked.count == 1 ? "lesson unlocked" : "lessons unlocked")]
+        result = r
     }
 
     /// Finishing a chapter's last lesson unlocks its story (web: finishStudy's toast).
