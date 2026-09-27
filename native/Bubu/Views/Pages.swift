@@ -32,6 +32,9 @@ struct PageView: View {
         switch page {
         case .browse(let id): BrowsePage(lessonId: id)
         case .chars: CharactersPage()
+        case .readings: ReadingsPage()
+        case .story(let id): StoryPage(storyId: id)
+        case .guide(let ci): GuidePage(chapter: ci)
         default: ComingSoon(title: "Coming soon", icon: "hammer")
         }
     }
@@ -163,6 +166,7 @@ struct CharactersPage: View {
         }
         .searchable(text: $query, prompt: "Search 字, pinyin or meaning…")
         .navigationTitle("Characters")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Text("\(progress.charsKnown) / \(Course.allChars.count)").font(.nunito(13, .semibold)).foregroundStyle(Color.muted)

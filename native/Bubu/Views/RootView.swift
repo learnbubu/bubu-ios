@@ -32,6 +32,7 @@ final class Router {
         case "write": start(StudySession.writing(p))
         case "quiz": start(StudySession.quiz(p, cards: StudySession.reachedCards(p)))
         case "chars": push(.chars)
+        case "read": push(.readings)
         default: Moments.shared.toast("Coming in the next build.")
         }
     }
@@ -55,6 +56,8 @@ struct RootView: View {
     /// Screens the cloud screenshot run asks for with `-screen`.
     private func debugScreens() {
         #if DEBUG
+        if Launch.screen == "guide" { router.tab = .learn; router.learnPath = [.guide(1)]; return }
+        if Launch.screen == "story", let r = Course.shared.data.readings.first { router.tab = .home; router.homePath = [.story(r.id)]; return }
         if Launch.screen == "chars" { router.tab = .home; router.homePath = [.chars]; return }
         if Launch.screen == "char" { router.tab = .learn; CharNav.shared.open("好"); return }
         guard let screen = Launch.screen, ["study", "quiz", "sentence", "speak", "write", "done", "char"].contains(screen) else { return }

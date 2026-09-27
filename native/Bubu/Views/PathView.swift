@@ -120,7 +120,7 @@ struct PathView: View {
             HStack(spacing: 8) {
                 Text(course.chapterLabel(ci).uppercased())
                     .font(.nunitoXB(10)).tracking(1.3).foregroundStyle(Color.accent)
-                GuidePill()
+                GuidePill(chapter: ci)
             }
             Text(course.chapters[ci].title)
                 .font(.nunitoXB(18)).tracking(-0.2).foregroundStyle(Color.ink)
@@ -129,7 +129,20 @@ struct PathView: View {
             Bar(value: Double(d) / Double(max(t, 1)))
                 .scaleEffect(x: right ? -1 : 1)
                 .padding(.top, 8).padding(.bottom, 5)
-            Text("\(d) / \(t) lessons").font(.nunito(11, .bold)).foregroundStyle(Color.muted)
+            HStack(spacing: 8) {
+                Text("\(d) / \(t) lessons").font(.nunito(11, .bold)).foregroundStyle(Color.muted)
+                // a finished chapter ends in its story
+                if d == t, let story = course.storyFor(chapter: ci) {
+                    let read = progress.readDone(story.id)
+                    Button { router.push(.story(story.id)) } label: {
+                        Label(read ? "Read again" : "Read the story", systemImage: "book.fill")
+                            .font(.nunitoXB(11)).foregroundStyle(read ? Color.muted : Color.onAccent)
+                            .padding(.horizontal, 9).padding(.vertical, 3)
+                            .background(read ? Color.line : Color.accent, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
         .padding(.horizontal, 18)
         .frame(width: W * 0.62, alignment: right ? .trailing : .leading)
@@ -330,14 +343,20 @@ struct StartBubble: View {
 
 /// The GUIDE tag beside a chapter's name.
 struct GuidePill: View {
+    let chapter: Int
+    @Environment(Router.self) private var router
     var body: some View {
-        HStack(spacing: 3) {
-            Image(systemName: "lightbulb").font(.system(size: 10, weight: .bold))
-            Text("GUIDE").font(.nunitoXB(10)).tracking(0.6)
+        Button { router.push(.guide(chapter)) } label: {
+            HStack(spacing: 3) {
+                Image(systemName: "lightbulb").font(.system(size: 10, weight: .bold))
+                Text("GUIDE").font(.nunitoXB(10)).tracking(0.6)
+            }
+            .foregroundStyle(Color.gold)
+            .padding(.leading, 6).padding(.trailing, 8).padding(.vertical, 2)
+            .background(Color.gold.opacity(0.14), in: Capsule())
+            .contentShape(Rectangle().inset(by: -8))
         }
-        .foregroundStyle(Color.gold)
-        .padding(.leading, 6).padding(.trailing, 8).padding(.vertical, 2)
-        .background(Color.gold.opacity(0.14), in: Capsule())
+        .buttonStyle(.plain)
     }
 }
 
