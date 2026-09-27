@@ -7,10 +7,7 @@ extension Course {
     func storyFor(chapter ci: Int) -> Reading? { data.readings.first { $0.chapter == ci } }
 
     /// What a word means: its own card, else its characters' meanings (web: wordMeaning).
-    func meaning(of hanzi: String) -> String {
-        if let c = cards.first(where: { $0.word.hanzi == hanzi }) { return c.word.en }
-        return hanzi.filter(Course.isHan).map { CharData.shared.meaning(String($0)) }.filter { !$0.isEmpty }.joined(separator: " + ")
-    }
+    func meaning(of hanzi: String) -> String { Hints.meaning(hanzi) }
 
     /// Every character taught up to and including a chapter (web: chapterChars).
     func charsThrough(chapter ci: Int) -> Set<Character> {

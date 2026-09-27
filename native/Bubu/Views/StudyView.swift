@@ -451,6 +451,7 @@ struct ChoiceView: View {
     @Environment(ProgressStore.self) private var progress
     private let course = Course.shared
     private var showPinyin: Bool { progress.prefs.showPinyin }
+    @State private var tonesOpen = false
 
     var body: some View {
         let w = ex.card.word
@@ -461,8 +462,13 @@ struct ChoiceView: View {
                 if isNew { NewBadge() }
                 switch ex.dir {
                 case "recall":
-                    Text(w.en).font(.nunito(16.3)).foregroundStyle(isNew ? Color.newInk : Color.ink)
-                        .multilineTextAlignment(.center)
+                    if isNew {
+                        HintChip(hanzi: w.hanzi, pinyin: w.pinyin, reverse: true) {
+                            Text(w.en).font(.nunito(16.3)).foregroundStyle(Color.newInk).multilineTextAlignment(.center)
+                        }
+                    } else {
+                        Text(w.en).font(.nunito(16.3)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                    }
                     SpeakerButton(text: w.hanzi)
                 case "pinyin":
                     Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(isNew ? Color.newInk : Color.ink)
@@ -476,7 +482,12 @@ struct ChoiceView: View {
                     SpeakerButton(text: w.hanzi)
                 default:
                     Group {
-                        if isNew { Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(Color.newInk) }
+                        if isNew {
+                            HintChip(hanzi: w.hanzi, pinyin: w.pinyin) {
+                                Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(Color.newInk)
+                                    .overlay(alignment: .bottom) { Line().stroke(Color.newInk, style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2) }
+                            }
+                        }
                         else { ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: big, weight: .medium) }
                     }
                     SpeakerButton(text: w.hanzi)
@@ -485,10 +496,29 @@ struct ChoiceView: View {
             if ex.dir == "recognize" || (ex.dir == "recall" && !showPinyin) {
                 PinyinHint(pinyin: w.pinyin, shown: showPinyin).frame(minHeight: 44)
             }
+            if ex.dir == "pinyin" {
+                Button("What are tones?") { tonesOpen = true }
+                    .font(.nunito(14, .bold)).foregroundStyle(Color.accent).padding(.top, 8)
+            }
             VStack(spacing: 8) {
                 ForEach(ex.options, id: \.self) { opt in option(opt) }
             }
             .padding(.top, 8)
+        }
+        .sheet(isPresented: $tonesOpen) {
+            NavigationStack {
+                ScrollView { TonesPrimer().padding(20) }
+                    .navigationTitle("The four tones").navigationBarTitleDisplayMode(.inline)
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { tonesOpen = false } } }
+            }
+            .presentationDetents([.medium, .large])
+        }
+        .onAppear {
+            // the first pinyin drill ever opens the primer once
+            if ex.dir == "pinyin" && !UserDefaults.standard.bool(forKey: "tonesSeen") {
+                UserDefaults.standard.set(true, forKey: "tonesSeen")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { tonesOpen = true }
+            }
         }
     }
 
@@ -663,13 +693,24 @@ struct SentenceView: View {
             MascotPrompt(mood: result, sentence: !ex.toChinese) {
                 if ex.toChinese {
                     if anyNew { NewBadge() }
-                    Text(sent.en).font(.nunito(16.3)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                    FlowLayout(spacing: 4, lineSpacing: 4, center: true) {
+                        ForEach(Array(Hints.english(sent.en, sent.words).enumerated()), id: \.offset) { _, t in
+                            HintChip(hanzi: t.word?.hanzi, pinyin: t.word?.pinyin, reverse: true) {
+                                Text(t.text).font(.nunito(16.3)).foregroundStyle(Color.ink)
+                                    .overlay(alignment: .bottom) {
+                                        Line().stroke(Color.muted.opacity(t.none ? 0.28 : 0.6), style: StrokeStyle(lineWidth: 2, dash: [1.5, 3]))
+                                            .frame(height: 2).offset(y: 2)
+                                    }
+                            }
+                        }
+                    }
                 } else {
                     FlowLayout(spacing: 2, lineSpacing: 4) {
                         if anyNew { NewBadge() }
                         SpeakerButton(text: sent.hanzi, size: 21.6)
                         ForEach(Array(sent.words.enumerated()), id: \.offset) { _, w in
                             let new = isNew(w.hanzi)
+                            HintChip(hanzi: w.hanzi, pinyin: w.pinyin) {
                             VStack(spacing: 1) {
                                 Text(w.pinyin).font(.nunito(12.5)).foregroundStyle(new ? Color.newInk : Color.muted)
                                     .opacity(progress.prefs.showPinyin || pinyinOpen ? 1 : 0)
@@ -680,6 +721,7 @@ struct SentenceView: View {
                                         Line().stroke(new ? Color.newInk : Color.muted, style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2)
                                     }
                             }
+                            }
                             .padding(.horizontal, 3)
                         }
                     }
@@ -687,6 +729,7 @@ struct SentenceView: View {
                     .onTapGesture { withAnimation { pinyinOpen.toggle() } }
                 }
             }
+            if !HintTip.used { Text("Tap a word for its meaning").font(.nunito(12.5)).foregroundStyle(Color.muted) }
             answerArea
             bank
         }

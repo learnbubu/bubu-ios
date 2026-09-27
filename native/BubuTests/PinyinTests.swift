@@ -25,4 +25,14 @@ final class PinyinTests: XCTestCase {
         let known = Course.shared.charsThrough(chapter: 1)
         for t in phrases { XCTAssertTrue(t.hanzi.filter(Course.isHan).allSatisfy(known.contains), t.hanzi) }
     }
+
+    func testEnglishHintsPointAtTheRightWords() {
+        let words = [SentenceWord(hanzi: "我", pinyin: "wǒ"), SentenceWord(hanzi: "喝", pinyin: "hē"), SentenceWord(hanzi: "咖啡", pinyin: "kāfēi")]
+        let t = Hints.english("I drink coffee.", words)
+        XCTAssertEqual(t.map { $0.word?.hanzi }, ["我", "喝", "咖啡"])
+        let the = Hints.english("the coffee", words)
+        XCTAssertTrue(the[0].none)
+        XCTAssertEqual(Hints.stem("drinking"), "drink")
+        XCTAssertEqual(Hints.stem("don't"), "not")
+    }
 }
