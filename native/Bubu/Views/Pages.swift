@@ -35,6 +35,8 @@ struct PageView: View {
         case .readings: ReadingsPage()
         case .story(let id): StoryPage(storyId: id)
         case .guide(let ci): GuidePage(chapter: ci)
+        case .tones: TonesPage()
+        case .converse: ConversePage()
         default: ComingSoon(title: "Coming soon", icon: "hammer")
         }
     }

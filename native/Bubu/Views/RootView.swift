@@ -33,6 +33,8 @@ final class Router {
         case "quiz": start(StudySession.quiz(p, cards: StudySession.reachedCards(p)))
         case "chars": push(.chars)
         case "read": push(.readings)
+        case "tones": push(.tones)
+        case "speak": push(.converse)
         default: Moments.shared.toast("Coming in the next build.")
         }
     }
@@ -56,6 +58,7 @@ struct RootView: View {
     /// Screens the cloud screenshot run asks for with `-screen`.
     private func debugScreens() {
         #if DEBUG
+        if Launch.screen == "tones" { router.homePath = [.tones]; return }
         if Launch.screen == "guide" { router.tab = .learn; router.learnPath = [.guide(1)]; return }
         if Launch.screen == "story", let r = Course.shared.data.readings.first { router.tab = .home; router.homePath = [.story(r.id)]; return }
         if Launch.screen == "chars" { router.tab = .home; router.homePath = [.chars]; return }
@@ -89,7 +92,7 @@ struct RootView: View {
                 ComingSoon(title: "Profile", icon: "person.crop.circle").toolbar(.hidden, for: .navigationBar).pageDestinations()
             }
             .tabItem { Label("Profile", systemImage: "person") }.tag(Router.Tab.profile)
-            SettingsView()
+            NavigationStack { SettingsView().toolbar(.hidden, for: .navigationBar) }
                 .tabItem { Label("Settings", systemImage: "gearshape") }.tag(Router.Tab.settings)
         }
         .sensoryFeedback(.selection, trigger: router.tab)

@@ -93,6 +93,19 @@ struct SettingsView: View {
                 }
 
                 section {
+                    NavigationLink {
+                        ScrollView { TonesPrimer().padding(18) }
+                            .background(Color.bg.ignoresSafeArea())
+                            .navigationTitle("The four tones").navigationBarTitleDisplayMode(.inline)
+                    } label: {
+                        row("The four tones", "Hear 妈 麻 马 骂 and how each tone moves.") {
+                            Image(systemName: "chevron.right").font(.system(size: 14, weight: .bold)).foregroundStyle(Color.muted)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                section {
                     row("Back up progress", "Save everything to a file, in the same format as the website, so it restores in either.") {
                         ShareLink(item: BackupFile(data: Backup.export(progress)), preview: SharePreview("Bùbù progress")) {
                             Text("Export").font(.nunito(15, .bold)).foregroundStyle(Color.accent)
