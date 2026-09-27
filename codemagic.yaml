@@ -52,6 +52,8 @@ workflows:
         script: |
           brew install xcodegen
           cd native && xcodegen generate
+          # the ready-to-open project, for building on a Mac with nothing but Xcode
+          zip -qr ../Bubu-Xcode-project.zip . -x "*.DS_Store"
       - name: Create a simulator
         script: |
           TYPE=$(xcrun simctl list devicetypes | grep -E "iPhone 1[5-9]( |$)" | grep -v Plus | grep -v Max | tail -1 | sed -E 's/.*\((com\.apple[^)]*)\).*/\1/')
@@ -74,7 +76,7 @@ workflows:
           xcrun simctl status_bar "$UDID" override --time 9:41 --batteryState charged --batteryLevel 100 || true
           for MODE in light dark; do
             xcrun simctl ui "$UDID" appearance $MODE
-            for S in home path lesson study quiz sentence done; do
+            for S in home path lesson study quiz sentence speak done; do
               xcrun simctl terminate "$UDID" com.domchivers.bubu || true
               xcrun simctl launch "$UDID" com.domchivers.bubu -screen $S
               sleep 6
@@ -84,3 +86,4 @@ workflows:
     artifacts:
       - screenshots/*.png
       - test.log
+      - Bubu-Xcode-project.zip

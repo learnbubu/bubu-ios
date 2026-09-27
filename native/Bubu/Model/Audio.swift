@@ -55,12 +55,27 @@ final class Sounds {
     }
 
     private var active = false
+    private var recording = false
     /// One audio setup for speech and effects, so neither cuts the other off.
     func activate() {
-        guard !active else { return }
+        guard !active, !recording else { return }
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
         try? AVAudioSession.sharedInstance().setActive(true)
         active = true
+    }
+
+    /// Switch to the microphone for speaking practice, and back.
+    func useForRecording(_ on: Bool) {
+        let session = AVAudioSession.sharedInstance()
+        recording = on
+        if on {
+            try? session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .duckOthers])
+            try? session.setActive(true, options: .notifyOthersOnDeactivation)
+        } else {
+            try? session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try? session.setActive(true)
+        }
+        active = !on
     }
 
     func play(_ name: String) {

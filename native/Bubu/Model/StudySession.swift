@@ -9,8 +9,8 @@ final class StudySession: Identifiable {
     static let newPerSession = 6, reviewPerSession = 4, meetGroup = 3, sessionLen = 12
     static let xpCorrect = 2, xpCombo = 3, xpPerfect = 5, xpSession = 10, xpLesson = 25, comboAt = 5
 
-    /// The exercise kinds, as the web's FOCUSES. Write and speak join once their screens exist.
-    static let allDirs = ["recognize", "recall", "pinyin", "listen", "sentence"]
+    /// The exercise kinds, as the web's FOCUSES. Write joins once its screen exists.
+    static let allDirs = ["recognize", "recall", "pinyin", "listen", "sentence", "speak"]
 
     enum Item {
         case meet(cards: [Card], first: Bool, left: Int)
@@ -228,6 +228,13 @@ final class StudySession: Identifiable {
         return xp
     }
 
+    /// "Can't speak now": the word comes back later, with no penalty and no XP.
+    func skip() {
+        guard !answered, let c = card else { return }
+        answered = true
+        queue.append(.card(c))
+    }
+
     var progressFraction: Double { sessionTotal == 0 ? 0 : min(Double(stepsDone), Double(sessionTotal)) / Double(sessionTotal) }
     var hasMeetLeft: Bool { queue.contains { if case .meet = $0 { return true } else { return false } } }
 
@@ -290,7 +297,7 @@ final class StudySession: Identifiable {
 
 /// One question on screen: what's asked, the options, and the right answer.
 struct Exercise {
-    enum Kind { case choice, sentence }
+    enum Kind { case choice, sentence, speak }
     let kind: Kind
     let dir: String
     let card: Card
@@ -312,12 +319,17 @@ struct Exercise {
         case "pinyin": return "Which pinyin is correct?"
         case "listen": return "What did you hear?"
         case "sentence": return toChinese ? "Build the Chinese" : "Translate this sentence"
+        case "speak": return "Say it out loud"
         default: return "What does this mean?"
         }
     }
 
     static func make(card c: Card, dir: String, lessonId: String, progress: ProgressStore) -> Exercise? {
-        dir == "sentence" ? sentence(c, lessonId: lessonId) : choice(c, dir: dir, lessonId: lessonId)
+        switch dir {
+        case "sentence": return sentence(c, lessonId: lessonId)
+        case "speak": return speak(c)
+        default: return choice(c, dir: dir, lessonId: lessonId)
+        }
     }
 
     private static func field(_ w: Word, _ dir: String) -> String {
@@ -364,6 +376,20 @@ struct Exercise {
         }
         return Exercise(kind: .choice, dir: dir, card: c, options: (distractors.prefix(3) + [answer]).shuffled(), answer: answer)
     }
+
+    /// Say it aloud: a short phrase with the word in it, since a lone syllable is too
+    /// easily misheard, else the word itself (web: the speak card).
+    static func speak(_ c: Card) -> Exercise {
+        let phrase = Course.shared.sentences(for: c)
+            .filter { (3...12).contains($0.hanzi.filter(Course.isHan).count) }
+            .min { $0.hanzi.filter(Course.isHan).count < $1.hanzi.filter(Course.isHan).count }
+        return Exercise(kind: .speak, dir: "speak", card: c, sentence: phrase)
+    }
+
+    /// What to say, its pinyin and its meaning.
+    var sayHanzi: String { sentence?.hanzi ?? card.word.hanzi }
+    var sayPinyin: String { sentence?.pinyin ?? card.word.pinyin }
+    var sayEn: String { sentence?.en ?? card.word.en }
 
     /// Word tiles to put in order (web: buildSentenceExercise).
     static func sentence(_ c: Card, lessonId: String) -> Exercise? {

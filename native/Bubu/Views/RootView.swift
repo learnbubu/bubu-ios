@@ -28,12 +28,13 @@ struct RootView: View {
     /// Screens the cloud screenshot run asks for with `-screen`.
     private func debugScreens() {
         #if DEBUG
-        guard let screen = Launch.screen, ["study", "quiz", "sentence", "done"].contains(screen) else { return }
+        guard let screen = Launch.screen, ["study", "quiz", "sentence", "speak", "done"].contains(screen) else { return }
         let first = Course.shared.lessons[0].id
         let s = StudySession(lessonId: first, progress: progress)
         switch screen {
         case "quiz": s.debugShow(dir: "recognize")
         case "sentence": s.debugShow(dir: "sentence")
+        case "speak": s.debugShow(dir: "speak")
         case "done": s.debugFinish()
         default: break
         }

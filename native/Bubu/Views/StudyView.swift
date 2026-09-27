@@ -118,6 +118,10 @@ struct StudyView: View {
                     if let ex = session.exercise {
                         if ex.kind == .sentence {
                             SentenceView(ex: ex, placed: $placed, result: feedback?.correct)
+                        } else if ex.kind == .speak {
+                            SpeakView(ex: ex, answered: session.answered,
+                                      settle: { correct in settle(correct) },
+                                      skip: { session.skip() })
                         } else {
                             ChoiceView(ex: ex, picked: picked, answered: session.answered) { choose($0) }
                         }
@@ -149,7 +153,7 @@ struct StudyView: View {
         return ZStack(alignment: .bottom) {
             // a short slot, so four options fit a phone; the feedback rises over them
             Color.clear.frame(height: 84)
-            if let fb = feedback, let ex {
+            if let fb = feedback, let ex, ex.kind != .speak {
                 FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text))
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
                         .shadow(color: Color.panel, radius: 12, y: -10))
@@ -186,6 +190,14 @@ struct StudyView: View {
     private func checkSentence() {
         guard let ex = session.exercise, !session.answered else { return }
         let correct = ex.check(placed)
+        session.answer(correct)
+        Sounds.shared.play(correct ? "correct" : "wrong")
+        withAnimation { feedback = Feedback(correct: correct, chosen: nil) }
+    }
+
+    /// A spoken answer, marked by what was heard.
+    private func settle(_ correct: Bool) {
+        guard !session.answered else { return }
         session.answer(correct)
         Sounds.shared.play(correct ? "correct" : "wrong")
         withAnimation { feedback = Feedback(correct: correct, chosen: nil) }
