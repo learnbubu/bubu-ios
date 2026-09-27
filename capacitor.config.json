@@ -1,0 +1,10 @@
+{
+  "appId": "com.domchivers.bubu",
+  "appName": "步步 Bùbù",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "scrollEnabled": false,
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}

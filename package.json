@@ -1,0 +1,19 @@
+{
+  "name": "bubu-ios",
+  "version": "1.0.0",
+  "private": true,
+  "description": "步步 Bùbù as a native iPhone app: the web app in chineseLearning/app, wrapped with Capacitor.",
+  "scripts": {
+    "copy-web": "node scripts/copy-web.js",
+    "sync": "node scripts/copy-web.js && npx cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2",
+    "@capgo/capacitor-speech-recognition": "^8.3.2"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.2"
+  }
+}
