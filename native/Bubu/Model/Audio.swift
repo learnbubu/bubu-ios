@@ -6,13 +6,12 @@ import UIKit
 final class Speech {
     static let shared = Speech()
     private let synth = AVSpeechSynthesizer()
-    /// the web's default rate of 0.85, on AVSpeech's scale where 0.5 is normal speed
-    var rate: Float = AVSpeechUtteranceDefaultSpeechRate * 0.85
+    /// the speed from Settings (the web's 0.85 by default), on AVSpeech's scale where 0.5 is normal
+    var rate: Float { Float(ProgressStore.current?.prefs.rate ?? 0.85) * AVSpeechUtteranceDefaultSpeechRate }
 
     /// the voice chosen in Settings, if it's still installed
-    var voiceURI: String?
     var voice: AVSpeechSynthesisVoice? {
-        if let id = voiceURI, let v = AVSpeechSynthesisVoice(identifier: id) { return v }
+        if let id = ProgressStore.current?.prefs.voiceURI, let v = AVSpeechSynthesisVoice(identifier: id) { return v }
         return bestVoice
     }
 
@@ -61,26 +60,20 @@ final class Speech {
     }
 }
 
-/// The web's sound effects: correct, wrong, complete and goal.
+/// The web's sound effects: correct, wrong, complete and goal. Loaded on first use and
+/// played off the main thread, since preparing a player waits on the audio hardware.
 final class Sounds {
     static let shared = Sounds()
+    private let queue = DispatchQueue(label: "bubu.sounds")
     private var players: [String: AVAudioPlayer] = [:]
     private var lastGoal = Date.distantPast
-    var enabled = true
-
-    private init() {
-        for name in ["correct", "wrong", "complete", "goal"] {
-            if let url = Bundle.main.url(forResource: name, withExtension: "mp3"),
-               let p = try? AVAudioPlayer(contentsOf: url) {
-                p.volume = 0.6
-                p.prepareToPlay()
-                players[name] = p
-            }
-        }
-    }
-
     private var active = false
     private var recording = false
+
+    private init() {}
+
+    var enabled: Bool { ProgressStore.current?.prefs.sound ?? true }
+
     /// One audio setup for speech and effects, so neither cuts the other off.
     func activate() {
         guard !active, !recording else { return }
@@ -109,8 +102,15 @@ final class Sounds {
         // the lesson-complete chime is dropped if the goal fanfare just played
         if name == "complete" && Date().timeIntervalSince(lastGoal) < 1.5 { return }
         activate()
-        guard let p = players[name] else { return }
-        p.currentTime = 0
-        p.play()
+        queue.async { [self] in
+            if players[name] == nil, let url = Bundle.main.url(forResource: name, withExtension: "mp3"),
+               let p = try? AVAudioPlayer(contentsOf: url) {
+                p.volume = 0.6
+                players[name] = p
+            }
+            guard let p = players[name] else { return }
+            p.currentTime = 0
+            p.play()
+        }
     }
 }

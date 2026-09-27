@@ -50,12 +50,9 @@ final class ProgressStore {
         if url == nil { Self.current = self }
     }
 
-    /// Settings that live outside the views: speech and sound.
-    private func applyPrefs() {
-        Speech.shared.rate = Float(prefs.rate) * AVSpeechUtteranceDefaultSpeechRate
-        Speech.shared.voiceURI = prefs.voiceURI
-        Sounds.shared.enabled = prefs.sound
-    }
+    /// Speech and sound read the settings when they play, so nothing audio starts at launch
+    /// (preparing a player blocks until an audio device answers).
+    private func applyPrefs() {}
 
     /// The settings as the web stores them.
     func prefsJSON() -> [String: Any] {
