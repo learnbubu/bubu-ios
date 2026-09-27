@@ -136,6 +136,21 @@ final class ProgressStore {
         return o
     }
 
+    // MARK: what to study
+
+    /// The lessons chosen in "What to study"; all of them unless some were picked.
+    var selectedLessons: Set<String> {
+        if let l = prefs.lessons, !l.isEmpty { return Set(l) }
+        return Set(course.lessons.map(\.id))
+    }
+    /// The skills switched on; all seven unless some were switched off.
+    var selectedFocuses: Set<String> {
+        if let f = prefs.focuses, !f.isEmpty { return Set(f) }
+        return Set(StudySession.allDirs)
+    }
+    /// The words of the chosen lessons (web: activeCards).
+    var activeCards: [Card] { let s = selectedLessons; return course.cards.filter { s.contains($0.lessonId) } }
+
     // MARK: shortcuts into the activity record
     var xpDays: [String: Int] { activity.xpDays }
     var days: [String: Int] { activity.days }
@@ -422,7 +437,8 @@ final class ProgressStore {
         let t = today
         if let q = activity.quests, q.date == t { return q.ids.compactMap { Quest.all[$0] } }
         let second = Quest.pick(Quest.sets[1], seed: t + "b")
-        let skills = Quest.sets[2].filter { Quest.skillDir[$0].map(StudySession.allDirs.contains) ?? false }
+        let on = selectedFocuses
+        let skills = Quest.sets[2].filter { Quest.skillDir[$0].map(on.contains) ?? false }
         let third = skills.isEmpty ? Quest.pick(Quest.sets[1].filter { $0 != second }, seed: t + "c")
                                    : Quest.pick(skills, seed: t + "c")
         return [Quest.pick(Quest.sets[0], seed: t + "a"), second, third].compactMap { Quest.all[$0] }

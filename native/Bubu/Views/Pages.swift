@@ -13,6 +13,7 @@ enum Page: Hashable {
     case flash([String])
     case match([String])
     case avatar
+    case studyChoice             // "What to study"
 }
 
 extension View {
@@ -38,6 +39,7 @@ struct PageView: View {
         case .tones: TonesPage()
         case .converse: ConversePage()
         case .pick: PickPage()
+        case .studyChoice: StudyChoicePage()
         case .flash(let ids): FlashPage(ids: ids)
         case .match(let ids): MatchPage(ids: ids)
         default: ComingSoon(title: "Coming soon", icon: "hammer")

@@ -29,6 +29,19 @@ struct HomeView: View {
                             .padding(.top, 20).padding(.bottom, 10).padding(.horizontal, 2)
                         hub
                         tiles.padding(.top, 10)
+                        Button { router.push(.studyChoice) } label: {
+                            HStack {
+                                Text("What to study").font(.nunito(17)).foregroundStyle(Color.ink)
+                                Spacer()
+                                let nL = progress.selectedLessons.count, nF = progress.selectedFocuses.count
+                                Text("\(nL == Course.shared.lessons.count ? "all lessons" : "\(nL) lesson\(nL == 1 ? "" : "s")"), \(nF) focus\(nF == 1 ? "" : "es")")
+                                    .font(.nunito(13)).foregroundStyle(Color.muted)
+                                Image(systemName: "chevron.right").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.muted)
+                            }
+                            .padding(.horizontal, 16).padding(.vertical, 15).panel(radius: 16)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 10)
                         Color.clear.frame(height: 150)
                     }
                     .padding(.horizontal, 18)

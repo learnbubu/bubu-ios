@@ -13,6 +13,8 @@ struct Prefs: Codable, Equatable {
     var toneColours = true
     var checkStrokes = true
     var autoRelight = true      // an ember relights a missed day by itself
+    var lessons: [String]?      // "What to study": the lessons chosen (nil or empty = all)
+    var focuses: [String]?      // and the skills switched on (nil or empty = all)
 
     init() {}
     init(from decoder: Decoder) throws {
@@ -26,6 +28,8 @@ struct Prefs: Codable, Equatable {
         toneColours = (try? c.decode(Bool.self, forKey: .toneColours)) ?? true
         checkStrokes = (try? c.decode(Bool.self, forKey: .checkStrokes)) ?? true
         autoRelight = (try? c.decode(Bool.self, forKey: .autoRelight)) ?? true
+        lessons = try? c.decode([String].self, forKey: .lessons)
+        focuses = try? c.decode([String].self, forKey: .focuses)
     }
 
     var colorScheme: ColorScheme? { theme == "light" ? .light : theme == "dark" ? .dark : nil }

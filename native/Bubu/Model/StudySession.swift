@@ -88,7 +88,8 @@ final class StudySession: Identifiable {
         self.progress = progress
         self.mode = mode
         self.title = title
-        self.focuses = focuses ?? Set(Self.allDirs)
+        // a mixed session uses the skills switched on in "What to study"
+        self.focuses = focuses ?? (mode == .mistakes ? Set(Self.allDirs) : progress.selectedFocuses)
         self.start = progress.now()
         let chosen = cards ?? StudySession.buildQueue(lessonId: lessonId, progress: progress, focuses: self.focuses)
         self.scope = mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId))
@@ -125,18 +126,18 @@ final class StudySession: Identifiable {
     }
 
     static func listening(_ p: ProgressStore) -> StudySession? {
-        let cards = reachedCards(p)
+        let cards = p.activeCards
         let studied = cards.filter { p.srs[$0.id] != nil }
         let pool = studied.isEmpty ? cards : studied
-        guard !pool.isEmpty else { return nil }
+        guard !pool.isEmpty else { Moments.shared.toast("Pick at least one lesson — open “What to study”."); return nil }
         return StudySession(lessonId: "", progress: p, focuses: ["listen"], cards: Array(pool.shuffled().prefix(20)), mode: .listen, title: "Listening")
     }
 
     static func writing(_ p: ProgressStore) -> StudySession? {
-        let cards = reachedCards(p).filter { StrokeData.shared.writable($0.word.hanzi) }
+        let cards = p.activeCards.filter { StrokeData.shared.writable($0.word.hanzi) }
         let studied = cards.filter { p.srs[$0.id] != nil }
         let pool = studied.isEmpty ? cards : studied
-        guard !pool.isEmpty else { return nil }
+        guard !pool.isEmpty else { Moments.shared.toast("Pick at least one lesson — open “What to study”."); return nil }
         return StudySession(lessonId: "", progress: p, focuses: ["write"], cards: Array(pool.shuffled().prefix(12)), mode: .write, title: "Writing")
     }
 

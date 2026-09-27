@@ -30,7 +30,7 @@ final class Router {
         switch mode {
         case "listen": start(StudySession.listening(p))
         case "write": start(StudySession.writing(p))
-        case "quiz": start(StudySession.quiz(p, cards: StudySession.reachedCards(p)))
+        case "quiz": start(StudySession.quiz(p, cards: p.activeCards))
         case "chars": push(.chars)
         case "read": push(.readings)
         case "tones": push(.tones)
