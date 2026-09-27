@@ -30,14 +30,21 @@ struct PathView: View {
                         pebbles(items, W, current: current)
                         ForEach(items, id: \.lesson.id) { it in
                             if let ci = it.chapter { banner(ci, items: items, it: it, W: W, current: current) }
-                            stone(it, W: W, current: current).id(it.lesson.id)
+                            stone(it, W: W, current: current)
                         }
                         scenery(items, W, behind: false)
+                        // a marker at the current stone, for the scroll to land on: positioned
+                        // views all report the full canvas as their frame, so they can't be targets
+                        VStack(spacing: 0) {
+                            Color.clear.frame(height: max(0, (items.first { $0.lesson.id == current }?.y ?? 0)))
+                            Color.clear.frame(width: 1, height: 1).id("current")
+                        }
+                        .allowsHitTesting(false)
                     }
                 }
                 .scrollIndicators(.hidden)
                 // land on the current lesson, as the web does on every render
-                .onAppear { if let c = current { reader.scrollTo(c, anchor: .center) } }
+                .onAppear { if current != nil { reader.scrollTo("current", anchor: .center) } }
             }
             .overlay(alignment: .bottom) {
                 // the web's bottom fade: solid for a few points, gone by 76
