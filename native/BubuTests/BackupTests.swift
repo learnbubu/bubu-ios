@@ -48,7 +48,7 @@ final class BackupTests: XCTestCase {
         XCTAssertEqual(p.srs.count, 2)
         XCTAssertEqual(p.srs["L1:1"]?.reps, 2)
         XCTAssertEqual(p.srs["L1:0"]?.known, true)
-        XCTAssertEqual(p.done, ["L1", "L2"])
+        XCTAssertTrue(p.done.isEmpty)                         // made-up lesson ids are dropped, as the web does
         XCTAssertEqual(p.name, "Sam")
         XCTAssertEqual(p.prefs.dailyGoal, 50)
         XCTAssertFalse(p.prefs.showPinyin)
