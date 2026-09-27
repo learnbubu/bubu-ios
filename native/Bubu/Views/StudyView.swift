@@ -147,11 +147,12 @@ struct StudyView: View {
         let fill = !ready ? Color.line : feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent
         let ink = !ready ? Color.muted.opacity(0.45) : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
         return ZStack(alignment: .bottom) {
-            Color.clear.frame(height: isSentence ? 84 : 216)
+            // a short slot, so four options fit a phone; the feedback rises over them
+            Color.clear.frame(height: 84)
             if let fb = feedback, let ex {
                 FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text))
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
-                        .shadow(color: isSentence ? Color.panel : .clear, radius: 12, y: -10))
+                        .shadow(color: Color.panel, radius: 12, y: -10))
                     .padding(.bottom, 79)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
@@ -364,8 +365,9 @@ struct MeetView: View {
     /// "好 = 女 woman + 子 child", sound parts showing their pinyin.
     private func partLines(_ hanzi: String) -> [AttributedString] {
         let cd = CharData.shared
+        var seen = Set<String>()
         return hanzi.filter(Course.isHan).map(String.init)
-            .filter { (cd.chars[$0]?.c?.count ?? 0) > 1 }
+            .filter { (cd.chars[$0]?.c?.count ?? 0) > 1 && seen.insert($0).inserted }
             .prefix(3)
             .map { ch in
                 var s = AttributedString(ch)
