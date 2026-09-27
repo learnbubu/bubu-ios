@@ -15,6 +15,7 @@ final class ProgressStore {
     private(set) var days: [String: Int] = [:]        // reviews answered per day
     private(set) var celebrated: String?              // the day the goal bonus was paid
     private(set) var boostUntil: Double = 0           // double XP until (ms)
+    private(set) var hooks: [String: String] = [:]    // your own memory hooks, by character
     var name: String = ""
 
     private let course: Course
@@ -31,6 +32,7 @@ final class ProgressStore {
         var days: [String: Int]?
         var celebrated: String?
         var boostUntil: Double?
+        var hooks: [String: String]?
     }
 
     init(course: Course, url: URL? = nil) {
@@ -45,7 +47,7 @@ final class ProgressStore {
         guard let data = try? Data(contentsOf: url),
               let s = try? JSONDecoder().decode(Saved.self, from: data) else { return }
         srs = s.srs; done = Set(s.done); xpDays = s.xpDays ?? [:]; name = s.name ?? ""; qc = s.qc ?? [:]
-        lit = Set(s.lit ?? []); days = s.days ?? [:]; celebrated = s.celebrated; boostUntil = s.boostUntil ?? 0
+        lit = Set(s.lit ?? []); days = s.days ?? [:]; celebrated = s.celebrated; boostUntil = s.boostUntil ?? 0; hooks = s.hooks ?? [:]
     }
 
     @ObservationIgnored private var held = 0
@@ -60,7 +62,7 @@ final class ProgressStore {
     func save() {
         if held > 0 { pending = true; return }
         let s = Saved(srs: srs, done: done.sorted(), xpDays: xpDays, name: name, qc: qc,
-                      lit: lit.sorted(), days: days, celebrated: celebrated, boostUntil: boostUntil)
+                      lit: lit.sorted(), days: days, celebrated: celebrated, boostUntil: boostUntil, hooks: hooks)
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         if let data = try? JSONEncoder().encode(s) { try? data.write(to: url, options: .atomic) }
     }
@@ -140,6 +142,8 @@ final class ProgressStore {
         lit.insert(t); save()
         return true
     }
+
+    func setHook(_ ch: String, _ text: String?) { hooks[ch] = text; save() }
 
     var boostActive: Bool { boostUntil > now() }
     func startBoost() { boostUntil = now() + 15 * 60_000; save() }

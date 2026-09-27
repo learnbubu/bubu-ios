@@ -28,7 +28,8 @@ struct RootView: View {
     /// Screens the cloud screenshot run asks for with `-screen`.
     private func debugScreens() {
         #if DEBUG
-        guard let screen = Launch.screen, ["study", "quiz", "sentence", "speak", "write", "done"].contains(screen) else { return }
+        if Launch.screen == "char" { router.tab = .learn; CharNav.shared.open("好"); return }
+        guard let screen = Launch.screen, ["study", "quiz", "sentence", "speak", "write", "done", "char"].contains(screen) else { return }
         let first = Course.shared.lessons[0].id
         let s = StudySession(lessonId: first, progress: progress)
         switch screen {
@@ -63,9 +64,11 @@ struct RootView: View {
             }
         }
         .animation(.spring(response: 0.34, dampingFraction: 0.86), value: router.lesson?.id)
+        .charSheetHost()
         .fullScreenCover(item: $router.study) { s in
             StudyView(session: s) { router.study = nil }
                 .environment(progress)
+                .charSheetHost()
         }
         .environment(router)
         .onAppear { debugScreens() }

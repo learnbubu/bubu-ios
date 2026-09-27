@@ -358,7 +358,7 @@ struct MeetView: View {
 
     private func row(_ c: Card) -> some View {
         HStack(spacing: 12) {
-            ToneText(hanzi: c.word.hanzi, pinyin: c.word.pinyin, size: 27, weight: .bold)
+            TappableHanzi(text: c.word.hanzi, pinyin: c.word.pinyin, size: 27, weight: .bold)
                 .frame(minWidth: 60)
             VStack(alignment: .leading, spacing: 2) {
                 Text(c.word.pinyin).font(.nunito(16)).foregroundStyle(Color.ink)
@@ -535,6 +535,8 @@ struct FeedbackBanner: View {
                 }
                 if let diff, let other = lookalike {
                     diffBlock(diff, other: other)
+                } else if ex.kind != .sentence, w.hanzi.contains(where: { CharData.shared.chars[String($0)] != nil }) {
+                    Text("Tap a character to see how it's built").font(.nunito(11.5, .bold)).opacity(0.75).padding(.top, 6)
                 }
             }
             Spacer(minLength: 0)
@@ -562,7 +564,7 @@ struct FeedbackBanner: View {
         switch k {
         case "en": Text(w.en).font(.nunito(big ? 17.6 : 14.4)).foregroundStyle(big ? Color.ink : Color.gold)
         case "py": PinyinText(pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .regular)
-        default: ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .medium)
+        default: TappableHanzi(text: w.hanzi, pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .medium)
         }
     }
 

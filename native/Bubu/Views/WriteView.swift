@@ -66,6 +66,7 @@ struct GridSquare: View {
             }
             .stroke(Color.line, style: StrokeStyle(lineWidth: 1, dash: [5, 5]))
         }
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
     }
 }
