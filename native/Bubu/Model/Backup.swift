@@ -12,6 +12,7 @@ struct Prefs: Codable, Equatable {
     var showPinyin = true
     var toneColours = true
     var checkStrokes = true
+    var autoRelight = true      // an ember relights a missed day by itself
 
     init() {}
     init(from decoder: Decoder) throws {
@@ -24,6 +25,7 @@ struct Prefs: Codable, Equatable {
         showPinyin = (try? c.decode(Bool.self, forKey: .showPinyin)) ?? true
         toneColours = (try? c.decode(Bool.self, forKey: .toneColours)) ?? true
         checkStrokes = (try? c.decode(Bool.self, forKey: .checkStrokes)) ?? true
+        autoRelight = (try? c.decode(Bool.self, forKey: .autoRelight)) ?? true
     }
 
     var colorScheme: ColorScheme? { theme == "light" ? .light : theme == "dark" ? .dark : nil }
@@ -47,17 +49,11 @@ enum Backup {
         var prefs = p.prefsJSON()
         prefs["name"] = p.name
         if !p.hooks.isEmpty { prefs["hooks"] = p.hooks }
-        var activity: [String: Any] = [
-            "days": p.days, "xpDays": p.xpDays,
-            "lit": Dictionary(uniqueKeysWithValues: p.lit.map { ($0, true) }),
-            "boostUntil": p.boostUntil, "qc": p.qc,
-        ]
-        if let c = p.celebrated { activity["celebrated"] = c }
         let data: [String: String] = [
             srsKey: text(p.srs),
             doneKey: text(p.done.sorted()),
             prefsKey: json(prefs),
-            activityKey: json(activity),
+            activityKey: text(p.activity),
         ]
         let payload: [String: Any] = [
             "app": "zhBeginnerA", "version": 1,
@@ -95,16 +91,8 @@ enum Backup {
         let done = Set((obj(doneKey) as? [Any] ?? []).compactMap { $0 as? String })
         let prefsObj = obj(prefsKey) as? [String: Any] ?? [:]
         let prefs = (try? JSONSerialization.data(withJSONObject: prefsObj)).flatMap { try? JSONDecoder().decode(Prefs.self, from: $0) } ?? Prefs()
-        let act = obj(activityKey) as? [String: Any] ?? [:]
-        let ints = { (k: String) -> [String: Int] in
-            (act[k] as? [String: Any] ?? [:]).compactMapValues { ($0 as? NSNumber)?.intValue }
-        }
-        var lit = Set((act["lit"] as? [String: Any] ?? [:]).keys)
-        lit.formUnion((act["relit"] as? [String: Any] ?? [:]).keys)
-        let qc = (act["qc"] as? [String: [String: Any]] ?? [:]).mapValues { $0.compactMapValues { ($0 as? NSNumber)?.intValue } }
-        p.replaceAll(srs: srs, done: done, xpDays: ints("xpDays"), days: ints("days"), lit: lit,
-                     celebrated: act["celebrated"] as? String, boostUntil: (act["boostUntil"] as? NSNumber)?.doubleValue ?? 0,
-                     qc: qc, name: (prefsObj["name"] as? String) ?? "",
+        let activity = data[activityKey].flatMap { try? JSONDecoder().decode(Activity.self, from: Data($0.utf8)) } ?? Activity()
+        p.replaceAll(srs: srs, done: done, activity: activity, name: (prefsObj["name"] as? String) ?? "",
                      hooks: prefsObj["hooks"] as? [String: String] ?? [:], prefs: prefs)
         return true
     }

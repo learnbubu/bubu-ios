@@ -75,7 +75,7 @@ struct StudyView: View {
                     .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
             }
             .buttonStyle(PressDown(depth: 1))
-            Text("Study").font(.nunito(16, .bold)).foregroundStyle(Color.ink)
+            Text(session.title).font(.nunito(16, .bold)).foregroundStyle(Color.ink)
             Spacer()
             if session.combo >= 3 {
                 let hot = session.combo >= 5

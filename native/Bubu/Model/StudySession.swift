@@ -17,8 +17,15 @@ final class StudySession: Identifiable {
         case card(Card)
     }
 
+    /// What the session is for. Only a lesson session can finish a lesson.
+    enum Mode { case lesson, review, mistakes, trouble, listen, write }
+
     let id = UUID()
     let lessonId: String
+    let mode: Mode
+    let title: String
+    /// the lessons whose words make the wrong options
+    let scope: Set<String>
     let focuses: Set<String>
     private let course = Course.shared
     private let progress: ProgressStore
@@ -61,18 +68,66 @@ final class StudySession: Identifiable {
         let fixed: Int
         let nextLessonId: String?
         let wordsLeft: Int
+        let fire: ProgressStore.Fire?
+        let mode: Mode
     }
 
-    init(lessonId: String, progress: ProgressStore, focuses: Set<String>? = nil, cards: [Card]? = nil) {
+    init(lessonId: String, progress: ProgressStore, focuses: Set<String>? = nil, cards: [Card]? = nil,
+         mode: Mode = .lesson, title: String = "Study") {
         self.lessonId = lessonId
         self.progress = progress
+        self.mode = mode
+        self.title = title
         self.focuses = focuses ?? Set(Self.allDirs)
         self.start = progress.now()
         let chosen = cards ?? StudySession.buildQueue(lessonId: lessonId, progress: progress, focuses: self.focuses)
+        self.scope = mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId))
         self.source = chosen
         self.queue = sessionOrder(chosen)
         self.sessionTotal = queue.filter { if case .card = $0 { return true } else { return false } }.count
         next()
+    }
+
+    // MARK: the practice modes
+
+    /// Words from the lessons you've reached: done ones and the one you're on.
+    static func reachedCards(_ p: ProgressStore) -> [Card] {
+        let cur = p.currentLessonId
+        return Course.shared.cards.filter { p.isDone($0.lessonId) || $0.lessonId == cur }
+    }
+
+    static func review(_ p: ProgressStore) -> StudySession? {
+        let cards = p.dueReviewCards()
+        guard !cards.isEmpty else { Moments.shared.toast("Nothing due yet - come back later."); return nil }
+        return StudySession(lessonId: "", progress: p, cards: Array(cards.shuffled().prefix(20)), mode: .review, title: "Review")
+    }
+
+    static func mistakes(_ p: ProgressStore) -> StudySession? {
+        let cards = Array(p.mistakeCards().prefix(sessionLen))
+        guard !cards.isEmpty else { Moments.shared.toast("No mistakes to fix. Nice!"); return nil }
+        return StudySession(lessonId: "", progress: p, cards: cards, mode: .mistakes, title: "Your mistakes")
+    }
+
+    static func trouble(_ p: ProgressStore) -> StudySession? {
+        let cards = p.troubleCards()
+        guard !cards.isEmpty else { Moments.shared.toast("No trouble words yet — nothing you're stuck on. Nice!"); return nil }
+        return StudySession(lessonId: "", progress: p, cards: Array(cards.prefix(20)), mode: .trouble, title: "Trouble words")
+    }
+
+    static func listening(_ p: ProgressStore) -> StudySession? {
+        let cards = reachedCards(p)
+        let studied = cards.filter { p.srs[$0.id] != nil }
+        let pool = studied.isEmpty ? cards : studied
+        guard !pool.isEmpty else { return nil }
+        return StudySession(lessonId: "", progress: p, focuses: ["listen"], cards: Array(pool.shuffled().prefix(20)), mode: .listen, title: "Listening")
+    }
+
+    static func writing(_ p: ProgressStore) -> StudySession? {
+        let cards = reachedCards(p).filter { StrokeData.shared.writable($0.word.hanzi) }
+        let studied = cards.filter { p.srs[$0.id] != nil }
+        let pool = studied.isEmpty ? cards : studied
+        guard !pool.isEmpty else { return nil }
+        return StudySession(lessonId: "", progress: p, focuses: ["write"], cards: Array(pool.shuffled().prefix(12)), mode: .write, title: "Writing")
     }
 
     // MARK: building the session
@@ -155,10 +210,10 @@ final class StudySession: Identifiable {
         current = item
         if case .card(let c) = item {
             dir = pickDirection(c)
-            exercise = Exercise.make(card: c, dir: dir, lessonId: lessonId, progress: progress)
+            exercise = Exercise.make(card: c, dir: dir, scope: scope, progress: progress)
             if exercise == nil {               // a sentence that couldn't be built: fall back
                 dir = "recognize"
-                exercise = Exercise.make(card: c, dir: dir, lessonId: lessonId, progress: progress)
+                exercise = Exercise.make(card: c, dir: dir, scope: scope, progress: progress)
             }
             exercise?.isNew = Self.isNewCard(progress.srs[c.id])
         }
@@ -167,6 +222,9 @@ final class StudySession: Identifiable {
     /// Which exercise a card gets, climbing a ladder as the word gets stronger (web: pickDirection).
     private func pickDirection(_ c: Card) -> String {
         let s = progress.srs[c.id]
+        if mode == .mistakes, let m = s?.miss, dirByCard[c.id] == nil, missedDirPossible(c, m.d) {
+            dirByCard[c.id] = m.d; lastDir = m.d; return m.d
+        }
         var enabled = Self.allDirs.filter { focuses.contains($0) }
         if course.sentences(for: c).isEmpty { enabled.removeAll { $0 == "sentence" } }
         if !StrokeData.shared.writable(c.word.hanzi) { enabled.removeAll { $0 == "write" } }
@@ -190,6 +248,12 @@ final class StudySession: Identifiable {
         return d
     }
 
+    private func missedDirPossible(_ c: Card, _ d: String) -> Bool {
+        if d == "write" { return StrokeData.shared.writable(c.word.hanzi) }
+        if d == "sentence" { return !course.sentences(for: c).isEmpty }
+        return Self.allDirs.contains(d)
+    }
+
     var card: Card? { if case .card(let c) = current { return c } else { return nil } }
 
     /// Grade the current card (web: answerStudy). Returns the XP just earned.
@@ -201,7 +265,7 @@ final class StudySession: Identifiable {
         defer { progress.releaseSaves() }
         let wasNew = progress.srs[c.id] == nil
         lastCorrect = correct
-        let r = progress.answer(c.id, correct: correct, dir: dir, sessionStart: start, mistakesMode: false)
+        let r = progress.answer(c.id, correct: correct, dir: dir, sessionStart: start, mistakesMode: mode == .mistakes)
         if r.mistake { mistakes += 1 }
         if r.fixed { fixedCount += 1 }
         progress.recordReview()
@@ -209,6 +273,7 @@ final class StudySession: Identifiable {
         var xp = 0
         if correct {
             combo += 1
+            if combo == Self.comboAt { DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { Sounds.shared.play("combo") } }
             xp = progress.earnXP(combo >= Self.comboAt ? Self.xpCombo : Self.xpCorrect).earned
         } else {
             combo = 0
@@ -243,9 +308,9 @@ final class StudySession: Identifiable {
 
     private func finish() {
         current = nil
-        let lessonCards = course.cards(in: lessonId)
-        let cleared = lessonCards.allSatisfy { (progress.srs[$0.id]?.reps ?? 0) >= 1 }
-        let justFinished = !progress.isDone(lessonId) && cleared
+        let lessonCards = mode == .lesson ? course.cards(in: lessonId) : []
+        let cleared = !lessonCards.isEmpty && lessonCards.allSatisfy { (progress.srs[$0.id]?.reps ?? 0) >= 1 }
+        let justFinished = mode == .lesson && !progress.isDone(lessonId) && cleared
         if justFinished { progress.markDone(lessonId) }
         let perfect = againCount == 0 && answeredCount >= 5
         progress.questEvent("session", correct: true, lesson: justFinished, perfect: perfect)
@@ -253,16 +318,28 @@ final class StudySession: Identifiable {
         let s = progress.earnXP(justFinished ? Self.xpLesson : Self.xpSession)
         sessionXP += s.earned; goal = goal || s.goalReached
         if perfect { let p = progress.earnXP(Self.xpPerfect); sessionXP += p.earned; goal = goal || p.goalReached }
-        if justFinished { progress.startBoost() }
-        let lit = progress.lightFire()
+        if justFinished {
+            progress.startBoost()
+            storyUnlocked()
+        }
+        let fire = progress.lightFire()
         let left = justFinished ? 0 : lessonCards.filter { (progress.srs[$0.id]?.reps ?? 0) < 1 }.count
-        let title = justFinished ? "Lesson complete" : left > 0 ? "Batch done" : "Session complete"
+        let title = mode == .mistakes ? "Mistakes practised" : [.review, .trouble].contains(mode) ? "Review complete"
+            : justFinished ? "Lesson complete" : left > 0 ? "Batch done" : "Session complete"
         let seconds = Int(((progress.now() - start) / 1000).rounded())
         let accuracy = answeredCount == 0 ? 100 : Int((Double(answeredCount - againCount) / Double(answeredCount) * 100).rounded())
         result = Result(title: title, xp: sessionXP, seconds: seconds, accuracy: accuracy, perfect: perfect,
-                        lessonFinished: justFinished, fireJustLit: lit, goalReached: goal,
+                        lessonFinished: justFinished, fireJustLit: fire != nil, goalReached: goal,
                         mistakes: mistakes, fixed: fixedCount,
-                        nextLessonId: justFinished ? nextLesson(after: lessonId) : nil, wordsLeft: left)
+                        nextLessonId: justFinished ? nextLesson(after: lessonId) : nil, wordsLeft: left,
+                        fire: fire, mode: mode)
+    }
+
+    /// Finishing a chapter's last lesson unlocks its story (web: finishStudy's toast).
+    private func storyUnlocked() {
+        guard let ci = course.chapterOf[lessonId], progress.chapterDone(ci),
+              let story = course.data.readings.first(where: { $0.chapter == ci }), !progress.readDone(story.id) else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) { Moments.shared.toast("New story unlocked: \(story.title)") }
     }
 
     /// The next unfinished lesson after this one, else the first unfinished (web: nextLessonId).
@@ -280,7 +357,7 @@ final class StudySession: Identifiable {
         let c = dir == "sentence" ? (course.cards.first { !course.sentences(for: $0).isEmpty } ?? cards[0]) : cards[0]
         current = .card(c)
         self.dir = dir
-        exercise = Exercise.make(card: c, dir: dir, lessonId: c.lessonId, progress: progress)
+        exercise = Exercise.make(card: c, dir: dir, scope: [c.lessonId], progress: progress)
         exercise?.isNew = true
     }
     func debugFinish() {
@@ -291,7 +368,9 @@ final class StudySession: Identifiable {
     #endif
 
     /// The same words again (web: Practice again).
-    func again() -> StudySession { StudySession(lessonId: lessonId, progress: progress, focuses: focuses, cards: source) }
+    func again() -> StudySession {
+        StudySession(lessonId: lessonId, progress: progress, focuses: focuses, cards: source, mode: mode, title: title)
+    }
 }
 
 // MARK: exercises
@@ -328,16 +407,16 @@ struct Exercise {
         }
     }
 
-    static func make(card c: Card, dir: String, lessonId: String, progress: ProgressStore) -> Exercise? {
+    static func make(card c: Card, dir: String, scope: Set<String>, progress: ProgressStore) -> Exercise? {
         switch dir {
-        case "sentence": return sentence(c, lessonId: lessonId)
+        case "sentence": return sentence(c)
         case "speak": return speak(c)
         case "write":
             let s = progress.srs[c.id]
             // the help fades: new, learning, then from memory once spaced a week out
             let stage = (s?.reps ?? 0) < 1 ? 0 : (s?.interval ?? 0) >= 7 ? 2 : 1
             return Exercise(kind: .write, dir: "write", card: c, writeStage: stage)
-        default: return choice(c, dir: dir, lessonId: lessonId)
+        default: return choice(c, dir: dir, scope: scope)
         }
     }
 
@@ -350,9 +429,10 @@ struct Exercise {
     }
 
     /// One answer and three distractors (web: buildChoiceExercise).
-    static func choice(_ c: Card, dir: String, lessonId: String) -> Exercise {
+    static func choice(_ c: Card, dir: String, scope: Set<String>) -> Exercise {
         let course = Course.shared
-        let cards = course.cards(in: lessonId).isEmpty ? course.cards : course.cards(in: lessonId)
+        let inScope = course.cards.filter { scope.contains($0.lessonId) }
+        let cards = inScope.isEmpty ? course.cards : inScope
         let answer = field(c.word, dir)
         var distractors: [String] = []
         let others = { (exclude: [String]) -> [String] in
@@ -401,7 +481,7 @@ struct Exercise {
     var sayEn: String { sentence?.en ?? card.word.en }
 
     /// Word tiles to put in order (web: buildSentenceExercise).
-    static func sentence(_ c: Card, lessonId: String) -> Exercise? {
+    static func sentence(_ c: Card) -> Exercise? {
         let course = Course.shared
         guard let sent = course.sentences(for: c).randomElement() else { return nil }
         let enWords = Sentence.enWords(sent.en)

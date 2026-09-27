@@ -10,6 +10,18 @@ final class Router {
     var lesson: Lesson?
     var study: StudySession?
 
+    /// Open a session, if there was one to start.
+    func start(_ s: StudySession?) { if let s { lesson = nil; study = s } }
+
+    /// A practice tile on Home (web: runMode).
+    func practice(_ mode: String, _ p: ProgressStore) {
+        switch mode {
+        case "listen": start(StudySession.listening(p))
+        case "write": start(StudySession.writing(p))
+        default: Moments.shared.toast("Coming in the next build.")
+        }
+    }
+
     init() {
         switch Launch.screen {
         case "path", "lesson": tab = .learn
@@ -24,6 +36,7 @@ final class Router {
 struct RootView: View {
     @State private var router = Router()
     @Environment(ProgressStore.self) private var progress
+    @Environment(\.scenePhase) private var scenePhase
 
     /// Screens the cloud screenshot run asks for with `-screen`.
     private func debugScreens() {
@@ -65,15 +78,21 @@ struct RootView: View {
         }
         .animation(.spring(response: 0.34, dampingFraction: 0.86), value: router.lesson?.id)
         .charSheetHost()
+        .momentsHost()
         .fullScreenCover(item: $router.study) { s in
             StudyView(session: s) { router.study = nil }
                 .environment(progress)
                 .charSheetHost()
+                .momentsHost(study: true)
                 .preferredColorScheme(progress.prefs.colorScheme)
         }
         .preferredColorScheme(progress.prefs.colorScheme)
         .environment(router)
         .onAppear { debugScreens() }
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            // after a missed day, the fire is relit (or its loss shown) when you come back
+            if phase == .active { DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { progress.protectStreak() } }
+        }
     }
 }
 

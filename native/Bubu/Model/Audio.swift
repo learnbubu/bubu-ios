@@ -103,7 +103,8 @@ final class Sounds {
         if name == "complete" && Date().timeIntervalSince(lastGoal) < 1.5 { return }
         activate()
         queue.async { [self] in
-            if players[name] == nil, let url = Bundle.main.url(forResource: name, withExtension: "mp3"),
+            if players[name] == nil, let url = Bundle.main.url(forResource: name, withExtension: "mp3")
+                ?? Bundle.main.url(forResource: name, withExtension: "wav"),
                let p = try? AVAudioPlayer(contentsOf: url) {
                 p.volume = 0.6
                 players[name] = p

@@ -390,9 +390,10 @@ struct HUD: View {
 
 struct ReviewButton: View {
     @Environment(ProgressStore.self) private var progress
+    @Environment(Router.self) private var router
     var body: some View {
         if progress.dueCount > 0 {
-            Button {} label: {
+            Button { router.start(StudySession.review(progress)) } label: {
                 Label("Review \(progress.dueCount) word\(progress.dueCount == 1 ? "" : "s")", systemImage: "arrow.triangle.2.circlepath")
                     .padding(.horizontal, 8)
             }

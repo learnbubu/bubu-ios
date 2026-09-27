@@ -23,6 +23,7 @@ struct HomeView: View {
                         header
                         streakCard.padding(.top, 14)
                         questCard.padding(.top, 8)
+                        if progress.boostActive { BoostPill().padding(.top, 14) }
                         continueSection
                         Text("Practice").font(.nunitoXB(17)).foregroundStyle(Color.ink)
                             .padding(.top, 20).padding(.bottom, 10).padding(.horizontal, 2)
@@ -82,16 +83,25 @@ struct HomeView: View {
     // MARK: streak
     private var streakCard: some View {
         let streak = progress.streak, xp = progress.xpToday, goal = progress.dailyGoal
-        let lit = progress.litOn(progress.today)
-        let bubble = xp >= goal ? "Goal done!" : lit ? "\(goal - xp) XP to goal" : streak > 0 ? "Keep it lit!" : "Let's start!"
+        let out = progress.outSince
+        let lit = progress.litOn(progress.today) && out == nil
+        // from six in the evening an unlit day with a streak behind it is at risk
+        let hoursLeft = 24 - Calendar.current.component(.hour, from: Date())
+        let risk = out == nil && !lit && streak > 0 && hoursLeft <= 6
+        let askable = out != nil && progress.embers > 0 && !progress.prefs.autoRelight
+        let bubble = out != nil ? (askable ? "Relight it?" : "Went out")
+            : risk ? "\(hoursLeft)h left to keep it" : xp >= goal ? "Goal done!" : lit ? "\(goal - xp) XP to goal"
+            : streak > 0 ? "Keep it lit!" : "Let's start!"
         return VStack(spacing: 0) {
             ZStack(alignment: .topTrailing) {
                 HStack(spacing: 13) {
                     FlameIcon(lit: lit, size: 42)
                         .shadow(color: lit ? Color(UIColor(hex: 0xF08A7A)).opacity(0.55) : .clear, radius: 10)
                     VStack(alignment: .leading, spacing: 5) {
-                        Text("\(streak)").font(.nunitoXB(34)).tracking(-0.6).foregroundStyle(Color.ink)
+                        Text("\(out?.lost ?? streak)").font(.nunitoXB(34)).tracking(-0.6).foregroundStyle(out != nil ? Color.muted : Color.ink)
                         Text("day streak").font(.nunito(14, .bold)).foregroundStyle(Color.muted)
+                        Label("\(progress.embers)", systemImage: "flame").font(.nunitoXB(11.5)).foregroundStyle(Color.gold)
+                            .padding(.top, 2)
                     }
                     Spacer()
                 }
@@ -101,7 +111,15 @@ struct HomeView: View {
                 Image("home-peek").resizable().scaledToFit().frame(height: 92)
                     .offset(x: -64, y: 118 + 12 - 92 + 6)
                     .allowsHitTesting(false)
-                SpeechBubble(text: bubble).padding(.top, 13).padding(.trailing, 16)
+                Button {
+                    if askable, let o = out { Moments.shared.show(.askRelight(lost: o.lost, embers: progress.embers)) }
+                    else if risk, let s = progress.currentLessonId.flatMap({ Course.shared.lessonById[$0] }) { router.tab = .learn; router.lesson = s }
+                } label: {
+                    SpeechBubble(text: bubble, hot: askable || risk)
+                        .phaseAnimator(risk ? [0.0, -3.0] : [0.0]) { v, y in v.offset(y: y) } animation: { _ in .easeInOut(duration: 1.1) }
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 13).padding(.trailing, 16)
             }
             .clipped()
             WeekStrip()
@@ -115,17 +133,18 @@ struct HomeView: View {
     // MARK: quests
     private var questCard: some View {
         let quests = progress.todayQuests
-        let done = quests.filter { progress.progress(of: $0) >= $0.target }.count
+        let done = quests.filter { progress.questDone($0) || progress.progress(of: $0) >= $0.target }.count
+        let opened = done == 3 && progress.chestOpened
         return VStack(spacing: 0) {
             HStack {
                 Text("Daily quests").font(.nunitoXB(15)).foregroundStyle(Color.ink)
                 Spacer()
-                Text("\(done)/3").font(.nunitoXB(12.5)).foregroundStyle(done == 3 ? Color.gold : Color.muted)
+                Text(done == 3 ? (opened ? "Chest opened" : "3/3") : "\(done)/3").font(.nunitoXB(12.5)).foregroundStyle(done == 3 ? Color.gold : Color.muted)
                     .padding(.horizontal, 10).padding(.vertical, 3)
                     .background(Color.accentSoft, in: Capsule())
             }
-            .padding(.bottom, 2)
-            ForEach(Array(quests.enumerated()), id: \.offset) { i, q in
+            .padding(.bottom, opened ? 8 : 2)
+            if !opened { ForEach(Array(quests.enumerated()), id: \.offset) { i, q in
                 let n = min(q.target, progress.progress(of: q)), ok = n >= q.target
                 HStack(spacing: 10) {
                     Image(systemName: ok ? "checkmark" : q.icon).font(.system(size: 14, weight: .semibold))
@@ -142,7 +161,7 @@ struct HomeView: View {
                 }
                 .padding(.vertical, 8)
                 .overlay(alignment: .top) { if i > 0 { Rectangle().fill(Color.line).frame(height: 1) } }
-            }
+            } }
         }
         .padding(.horizontal, 14).padding(.top, 12).padding(.bottom, 4)
         .panel()
@@ -210,15 +229,22 @@ struct HomeView: View {
     // MARK: practice
     private var hub: some View {
         VStack(spacing: 0) {
-            hubRow("xmark", "Fix your mistakes",
-                   progress.mistakeCount > 0 ? "Words you missed" : "Nothing to fix. Mistakes you make land here",
-                   progress.mistakeCount, ink: .again, soft: .againSoft)
-            hubRow("arrow.counterclockwise", "Review",
-                   progress.dueCount > 0 ? "\(progress.dueCount) word\(progress.dueCount == 1 ? "" : "s") due" : "All caught up",
-                   progress.dueCount, ink: .accent, soft: .accentSoft, first: false)
-            hubRow("scope", "Weak words", progress.weakCount > 0 ? "Words that keep slipping" : "No weak words yet",
-                   progress.weakCount, ink: .gold, soft: Color.gold.opacity(0.18), first: false)
+            Button { router.start(StudySession.mistakes(progress)) } label: {
+                hubRow("xmark", "Fix your mistakes",
+                       progress.mistakeCount > 0 ? "Words you missed, asked the way you missed them" : "Nothing to fix. Mistakes you make land here",
+                       progress.mistakeCount, ink: .again, soft: .againSoft)
+            }
+            Button { router.start(StudySession.review(progress)) } label: {
+                hubRow("arrow.counterclockwise", "Review",
+                       progress.dueCount > 0 ? "\(progress.dueCount) word\(progress.dueCount == 1 ? "" : "s") due" : "All caught up",
+                       progress.dueCount, ink: .accent, soft: .accentSoft, first: false)
+            }
+            Button { router.start(StudySession.trouble(progress)) } label: {
+                hubRow("scope", "Weak words", progress.weakCount > 0 ? "The words that keep tripping you up" : "No weak words yet",
+                       progress.weakCount, ink: .gold, soft: Color.gold.opacity(0.18), first: false)
+            }
         }
+        .buttonStyle(.plain)
         .panel(radius: 18).panelShadow()
     }
 
@@ -262,7 +288,7 @@ struct HomeView: View {
         return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
             ForEach(list) { t in
                 let c = Color.tiles[t.color]!
-                Button {} label: {
+                Button { router.practice(t.id, progress) } label: {
                     HStack(spacing: 10) {
                         Group {
                             if t.icon == "字" { Text("字").font(.hanzi(22, .bold)) }
@@ -290,16 +316,32 @@ private struct ScrollYKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
-/// The streak card's speech bubble, tail pointing down at Bùbù.
+/// The streak card's speech bubble, tail pointing down at Bùbù; orange when it wants you.
 struct SpeechBubble: View {
     let text: String
+    var hot = false
     var body: some View {
-        Text(text).font(.nunitoXB(13)).foregroundStyle(Color.accent).lineLimit(1)
+        let bg = hot ? Color(UIColor(hex: 0xF0742F)) : Color.accentSoft
+        Text(text).font(.nunitoXB(13)).foregroundStyle(hot ? Color.white : Color.accent).lineLimit(1)
             .padding(.horizontal, 11).padding(.vertical, 6)
-            .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(bg, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(alignment: .bottomLeading) {
-                Triangle().fill(Color.accentSoft).frame(width: 12, height: 6).offset(x: 15, y: 5)
+                Triangle().fill(bg).frame(width: 12, height: 6).offset(x: 15, y: 5)
             }
+    }
+}
+
+/// Double XP after a lesson, counting down (web: renderBoost).
+struct BoostPill: View {
+    @Environment(ProgressStore.self) private var progress
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            let left = max(0, Int((progress.boostUntil - progress.now()) / 1000))
+            (Text("2×").font(.nunito(14, .black)) + Text(" XP · \(left / 60):\(String(format: "%02d", left % 60))").font(.nunito(14, .bold)))
+                .monospacedDigit().foregroundStyle(Color.gold)
+                .frame(maxWidth: .infinity).padding(.vertical, 8)
+                .background(Color.accentSoft, in: Capsule())
+        }
     }
 }
 

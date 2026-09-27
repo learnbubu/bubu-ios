@@ -81,6 +81,8 @@ struct SettingsView: View {
                 }
 
                 section {
+                    toggle("Embers relight automatically", "Miss a day and an ember is spent for you overnight. Off means you choose each time.", $p.prefs.autoRelight)
+                    divider
                     toggle("Sound effects", "Chimes for right and wrong, and the end of a session.", $p.prefs.sound)
                     divider
                     toggle("Show pinyin", "Show pinyin under characters as a reading aid (off = a tougher test).", $p.prefs.showPinyin)

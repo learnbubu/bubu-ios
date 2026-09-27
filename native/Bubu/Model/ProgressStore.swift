@@ -2,26 +2,62 @@ import Foundation
 import Observation
 import AVFoundation
 
+/// Everything the web app keeps in its activity record, with the same names and
+/// shapes (dates as "yyyy-MM-dd", sets as {date: true}), so a backup moves
+/// between the website and the app untouched.
+struct Activity: Codable, Equatable {
+    var days: [String: Int] = [:]            // answers per day
+    var xpDays: [String: Int] = [:]          // XP per day
+    var lit: [String: Bool] = [:]            // days a session was finished: the fire
+    var relit: [String: Bool] = [:]          // missed days covered by an ember
+    var celebrated: String?                  // the day the goal bonus was paid
+    var boostUntil: Double = 0               // double XP until (ms)
+    var qc: [String: [String: Int]] = [:]    // today's quest counters
+    var embers: Int?                         // nil means the one you start with
+    var emberFor: [String: String] = [:]     // streak milestone → the day its ember was given
+    var best: Int = 0                        // longest streak
+    var levelSeen: Int = 1
+    var chests: Int = 0
+    var questMonths: [String: Int] = [:]     // "2026-09" → quests done that month
+    var quests: QuestDay?
+    var achv: [String: String] = [:]         // achievement → the day it was earned
+    var readsDone: [String: String] = [:]    // story → the day it was first read
+    var relightAsked: String?
+
+    struct QuestDay: Codable, Equatable {
+        var date: String
+        var ids: [String]
+        var done: [String: Bool] = [:]
+        var chest = false
+    }
+
+    init() {}
+    // lenient: a field the web wrote differently is dropped, not the whole record
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        func get<T: Decodable>(_ k: CodingKeys, _ d: T) -> T { (try? c.decode(T.self, forKey: k)) ?? d }
+        days = get(.days, [:]); xpDays = get(.xpDays, [:]); lit = get(.lit, [:]); relit = get(.relit, [:])
+        celebrated = try? c.decode(String.self, forKey: .celebrated)
+        boostUntil = get(.boostUntil, 0); qc = get(.qc, [:]); embers = try? c.decode(Int.self, forKey: .embers)
+        emberFor = get(.emberFor, [:]); best = get(.best, 0); levelSeen = get(.levelSeen, 1); chests = get(.chests, 0)
+        questMonths = get(.questMonths, [:]); quests = try? c.decode(QuestDay.self, forKey: .quests)
+        achv = get(.achv, [:]); readsDone = get(.readsDone, [:])
+        relightAsked = try? c.decode(String.self, forKey: .relightAsked)
+    }
+}
+
 /// Everything a learner has done, saved as JSON in Application Support.
-/// Field names follow the web app's saved progress (srs, done, activity), so a
-/// backup from the website can be read here and the other way round.
 @Observable
 final class ProgressStore {
     private(set) var srs: [String: SRSRecord] = [:]
     private(set) var done: Set<String> = []
-    private(set) var xpDays: [String: Int] = [:]      // "2026-09-27" → XP earned that day
-    /// today's quest counters (combo, sessions, lessons, perfect, listen, write, speak, sentence)
-    private(set) var qc: [String: [String: Int]] = [:]
-    private(set) var lit: Set<String> = []            // days a session was finished: the fire
-    private(set) var days: [String: Int] = [:]        // reviews answered per day
-    private(set) var celebrated: String?              // the day the goal bonus was paid
-    private(set) var boostUntil: Double = 0           // double XP until (ms)
+    private(set) var activity = Activity()
     private(set) var hooks: [String: String] = [:]    // your own memory hooks, by character
-    var prefs = Prefs() { didSet { if prefs != oldValue { applyPrefs(); save() } } }
+    var prefs = Prefs() { didSet { if prefs != oldValue { save() } } }
+    var name: String = ""
 
     /// The store in use, for small views that read a setting (tone colours, pinyin).
     @ObservationIgnored static weak var current: ProgressStore?
-    var name: String = ""
 
     private let course: Course
     private let url: URL
@@ -30,15 +66,13 @@ final class ProgressStore {
     private struct Saved: Codable {
         var srs: [String: SRSRecord]
         var done: [String]
-        var xpDays: [String: Int]?
         var name: String?
-        var qc: [String: [String: Int]]?
-        var lit: [String]?
-        var days: [String: Int]?
-        var celebrated: String?
-        var boostUntil: Double?
         var hooks: [String: String]?
         var prefs: Prefs?
+        var activity: Activity?
+        // the first native builds kept these at the top level
+        var xpDays: [String: Int]?, qc: [String: [String: Int]]?, lit: [String]?, days: [String: Int]?
+        var celebrated: String?, boostUntil: Double?
     }
 
     init(course: Course, url: URL? = nil) {
@@ -46,46 +80,22 @@ final class ProgressStore {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         self.url = url ?? dir.appendingPathComponent("progress.json")
         load()
-        applyPrefs()
         if url == nil { Self.current = self }
-    }
-
-    /// Speech and sound read the settings when they play, so nothing audio starts at launch
-    /// (preparing a player blocks until an audio device answers).
-    private func applyPrefs() {}
-
-    /// The settings as the web stores them.
-    func prefsJSON() -> [String: Any] {
-        guard let d = try? JSONEncoder().encode(prefs),
-              let o = try? JSONSerialization.jsonObject(with: d) as? [String: Any] else { return [:] }
-        return o
-    }
-
-    /// Everything replaced at once, from a backup.
-    func replaceAll(srs: [String: SRSRecord], done: Set<String>, xpDays: [String: Int], days: [String: Int], lit: Set<String>,
-                    celebrated: String?, boostUntil: Double, qc: [String: [String: Int]], name: String,
-                    hooks: [String: String], prefs: Prefs) {
-        holdSaves()
-        self.srs = srs; self.done = done; self.xpDays = xpDays; self.days = days; self.lit = lit
-        self.celebrated = celebrated; self.boostUntil = boostUntil; self.qc = qc; self.name = name
-        self.hooks = hooks; self.prefs = prefs
-        pending = true
-        releaseSaves()
-    }
-
-    /// Start again from nothing, keeping your name and settings.
-    func resetProgress() {
-        replaceAll(srs: [:], done: [], xpDays: [:], days: [:], lit: [], celebrated: nil, boostUntil: 0, qc: [:],
-                   name: name, hooks: hooks, prefs: prefs)
     }
 
     // MARK: saving
     private func load() {
         guard let data = try? Data(contentsOf: url),
               let s = try? JSONDecoder().decode(Saved.self, from: data) else { return }
-        srs = s.srs; done = Set(s.done); xpDays = s.xpDays ?? [:]; name = s.name ?? ""; qc = s.qc ?? [:]
-        lit = Set(s.lit ?? []); days = s.days ?? [:]; celebrated = s.celebrated; boostUntil = s.boostUntil ?? 0; hooks = s.hooks ?? [:]
+        srs = s.srs; done = Set(s.done); name = s.name ?? ""; hooks = s.hooks ?? [:]
         prefs = s.prefs ?? Prefs()
+        if let a = s.activity { activity = a } else {
+            var a = Activity()
+            a.xpDays = s.xpDays ?? [:]; a.qc = s.qc ?? [:]; a.days = s.days ?? [:]
+            a.lit = Dictionary(uniqueKeysWithValues: (s.lit ?? []).map { ($0, true) })
+            a.celebrated = s.celebrated; a.boostUntil = s.boostUntil ?? 0
+            activity = a
+        }
     }
 
     @ObservationIgnored private var held = 0
@@ -99,11 +109,40 @@ final class ProgressStore {
 
     func save() {
         if held > 0 { pending = true; return }
-        let s = Saved(srs: srs, done: done.sorted(), xpDays: xpDays, name: name, qc: qc,
-                      lit: lit.sorted(), days: days, celebrated: celebrated, boostUntil: boostUntil, hooks: hooks, prefs: prefs)
+        let s = Saved(srs: srs, done: done.sorted(), name: name, hooks: hooks, prefs: prefs, activity: activity)
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         if let data = try? JSONEncoder().encode(s) { try? data.write(to: url, options: .atomic) }
     }
+
+    /// Everything replaced at once, from a backup.
+    func replaceAll(srs: [String: SRSRecord], done: Set<String>, activity: Activity, name: String,
+                    hooks: [String: String], prefs: Prefs) {
+        holdSaves()
+        self.srs = srs; self.done = done; self.activity = activity; self.name = name
+        self.hooks = hooks; self.prefs = prefs
+        pending = true
+        releaseSaves()
+    }
+
+    /// Start again from nothing, keeping your name and settings.
+    func resetProgress() {
+        replaceAll(srs: [:], done: [], activity: Activity(), name: name, hooks: hooks, prefs: prefs)
+    }
+
+    /// The settings as the web stores them.
+    func prefsJSON() -> [String: Any] {
+        guard let d = try? JSONEncoder().encode(prefs),
+              let o = try? JSONSerialization.jsonObject(with: d) as? [String: Any] else { return [:] }
+        return o
+    }
+
+    // MARK: shortcuts into the activity record
+    var xpDays: [String: Int] { activity.xpDays }
+    var days: [String: Int] { activity.days }
+    var qc: [String: [String: Int]] { activity.qc }
+    var celebrated: String? { activity.celebrated }
+    var boostUntil: Double { activity.boostUntil }
+    var lit: Set<String> { Set(activity.lit.filter(\.value).keys) }
 
     // MARK: lessons
     func isDone(_ lessonId: String) -> Bool { done.contains(lessonId) }
@@ -118,29 +157,56 @@ final class ProgressStore {
         return (ids.filter { done.contains($0) }.count, ids.count)
     }
 
+    /// Every lesson of a chapter is done (web: chapterDone).
+    func chapterDone(_ ci: Int) -> Bool { course.chapters[ci].lessons.allSatisfy(done.contains) }
+
     // MARK: reviews
     func review(_ cardId: String, _ grade: Grade) {
         srs[cardId] = FSRS.schedule(srs[cardId], grade: grade, now: now())
         save()
     }
 
-    var dueCount: Int {
-        let t = now()
-        return srs.values.filter { ($0.due ?? 0) <= t && ($0.reps ?? 0) > 0 }.count
-    }
-
-    /// Due reviews from other lessons, from lessons done or the one you're on (web: dueReviewCards).
-    func dueReviewCards(excluding lessonId: String) -> [Card] {
+    /// Words falling due, from lessons done or the one you're on (web: dueReviewCards).
+    func dueReviewCards(excluding lessonId: String? = nil) -> [Card] {
         let t = now(), cur = currentLessonId
         return course.cards.filter { c in
             guard c.lessonId != lessonId, let r = srs[c.id], let due = r.due, due <= t else { return false }
             return done.contains(c.lessonId) || c.lessonId == cur
         }
     }
+    var dueCount: Int { dueReviewCards().count }
+
+    /// Words answered wrong and not yet put right, newest first (web: mistakeCards).
+    func mistakeCards() -> [Card] {
+        course.cards.filter { srs[$0.id]?.miss != nil }.sorted { (srs[$0.id]?.miss?.at ?? 0) > (srs[$1.id]?.miss?.at ?? 0) }
+    }
+    var mistakeCount: Int { srs.values.filter { $0.miss != nil }.count }
+
+    /// Words that keep tripping you up, most-missed first (web: troubleCards).
+    func troubleCards() -> [Card] {
+        let cur = currentLessonId
+        return course.cards.filter { c in
+            guard let s = srs[c.id], (s.reps ?? 0) > 0 || (s.lapses ?? 0) > 0 else { return false }
+            guard done.contains(c.lessonId) || c.lessonId == cur else { return false }
+            return (s.lapses ?? 0) > 0 || (s.ease ?? 2.4) < 2.4
+        }
+        .sorted { a, b in
+            let sa = srs[a.id]!, sb = srs[b.id]!
+            if (sa.lapses ?? 0) != (sb.lapses ?? 0) { return (sa.lapses ?? 0) > (sb.lapses ?? 0) }
+            return (sa.ease ?? 2.4) < (sb.ease ?? 2.4)
+        }
+    }
+    var weakCount: Int { troubleCards().count }
 
     var wordsLearned: Int { srs.values.filter { ($0.reps ?? 0) > 0 }.count }
 
-    // MARK: streak and XP
+    /// Well learnt: spaced a week out and produced at least once (web: isMastered).
+    func isMastered(_ cardId: String) -> Bool {
+        guard let s = srs[cardId] else { return false }
+        return (s.interval ?? 0) >= 7 && (s.prod ?? false)
+    }
+
+    // MARK: days
     private static let dayFormat: DateFormatter = {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
@@ -149,63 +215,68 @@ final class ProgressStore {
         return f
     }()
     static func dayKey(_ ms: Double) -> String { dayFormat.string(from: Date(timeIntervalSince1970: ms / 1000)) }
+    var today: String { Self.dayKey(now()) }
+    /// The day n days from today (web: dayKeyOffset).
+    func day(_ offset: Int) -> String {
+        let d = Calendar(identifier: .gregorian).date(byAdding: .day, value: offset, to: Date(timeIntervalSince1970: now() / 1000))!
+        return Self.dayKey(d.timeIntervalSince1970 * 1000)
+    }
+
+    /// Monday to Sunday of this week, as day keys.
+    var thisWeek: [String] {
+        var cal = Calendar(identifier: .gregorian); cal.firstWeekday = 2
+        let now = Date(timeIntervalSince1970: self.now() / 1000)
+        let monday = cal.dateInterval(of: .weekOfYear, for: now)?.start ?? now
+        return (0..<7).map { Self.dayKey(cal.date(byAdding: .day, value: $0, to: monday)!.timeIntervalSince1970 * 1000) }
+    }
+
+    // MARK: XP, goal, levels
+    var dailyGoal: Int { prefs.dailyGoal }
+    func xp(on day: String) -> Int { activity.xpDays[day] ?? 0 }
+    var xpToday: Int { xp(on: today) }
+    var xpTotal: Int { activity.xpDays.values.reduce(0, +) }
+
+    /// Level L until 50·L·(L+1) XP in all (web: levelInfo).
+    var level: (level: Int, into: Int, span: Int, next: Int) {
+        let total = xpTotal
+        var L = 1
+        while total >= 50 * L * (L + 1) { L += 1 }
+        let floor = 50 * (L - 1) * L, ceil = 50 * L * (L + 1)
+        return (L, total - floor, ceil - floor, ceil - total)
+    }
+
+    var boostActive: Bool { activity.boostUntil > now() }
+    func startBoost() { activity.boostUntil = now() + 15 * 60_000; save() }
 
     func earn(_ xp: Int) { earnXP(xp) }
 
-    var xpToday: Int { xpDays[Self.dayKey(now())] ?? 0 }
-
-    /// A day counts once a session was finished on it (the web's litOn).
-    /// Before this day XP lit the fire; days from then count if they met the old goal.
-    static let litCutoff = "2026-09-19"
-    func litOn(_ day: String) -> Bool {
-        lit.contains(day) || (day < Self.litCutoff && ((xpDays[day] ?? 0) >= 10 || (days[day] ?? 0) >= 20))
-    }
-
-    /// Days in a row with the fire lit, ending today, or yesterday if today isn't lit yet.
-    var streak: Int {
-        let cal = Calendar(identifier: .gregorian)
-        var d = Date(timeIntervalSince1970: now() / 1000)
-        let key = { (d: Date) in Self.dayKey(d.timeIntervalSince1970 * 1000) }
-        if !litOn(key(d)) { d = cal.date(byAdding: .day, value: -1, to: d)! }
-        var n = 0
-        while litOn(key(d)) { n += 1; d = cal.date(byAdding: .day, value: -1, to: d)! }
-        return n
-    }
-
-    /// Light today's fire. Returns true if it wasn't lit yet.
-    @discardableResult
-    func lightFire() -> Bool {
-        let t = today
-        guard !lit.contains(t) else { return false }
-        lit.insert(t); save()
-        return true
-    }
-
-    func setHook(_ ch: String, _ text: String?) { hooks[ch] = text; save() }
-
-    var boostActive: Bool { boostUntil > now() }
-    func startBoost() { boostUntil = now() + 15 * 60_000; save() }
-
-    /// Earn XP as the web's earnXP: doubled during a boost, and the first time today's
-    /// total crosses the daily goal a +15 bonus is paid. Returns what was actually earned,
-    /// and whether the goal was just reached.
+    /// Earn XP as the web's earnXP: doubled during a boost; the first time today's total
+    /// crosses the daily goal, a +15 bonus (itself doubled in a boost) and its moment;
+    /// then quests and levels are checked.
     @discardableResult
     func earnXP(_ n: Int) -> (earned: Int, goalReached: Bool) {
-        let mult = boostActive ? 2 : 1
-        let t = today
-        let before = xpDays[t, default: 0]
-        xpDays[t, default: 0] += n * mult
+        guard n > 0 else { return (0, false) }
+        let mult = boostActive ? 2 : 1, t = today
+        let before = activity.xpDays[t] ?? 0
+        activity.xpDays[t] = before + n * mult
         var total = n * mult, reached = false
-        if before < dailyGoal && xpDays[t, default: 0] >= dailyGoal && celebrated != t {
-            celebrated = t
-            xpDays[t, default: 0] += 15 * mult
+        if before < dailyGoal && before + n * mult >= dailyGoal && activity.celebrated != t {
+            activity.celebrated = t
+            activity.xpDays[t, default: 0] += 15 * mult
             total += 15 * mult; reached = true
+            Moments.shared.show(.goal)
         }
         save()
+        checkQuests()
+        let lv = level.level
+        if lv > activity.levelSeen {
+            activity.levelSeen = lv; save()
+            Moments.shared.show(.level(lv, next: level.next))
+        }
         return (total, reached)
     }
 
-    func recordReview() { days[today, default: 0] += 1; save() }
+    func recordReview() { activity.days[today, default: 0] += 1; save() }
 
     /// Grade an answer in a study session, as the web's answerStudy does to the record.
     func answer(_ cardId: String, correct: Bool, dir: String, sessionStart: Double, mistakesMode: Bool) -> (mistake: Bool, fixed: Bool) {
@@ -224,21 +295,108 @@ final class ProgressStore {
         return (mistake, fixed)
     }
 
-    // MARK: daily goal, week and quests
-    var dailyGoal: Int { prefs.dailyGoal }
-
-    func xp(on day: String) -> Int { xpDays[day] ?? 0 }
-    var today: String { Self.dayKey(now()) }
-
-    /// Monday to Sunday of this week, as day keys.
-    var thisWeek: [String] {
-        var cal = Calendar(identifier: .gregorian); cal.firstWeekday = 2
-        let now = Date(timeIntervalSince1970: self.now() / 1000)
-        let monday = cal.dateInterval(of: .weekOfYear, for: now)?.start ?? now
-        return (0..<7).map { Self.dayKey(cal.date(byAdding: .day, value: $0, to: monday)!.timeIntervalSince1970 * 1000) }
+    /// Words passed in a skip test are seeded as already known (web: finishPlacement).
+    func seedKnown(_ cardId: String) {
+        guard srs[cardId] == nil else { return }
+        let t = now()
+        srs[cardId] = SRSRecord(ease: 2.4, interval: 3, due: t + 3 * FSRS.day, reps: 2, S: 3, D: 5, last: t, lapses: 0)
+        srs[cardId]?.known = true
+        srs[cardId]?.prod = true
+        save()
     }
 
-    var qcToday: [String: Int] { qc[today] ?? [:] }
+    func setHook(_ ch: String, _ text: String?) { hooks[ch] = text; save() }
+
+    func markRead(_ storyId: String) -> Bool {
+        guard activity.readsDone[storyId] == nil else { return false }
+        activity.readsDone[storyId] = today; save()
+        return true
+    }
+    func readDone(_ storyId: String) -> Bool { activity.readsDone[storyId] != nil }
+
+    // MARK: the fire: streak, embers and relighting
+
+    /// Before this day XP lit the fire; days from then count if they met the old goal.
+    static let litCutoff = "2026-09-19"
+    /// A day counts once a session was finished on it, or an ember covered it (web: litOn).
+    func litOn(_ day: String) -> Bool {
+        (activity.lit[day] ?? false) || (activity.relit[day] ?? false)
+            || (day < Self.litCutoff && ((activity.xpDays[day] ?? 0) >= 10 || (activity.days[day] ?? 0) >= 20))
+    }
+    func relitOn(_ day: String) -> Bool { activity.relit[day] ?? false }
+
+    /// Days in a row with the fire lit, ending today, or yesterday if today isn't lit yet.
+    var streak: Int {
+        var k = litOn(today) ? 0 : -1, n = 0
+        while litOn(day(k)) { n += 1; k -= 1 }
+        return n
+    }
+    var bestStreak: Int { max(activity.best, streak) }
+
+    static let milestones = [3, 7, 14, 30, 50, 100, 200, 365]
+    static let emberAt = [3, 7, 14, 30, 60, 100]
+    var embers: Int { activity.embers ?? 1 }
+
+    struct Fire { let streak: Int; let ember: Bool; let milestone: Bool }
+
+    /// Light today's fire (web: lightFire). Nil if it was already lit today.
+    @discardableResult
+    func lightFire() -> Fire? {
+        let t = today
+        guard !(activity.lit[t] ?? false) else { return nil }
+        activity.lit[t] = true
+        let s = streak
+        let start = day(1 - s)                                  // the day this streak began
+        var ember = false
+        for m in Self.emberAt {
+            let key = String(m)
+            if s < m || (activity.emberFor[key].map { $0 >= start } ?? false) { continue }
+            activity.emberFor[key] = t
+            if embers < 3 { activity.embers = embers + 1; ember = true }
+        }
+        if s > activity.best { activity.best = s }
+        save()
+        return Fire(streak: s, ember: ember, milestone: Self.milestones.contains(s))
+    }
+
+    /// The day the fire went out, if it can still be relit: yesterday was missed
+    /// and the day before was lit (web: outSince).
+    var outSince: (date: String, lost: Int)? {
+        let y = day(-1)
+        guard !litOn(y) else { return nil }
+        var k = -2, run = 0
+        while litOn(day(k)) { run += 1; k -= 1 }
+        return run > 0 ? (y, run) : nil
+    }
+
+    /// Spend an ember to cover the missed day.
+    @discardableResult
+    func relight() -> Bool {
+        guard let out = outSince, embers >= 1 else { return false }
+        activity.embers = embers - 1
+        activity.relit[out.date] = true
+        save()
+        return true
+    }
+
+    /// When the app opens after a missed day (web: protectStreak): an ember relights
+    /// the fire by itself unless that's switched off; with none left, the fire is out.
+    func protectStreak() {
+        guard let out = outSince, activity.relightAsked != out.date else { return }
+        activity.relightAsked = out.date
+        save()
+        if embers >= 1 && prefs.autoRelight {
+            if relight() { Moments.shared.show(.relit(streak: streak, left: embers)) }
+        } else if embers >= 1 {
+            Moments.shared.show(.askRelight(lost: out.lost, embers: embers))
+        } else {
+            Moments.shared.show(.fireOut(lost: out.lost))
+        }
+    }
+
+    // MARK: quests
+
+    var qcToday: [String: Int] { activity.qc[today] ?? [:] }
 
     /// Called after every answer and every finished session, as the web's questEvent.
     func questEvent(_ kind: String, correct: Bool = false, lesson: Bool = false, perfect: Bool = false) {
@@ -252,21 +410,30 @@ final class ProgressStore {
             c["comboMax"] = max(c["comboMax"] ?? 0, c["combo"] ?? 0)
             if correct && ["listen", "write", "speak", "sentence"].contains(kind) { c[kind, default: 0] += 1 }
         }
-        qc = [today: c]                                  // yesterday's counters are no longer needed
+        activity.qc = [today: c]                          // yesterday's counters are no longer needed
         save()
+        checkQuests()
     }
 
-    func reviewedToday() -> Int { days[today] ?? 0 }
+    func reviewedToday() -> Int { activity.days[today] ?? 0 }
 
     /// Today's three quests, picked from the same pools by the same date hash as the web.
     var todayQuests: [Quest] {
         let t = today
+        if let q = activity.quests, q.date == t { return q.ids.compactMap { Quest.all[$0] } }
         let second = Quest.pick(Quest.sets[1], seed: t + "b")
         let skills = Quest.sets[2].filter { Quest.skillDir[$0].map(StudySession.allDirs.contains) ?? false }
         let third = skills.isEmpty ? Quest.pick(Quest.sets[1].filter { $0 != second }, seed: t + "c")
                                    : Quest.pick(skills, seed: t + "c")
         return [Quest.pick(Quest.sets[0], seed: t + "a"), second, third].compactMap { Quest.all[$0] }
     }
+
+    private var questDay: Activity.QuestDay {
+        if let q = activity.quests, q.date == today { return q }
+        return Activity.QuestDay(date: today, ids: todayQuests.map(\.id))
+    }
+    func questDone(_ q: Quest) -> Bool { questDay.done[q.id] ?? false }
+    var chestOpened: Bool { questDay.chest }
 
     func progress(of q: Quest) -> Int {
         let c = qcToday
@@ -285,10 +452,36 @@ final class ProgressStore {
         }
     }
 
-    /// Cards whose last answer was wrong and haven't been put right yet.
-    var mistakeCount: Int { srs.values.filter { ($0.lapses ?? 0) > 0 && ($0.reps ?? 0) == 0 }.count }
-    /// Words that keep slipping: lapsed twice or more.
-    var weakCount: Int { srs.values.filter { ($0.lapses ?? 0) >= 2 }.count }
+    /// Mark quests done as they're reached; all three open a chest (web: checkQuests).
+    func checkQuests() {
+        var q = questDay
+        let newly = todayQuests.filter { !(q.done[$0.id] ?? false) && progress(of: $0) >= $0.target }
+        guard !newly.isEmpty else { return }
+        for n in newly { q.done[n.id] = true }
+        let month = String(today.prefix(7))
+        activity.questMonths[month, default: 0] += newly.count
+        let all = q.ids.allSatisfy { q.done[$0] ?? false }
+        var ember = false
+        if all && !q.chest {
+            q.chest = true
+            activity.chests += 1
+            if activity.chests % 5 == 0 && embers < 3 { activity.embers = embers + 1; ember = true }
+        }
+        activity.quests = q
+        save()
+        if all {
+            earnXP(20)
+            Moments.shared.show(.chest(ember: ember))
+        } else {
+            for n in newly { Moments.shared.toast("Quest done: \(n.title)") }
+        }
+    }
+
+    /// For backups: the activity record as it is.
+    func stampAchievement(_ id: String) {
+        guard activity.achv[id] == nil else { return }
+        activity.achv[id] = today; save()
+    }
 }
 
 struct Quest: Identifiable {
