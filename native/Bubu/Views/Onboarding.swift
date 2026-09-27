@@ -43,8 +43,13 @@ struct OnboardingView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity)
-        .background(alignment: .bottom) {
-            Image("welcome").resizable().scaledToFit().frame(maxWidth: .infinity).ignoresSafeArea(edges: .bottom)
+        .background {
+            // the art covers the whole screen, anchored at the bottom, as on the web
+            GeometryReader { g in
+                Image("welcome").resizable().scaledToFill()
+                    .frame(width: g.size.width, height: g.size.height, alignment: .bottom).clipped()
+            }
+            .ignoresSafeArea()
         }
         .overlay(alignment: .bottom) {
             VStack(spacing: 12) {
