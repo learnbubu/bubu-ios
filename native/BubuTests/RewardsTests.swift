@@ -15,9 +15,9 @@ final class RewardsTests: XCTestCase {
     func testLevelsFollowTheWebCurve() {
         let (p, _) = make(at: noon)
         XCTAssertEqual(p.level.level, 1)
-        p.earnXP(99)
-        XCTAssertEqual(p.level.level, 1)          // 100 XP (goal bonus included) reaches level 2
-        p.earnXP(1)
+        p.earnXP(80)                               // 80 + the 15 goal bonus = 95
+        XCTAssertEqual(p.level.level, 1)
+        p.earnXP(5)                                // 100 reaches level 2
         XCTAssertEqual(p.level.level, 2)
         XCTAssertEqual(p.level.next, 300 - p.xpTotal)
     }
