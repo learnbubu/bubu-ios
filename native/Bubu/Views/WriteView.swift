@@ -91,9 +91,9 @@ struct WritingBox: View {
     var checking = true
     @State private var freeInk: [[CGPoint]] = []
 
-    init(char: String, size: CGFloat, stage: Int, checking: Bool = true, complete: @escaping () -> Void) {
+    init(char: String, size: CGFloat, stage: Int, checking: Bool = true, animate: Bool = true, complete: @escaping () -> Void) {
         self.char = char; self.size = size; self.stage = stage; self.checking = checking; self.complete = complete
-        _intro = State(initialValue: stage == 0)
+        _intro = State(initialValue: stage == 0 && animate)
     }
 
     private var data: CharStrokes? { StrokeData.shared.chars[char] }
@@ -252,5 +252,86 @@ struct PeekBox: View {
             }
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// A writing sheet (字帖) for a word, as the web's: a tab per character, the character
+/// with its strokes to watch, and a 4 × 4 grid, the top row to trace, the rest from memory.
+struct WritingSheetPage: View {
+    let hanzi: String
+    @State private var index = 0
+    @State private var round = 0
+    @State private var animating = false
+    private let course = Course.shared
+
+    var body: some View {
+        let chars = hanzi.filter(Course.isHan).map(String.init).filter(StrokeData.shared.has)
+        let word = course.cards.first { $0.word.hanzi == hanzi }?.word
+        ScrollView {
+            if chars.isEmpty {
+                Text("No stroke data for this word yet.").font(.nunito(15)).foregroundStyle(Color.muted).padding(.top, 40)
+            } else {
+                let ch = chars[min(index, chars.count - 1)]
+                VStack(alignment: .leading, spacing: 14) {
+                    if chars.count > 1 {
+                        HStack(spacing: 8) {
+                            ForEach(Array(chars.enumerated()), id: \.offset) { i, c in
+                                Button { index = i; round += 1 } label: {
+                                    Text(c).font(.hanzi(22, .bold)).foregroundStyle(i == index ? Color.onAccent : Color.ink)
+                                        .frame(width: 46, height: 46)
+                                        .background(i == index ? Color.accent : Color.panel, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line))
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                    HStack(spacing: 14) {
+                        GlyphAnimation(char: ch, size: 96, loops: 1).id("\(ch)-\(round)-big")
+                            .onTapGesture { round += 1 }
+                        VStack(alignment: .leading, spacing: 3) {
+                            PinyinText(pinyin: word?.pinyin ?? (CharData.shared.chars[ch]?.p ?? ""), size: 18)
+                            Text(word?.en ?? CharData.shared.meaning(ch)).font(.nunito(15)).foregroundStyle(Color.ink)
+                            Text("笔画 (strokes): \(StrokeData.shared.chars[ch]?.count ?? 0)").font(.nunito(13)).foregroundStyle(Color.muted)
+                            let ex = examples(ch)
+                            if !ex.isEmpty {
+                                Text("组词: " + ex.map { "\($0.word.hanzi) (\($0.word.pinyin))" }.joined(separator: "，"))
+                                    .font(.nunito(13)).foregroundStyle(Color.muted)
+                            }
+                        }
+                    }
+                    GeometryReader { g in
+                        let cell = floor(g.size.width / 4)
+                        VStack(spacing: 0) {
+                            ForEach(0..<4, id: \.self) { r in
+                                HStack(spacing: 0) {
+                                    ForEach(0..<4, id: \.self) { c in
+                                        WritingBox(char: ch, size: cell, stage: r == 0 ? 0 : 2, animate: r == 0 && c == 0) {}
+                                    }
+                                }
+                            }
+                        }
+                        .id("\(ch)-\(round)")
+                    }
+                    .aspectRatio(1, contentMode: .fit)
+                    Text("Trace the top row; write the rest from memory. Wrong strokes won't register; a hint appears after a few misses.")
+                        .font(.nunito(13)).foregroundStyle(Color.muted)
+                    Button { round += 1 } label: { Label("Clear the sheet", systemImage: "arrow.counterclockwise") }
+                        .buttonStyle(WideButton(ghost: true))
+                }
+                .padding(18)
+            }
+        }
+        .navigationTitle("Writing sheet · \(hanzi)")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// Other words with this character (web: exampleWords).
+    private func examples(_ ch: String) -> [Card] {
+        var seen = Set<String>(), out: [Card] = []
+        for c in course.cards where c.word.hanzi != hanzi && c.word.hanzi.count > 1 && c.word.hanzi.contains(ch) && seen.insert(c.word.hanzi).inserted {
+            out.append(c); if out.count >= 4 { break }
+        }
+        return out
     }
 }

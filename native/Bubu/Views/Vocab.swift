@@ -123,6 +123,7 @@ struct PickPage: View {
 
 struct FlashPage: View {
     let ids: [String]
+    @Environment(Router.self) private var router
     @State private var cards: [Card] = []
     @State private var index = 0
     @State private var flipped = false
@@ -154,6 +155,12 @@ struct FlashPage: View {
                                     Text("½×").font(.nunitoXB(15)).foregroundStyle(Color.accent).padding(6)
                                 }
                                 .buttonStyle(.plain)
+                                if StrokeData.shared.writable(c.word.hanzi) {
+                                    Button { router.push(.writingSheet(c.word.hanzi)) } label: {
+                                        Image(systemName: "pencil.line").font(.system(size: 20)).foregroundStyle(Color.accent).padding(6)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                             }
                         }
                     }

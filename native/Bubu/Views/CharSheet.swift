@@ -80,6 +80,7 @@ struct TappableHanzi: View {
 struct CharSheet: View {
     let ch: String
     @Environment(ProgressStore.self) private var progress
+    @Environment(Router.self) private var router
     @State private var nav = CharNav.shared
     @State private var shown = false
     @State private var drag: CGFloat = 0
@@ -207,6 +208,18 @@ struct CharSheet: View {
             } else if d?.t == "g" {
                 Text("A picture character: it started as a drawing of the thing itself.")
                     .font(.nunito(14)).foregroundStyle(Color.muted).padding(.top, 12)
+            }
+
+            if strokes > 0 && !Moments.shared.studyUp {
+                Button {
+                    nav.close()
+                    router.push(.writingSheet(ch))
+                } label: {
+                    Label("Writing sheet", systemImage: "square.grid.3x3").font(.nunitoXB(14)).foregroundStyle(Color.accent)
+                        .padding(.horizontal, 14).padding(.vertical, 8).background(Color.accentSoft, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 12)
             }
 
             hook(d?.h).padding(.top, 12)

@@ -14,6 +14,7 @@ enum Page: Hashable {
     case match([String])
     case avatar
     case studyChoice             // "What to study"
+    case writingSheet(String)    // a word's 字帖
 }
 
 extension View {
@@ -41,6 +42,7 @@ struct PageView: View {
         case .pick: PickPage()
         case .studyChoice: StudyChoicePage()
         case .avatar: AvatarBuilderPage()
+        case .writingSheet(let h): WritingSheetPage(hanzi: h)
         case .flash(let ids): FlashPage(ids: ids)
         case .match(let ids): MatchPage(ids: ids)
         default: ComingSoon(title: "Coming soon", icon: "hammer")
@@ -52,6 +54,7 @@ struct PageView: View {
 
 struct BrowsePage: View {
     let lessonId: String
+    @Environment(Router.self) private var router
     private let course = Course.shared
     var body: some View {
         let cards = course.cards(in: lessonId)
@@ -68,6 +71,12 @@ struct BrowsePage: View {
                         }
                         Spacer(minLength: 0)
                         SpeakerButton(text: c.word.hanzi, size: 19)
+                        if StrokeData.shared.writable(c.word.hanzi) {
+                            Button { router.push(.writingSheet(c.word.hanzi)) } label: {
+                                Image(systemName: "pencil.line").font(.system(size: 17)).foregroundStyle(Color.accent).padding(4)
+                            }
+                            .buttonStyle(.borderless)
+                        }
                     }
                     .padding(.vertical, 3)
                     .listRowBackground(Color.panel)
