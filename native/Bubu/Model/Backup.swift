@@ -100,6 +100,7 @@ enum Backup {
         let activity = data[activityKey].flatMap { try? JSONDecoder().decode(Activity.self, from: Data($0.utf8)) } ?? Activity()
         p.replaceAll(srs: srs, done: done, activity: activity, name: (prefsObj["name"] as? String) ?? "",
                      hooks: prefsObj["hooks"] as? [String: String] ?? [:], prefs: prefs)
+        p.markBackedUp()
         return true
     }
 }

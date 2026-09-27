@@ -106,10 +106,8 @@ struct SettingsView: View {
                 }
 
                 section {
-                    row("Back up progress", "Save everything to a file, in the same format as the website, so it restores in either.") {
-                        ShareLink(item: BackupFile(data: Backup.export(progress)), preview: SharePreview("Bùbù progress")) {
-                            Text("Export").font(.nunito(15, .bold)).foregroundStyle(Color.accent)
-                        }
+                    row("Back up progress", "Save everything to a file, in the same format as the website, so it restores in either. Progress lives only on this phone — \(progress.backupAge).") {
+                        ExportButton()
                     }
                     divider
                     row("Restore backup", "Replaces current progress with a saved file, from the app or the website.") {
@@ -209,6 +207,18 @@ struct SettingsView: View {
 
     private func toggle(_ label: String, _ desc: String, _ on: Binding<Bool>) -> some View {
         row(label, desc) { Toggle("", isOn: on).labelsHidden().tint(.accent) }
+    }
+}
+
+/// Share the backup file; sharing it counts as backing up.
+struct ExportButton: View {
+    @Environment(ProgressStore.self) private var progress
+    var label = "Export"
+    var body: some View {
+        ShareLink(item: BackupFile(data: Backup.export(progress)), preview: SharePreview("Bùbù progress")) {
+            Text(label).font(.nunito(15, .bold)).foregroundStyle(Color.accent)
+        }
+        .simultaneousGesture(TapGesture().onEnded { progress.markBackedUp() })
     }
 }
 

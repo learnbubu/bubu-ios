@@ -52,7 +52,12 @@ struct PathView: View {
                                        .init(color: .bg.opacity(0), location: 1)], startPoint: .bottom, endPoint: .top)
                     .frame(height: 76).allowsHitTesting(false)
             }
-            .overlay(alignment: .top) { HUD() }
+            .overlay(alignment: .top) {
+                VStack(spacing: 8) {
+                    HUD()
+                    if progress.backupOverdue { BackupNudge().padding(.horizontal, 14) }
+                }
+            }
             .overlay(alignment: .bottom) { ReviewButton() }
         }
         .background(Color.bg.ignoresSafeArea())
@@ -357,6 +362,30 @@ struct GuidePill: View {
             .contentShape(Rectangle().inset(by: -8))
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// "Back up your progress", when it's been a while (web: #backupNudge).
+struct BackupNudge: View {
+    @Environment(ProgressStore.self) private var progress
+    var body: some View {
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Back up your progress").font(.nunitoXB(14)).foregroundStyle(Color.ink)
+                Text(progress.lastBackup == 0 ? "Your streak and history live only on this phone." : "Last \(progress.backupAge).")
+                    .font(.nunito(12)).foregroundStyle(Color.muted)
+            }
+            Spacer(minLength: 0)
+            ExportButton()
+            Button { withAnimation { progress.snoozeBackup() } } label: {
+                Image(systemName: "xmark").font(.system(size: 12, weight: .bold)).foregroundStyle(Color.muted).padding(6)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.line))
+        .transition(.move(edge: .top).combined(with: .opacity))
     }
 }
 

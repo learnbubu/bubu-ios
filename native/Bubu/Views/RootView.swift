@@ -55,6 +55,7 @@ struct RootView: View {
     @State private var router = Router()
     @Environment(ProgressStore.self) private var progress
     @Environment(\.scenePhase) private var scenePhase
+    @State private var showWelcome = Launch.screen == "welcome"
 
     /// Screens the cloud screenshot run asks for with `-screen`.
     private func debugScreens() {
@@ -118,6 +119,22 @@ struct RootView: View {
         .preferredColorScheme(progress.prefs.colorScheme)
         .environment(router)
         .onAppear { debugScreens() }
+        .fullScreenCover(isPresented: Binding(get: { (!progress.onboarded && Launch.screen == nil) || showWelcome },
+                                              set: { if !$0 { showWelcome = false } })) {
+            OnboardingView { level in
+                progress.markOnboarded(); showWelcome = false
+                router.tab = .learn
+                // the first lesson, or a placement test up to the end of book 1 or 2
+                let books = Course.shared.chapters.map(\.unit).reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }
+                let end = { (u: String) in Course.shared.chapters.last { $0.unit == u }?.lessons.last }
+                let target = level == "a" ? end(books[0]) : level == "b" ? end(books[1]) : nil
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    if let t = target { router.start(StudySession.placement(progress, to: t, label: "Placement test")) }
+                    else if let cur = progress.currentLessonId { router.start(StudySession(lessonId: cur, progress: progress)) }
+                }
+            }
+            .environment(progress)
+        }
         .onChange(of: scenePhase, initial: true) { _, phase in
             // after a missed day, the fire is relit (or its loss shown) when you come back
             if phase == .active { DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { progress.protectStreak() } }

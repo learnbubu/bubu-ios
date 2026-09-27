@@ -55,6 +55,9 @@ final class ProgressStore {
     private(set) var hooks: [String: String] = [:]    // your own memory hooks, by character
     var prefs = Prefs() { didSet { if prefs != oldValue { save() } } }
     var name: String = ""
+    private(set) var onboarded = false
+    private(set) var lastBackup: Double = 0           // when a backup was last made (ms)
+    private(set) var backupSnooze: Double = 0         // the reminder is quiet until (ms)
 
     /// The store in use, for small views that read a setting (tone colours, pinyin).
     @ObservationIgnored static weak var current: ProgressStore?
@@ -70,6 +73,9 @@ final class ProgressStore {
         var hooks: [String: String]?
         var prefs: Prefs?
         var activity: Activity?
+        var onboarded: Bool?
+        var lastBackup: Double?
+        var backupSnooze: Double?
         // the first native builds kept these at the top level
         var xpDays: [String: Int]?, qc: [String: [String: Int]]?, lit: [String]?, days: [String: Int]?
         var celebrated: String?, boostUntil: Double?
@@ -88,6 +94,9 @@ final class ProgressStore {
         guard let data = try? Data(contentsOf: url),
               let s = try? JSONDecoder().decode(Saved.self, from: data) else { return }
         srs = s.srs; done = Set(s.done); name = s.name ?? ""; hooks = s.hooks ?? [:]
+        // someone with progress from an earlier build has already started
+        onboarded = s.onboarded ?? (!s.srs.isEmpty || !s.done.isEmpty)
+        lastBackup = s.lastBackup ?? 0; backupSnooze = s.backupSnooze ?? 0
         prefs = s.prefs ?? Prefs()
         if let a = s.activity { activity = a } else {
             var a = Activity()
@@ -109,7 +118,8 @@ final class ProgressStore {
 
     func save() {
         if held > 0 { pending = true; return }
-        let s = Saved(srs: srs, done: done.sorted(), name: name, hooks: hooks, prefs: prefs, activity: activity)
+        let s = Saved(srs: srs, done: done.sorted(), name: name, hooks: hooks, prefs: prefs, activity: activity,
+                      onboarded: onboarded, lastBackup: lastBackup, backupSnooze: backupSnooze)
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         if let data = try? JSONEncoder().encode(s) { try? data.write(to: url, options: .atomic) }
     }
@@ -122,6 +132,24 @@ final class ProgressStore {
         self.hooks = hooks; self.prefs = prefs
         pending = true
         releaseSaves()
+    }
+
+    func markOnboarded() { onboarded = true; save() }
+
+    // MARK: the backup reminder (web: backupOverdue)
+    static let staleDays = 14.0, snoozeDays = 7.0
+    func markBackedUp() { lastBackup = now(); backupSnooze = 0; save() }
+    func snoozeBackup() { backupSnooze = now() + Self.snoozeDays * FSRS.day; save() }
+    var backupAge: String {
+        guard lastBackup > 0 else { return "never backed up" }
+        let d = Int((now() - lastBackup) / FSRS.day)
+        return d <= 0 ? "backed up today" : "backed up \(d) day\(d == 1 ? "" : "s") ago"
+    }
+    /// Only when there's something worth losing, and not while snoozed.
+    var backupOverdue: Bool {
+        guard !done.isEmpty || srs.count >= 8 || streak > 0 else { return false }
+        guard now() >= backupSnooze else { return false }
+        return lastBackup == 0 || (now() - lastBackup) / FSRS.day >= Self.staleDays
     }
 
     /// Start again from nothing, keeping your name and settings.
