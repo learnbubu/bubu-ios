@@ -93,6 +93,13 @@ struct SettingsView: View {
                 }
 
                 section {
+                    NavigationLink { HelpPage() } label: {
+                        row("How it works", "Spaced repetition, the practice modes, and the buttons you'll see.") {
+                            Image(systemName: "chevron.right").font(.system(size: 14, weight: .bold)).foregroundStyle(Color.muted)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    divider
                     NavigationLink {
                         ScrollView { TonesPrimer().padding(18) }
                             .background(Color.bg.ignoresSafeArea())
@@ -207,6 +214,38 @@ struct SettingsView: View {
 
     private func toggle(_ label: String, _ desc: String, _ on: Binding<Bool>) -> some View {
         row(label, desc) { Toggle("", isOn: on).labelsHidden().tint(.accent) }
+    }
+}
+
+/// How it works (web: #helpModal), written for the app.
+struct HelpPage: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                p("**Study** uses spaced repetition: it brings back words you find hard and spaces out ones you know. Get a word right and it comes back less often; miss it and it returns soon, then again at the end of the session.")
+                p("Each word climbs a ladder: first you recognise it and hear it, then recall it, read its pinyin and use it in sentences, and once it's solid, write it and say it.")
+                h("Practice")
+                p("• **Fix your mistakes** asks each missed word the way you missed it.
+• **Review** brings back words that are due.
+• **Weak words** are the ones that keep slipping.
+• **Listening, Writing, Quiz, Tones, Reading and Speaking** each practise one thing.
+• **Vocabulary** lets you pick any words for flashcards, matching or a quiz.")
+                h("Buttons you'll see")
+                p("• The speaker plays a word; **½×** plays it slowly.
+• Tap a dotted word for its meaning, or a character to see how it's built.
+• The pencil opens a writing sheet.
+• The microphone checks what you say.")
+                h("Streaks and XP")
+                p("Finish a session to light the day's fire. Miss a day and an ember can relight it; you earn embers at 3, 7, 14, 30, 60 and 100 days. XP counts toward your daily goal, your level and your daily quests.")
+            }
+            .padding(20)
+        }
+        .background(Color.bg.ignoresSafeArea())
+        .navigationTitle("How it works").navigationBarTitleDisplayMode(.inline)
+    }
+    private func h(_ t: String) -> some View { Text(t).font(.nunitoXB(17)).foregroundStyle(Color.ink).padding(.top, 6) }
+    private func p(_ t: String) -> some View {
+        Text(.init(t)).font(.nunito(15)).foregroundStyle(Color.ink).lineSpacing(3).fixedSize(horizontal: false, vertical: true)
     }
 }
 

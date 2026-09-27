@@ -193,6 +193,24 @@ struct HomeView: View {
         .buttonStyle(.plain)
         .padding(.top, 20).padding(.horizontal, 2)
 
+        if progress.currentLessonId == nil {
+            // every lesson done: the card starts a review instead
+            Button { router.start(StudySession.review(progress)) } label: {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("COURSE COMPLETE").font(.nunito(12.5, .bold)).foregroundStyle(Color.muted)
+                    Text("You've finished every lesson").font(.nunitoXB(20)).foregroundStyle(Color.ink)
+                    Text("Keep your words sharp with a review.").font(.nunito(13.5, .semibold)).foregroundStyle(Color.muted)
+                    Text("Review your words").font(.nunito(13, .bold)).foregroundStyle(Color.accent).padding(.top, 8)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading).padding(16)
+                .overlay(alignment: .bottomTrailing) {
+                    Image(systemName: "checkmark").font(.system(size: 19, weight: .bold)).foregroundStyle(Color.onAccent)
+                        .frame(width: 46, height: 46).background(Color.accent, in: Circle()).padding(14)
+                }
+                .panel().panelShadow()
+            }
+            .buttonStyle(PressDown(depth: 2)).padding(.top, 10)
+        }
         if let id = progress.currentLessonId, let lesson = course.lessonById[id], let ci = course.chapterOf[id] {
             let cards = course.cards(in: id)
             let learned = cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
@@ -244,16 +262,16 @@ struct HomeView: View {
         VStack(spacing: 0) {
             Button { router.start(StudySession.mistakes(progress)) } label: {
                 hubRow("xmark", "Fix your mistakes",
-                       progress.mistakeCount > 0 ? "Words you missed, asked the way you missed them" : "Nothing to fix. Mistakes you make land here",
+                       progress.mistakeCount > 0 ? "\(progress.mistakeCount) word\(progress.mistakeCount == 1 ? "" : "s") to get right again" : "Nothing to fix. Mistakes you make land here",
                        progress.mistakeCount, ink: .again, soft: .againSoft)
             }
             Button { router.start(StudySession.review(progress)) } label: {
                 hubRow("arrow.counterclockwise", "Review",
-                       progress.dueCount > 0 ? "\(progress.dueCount) word\(progress.dueCount == 1 ? "" : "s") due" : "All caught up",
+                       progress.dueCount > 0 ? "\(progress.dueCount) word\(progress.dueCount == 1 ? "" : "s") ready to review" : "All caught up",
                        progress.dueCount, ink: .accent, soft: .accentSoft, first: false)
             }
             Button { router.start(StudySession.trouble(progress)) } label: {
-                hubRow("scope", "Weak words", progress.weakCount > 0 ? "The words that keep tripping you up" : "No weak words yet",
+                hubRow("scope", "Weak words", progress.weakCount > 0 ? "\(progress.weakCount) word\(progress.weakCount == 1 ? "" : "s") you often miss" : "No weak words yet",
                        progress.weakCount, ink: .gold, soft: Color.gold.opacity(0.18), first: false)
             }
         }
@@ -286,6 +304,7 @@ struct HomeView: View {
     private struct Tile: Identifiable { let id: String; let icon: String; let title: String; let sub: String; let color: String }
 
     private var tiles: some View {
+        let fresh = course.data.readings.filter { progress.chapterDone($0.chapter) && !progress.readDone($0.id) }.count
         let known = Set(progress.srs.filter { ($0.value.reps ?? 0) > 0 }.keys.compactMap { course.cardById[$0] }
             .flatMap { $0.word.hanzi.filter(Course.isHan) }).count
         let list = [
@@ -295,7 +314,7 @@ struct HomeView: View {
             Tile(id: "write", icon: "pencil", title: "Writing", sub: "Master the strokes", color: "yellow"),
             Tile(id: "quiz", icon: "checklist", title: "Quiz", sub: "Multiple choice", color: "purple"),
             Tile(id: "chars", icon: "字", title: "Characters", sub: "\(known) known", color: "teal"),
-            Tile(id: "read", icon: "book", title: "Reading", sub: "Chapter stories", color: "orange"),
+            Tile(id: "read", icon: "book", title: "Reading", sub: fresh > 0 ? "\(fresh) new \(fresh > 1 ? "stories" : "story")" : "Chapter stories", color: "orange"),
             Tile(id: "tones", icon: "music.note", title: "Tones", sub: "Hear the pairs", color: "pink"),
         ]
         return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
