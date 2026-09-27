@@ -48,7 +48,17 @@ final class ProgressStore {
         lit = Set(s.lit ?? []); days = s.days ?? [:]; celebrated = s.celebrated; boostUntil = s.boostUntil ?? 0
     }
 
+    @ObservationIgnored private var held = 0
+    @ObservationIgnored private var pending = false
+    /// Hold saves while several changes are made, then write once.
+    func holdSaves() { held += 1 }
+    func releaseSaves() {
+        held = max(0, held - 1)
+        if held == 0 && pending { pending = false; save() }
+    }
+
     func save() {
+        if held > 0 { pending = true; return }
         let s = Saved(srs: srs, done: done.sorted(), xpDays: xpDays, name: name, qc: qc,
                       lit: lit.sorted(), days: days, celebrated: celebrated, boostUntil: boostUntil)
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -83,7 +93,7 @@ final class ProgressStore {
     func dueReviewCards(excluding lessonId: String) -> [Card] {
         let t = now(), cur = currentLessonId
         return course.cards.filter { c in
-            guard c.lessonId != lessonId, let r = srs[c.id], (r.due ?? 0) <= t else { return false }
+            guard c.lessonId != lessonId, let r = srs[c.id], let due = r.due, due <= t else { return false }
             return done.contains(c.lessonId) || c.lessonId == cur
         }
     }
@@ -91,23 +101,34 @@ final class ProgressStore {
     var wordsLearned: Int { srs.values.filter { ($0.reps ?? 0) > 0 }.count }
 
     // MARK: streak and XP
-    static func dayKey(_ ms: Double) -> String {
-        let f = DateFormatter(); f.calendar = Calendar(identifier: .gregorian); f.dateFormat = "yyyy-MM-dd"
-        return f.string(from: Date(timeIntervalSince1970: ms / 1000))
-    }
+    private static let dayFormat: DateFormatter = {
+        let f = DateFormatter()
+        f.calendar = Calendar(identifier: .gregorian)
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd"
+        return f
+    }()
+    static func dayKey(_ ms: Double) -> String { dayFormat.string(from: Date(timeIntervalSince1970: ms / 1000)) }
 
     func earn(_ xp: Int) { earnXP(xp) }
 
     var xpToday: Int { xpDays[Self.dayKey(now())] ?? 0 }
 
     /// A day counts once a session was finished on it (the web's litOn).
-    func litOn(_ day: String) -> Bool { lit.contains(day) }
+    /// Before this day XP lit the fire; days from then count if they met the old goal.
+    static let litCutoff = "2026-09-19"
+    func litOn(_ day: String) -> Bool {
+        lit.contains(day) || (day < Self.litCutoff && ((xpDays[day] ?? 0) >= 10 || (days[day] ?? 0) >= 20))
+    }
 
     /// Days in a row with the fire lit, ending today, or yesterday if today isn't lit yet.
     var streak: Int {
-        var n = 0, t = now()
-        if !litOn(Self.dayKey(t)) { t -= FSRS.day }
-        while litOn(Self.dayKey(t)) { n += 1; t -= FSRS.day }
+        let cal = Calendar(identifier: .gregorian)
+        var d = Date(timeIntervalSince1970: now() / 1000)
+        let key = { (d: Date) in Self.dayKey(d.timeIntervalSince1970 * 1000) }
+        if !litOn(key(d)) { d = cal.date(byAdding: .day, value: -1, to: d)! }
+        var n = 0
+        while litOn(key(d)) { n += 1; d = cal.date(byAdding: .day, value: -1, to: d)! }
         return n
     }
 
@@ -128,14 +149,15 @@ final class ProgressStore {
     /// and whether the goal was just reached.
     @discardableResult
     func earnXP(_ n: Int) -> (earned: Int, goalReached: Bool) {
-        let amount = boostActive ? n * 2 : n
+        let mult = boostActive ? 2 : 1
         let t = today
-        xpDays[t, default: 0] += amount
-        var total = amount, reached = false
-        if xpDays[t, default: 0] >= dailyGoal && celebrated != t {
+        let before = xpDays[t, default: 0]
+        xpDays[t, default: 0] += n * mult
+        var total = n * mult, reached = false
+        if before < dailyGoal && xpDays[t, default: 0] >= dailyGoal && celebrated != t {
             celebrated = t
-            xpDays[t, default: 0] += 15
-            total += 15; reached = true
+            xpDays[t, default: 0] += 15 * mult
+            total += 15 * mult; reached = true
         }
         save()
         return (total, reached)
@@ -192,16 +214,16 @@ final class ProgressStore {
         save()
     }
 
-    func reviewedToday() -> Int {
-        let t = today
-        return srs.values.filter { $0.last.map { Self.dayKey($0) == t } ?? false }.count
-    }
+    func reviewedToday() -> Int { days[today] ?? 0 }
 
     /// Today's three quests, picked from the same pools by the same date hash as the web.
     var todayQuests: [Quest] {
         let t = today
-        return [Quest.pick(Quest.sets[0], seed: t + "a"), Quest.pick(Quest.sets[1], seed: t + "b"),
-                Quest.pick(Quest.sets[2], seed: t + "c")].compactMap { Quest.all[$0] }
+        let second = Quest.pick(Quest.sets[1], seed: t + "b")
+        let skills = Quest.sets[2].filter { Quest.skillDir[$0].map(StudySession.allDirs.contains) ?? false }
+        let third = skills.isEmpty ? Quest.pick(Quest.sets[1].filter { $0 != second }, seed: t + "c")
+                                   : Quest.pick(skills, seed: t + "c")
+        return [Quest.pick(Quest.sets[0], seed: t + "a"), second, third].compactMap { Quest.all[$0] }
     }
 
     func progress(of q: Quest) -> Int {
@@ -244,6 +266,8 @@ struct Quest: Identifiable {
         Quest(id: "speak3", title: "Say 3 words aloud", icon: "mic", target: 3),
         Quest(id: "sentence2", title: "Build 2 sentences", icon: "bubble.left.and.bubble.right", target: 2),
     ].map { ($0.id, $0) })
+    /// the exercise a skill quest needs
+    static let skillDir = ["listen5": "listen", "write3": "write", "speak3": "speak", "sentence2": "sentence"]
     static let sets = [["xp30", "xp50"], ["combo5", "combo10", "review15", "review30", "lesson1", "session2", "perfect1"],
                        ["listen5", "write3", "speak3", "sentence2"]]
     /// FNV-1a over the seed, as the web's seededPick

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The end of a session, in the web's three stages: what you earned, your fire,
-/// then today's quests with where to go next.
+/// then today's quests with where to go next. All on one card, as on the web.
 struct DoneView: View {
     let session: StudySession
     var close: () -> Void
@@ -9,12 +9,19 @@ struct DoneView: View {
     var next: (String) -> Void
     @Environment(ProgressStore.self) private var progress
     @State private var stage = 0
+    @State private var flameIn = false
     private let course = Course.shared
+
+    static let milestoneWords: [Int: String] = [
+        3: "Three days. It's a habit now.", 7: "A whole week on fire.", 14: "Two weeks. Unstoppable.",
+        30: "A month. Seriously impressive.", 50: "Fifty days of Chinese.", 100: "One hundred days.",
+        200: "Two hundred days.", 365: "A full year. 太厉害了!",
+    ]
 
     var body: some View {
         let r = session.result!
         VStack(spacing: 0) {
-            Spacer(minLength: 12)
+            Spacer(minLength: 0)
             Group {
                 switch stage {
                 case 0: stageOne(r)
@@ -27,17 +34,25 @@ struct DoneView: View {
             Spacer(minLength: 12)
             buttons(r)
         }
-        .padding(.horizontal, 20).padding(.bottom, 14)
-        .frame(maxWidth: 460)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 16).padding(.top, 26).padding(.bottom, 18)
+        .background(Color.panel, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
+        .padding(.top, 8).padding(.bottom, 8)
         .onAppear { if r.goalReached { Sounds.shared.play("goal") } }
+        .sensoryFeedback(.success, trigger: stage) { _, n in n == 1 }
+    }
+
+    private func heading(_ t: String) -> some View {
+        Text(t).font(.nunito(16.8, .bold)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
     }
 
     // MARK: stage 1: XP, time, accuracy
 
     private func stageOne(_ r: StudySession.Result) -> some View {
         VStack(spacing: 0) {
-            Image("panda-celebrate").resizable().scaledToFit().frame(height: 160)
-            Text(r.title).font(.nunitoXB(26)).foregroundStyle(Color.ink).padding(.top, 4)
+            Image("done-panda").resizable().scaledToFit().frame(width: 160)
+            heading(r.title).padding(.top, 4)
             HStack(spacing: 10) {
                 DoneTile(value: r.xp, format: { "+\($0)" }, label: "XP", bg: Color(light: 0xFEEBBB, dark: 0x2A2B23), ink: Color(light: 0xB06A0A, dark: 0xF5B03D), delay: 0.2)
                 DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: "Time", bg: .accentSoft, ink: .accent, delay: 0.42)
@@ -49,7 +64,7 @@ struct DoneView: View {
                 if r.lessonFinished { note("Lesson done: double XP for the next 15 minutes", fg: .accent, bg: .accentSoft) }
                 if r.fixed > 0 { note("\(r.fixed) mistake\(r.fixed == 1 ? "" : "s") fixed", fg: .good, bg: .goodSoft) }
                 else if r.mistakes > 0 { note("\(r.mistakes) mistake\(r.mistakes == 1 ? "" : "s") saved to practise in Fix your mistakes", fg: .again, bg: .againSoft) }
-                else if progress.boostActive && !r.lessonFinished { note("Double XP is on", fg: .accent, bg: .accentSoft) }
+                else if progress.boostActive { note("Double XP is on", fg: .accent, bg: .accentSoft) }
             }
             .padding(.top, 10)
         }
@@ -66,24 +81,23 @@ struct DoneView: View {
     private func stageTwo(_ r: StudySession.Result) -> some View {
         let streak = progress.streak, lit = progress.litOn(progress.today)
         let msg: String = r.fireJustLit
-            ? (streak == 1 ? "Fire lit. Come back tomorrow to make it two." : "Fire lit. Keep it going tomorrow.")
+            ? (streak == 1 ? "Fire lit. Come back tomorrow to make it two."
+               : Self.milestoneWords[streak] ?? "Fire lit. Keep it going tomorrow.")
             : lit ? "Already lit today. Keep it going tomorrow." : "Finish a session to light today's fire."
         return VStack(spacing: 0) {
-            Image(systemName: "flame.fill")
-                .font(.system(size: 96))
-                .foregroundStyle(lit ? AnyShapeStyle(LinearGradient(colors: [Color(UIColor(hex: 0xFFB347)), Color(UIColor(hex: 0xF0742F))], startPoint: .top, endPoint: .bottom))
-                                     : AnyShapeStyle(Color.muted.opacity(0.6)))
+            FlameIcon(lit: lit, size: 110)
                 .shadow(color: lit ? Color(UIColor(hex: 0xF08A7A)).opacity(0.6) : .clear, radius: 16)
-                .frame(width: 110, height: 110)
-                .phaseAnimator([0.6, 1.0], trigger: stage) { v, s in v.scaleEffect(s) } animation: { _ in .spring(response: 0.5, dampingFraction: 0.5) }
-            Text("\(streak)").font(.nunito(57.6, .black)).tracking(-1.5).foregroundStyle(Color.ink).padding(.top, 6)
-            Text("day streak").font(.nunitoXB(22)).foregroundStyle(Color.ink).padding(.top, 4)
+                .scaleEffect(flameIn ? 1 : 0.6)
+            Text("\(streak)").font(.nunito(57.6, .black)).tracking(-1.7).foregroundStyle(Color.ink).padding(.top, 6)
+            heading("day streak").padding(.top, 4)
             WeekStrip().frame(maxWidth: 330).padding(.top, 14)
-            Text(msg).font(.nunito(15, .semibold)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+            Text(msg).font(.nunito(16)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
                 .padding(.top, 10).padding(.bottom, 14)
         }
-        .onAppear { if r.fireJustLit { Sounds.shared.play("goal") } }
-        .sensoryFeedback(.success, trigger: stage)
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) { flameIn = true }
+            if r.fireJustLit && !r.goalReached { Sounds.shared.play("goal") }
+        }
     }
 
     // MARK: stage 3: quests
@@ -91,13 +105,13 @@ struct DoneView: View {
     private func stageThree(_ r: StudySession.Result) -> some View {
         let quests = progress.todayQuests
         let done = quests.filter { progress.progress(of: $0) >= $0.target }.count
-        return VStack(alignment: .leading, spacing: 4) {
-            Text("Daily quests").font(.nunitoXB(26)).foregroundStyle(Color.ink)
+        return VStack(spacing: 4) {
+            heading("Daily quests")
             Text(done == 3 ? "All three done. Chest opened!" : "\(done) of 3 done today")
-                .font(.nunito(15, .semibold)).foregroundStyle(Color.muted)
-            QuestRows().padding(.top, 10)
+                .font(.nunito(16)).foregroundStyle(Color.muted)
+            QuestRows().padding(.top, 6).padding(.bottom, 14)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: buttons
@@ -107,28 +121,54 @@ struct DoneView: View {
         VStack(spacing: 8) {
             if stage < 2 {
                 Button("Continue") { withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { stage += 1 } }
-                    .buttonStyle(PrimaryButtonStyle())
+                    .buttonStyle(WideButton())
             } else {
                 if r.wordsLeft > 0 {
                     Button("Keep going — \(r.wordsLeft) word\(r.wordsLeft == 1 ? "" : "s") left →") { next(session.lessonId) }
-                        .buttonStyle(PrimaryButtonStyle())
-                } else if let id = r.nextLessonId, id != session.lessonId, let l = course.lessonById[id] {
+                        .buttonStyle(WideButton())
+                } else if let id = r.nextLessonId, let l = course.lessonById[id] {
                     Button("Next: \(l.name) →") { next(id) }
-                        .buttonStyle(PrimaryButtonStyle())
+                        .buttonStyle(WideButton())
                 }
                 Button("Practice again", action: again)
-                    .buttonStyle(PrimaryButtonStyle(color: .panel, base: .line, text: .ink))
-                Button { close() } label: {
-                    Text("← Back to path").font(.nunito(16, .bold)).foregroundStyle(Color.muted).padding(10)
-                }
-                .buttonStyle(.plain)
+                    .buttonStyle(WideButton())
+                Button("← Back to path") { close() }
+                    .buttonStyle(WideButton(ghost: true))
+                    .padding(.top, 4)
             }
         }
         .frame(maxWidth: 360)
     }
 }
 
-/// A result tile that counts up from zero.
+/// The web's full-width button: accent, or a ghost with a thin border.
+struct WideButton: ButtonStyle {
+    var ghost = false
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.nunitoXB(16.8)).lineLimit(1).minimumScaleFactor(0.8)
+            .foregroundStyle(ghost ? Color.ink : Color.onAccent)
+            .frame(maxWidth: .infinity).padding(14)
+            .background(ghost ? Color.clear : Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(ghost ? Color.line : .clear, lineWidth: 1))
+            .offset(y: configuration.isPressed ? 1 : 0)
+            .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed)
+    }
+}
+
+/// The web's two-tone flame; grey until the day is lit.
+struct FlameIcon: View {
+    var lit: Bool
+    var size: CGFloat
+    var body: some View {
+        Image("flame").resizable().scaledToFit()
+            .frame(width: size, height: size)
+            .saturation(lit ? 1 : 0.15)
+            .opacity(lit ? 1 : 0.6)
+    }
+}
+
+/// A result tile that counts up from zero: its label on top, the number below.
 struct DoneTile: View {
     let value: Int
     let format: (Int) -> String
@@ -140,11 +180,11 @@ struct DoneTile: View {
 
     var body: some View {
         VStack(spacing: 2) {
-            Text(format(shown)).font(.nunito(24, .black)).monospacedDigit().foregroundStyle(ink)
+            Text(label.uppercased()).font(.nunitoXB(10.9)).tracking(1.1).foregroundStyle(ink)
+            Text(format(shown)).font(.nunito(24.8, .black)).monospacedDigit().foregroundStyle(ink)
                 .contentTransition(.numericText())
-            Text(label).font(.nunito(12.5, .bold)).foregroundStyle(ink.opacity(0.8))
         }
-        .frame(maxWidth: .infinity).padding(.vertical, 14)
+        .frame(maxWidth: .infinity).padding(.top, 12).padding(.horizontal, 6).padding(.bottom, 10)
         .background(bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .task {
             try? await Task.sleep(for: .seconds(delay))

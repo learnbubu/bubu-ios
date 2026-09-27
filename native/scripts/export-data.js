@@ -83,6 +83,18 @@ async function imageSet(name, lightSrc, darkSrc) {
   }
   await imageSet("home-peek", path.join(WEB, "images", "panda-peek.png"), null); n++;
   await imageSet("sheet-waving", path.join(WEB, "images", "panda-waving.png"), null); n++;
+  await imageSet("done-panda", path.join(WEB, "images", "panda-celebrate.png"), null); n++;
+  // the web's two-tone flame, from its icon sprite, drawn at 3x
+  {
+    const html = fs.readFileSync(path.join(WEB, "index.html"), "utf8");
+    const sym = html.match(/<symbol id="i-flame-solid" viewBox="([^"]+)">([\s\S]*?)<\/symbol>/);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${sym[1]}" width="144" height="144">${sym[2]}</svg>`;
+    const dir = path.join(ASSETS, "flame.imageset");
+    fs.mkdirSync(dir, { recursive: true });
+    await sharp(Buffer.from(svg)).png().toFile(path.join(dir, "flame.png"));
+    fs.writeFileSync(path.join(dir, "Contents.json"), contents({ images: [{ idiom: "universal", filename: "flame.png", scale: "3x" }] }));
+    n++;
+  }
   await imageSet("home-card", path.join(WEB, "images", "card-light.webp"), path.join(WEB, "images", "card-dark.webp")); n++;
   // sound effects, as the web plays them
   const SND = path.resolve(__dirname, "../Bubu/Resources/Sounds");

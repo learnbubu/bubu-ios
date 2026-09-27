@@ -33,10 +33,13 @@ final class StudySession: Identifiable {
     private(set) var sessionTotal = 0
     private(set) var stepsDone = 0
     private(set) var cleared: Set<String> = []
-    private(set) var answeredCount = 0, againCount = 0, learnedCount = 0
+    private(set) var answeredCount = 0
+    private(set) var againCount = 0
+    private(set) var learnedCount = 0
     private(set) var sessionXP = 0
     private(set) var combo = 0
-    private(set) var mistakes = 0, fixedCount = 0
+    private(set) var mistakes = 0
+    private(set) var fixedCount = 0
     let start: Double
     private var lastDir: String?
     private var dirByCard: [String: String] = [:]
@@ -164,9 +167,6 @@ final class StudySession: Identifiable {
     /// Which exercise a card gets, climbing a ladder as the word gets stronger (web: pickDirection).
     private func pickDirection(_ c: Card) -> String {
         let s = progress.srs[c.id]
-        if let m = s?.miss, dirByCard[c.id] == nil, focuses.contains(m.d), Self.allDirs.contains(m.d) {
-            dirByCard[c.id] = m.d; lastDir = m.d; return m.d
-        }
         var enabled = Self.allDirs.filter { focuses.contains($0) }
         if course.sentences(for: c).isEmpty { enabled.removeAll { $0 == "sentence" } }
         if focuses.count > 1 {
@@ -196,7 +196,9 @@ final class StudySession: Identifiable {
     func answer(_ correct: Bool) -> Int {
         guard !answered, let c = card else { return 0 }
         answered = true
-        let wasNew = Self.isNewCard(progress.srs[c.id])
+        progress.holdSaves()
+        defer { progress.releaseSaves() }
+        let wasNew = progress.srs[c.id] == nil
         lastCorrect = correct
         let r = progress.answer(c.id, correct: correct, dir: dir, sessionStart: start, mistakesMode: false)
         if r.mistake { mistakes += 1 }
@@ -245,14 +247,22 @@ final class StudySession: Identifiable {
         if perfect { let p = progress.earnXP(Self.xpPerfect); sessionXP += p.earned; goal = goal || p.goalReached }
         if justFinished { progress.startBoost() }
         let lit = progress.lightFire()
-        let left = lessonCards.filter { progress.srs[$0.id] == nil }.count
+        let left = justFinished ? 0 : lessonCards.filter { (progress.srs[$0.id]?.reps ?? 0) < 1 }.count
         let title = justFinished ? "Lesson complete" : left > 0 ? "Batch done" : "Session complete"
-        let seconds = Int((progress.now() - start) / 1000)
+        let seconds = Int(((progress.now() - start) / 1000).rounded())
         let accuracy = answeredCount == 0 ? 100 : Int((Double(answeredCount - againCount) / Double(answeredCount) * 100).rounded())
         result = Result(title: title, xp: sessionXP, seconds: seconds, accuracy: accuracy, perfect: perfect,
                         lessonFinished: justFinished, fireJustLit: lit, goalReached: goal,
                         mistakes: mistakes, fixed: fixedCount,
-                        nextLessonId: progress.currentLessonId, wordsLeft: left)
+                        nextLessonId: justFinished ? nextLesson(after: lessonId) : nil, wordsLeft: left)
+    }
+
+    /// The next unfinished lesson after this one, else the first unfinished (web: nextLessonId).
+    private func nextLesson(after id: String) -> String? {
+        let ls = course.lessons
+        let i = ls.firstIndex { $0.id == id } ?? -1
+        if let l = ls[(i + 1)...].first(where: { !progress.isDone($0.id) }) { return l.id }
+        return ls.first { !progress.isDone($0.id) }?.id
     }
 
     #if DEBUG
@@ -344,7 +354,7 @@ struct Exercise {
             for x in course.lookalikes(c, 2) { let v = field(x.word, dir); if v != answer && !near.contains(v) { near.append(v) } }
             distractors = near + others(near).prefix(3 - near.count)
         }
-        // a small lesson may not have three other answers: borrow from the whole course
+        // a lesson with very few words borrows from the whole course, so there are always four options
         if distractors.count < 3 {
             var seen = Set(distractors + [answer])
             for x in course.cards.shuffled() where distractors.count < 3 {

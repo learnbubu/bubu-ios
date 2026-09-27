@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// A Study session, laid out as the web's study screen: a top bar, a card with the
-/// progress bar, the prompt and the exercise, and a fixed slot at the bottom for the
-/// feedback and the Continue button, so answering never moves anything.
+/// A Study session, laid out as the web's study screen on a phone: a top bar, then
+/// one card filling the screen with the progress bar, the prompt, the exercise and,
+/// pinned at its foot, a reserved slot for the feedback and the Continue button, so
+/// answering never moves anything.
 struct StudyView: View {
     @State var session: StudySession
     var close: () -> Void
@@ -22,20 +23,30 @@ struct StudyView: View {
             if session.result != nil {
                 DoneView(session: session, close: close, again: { restart(session.again()) },
                          next: { id in restart(StudySession(lessonId: id, progress: progress)) })
+                    .padding(.horizontal, 18)
                     .transition(.opacity)
             } else {
                 VStack(spacing: 0) {
                     topBar
-                    ScrollView {
-                        card.padding(.horizontal, 12).padding(.bottom, 12)
+                    VStack(spacing: 0) {
+                        ScrollView {
+                            content.padding(.horizontal, 12).padding(.top, 15).padding(.bottom, 12)
+                        }
+                        .scrollIndicators(.hidden)
+                        .scrollBounceBehavior(.basedOnSize)
+                        if case .card = session.current { bottomSlot }
                     }
-                    .scrollIndicators(.hidden)
-                    .scrollBounceBehavior(.basedOnSize)
-                    if case .card = session.current { bottomSlot }
+                    .frame(maxHeight: .infinity)
+                    .background(Color.panel, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
+                    .padding(.horizontal, 18)
                 }
             }
         }
         .animation(.easeInOut(duration: 0.25), value: session.result != nil)
+        .onAppear {
+            if let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
+        }
         .sensoryFeedback(trigger: feedback?.correct) { _, new in
             guard let new else { return nil }
             return new ? .success : .error
@@ -57,41 +68,48 @@ struct StudyView: View {
     // MARK: chrome
 
     private var topBar: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             Button { close() } label: {
-                Text("← Home").font(.nunito(15, .bold)).foregroundStyle(Color.ink)
-                    .padding(.horizontal, 12).padding(.vertical, 8)
+                Text("← Home").font(.nunito(16, .bold)).foregroundStyle(Color.ink)
+                    .padding(.horizontal, 13).padding(.vertical, 9)
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PressDown(depth: 1))
             Text("Study").font(.nunito(16, .bold)).foregroundStyle(Color.ink)
             Spacer()
             if session.combo >= 3 {
+                let hot = session.combo >= 5
                 HStack(spacing: 3) {
-                    Image(systemName: "flame.fill").font(.system(size: 13))
-                    Text("\(session.combo)").font(.nunitoXB(14))
+                    Image(systemName: "flame.fill").font(.system(size: 12))
+                    Text("\(session.combo)").font(.nunitoXB(12.8))
                 }
-                .foregroundStyle(session.combo >= 5 ? Color(UIColor(hex: 0xF0742F)) : Color.gold)
-                .padding(.horizontal, 10).padding(.vertical, 4)
-                .background((session.combo >= 5 ? Color(UIColor(hex: 0xF0742F)) : Color.gold).opacity(0.14), in: Capsule())
+                .foregroundStyle(hot ? Color.white : Color.again)
+                .padding(.leading, 6).padding(.trailing, 9).padding(.vertical, 3)
+                .background(hot ? Color.again : Color.againSoft, in: Capsule())
                 .transition(.scale.combined(with: .opacity))
             }
             if progress.boostActive {
-                Text("2× XP").font(.nunitoXB(12)).foregroundStyle(Color.accent)
-                    .padding(.horizontal, 9).padding(.vertical, 4)
-                    .background(Color.accentSoft, in: Capsule())
+                TimelineView(.periodic(from: .now, by: 1)) { _ in
+                    let left = max(0, Int((progress.boostUntil - progress.now()) / 1000))
+                    (Text("2×").font(.nunito(12.5, .black)) + Text(" XP · \(left / 60):\(String(format: "%02d", left % 60))").font(.nunito(12.5, .bold)))
+                        .monospacedDigit()
+                        .foregroundStyle(Color.gold)
+                        .padding(.horizontal, 9).padding(.vertical, 3)
+                        .background(Color.accentSoft, in: Capsule())
+                }
             }
             Text("\(min(session.stepsDone, session.sessionTotal)) / \(session.sessionTotal)")
                 .font(.nunito(13, .semibold)).monospacedDigit().foregroundStyle(Color.muted)
         }
-        .padding(.leading, 4).padding(.trailing, 16).padding(.top, 4).padding(.bottom, 12)
+        .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, 12)
         .animation(.spring(response: 0.3), value: session.combo)
     }
 
-    private var card: some View {
+    private var content: some View {
         VStack(alignment: .leading, spacing: 0) {
             ProgressBarShine(value: session.progressFraction)
-            Text(promptLabel).font(.nunitoXB(21.6)).tracking(-0.2).foregroundStyle(Color.ink)
-                .padding(.top, 14)
+            Text(promptLabel).font(.nunitoXB(19.2)).tracking(-0.2).foregroundStyle(Color.ink)
+                .padding(.top, 18).padding(.bottom, 14)
             Group {
                 switch session.current {
                 case .meet(let cards, let first, let left):
@@ -101,7 +119,7 @@ struct StudyView: View {
                         if ex.kind == .sentence {
                             SentenceView(ex: ex, placed: $placed, result: feedback?.correct)
                         } else {
-                            ChoiceView(ex: ex, picked: picked, answered: session.answered, isNew: ex.isNew) { choose($0) }
+                            ChoiceView(ex: ex, picked: picked, answered: session.answered) { choose($0) }
                         }
                     }
                 case nil:
@@ -111,8 +129,6 @@ struct StudyView: View {
             .id(exerciseKey)
             .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
         }
-        .padding(.horizontal, 12).padding(.vertical, 15)
-        .panel(radius: 13)
         .animation(.spring(response: 0.35, dampingFraction: 0.9), value: exerciseKey)
     }
 
@@ -121,33 +137,37 @@ struct StudyView: View {
         return session.exercise?.label ?? ""
     }
 
-    /// The reserved slot: feedback above, Continue below, fixed height.
+    /// The reserved slot at the card's foot. Multiple choice keeps 216 points from the
+    /// start with the feedback above the button; the sentence builder keeps 84 and its
+    /// feedback rises over the word bank.
     private var bottomSlot: some View {
         let ex = session.exercise
         let isSentence = ex?.kind == .sentence
         let ready = session.answered || (isSentence && !placed.isEmpty)
-        return VStack(spacing: 10) {
-            Spacer(minLength: 0)
+        let fill = !ready ? Color.line : feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent
+        let ink = !ready ? Color.muted.opacity(0.45) : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
+        return ZStack(alignment: .bottom) {
+            Color.clear.frame(height: isSentence ? 84 : 216)
             if let fb = feedback, let ex {
-                FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen)
+                FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text))
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
+                        .shadow(color: isSentence ? Color.panel : .clear, radius: 12, y: -10))
+                    .padding(.bottom, 79)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             Button {
                 if isSentence && !session.answered { checkSentence() } else { advance() }
             } label: {
                 Text(isSentence && !session.answered ? "Check" : "Continue")
-                    .font(.nunitoXB(17))
-                    .foregroundStyle(ready ? (feedback == nil ? Color.onAccent : Color.white) : Color.muted)
+                    .font(.nunitoXB(16.8)).foregroundStyle(ink)
                     .frame(maxWidth: .infinity).padding(14)
-                    .background(ready ? (feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent) : Color.line,
-                                in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(fill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
-            .buttonStyle(PressDown(depth: 2))
+            .buttonStyle(PressDown(depth: 1))
             .disabled(!ready)
+            .padding(.bottom, 14)
         }
-        .padding(.horizontal, 16).padding(.bottom, 14)
-        .frame(height: feedback == nil ? 84 : nil)
-        .frame(minHeight: 84)
+        .padding(.horizontal, 12)
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: feedback != nil)
     }
 
@@ -175,7 +195,7 @@ struct StudyView: View {
             session.next()
             resetExercise()
         }
-        if session.result != nil { Sounds.shared.play("complete") }
+        if let r = session.result, !r.goalReached { Sounds.shared.play("complete") }
     }
 }
 
@@ -203,6 +223,7 @@ struct ProgressBarShine: View {
 
 struct MascotPrompt<Content: View>: View {
     var mood: Bool?          // nil: asking; true: pleased; false: sad
+    var sentence = false
     @ViewBuilder var content: Content
     @State private var pop = false
 
@@ -213,7 +234,7 @@ struct MascotPrompt<Content: View>: View {
                 .frame(width: 122, height: 148, alignment: .bottom)
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)
-            SpeechBubbleBox { content }
+            SpeechBubbleBox(sentence: sentence) { content }
         }
         .frame(minHeight: 140)
         .onChange(of: mood) { _, new in
@@ -226,10 +247,11 @@ struct MascotPrompt<Content: View>: View {
 
 /// The white bubble with a tail on its left, pointing at Bùbù.
 struct SpeechBubbleBox<Content: View>: View {
+    var sentence = false
     @ViewBuilder var content: Content
     var body: some View {
         VStack(spacing: 6) { content }
-            .padding(.horizontal, 16).padding(.vertical, 14)
+            .padding(.leading, sentence ? 10 : 13).padding(.trailing, sentence ? 14 : 13).padding(.vertical, 12)
             .frame(maxWidth: .infinity)
             .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.panel))
             .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.line, lineWidth: 2))
@@ -259,11 +281,16 @@ struct SpeakerButton: View {
 
 struct NewBadge: View {
     var body: some View {
-        Text("NEW WORD").font(.nunito(10, .black)).tracking(1.6)
+        Text("NEW WORD").font(.nunito(10.2, .black)).tracking(1.0)
             .foregroundStyle(Color.tiles["purple"]!.ink)
-            .padding(.horizontal, 9).padding(.vertical, 3)
+            .padding(.horizontal, 10).padding(.vertical, 3)
             .background(Color.tiles["purple"]!.bg, in: Capsule())
     }
+}
+
+extension Color {
+    static let newInk = Color.tiles["purple"]!.ink
+    static let newBg = Color.tiles["purple"]!.bg
 }
 
 // MARK: - meet the new words
@@ -284,25 +311,34 @@ struct MeetView: View {
             + (later > 0 ? " \(later) more come\(later == 1 ? "s" : "") later in this session." : "")
         let lid = first && !cards.isEmpty && cards.allSatisfy { $0.lessonId == cards[0].lessonId } ? cards[0].lessonId : nil
         let note = lid.flatMap { course.notes(for: $0).first }
-        VStack(spacing: 10) {
-            NewBadge().padding(.top, 10)
+        VStack(spacing: 8) {
+            NewBadge()
             Text(intro).font(.nunito(14.4)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                .padding(.bottom, 4)
             if let note {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
                     Label { Text(note.title) } icon: { Image(systemName: "lightbulb") }
-                        .font(.nunito(15, .bold)).foregroundStyle(Color.ink)
-                    Text(note.body).font(.nunito(14.5)).foregroundStyle(Color.ink).fixedSize(horizontal: false, vertical: true)
+                        .font(.nunito(14.4, .bold)).foregroundStyle(Color.ink)
+                    Text(note.body).font(.nunito(13.8)).lineSpacing(4).foregroundStyle(Color.ink)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(14).frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .padding(.horizontal, 12.8).padding(.vertical, 9.6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
             }
-            VStack(spacing: 8) {
-                ForEach(shown, id: \.id) { c in row(c) }
+            ForEach(shown, id: \.id) { c in row(c) }
+            Button(action: done) {
+                Text(shown.count == 1 ? "Practise it →" : "Practise them →")
+                    .font(.nunito(16, .bold)).foregroundStyle(Color.onAccent)
+                    .padding(.horizontal, 25.6).padding(.vertical, 12)
+                    .background(Color.accent, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
-            Button(shown.count == 1 ? "Practise it →" : "Practise them →", action: done)
-                .buttonStyle(PrimaryButtonStyle())
-                .padding(.top, 8)
+            .buttonStyle(PressDown(depth: 3))
+            .background(Color.accentDark, in: RoundedRectangle(cornerRadius: 14, style: .continuous).offset(y: 3))
+            .padding(.top, 17.6).padding(.bottom, 3)
         }
+        .frame(maxWidth: .infinity)
     }
 
     private func row(_ c: Card) -> some View {
@@ -310,7 +346,7 @@ struct MeetView: View {
             ToneText(hanzi: c.word.hanzi, pinyin: c.word.pinyin, size: 27, weight: .bold)
                 .frame(minWidth: 60)
             VStack(alignment: .leading, spacing: 2) {
-                PinyinText(pinyin: c.word.pinyin, size: 16)
+                Text(c.word.pinyin).font(.nunito(16)).foregroundStyle(Color.ink)
                 Text(c.word.en).font(.nunito(13.5)).foregroundStyle(Color.muted)
                 ForEach(partLines(c.word.hanzi), id: \.self) { line in
                     Text(line).font(.nunito(12.5)).foregroundStyle(Color.muted)
@@ -320,7 +356,9 @@ struct MeetView: View {
             SpeakerButton(text: c.word.hanzi, size: 22)
         }
         .padding(.horizontal, 11).padding(.vertical, 8)
-        .panel(radius: 14)
+        .frame(maxWidth: 440)
+        .background(Color.panel, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
     }
 
     /// "好 = 女 woman + 子 child", sound parts showing their pinyin.
@@ -331,14 +369,14 @@ struct MeetView: View {
             .prefix(3)
             .map { ch in
                 var s = AttributedString(ch)
-                s.foregroundColor = .ink; s.font = .nunitoXB(12.5)
+                s.foregroundColor = Color.ink; s.font = Font.nunitoXB(12.5)
                 s += AttributedString(" = ")
                 for (i, part) in (cd.chars[ch]?.c ?? []).enumerated() {
                     guard let comp = part.first else { continue }
                     let sound = part.count > 1 && part[1] == "s"
                     if i > 0 { s += AttributedString(" + ") }
                     var c = AttributedString(comp)
-                    c.foregroundColor = sound ? .gold : .accent; c.font = .nunitoXB(12.5)
+                    c.foregroundColor = sound ? Color.gold : Color.accent; c.font = Font.nunitoXB(12.5)
                     s += c
                     let names = cd.partNames[comp] ?? (cd.chars[comp].map { [$0.d ?? "", $0.p ?? ""] })
                     if let names, names.count > 1 {
@@ -355,6 +393,7 @@ struct MeetView: View {
 struct PinyinText: View {
     let pinyin: String
     var size: CGFloat = 16
+    var weight: Font.Weight = .semibold
     var body: some View {
         let words = pinyin.split(separator: " ", omittingEmptySubsequences: false).map(String.init)
         var t = Text("")
@@ -362,7 +401,7 @@ struct PinyinText: View {
             if i > 0 { t = t + Text(" ") }
             t = t + Text(w).foregroundColor(Color.tones[toneOf(w) - 1])
         }
-        return t.font(.nunito(size, .semibold))
+        return t.font(.nunito(size, weight))
     }
 }
 
@@ -372,45 +411,46 @@ struct ChoiceView: View {
     let ex: Exercise
     let picked: String?
     let answered: Bool
-    let isNew: Bool
     var choose: (String) -> Void
     private let course = Course.shared
 
     var body: some View {
         let w = ex.card.word
+        let isNew = ex.isNew
+        let big: CGFloat = w.hanzi.count > 3 ? 28.8 : 38.4
         VStack(spacing: 0) {
             MascotPrompt(mood: answered ? (picked == ex.answer) : nil) {
-                if isNew && ex.dir != "listen" { NewBadge() }
+                if isNew { NewBadge() }
                 switch ex.dir {
                 case "recall":
-                    Text(w.en).font(.nunito(17, .bold)).foregroundStyle(isNew ? Color.tiles["purple"]!.ink : Color.ink)
+                    Text(w.en).font(.nunito(16.3)).foregroundStyle(isNew ? Color.newInk : Color.ink)
                         .multilineTextAlignment(.center)
                     SpeakerButton(text: w.hanzi)
                 case "pinyin":
-                    Text(w.hanzi).font(.hanzi(w.hanzi.count > 3 ? 29 : 38, .medium)).foregroundStyle(Color.ink)
-                    Text(w.en).font(.nunito(16)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                    Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(isNew ? Color.newInk : Color.ink)
+                    Text(w.en).font(.nunito(16)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 case "listen":
                     Button { Speech.shared.speak(w.hanzi) } label: {
-                        Image(systemName: "headphones").font(.system(size: 50, weight: .regular)).foregroundStyle(Color.accent)
+                        Image(systemName: "headphones").font(.system(size: 54, weight: .light)).foregroundStyle(Color.accent)
                             .padding(6)
                     }
                     .buttonStyle(PressDown(depth: 1))
-                    Button { Speech.shared.speak(w.hanzi, slow: true) } label: {
-                        Label("Slower", systemImage: "tortoise.fill").font(.nunito(12, .bold)).foregroundStyle(Color.muted)
-                    }
-                    .buttonStyle(.plain)
+                    SpeakerButton(text: w.hanzi)
                 default:
-                    ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: w.hanzi.count > 3 ? 29 : 38, weight: .medium)
+                    Group {
+                        if isNew { Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(Color.newInk) }
+                        else { ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: big, weight: .medium) }
+                    }
                     SpeakerButton(text: w.hanzi)
                 }
             }
             if ex.dir == "recognize" {
-                PinyinText(pinyin: w.pinyin, size: 17).padding(.top, 8)
+                PinyinText(pinyin: w.pinyin, size: 23.2).frame(minHeight: 44)
             }
-            VStack(spacing: 10) {
+            VStack(spacing: 8) {
                 ForEach(ex.options, id: \.self) { opt in option(opt) }
             }
-            .padding(.top, 16)
+            .padding(.top, 8)
         }
     }
 
@@ -423,22 +463,20 @@ struct ChoiceView: View {
                     VStack(spacing: 2) {
                         Text(opt).font(.hanzi(18.4, .semibold)).foregroundStyle(Color.ink)
                         if let py = course.cards.first(where: { $0.word.hanzi == opt })?.word.pinyin {
-                            Text(py).font(.nunito(13)).foregroundStyle(Color.muted)
+                            Text(py).font(.nunito(13.1)).foregroundStyle(Color.muted)
                         }
                     }
-                    .padding(.vertical, 10)
                 } else {
-                    Text(opt).font(ex.dir == "pinyin" ? .nunito(18.4, .bold) : .nunito(17, .bold))
+                    Text(opt).font(.nunito(18.4, .bold))
                         .foregroundStyle(Color.ink).multilineTextAlignment(.center)
-                        .padding(.vertical, 14)
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 14)
+            .padding(.horizontal, 14).padding(.vertical, 11)
             .background(state == true ? Color.goodSoft : state == false ? Color.againSoft : Color.panel,
                         in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(state == true ? Color.good : state == false ? Color.again : Color.line, lineWidth: state == nil ? 1 : 2))
+                .strokeBorder(state == true ? Color.good : state == false ? Color.again : Color.line, lineWidth: 1))
         }
         .buttonStyle(PressDown(depth: 1))
         .disabled(answered)
@@ -452,6 +490,7 @@ struct FeedbackBanner: View {
     let ex: Exercise
     let correct: Bool
     let chosen: String?
+    var placed: [String] = []
     @State private var praise = ["Nice!", "Great job!", "Excellent!", "Spot on!", "太棒了!", "对了!"].randomElement()!
     private let course = Course.shared
 
@@ -505,30 +544,34 @@ struct FeedbackBanner: View {
     @ViewBuilder
     private func piece(_ k: String, _ w: Word, big: Bool) -> some View {
         switch k {
-        case "en": Text(w.en).font(.nunito(big ? 17.6 : 14.4, big ? .semibold : .regular)).foregroundStyle(big ? Color.ink : Color.gold)
-        case "py": PinyinText(pinyin: w.pinyin, size: big ? 17.6 : 14.4)
-        default: ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: big ? 20 : 15, weight: .medium)
+        case "en": Text(w.en).font(.nunito(big ? 17.6 : 14.4)).foregroundStyle(big ? Color.ink : Color.gold)
+        case "py": PinyinText(pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .regular)
+        default: ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .medium)
         }
     }
 
     @ViewBuilder
     private func sentenceAnswer(_ sent: Sentence) -> some View {
+        let orders = sent.acceptedOrders
+        let punct = sent.hanzi.last.map { "。？！".contains($0) ? String($0) : "" } ?? ""
         if !correct {
-            Text(ex.toChinese ? sent.hanzi : sent.en).font(ex.toChinese ? .hanzi(18, .medium) : .nunito(17.6)).foregroundStyle(Color.ink).padding(.top, 4)
+            Text(ex.toChinese ? sent.hanzi : sent.en).font(ex.toChinese ? .hanzi(17.6) : .nunito(17.6)).foregroundStyle(Color.ink).padding(.top, 4)
             if ex.toChinese { Text(sent.pinyin).font(.nunito(14.4)).foregroundStyle(Color.gold).padding(.top, 2) }
         }
-        let others = ex.toChinese ? Array(sent.acceptedOrders.dropFirst()) : []
+        // the other orders that would also have been right
+        let others = !ex.toChinese ? [] : correct ? orders.filter { $0 != placed } : Array(orders.dropFirst())
         if !others.isEmpty {
-            Text(correct ? "ALSO CORRECT:" : "ALSO ACCEPTED:").font(.nunitoXB(13)).tracking(0.4).opacity(0.85).padding(.top, 8)
+            Text(correct ? "ALSO CORRECT:" : "ALSO ACCEPTED:").font(.nunitoXB(13.1)).tracking(0.4).opacity(0.85).padding(.top, 8)
             ForEach(others, id: \.self) { o in
-                Text(o.joined()).font(.hanzi(16)).foregroundStyle(Color.ink)
+                Text(o.joined() + punct).font(.hanzi(17.6)).foregroundStyle(Color.ink).padding(.top, 4)
+                Text(sent.pinyin(for: o)).font(.nunito(14.4)).foregroundStyle(Color.gold).padding(.top, 2)
             }
         }
     }
 
     private func diffBlock(_ d: (right: String, wrong: String, note: String), other: Card) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("SPOT THE DIFFERENCE").font(.nunito(11, .black)).tracking(1.1).foregroundStyle(Color.again)
+            Text("SPOT THE DIFFERENCE").font(.nunito(11.2, .black)).tracking(1.1).foregroundStyle(Color.again)
             HStack(spacing: 8) {
                 cell(ex.card.word.hanzi, mark: d.right, en: ex.card.word.en, good: true)
                 cell(other.word.hanzi, mark: d.wrong, en: other.word.en, good: false)
@@ -544,8 +587,8 @@ struct FeedbackBanner: View {
         var s = AttributedString()
         for ch in hanzi {
             var a = AttributedString(String(ch))
-            if String(ch) == mark { a.foregroundColor = good ? .good : .again; a.underlineStyle = .single }
-            else { a.foregroundColor = .ink }
+            if String(ch) == mark { a.foregroundColor = good ? Color.good : Color.again; a.underlineStyle = Text.LineStyle.single }
+            else { a.foregroundColor = Color.ink }
             s += a
         }
         return VStack(spacing: 2) {
@@ -563,25 +606,36 @@ struct SentenceView: View {
     let ex: Exercise
     @Binding var placed: [Exercise.Tile]
     let result: Bool?
+    @Environment(ProgressStore.self) private var progress
     private let course = Course.shared
+
+    /// whether a word of the sentence is itself a word not learned yet
+    private func isNew(_ hanzi: String) -> Bool {
+        guard let c = course.cards.first(where: { $0.word.hanzi == hanzi }) else { return false }
+        return StudySession.isNewCard(progress.srs[c.id]) || (c.id == ex.card.id && ex.isNew)
+    }
 
     var body: some View {
         let sent = ex.sentence!
+        let anyNew = sent.words.contains { isNew($0.hanzi) }
         VStack(spacing: 16) {
-            MascotPrompt(mood: result) {
+            MascotPrompt(mood: result, sentence: !ex.toChinese) {
                 if ex.toChinese {
-                    Text(sent.en).font(.nunito(17, .bold)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                    if anyNew { NewBadge() }
+                    Text(sent.en).font(.nunito(16.3)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 } else {
                     FlowLayout(spacing: 2, lineSpacing: 4) {
-                        SpeakerButton(text: sent.hanzi, size: 20)
+                        if anyNew { NewBadge() }
+                        SpeakerButton(text: sent.hanzi, size: 21.6)
                         ForEach(Array(sent.words.enumerated()), id: \.offset) { _, w in
-                            let isNew = w.hanzi.contains(ex.card.word.hanzi)
+                            let new = isNew(w.hanzi)
                             VStack(spacing: 1) {
-                                Text(w.pinyin).font(.nunito(12.5)).foregroundStyle(isNew ? Color.tiles["purple"]!.ink : Color.muted)
-                                Text(w.hanzi).font(.hanzi(24.8)).foregroundStyle(isNew ? Color.tiles["purple"]!.ink : Color.ink)
+                                Text(w.pinyin).font(.nunito(12.5)).foregroundStyle(new ? Color.newInk : Color.muted)
+                                Text(w.hanzi).font(.hanzi(24.8)).foregroundStyle(new ? Color.newInk : Color.ink)
                                     .padding(.bottom, 2)
+                                    .background(new ? Color.newBg : .clear)
                                     .overlay(alignment: .bottom) {
-                                        Line().stroke(isNew ? Color.tiles["purple"]!.ink : Color.muted, style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2)
+                                        Line().stroke(new ? Color.newInk : Color.muted, style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2)
                                     }
                             }
                             .padding(.horizontal, 3)
@@ -594,10 +648,14 @@ struct SentenceView: View {
         }
     }
 
-    private var rowHeight: CGFloat { ex.toChinese ? 84 : 64 }
+    private var rowHeight: CGFloat { ex.toChinese ? 78 : 64 }
+    private var rows: Int {
+        let n = ex.toChinese ? (ex.sentence?.words.count ?? 0) : Sentence.enWords(ex.sentence?.en ?? "").count
+        return max(2, Int(ceil(Double(n) / Double(ex.toChinese ? 6 : 5))))
+    }
 
     private var answerArea: some View {
-        FlowLayout(spacing: 8, lineSpacing: 0, rowHeight: rowHeight) {
+        FlowLayout(spacing: 7, lineSpacing: 0, rowHeight: rowHeight) {
             ForEach(placed) { t in
                 tile(t, inAnswer: true) {
                     guard result == nil else { return }
@@ -605,10 +663,10 @@ struct SentenceView: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity, minHeight: rowHeight * 2, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: rowHeight * CGFloat(rows), alignment: .topLeading)
         .background(alignment: .top) {
             VStack(spacing: 0) {
-                ForEach(0..<2, id: \.self) { _ in
+                ForEach(0..<rows, id: \.self) { _ in
                     Rectangle().fill(Color.line).frame(height: 2).padding(.top, rowHeight - 2)
                 }
             }
@@ -616,16 +674,14 @@ struct SentenceView: View {
     }
 
     private var bank: some View {
-        FlowLayout(spacing: 8, lineSpacing: 8, center: true) {
+        FlowLayout(spacing: 7, lineSpacing: 7, center: true) {
             ForEach(ex.tiles) { t in
                 let used = placed.contains(t)
-                ZStack {
-                    tile(t, inAnswer: false) {
-                        guard result == nil, !used else { return }
-                        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) { placed.append(t) }
-                    }
-                    .opacity(used ? 0 : 1)
+                tile(t, inAnswer: false) {
+                    guard result == nil, !used else { return }
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) { placed.append(t) }
                 }
+                .opacity(used ? 0 : 1)
                 .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.line.opacity(used ? 0.6 : 0)))
             }
         }
@@ -640,7 +696,7 @@ struct SentenceView: View {
                 if let py = t.pinyin { Text(py).font(.nunito(11.5)).foregroundStyle(Color.muted) }
             }
             .foregroundStyle(tint ?? Color.ink)
-            .padding(.horizontal, 14).padding(.vertical, 10)
+            .padding(.horizontal, 12).padding(.vertical, 9)
             .background {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12, style: .continuous).fill(tint ?? Color.line).offset(y: 2)

@@ -141,11 +141,11 @@ final class CharData {
     let partNames: [String: [String]]     // part → [meaning, pinyin]
 
     private init() {
-        struct File: Codable { let chars: [String: CharInfo]; let parts: [String: [String]]? }
+        struct File: Codable { let chars: [String: CharInfo]; let parts: [String: [String?]]? }
         if let url = Bundle.main.url(forResource: "chars", withExtension: "json"),
            let data = try? Data(contentsOf: url),
            let f = try? JSONDecoder().decode(File.self, from: data) {
-            chars = f.chars; partNames = f.parts ?? [:]
+            chars = f.chars; partNames = (f.parts ?? [:]).mapValues { $0.map { $0 ?? "" } }
         } else {
             chars = [:]; partNames = [:]
         }

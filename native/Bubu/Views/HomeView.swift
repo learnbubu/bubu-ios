@@ -82,17 +82,13 @@ struct HomeView: View {
     // MARK: streak
     private var streakCard: some View {
         let streak = progress.streak, xp = progress.xpToday, goal = progress.dailyGoal
-        let lit = xp > 0
+        let lit = progress.litOn(progress.today)
         let bubble = xp >= goal ? "Goal done!" : lit ? "\(goal - xp) XP to goal" : streak > 0 ? "Keep it lit!" : "Let's start!"
         return VStack(spacing: 0) {
             ZStack(alignment: .topTrailing) {
                 HStack(spacing: 13) {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 38))
-                        .foregroundStyle(lit ? AnyShapeStyle(LinearGradient(colors: [Color(UIColor(hex: 0xFFB347)), Color(UIColor(hex: 0xF0742F))], startPoint: .top, endPoint: .bottom))
-                                             : AnyShapeStyle(Color.muted.opacity(0.55)))
+                    FlameIcon(lit: lit, size: 42)
                         .shadow(color: lit ? Color(UIColor(hex: 0xF08A7A)).opacity(0.55) : .clear, radius: 10)
-                        .frame(width: 42, height: 42)
                     VStack(alignment: .leading, spacing: 5) {
                         Text("\(streak)").font(.nunitoXB(34)).tracking(-0.6).foregroundStyle(Color.ink)
                         Text("day streak").font(.nunito(14, .bold)).foregroundStyle(Color.muted)
@@ -108,36 +104,12 @@ struct HomeView: View {
                 SpeechBubble(text: bubble).padding(.top, 13).padding(.trailing, 16)
             }
             .clipped()
-            weekStrip
+            WeekStrip()
+                .padding(.top, 10)
+                .overlay(alignment: .top) { Rectangle().fill(Color.line).frame(height: 1) }
         }
         .padding(.horizontal, 14).padding(.bottom, 12)
         .panel().panelShadow()
-    }
-
-    private var weekStrip: some View {
-        let days = progress.thisWeek, today = progress.today
-        let names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-        return HStack(spacing: 2) {
-            ForEach(0..<7, id: \.self) { i in
-                let d = days[i], xp = progress.xp(on: d)
-                let met = xp > 0, goal = xp >= progress.dailyGoal, isToday = d == today, future = d > today
-                VStack(spacing: 4) {
-                    ZStack {
-                        Circle().fill(goal ? Color.gold : met ? Color.good : .clear)
-                        Circle().strokeBorder(goal ? Color.gold : met ? Color.good : isToday ? Color.accent : Color.line,
-                                              style: StrokeStyle(lineWidth: 2, dash: isToday && !met ? [4, 3] : []))
-                        if met { Image(systemName: "checkmark").font(.system(size: 12, weight: .heavy)).foregroundStyle(.white) }
-                    }
-                    .frame(width: 26, height: 26)
-                    Text(names[i]).font(.nunito(11, .bold))
-                        .foregroundStyle(isToday ? Color.accent : met ? Color.ink : Color.muted)
-                }
-                .frame(maxWidth: .infinity)
-                .opacity(future ? 0.5 : 1)
-            }
-        }
-        .padding(.top, 10)
-        .overlay(alignment: .top) { Rectangle().fill(Color.line).frame(height: 1) }
     }
 
     // MARK: quests

@@ -34,8 +34,9 @@ struct SRSRecord: Codable, Equatable {
             return nil
         }
         ease = num(.ease); interval = num(.interval); due = num(.due)
-        reps = num(.reps).map { Int($0) }; S = num(.S); D = num(.D)
-        last = num(.last); lapses = num(.lapses).map { Int($0) }
+        let int = { (d: Double?) -> Int? in d.flatMap { $0.isFinite ? Int(exactly: $0.rounded()) : nil } }
+        reps = int(num(.reps)); S = num(.S); D = num(.D)
+        last = num(.last); lapses = int(num(.lapses))
         known = try? c.decodeIfPresent(Bool.self, forKey: .known)
         prod = try? c.decodeIfPresent(Bool.self, forKey: .prod)
         miss = try? c.decodeIfPresent(Miss.self, forKey: .miss)
