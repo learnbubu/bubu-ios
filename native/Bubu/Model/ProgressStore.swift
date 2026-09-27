@@ -149,6 +149,8 @@ final class ProgressStore {
     }
 
     func markOnboarded() { onboarded = true; save() }
+    /// Count the levels already reached as seen.
+    func settleLevel() { activity.levelSeen = max(activity.levelSeen, level.level); save() }
 
     // MARK: the backup reminder (web: backupOverdue)
     static let staleDays = 14.0, snoozeDays = 7.0

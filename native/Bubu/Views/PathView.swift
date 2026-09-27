@@ -400,6 +400,7 @@ struct HUD: View {
                 Image(systemName: "flame.fill").font(.system(size: 14))
                 Text("\(progress.streak)")
             }
+            Button { router.tab = .profile } label: {
             pill(tint: done ? .good : .accent, border: done ? .good : .line) {
                 ZStack {
                     Circle().stroke(done ? Color.goodSoft : Color.line, lineWidth: 3)
@@ -411,6 +412,8 @@ struct HUD: View {
                 .frame(width: 15, height: 15).padding(2)
                 Text("\(min(xp, goal))/\(goal)")
             }
+            }
+            .buttonStyle(.plain)
             Spacer()
             Button { router.tab = .settings } label: {
                 Image(systemName: "gearshape.fill").font(.system(size: 17)).foregroundStyle(Color.accent)
@@ -440,7 +443,12 @@ struct ReviewButton: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
     var body: some View {
-        if progress.dueCount > 0 {
+        if progress.dueCount == 0 && progress.currentLessonId == nil {
+            Text("Course complete — all caught up").font(.nunitoXB(15)).foregroundStyle(Color.good)
+                .padding(.horizontal, 18).padding(.vertical, 11)
+                .background(Color.goodSoft, in: Capsule())
+                .padding(.bottom, 12)
+        } else if progress.dueCount > 0 {
             Button { router.start(StudySession.review(progress)) } label: {
                 Label("Review \(progress.dueCount) word\(progress.dueCount == 1 ? "" : "s")", systemImage: "arrow.triangle.2.circlepath")
                     .padding(.horizontal, 8)

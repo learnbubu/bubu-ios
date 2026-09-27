@@ -61,4 +61,24 @@ final class BackupTests: XCTestCase {
         XCTAssertNil(Backup.summary(Data("{\"hello\":1}".utf8)))
         XCTAssertFalse(Backup.restore(Data("nonsense".utf8), into: store()))
     }
+
+    /// A backup from the old edition: its words move onto the new course's cards by what they are.
+    func testOldEditionBackupMigrates() throws {
+        let old = """
+        {"app":"zhBeginnerA","version":1,"exported":"2026-08-01T10:00:00.000Z","data":{
+          "zhBeginnerA.srs.v1":"{\\"useful:2\\":{\\"reps\\":3,\\"interval\\":9,\\"last\\":1785000000000,\\"due\\":1786000000000}}",
+          "zhBeginnerA.done.v1":"[\\"old-lesson-1\\"]",
+          "zhBeginnerA.prefs.v1":"{\\"lessons\\":[\\"old-lesson-1\\"]}",
+          "zhBeginnerA.activity.v1":"{\\"xpDays\\":{\\"2026-07-30\\":900}}"
+        }}
+        """
+        let p = store()
+        XCTAssertTrue(Backup.restore(Data(old.utf8), into: p))
+        let target = try XCTUnwrap(Course.shared.cards.first { $0.word.hanzi == "对不起" })
+        XCTAssertEqual(p.srs[target.id]?.reps, 3)
+        XCTAssertNil(p.srs["useful:2"])
+        XCTAssertFalse(p.done.contains("old-lesson-1"))
+        XCTAssertNil(p.prefs.lessons)
+        XCTAssertGreaterThan(p.activity.levelSeen, 1)          // no level-up for old XP
+    }
 }

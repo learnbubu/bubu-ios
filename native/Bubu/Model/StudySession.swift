@@ -351,6 +351,15 @@ final class StudySession: Identifiable {
         return xp
     }
 
+    /// Shuffle what's left (web: #studyShuffle). New words keep their order until all are met.
+    func shuffleRest() -> Bool {
+        guard !hasMeetLeft else { return false }
+        if !answered, let c = card { queue.append(.card(c)) }
+        queue.shuffle()
+        next()
+        return true
+    }
+
     /// "Can't speak now": the word comes back later, with no penalty and no XP.
     func skip() {
         guard !answered, let c = card else { return }

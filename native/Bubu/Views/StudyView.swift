@@ -100,6 +100,15 @@ struct StudyView: View {
             }
             Text("\(min(session.stepsDone, session.sessionTotal)) / \(session.sessionTotal)")
                 .font(.nunito(13, .semibold)).monospacedDigit().foregroundStyle(Color.muted)
+            if !session.isQuiz {
+                Button {
+                    withAnimation {
+                        if session.shuffleRest() { resetExercise() }
+                        else { Moments.shared.toast("Shuffle is available once all the new words have been introduced.") }
+                    }
+                } label: { Image(systemName: "shuffle").font(.system(size: 15, weight: .bold)).foregroundStyle(Color.muted) }
+                .buttonStyle(.plain)
+            }
         }
         .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, 12)
         .animation(.spring(response: 0.3), value: session.combo)
@@ -678,6 +687,7 @@ struct SentenceView: View {
     let result: Bool?
     @Environment(ProgressStore.self) private var progress
     @State private var pinyinOpen = false
+    @State private var held: Exercise.Tile?
     private let course = Course.shared
 
     /// whether a word of the sentence is itself a word not learned yet
@@ -729,7 +739,7 @@ struct SentenceView: View {
                     .onTapGesture { withAnimation { pinyinOpen.toggle() } }
                 }
             }
-            if !HintTip.used { Text("Tap a word for its meaning").font(.nunito(12.5)).foregroundStyle(Color.muted) }
+            if !HintTip.used { Text("Tap a word for its meaning, or hold a tile").font(.nunito(12.5)).foregroundStyle(Color.muted) }
             answerArea
             bank
         }
@@ -794,6 +804,22 @@ struct SentenceView: View {
         }
         .buttonStyle(PressDown(depth: 2))
         .sensoryFeedback(.selection, trigger: placed.count)
+        .simultaneousGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in held = t; HintTip.used = true })
+        .popover(isPresented: Binding(get: { held == t && (inAnswer || !placed.contains(t)) }, set: { if !$0 { held = nil } })) {
+            VStack(spacing: 3) {
+                if let py = t.pinyin {
+                    Text(Hints.meaning(t.text)).font(.nunito(15, .bold)).foregroundStyle(Color.ink)
+                    PinyinText(pinyin: py, size: 14)
+                } else if let w = ex.sentence?.words.first(where: { Hints.english(ex.sentence?.en ?? "", [$0]).contains { $0.text.lowercased() == t.text.lowercased() && $0.word != nil } }) {
+                    ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: 22, weight: .bold)
+                    PinyinText(pinyin: w.pinyin, size: 14)
+                } else {
+                    Text("No separate word in Chinese").font(.nunito(14, .semibold)).foregroundStyle(Color.muted)
+                }
+            }
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .presentationCompactAdaptation(.popover)
+        }
     }
 }
 

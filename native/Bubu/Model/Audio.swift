@@ -51,7 +51,21 @@ final class Speech {
 
     func stop() { synth.stopSpeaking(at: .immediate) }
 
+    /// Said once: there's no Chinese voice, or there's a far better one to download.
+    private func voiceTips() {
+        let d = UserDefaults.standard
+        if Self.chineseVoices.isEmpty {
+            guard !d.bool(forKey: "noVoiceTip") else { return }
+            d.set(true, forKey: "noVoiceTip")
+            Moments.shared.toast("No Chinese voice on this phone, so audio is silent. Add one in Settings → Accessibility → Spoken Content → Voices.")
+        } else if let v = voice, v.quality == .default, !d.bool(forKey: "voiceTip") {
+            d.set(true, forKey: "voiceTip")
+            Moments.shared.toast("Tip: for a far more natural voice, go to Settings → Accessibility → Spoken Content → Voices → Chinese and download an “Enhanced” voice.")
+        }
+    }
+
     func speak(_ text: String, slow: Bool = false) {
+        voiceTips()
         Sounds.shared.activate()
         synth.stopSpeaking(at: .immediate)
         let u = AVSpeechUtterance(string: text)

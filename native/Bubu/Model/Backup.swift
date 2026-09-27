@@ -73,6 +73,28 @@ enum Backup {
         return String(data: d, encoding: .utf8) ?? "{}"
     }
 
+    /// The old edition's card ids and their words.
+    static let oldCards: [String: String] = {
+        guard let url = Bundle.main.url(forResource: "oldcards", withExtension: "json"),
+              let d = try? Data(contentsOf: url), let o = try? JSONDecoder().decode([String: String].self, from: d) else { return [:] }
+        return o
+    }()
+
+    /// Records under the old edition's ids move to the course's word of the same
+    /// characters, keeping whichever is newer. True if anything moved.
+    static func migrate(_ srs: inout [String: SRSRecord]) -> Bool {
+        let course = Course.shared
+        var byHanzi: [String: String] = [:]
+        for c in course.cards where byHanzi[c.word.hanzi] == nil { byHanzi[c.word.hanzi] = c.id }
+        let old = srs.keys.filter { course.cardById[$0] == nil && oldCards[$0] != nil }
+        for k in old {
+            let rec = srs[k]!
+            if let h = oldCards[k], let to = byHanzi[h], (srs[to].map { (rec.last ?? 0) > ($0.last ?? 0) } ?? true) { srs[to] = rec }
+            srs[k] = nil
+        }
+        return !old.isEmpty
+    }
+
     /// What a backup holds, before restoring it; nil if it isn't one.
     static func summary(_ file: Data) -> Summary? {
         guard let p = try? JSONSerialization.jsonObject(with: file) as? [String: Any],
@@ -94,13 +116,36 @@ enum Backup {
                 if let d = try? JSONSerialization.data(withJSONObject: v), let r = try? JSONDecoder().decode(SRSRecord.self, from: d) { srs[id] = r }
             }
         }
-        let done = Set((obj(doneKey) as? [Any] ?? []).compactMap { $0 as? String })
+        var done = Set((obj(doneKey) as? [Any] ?? []).compactMap { $0 as? String })
         let prefsObj = obj(prefsKey) as? [String: Any] ?? [:]
-        let prefs = (try? JSONSerialization.data(withJSONObject: prefsObj)).flatMap { try? JSONDecoder().decode(Prefs.self, from: $0) } ?? Prefs()
+        var prefs = (try? JSONSerialization.data(withJSONObject: prefsObj)).flatMap { try? JSONDecoder().decode(Prefs.self, from: $0) } ?? Prefs()
         let activity = data[activityKey].flatMap { try? JSONDecoder().decode(Activity.self, from: Data($0.utf8)) } ?? Activity()
+
+        // the old edition's words carry over by what they are (web: migrateOldSRS, migrateOldDone)
+        let course = Course.shared
+        let moved = migrate(&srs)
+        let lessonIds = Set(course.lessons.map(\.id))
+        let stale = done.subtracting(lessonIds)
+        var carried = 0
+        if !stale.isEmpty {
+            done.subtract(stale)
+            for l in course.lessons where !done.contains(l.id) {
+                let cs = course.cards(in: l.id)
+                if !cs.isEmpty && cs.allSatisfy({ (srs[$0.id]?.reps ?? 0) > 0 }) { done.insert(l.id); carried += 1 }
+            }
+        }
+        if let chosen = prefs.lessons, chosen.contains(where: { !lessonIds.contains($0) }) { prefs.lessons = nil }
+
         p.replaceAll(srs: srs, done: done, activity: activity, name: (prefsObj["name"] as? String) ?? "",
                      hooks: prefsObj["hooks"] as? [String: String] ?? [:], prefs: prefs)
+        // a record from before levels were tracked: no level-up for XP already earned
+        if let a = data[activityKey], !a.contains("\"levelSeen\"") { p.settleLevel() }
         p.markBackedUp()
+        if moved || !stale.isEmpty {
+            Moments.shared.toast(carried > 0
+                ? "Welcome to the new course! \(carried) stone\(carried == 1 ? " is" : "s are") already done from your old progress, and your words keep their reviews."
+                : "Welcome to the new course! Your words keep their reviews.")
+        }
         return true
     }
 }

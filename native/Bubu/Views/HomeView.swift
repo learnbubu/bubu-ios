@@ -90,7 +90,7 @@ struct HomeView: View {
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
-        let part = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"
+        let part = h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"
         return progress.name.isEmpty ? "\(part)!" : "\(part), \(progress.name)!"
     }
 
@@ -127,7 +127,7 @@ struct HomeView: View {
                     .allowsHitTesting(false)
                 Button {
                     if askable, let o = out { Moments.shared.show(.askRelight(lost: o.lost, embers: progress.embers)) }
-                    else if risk, let s = progress.currentLessonId.flatMap({ Course.shared.lessonById[$0] }) { router.tab = .learn; router.lesson = s }
+                    else if risk, let id = progress.currentLessonId { router.start(StudySession(lessonId: id, progress: progress)) }
                 } label: {
                     SpeechBubble(text: bubble, hot: askable || risk)
                         .phaseAnimator(risk ? [0.0, -3.0] : [0.0]) { v, y in v.offset(y: y) } animation: { _ in .easeInOut(duration: 1.1) }
@@ -216,7 +216,7 @@ struct HomeView: View {
             let cards = course.cards(in: id)
             let learned = cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
             let parts = lesson.nameParts
-            Button { router.tab = .learn; router.lesson = lesson } label: {
+            Button { router.tab = .learn; router.start(StudySession(lessonId: lesson.id, progress: progress)) } label: {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(course.chapterLabel(ci).uppercased()).font(.nunito(12.5, .bold)).foregroundStyle(Color.muted)
                     Text(parts.hanzi).font(.hanzi(21, .heavy)).foregroundStyle(Color.ink)

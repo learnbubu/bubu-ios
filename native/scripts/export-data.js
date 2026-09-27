@@ -40,6 +40,12 @@ const course = {
 };
 fs.writeFileSync(path.join(DATA, "course.json"), JSON.stringify(course));
 fs.writeFileSync(path.join(DATA, "chars.json"), JSON.stringify(W.CHARS_DATA));
+// the JIC edition's card ids and their words, so a backup from it restores by word
+{
+  const src = fs.readFileSync(path.join(WEB, "migrate-old.js"), "utf8");
+  const win = {}; new Function("window", src)(win);
+  fs.writeFileSync(path.join(DATA, "oldcards.json"), JSON.stringify(win.OLD_CARDS || {}));
+}
 const strokes = Object.fromEntries(Object.entries(W.HANZI_DATA).map(([c, d]) => [c, d.radStrokes ? { strokes: d.strokes, medians: d.medians, rad: d.radStrokes } : { strokes: d.strokes, medians: d.medians }]));
 fs.writeFileSync(path.join(DATA, "strokes.json"), JSON.stringify(strokes));
 
