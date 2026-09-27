@@ -125,6 +125,8 @@ final class Course {
     var lessons: [Lesson] { data.lessons }
     var chapters: [Chapter] { data.chapters }
 
+    let cardsByLesson: [String: [Card]]
+
     init(data: CourseData) {
         self.data = data
         var seen = Set<String>(), cards: [Card] = []
@@ -138,6 +140,7 @@ final class Course {
             }
         }
         self.cards = cards
+        cardsByLesson = Dictionary(grouping: cards, by: \.lessonId)
         cardById = Dictionary(uniqueKeysWithValues: cards.map { ($0.id, $0) })
         lessonById = Dictionary(uniqueKeysWithValues: data.lessons.map { ($0.id, $0) })
         lessonOrder = Dictionary(uniqueKeysWithValues: data.lessons.enumerated().map { ($1.id, $0) })
@@ -176,7 +179,9 @@ final class Course {
         return out
     }
 
-    func cards(in lessonId: String) -> [Card] { cards.filter { $0.lessonId == lessonId } }
+    func cards(in lessonId: String) -> [Card] { cardsByLesson[lessonId] ?? [] }
+    /// every chapter's words
+    private(set) lazy var chapterCards: [[Card]] = chapters.map { ch in ch.lessons.flatMap { cardsByLesson[$0] ?? [] } }
     func notes(for lessonId: String) -> [Note] { data.notes[lessonId] ?? [] }
 
     /// "起步 1 · Chapter 2": chapters are counted within their book

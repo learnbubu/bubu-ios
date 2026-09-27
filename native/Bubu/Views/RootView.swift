@@ -30,7 +30,7 @@ final class Router {
         switch mode {
         case "listen": start(StudySession.listening(p))
         case "write": start(StudySession.writing(p))
-        case "quiz": start(StudySession.quiz(p, cards: p.activeCards))
+        case "quiz": start(StudySession.quiz(p, cards: p.activeCards, scope: p.selectedLessons))
         case "chars": push(.chars)
         case "read": push(.readings)
         case "tones": push(.tones)
@@ -56,6 +56,19 @@ struct RootView: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(\.scenePhase) private var scenePhase
     @State private var showWelcome = Launch.screen == "welcome"
+    @State private var startLevel: String?
+
+    /// Straight into learning once onboarding has gone: the first lesson, or a
+    /// placement test up to the end of book 1 or 2.
+    private func startAfterOnboarding() {
+        guard let level = startLevel else { return }
+        startLevel = nil
+        let books = Course.shared.chapters.map(\.unit).reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }
+        let end = { (u: String) in Course.shared.chapters.last { $0.unit == u }?.lessons.last }
+        let target = level == "a" ? end(books[0]) : level == "b" ? end(books[1]) : nil
+        if let t = target { router.start(StudySession.placement(progress, to: t, label: "Placement test")) }
+        else if let cur = progress.currentLessonId ?? Course.shared.lessons.last?.id { router.start(StudySession(lessonId: cur, progress: progress)) }
+    }
 
     /// Screens the cloud screenshot run asks for with `-screen`.
     private func debugScreens() {
@@ -120,18 +133,12 @@ struct RootView: View {
         .environment(router)
         .onAppear { debugScreens() }
         .fullScreenCover(isPresented: Binding(get: { (!progress.onboarded && Launch.screen == nil) || showWelcome },
-                                              set: { if !$0 { showWelcome = false } })) {
+                                              set: { if !$0 { showWelcome = false } }),
+                         onDismiss: startAfterOnboarding) {
             OnboardingView { level in
+                startLevel = level
                 progress.markOnboarded(); showWelcome = false
                 router.tab = .learn
-                // the first lesson, or a placement test up to the end of book 1 or 2
-                let books = Course.shared.chapters.map(\.unit).reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }
-                let end = { (u: String) in Course.shared.chapters.last { $0.unit == u }?.lessons.last }
-                let target = level == "a" ? end(books[0]) : level == "b" ? end(books[1]) : nil
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    if let t = target { router.start(StudySession.placement(progress, to: t, label: "Placement test")) }
-                    else if let cur = progress.currentLessonId { router.start(StudySession(lessonId: cur, progress: progress)) }
-                }
             }
             .environment(progress)
         }

@@ -11,6 +11,7 @@ struct ConversePage: View {
     @State private var message: Text?
     @State private var recognizer = Recognizer()
     @State private var canCheck = true
+    @State private var run = 0          // bumped on every start, advance and exit: stale timers do nothing
     private let course = Course.shared
 
     var body: some View {
@@ -57,7 +58,7 @@ struct ConversePage: View {
         .navigationTitle(dialogue.map { "Converse · \($0.title)" } ?? "Converse")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { canCheck = SFSpeechRecognizer(locale: Locale(identifier: "zh-CN"))?.isAvailable ?? false }
-        .onDisappear { recognizer.end() }
+        .onDisappear { recognizer.end(); run += 1; Speech.shared.stop() }
     }
 
     private func bubble(_ t: Turn) -> some View {
@@ -141,6 +142,7 @@ struct ConversePage: View {
 
     private func start(_ d: Dialogue) {
         recognizer.end()
+        run += 1
         dialogue = d; turn = 0; shown = []; message = nil; showChars = false
         step()
     }
@@ -153,12 +155,15 @@ struct ConversePage: View {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { shown.append(t) }
         Speech.shared.speak(t.hanzi)
         turn += 1
-        let id = d.id
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { if dialogue?.id == id { step() } }
+        let r = run
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { if run == r { step() } }
     }
 
     private func advance(_ t: Turn) {
+        // only the turn on screen can move on, and only once
+        guard let d = dialogue, turn < d.turns.count, d.turns[turn] == t else { return }
         recognizer.end()
+        run += 1
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { shown.append(t) }
         turn += 1; message = nil; showChars = false
         step()
@@ -176,7 +181,8 @@ struct ConversePage: View {
             } else {
                 message = Text("✓ \(r.level == .exact ? "Perfect" : "Close enough")").foregroundColor(.good).bold() + Text(" — heard “\(r.heard)”").foregroundColor(.muted)
                 Sounds.shared.play("correct")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { advance(t) }
+                let r0 = run
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { if run == r0 { advance(t) } }
             }
         }
         recognizer.onError = { f in

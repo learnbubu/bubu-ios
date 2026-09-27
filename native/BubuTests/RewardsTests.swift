@@ -86,4 +86,21 @@ final class RewardsTests: XCTestCase {
         XCTAssertEqual(b.activity, a.activity)
         XCTAssertTrue(b.readDone("story-1"))
     }
+
+    /// Loading must never save part-way: once it wrote an empty activity record over
+    /// the streak whenever your settings differed from the defaults.
+    func testReopeningKeepsEverything() {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        let a = ProgressStore(course: Course.shared, url: url)
+        a.prefs.dailyGoal = 30
+        a.lightFire()
+        a.earnXP(12)
+        a.save()
+        for _ in 0..<2 {
+            let b = ProgressStore(course: Course.shared, url: url)
+            XCTAssertEqual(b.prefs.dailyGoal, 30)
+            XCTAssertEqual(b.xpToday, 12)
+            XCTAssertEqual(b.streak, 1)
+        }
+    }
 }

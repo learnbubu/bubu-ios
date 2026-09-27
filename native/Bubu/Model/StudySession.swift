@@ -83,7 +83,7 @@ final class StudySession: Identifiable {
     private(set) var quizScore = 0
 
     init(lessonId: String, progress: ProgressStore, focuses: Set<String>? = nil, cards: [Card]? = nil,
-         mode: Mode = .lesson, title: String = "Study") {
+         mode: Mode = .lesson, title: String = "Study", scope: Set<String>? = nil) {
         self.lessonId = lessonId
         self.progress = progress
         self.mode = mode
@@ -92,7 +92,7 @@ final class StudySession: Identifiable {
         self.focuses = focuses ?? (mode == .mistakes ? Set(Self.allDirs) : progress.selectedFocuses)
         self.start = progress.now()
         let chosen = cards ?? StudySession.buildQueue(lessonId: lessonId, progress: progress, focuses: self.focuses)
-        self.scope = mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId))
+        self.scope = scope ?? (mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId)))
         self.source = chosen
         self.queue = mode == .quiz || mode == .placement ? chosen.map { .card($0) } : sessionOrder(chosen)
         self.sessionTotal = queue.filter { if case .card = $0 { return true } else { return false } }.count
@@ -130,7 +130,8 @@ final class StudySession: Identifiable {
         let studied = cards.filter { p.srs[$0.id] != nil }
         let pool = studied.isEmpty ? cards : studied
         guard !pool.isEmpty else { Moments.shared.toast("Pick at least one lesson — open “What to study”."); return nil }
-        return StudySession(lessonId: "", progress: p, focuses: ["listen"], cards: Array(pool.shuffled().prefix(20)), mode: .listen, title: "Listening")
+        return StudySession(lessonId: "", progress: p, focuses: ["listen"], cards: Array(pool.shuffled().prefix(20)), mode: .listen, title: "Listening",
+                            scope: p.selectedLessons)
     }
 
     static func writing(_ p: ProgressStore) -> StudySession? {
@@ -138,14 +139,16 @@ final class StudySession: Identifiable {
         let studied = cards.filter { p.srs[$0.id] != nil }
         let pool = studied.isEmpty ? cards : studied
         guard !pool.isEmpty else { Moments.shared.toast("Pick at least one lesson — open “What to study”."); return nil }
-        return StudySession(lessonId: "", progress: p, focuses: ["write"], cards: Array(pool.shuffled().prefix(12)), mode: .write, title: "Writing")
+        return StudySession(lessonId: "", progress: p, focuses: ["write"], cards: Array(pool.shuffled().prefix(12)), mode: .write, title: "Writing",
+                            scope: p.selectedLessons)
     }
 
     /// A quiz on some words: up to 20, multiple choice only (web: startQuiz).
-    static func quiz(_ p: ProgressStore, cards: [Card], focuses: Set<String>? = nil) -> StudySession? {
-        guard cards.count >= 3 else { Moments.shared.toast("A quiz needs at least 3 words."); return nil }
+    static func quiz(_ p: ProgressStore, cards: [Card], focuses: Set<String>? = nil, scope: Set<String>? = nil,
+                     tooFew: String = "Pick more lessons — a quiz needs at least 3 words.") -> StudySession? {
+        guard cards.count >= 3 else { Moments.shared.toast(tooFew); return nil }
         let items = Array(cards.shuffled().prefix(20))
-        return StudySession(lessonId: "", progress: p, focuses: focuses, cards: items, mode: .quiz, title: "Quiz · \(items.count) questions")
+        return StudySession(lessonId: "", progress: p, focuses: focuses, cards: items, mode: .quiz, title: "Quiz · \(items.count) questions", scope: scope)
     }
 
     /// The skip test: pass it to unlock a lesson and everything before it (web: startPlacement).
@@ -272,9 +275,8 @@ final class StudySession: Identifiable {
             if let rung {
                 var on = enabled.filter { rung.contains($0) }
                 if let before = dirByCard[c.id], on.count > 1 { on.removeAll { $0 == before } }
-                enabled = on.isEmpty ? enabled.filter { $0 != "write" && $0 != "speak" } : on
-            } else if let before = dirByCard[c.id], enabled.count > 1 {
-                enabled.removeAll { $0 == before }
+                let eased = enabled.filter { $0 != "write" && $0 != "speak" }
+                enabled = on.isEmpty ? (eased.isEmpty ? enabled : eased) : on
             }
         }
         if enabled.isEmpty { enabled = ["recognize"] }
@@ -320,12 +322,16 @@ final class StudySession: Identifiable {
         if correct {
             combo += 1
             if combo == Self.comboAt { DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { Sounds.shared.play("combo") } }
-            xp = progress.earnXP(combo >= Self.comboAt ? Self.xpCombo : Self.xpCorrect).earned
+            let mark = progress.xpCounter
+            progress.earnXP(combo >= Self.comboAt ? Self.xpCombo : Self.xpCorrect)
+            xp = progress.xpCounter - mark
         } else {
             combo = 0
         }
         sessionXP += xp
+        let qMark = progress.xpCounter
         progress.questEvent(dir, correct: correct)
+        xp += progress.xpCounter - qMark; sessionXP += progress.xpCounter - qMark
         answeredCount += 1
         if isQuiz {
             stepsDone += 1                     // one go at each question
@@ -359,17 +365,20 @@ final class StudySession: Identifiable {
 
     private func finish() {
         current = nil
+        progress.holdSaves(); defer { progress.releaseSaves() }
         if mode == .placement { return finishPlacement() }
         let lessonCards = mode == .lesson ? course.cards(in: lessonId) : []
         let cleared = !lessonCards.isEmpty && lessonCards.allSatisfy { (progress.srs[$0.id]?.reps ?? 0) >= 1 }
         let justFinished = mode == .lesson && !progress.isDone(lessonId) && cleared
         if justFinished { progress.markDone(lessonId) }
         let perfect = againCount == 0 && answeredCount >= 5
+        let mark = progress.xpCounter
         progress.questEvent("session", correct: true, lesson: justFinished, perfect: perfect)
         var goal = false
         let s = progress.earnXP(justFinished ? Self.xpLesson : Self.xpSession)
-        sessionXP += s.earned; goal = goal || s.goalReached
-        if perfect { let p = progress.earnXP(Self.xpPerfect); sessionXP += p.earned; goal = goal || p.goalReached }
+        goal = goal || s.goalReached
+        if perfect { let p = progress.earnXP(Self.xpPerfect); goal = goal || p.goalReached }
+        sessionXP += progress.xpCounter - mark
         if justFinished {
             progress.startBoost()
             storyUnlocked()

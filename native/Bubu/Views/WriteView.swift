@@ -90,6 +90,7 @@ struct WritingBox: View {
 
     var checking = true
     @State private var freeInk: [[CGPoint]] = []
+    @State private var stroking = false
 
     init(char: String, size: CGFloat, stage: Int, checking: Bool = true, animate: Bool = true, complete: @escaping () -> Void) {
         self.char = char; self.size = size; self.stage = stage; self.checking = checking; self.complete = complete
@@ -133,9 +134,11 @@ struct WritingBox: View {
             .onChanged { v in
                 guard !intro, !done, data != nil else { return }
                 if inkMissed { ink = []; inkMissed = false }
+                // a new stroke: whatever a cancelled one left behind goes
+                if !stroking { stroking = true; ink = [] }
                 ink.append(v.location)
             }
-            .onEnded { _ in check() })
+            .onEnded { _ in stroking = false; check() })
         .sensoryFeedback(.impact(weight: .light), trigger: drawn)
         .sensoryFeedback(.error, trigger: misses) { _, n in n > 0 }
         .sensoryFeedback(.success, trigger: done) { _, n in n }
@@ -149,7 +152,14 @@ struct WritingBox: View {
                 .buttonStyle(.bordered).padding(8)
             }
         }
-        .onAppear { if !checking { complete() } }
+        .overlay(alignment: .bottomLeading) {
+            if !checking && !done {
+                Button("Done") { withAnimation { done = true }; complete() }
+                    .font(.nunitoXB(14)).foregroundStyle(Color.onAccent)
+                    .padding(.horizontal, 14).padding(.vertical, 7).background(Color.accent, in: Capsule())
+                    .padding(8)
+            }
+        }
     }
 
     private func strokes(_ d: CharStrokes, _ idx: [Int], _ color: Color) -> some View {
@@ -195,7 +205,7 @@ struct GlyphAnimation: View {
     var body: some View {
         let d = StrokeData.shared.chars[char]
         let sp = GlyphSpace(size: size)
-        TimelineView(.animation) { tl in
+        TimelineView(.animation(paused: reported)) { tl in
             let n = d?.count ?? 0
             let one = Double(n) * (perStroke + gap) + pause
             let raw = tl.date.timeIntervalSince(start)

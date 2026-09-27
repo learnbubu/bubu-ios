@@ -247,7 +247,7 @@ struct ExportButton: View {
     @Environment(ProgressStore.self) private var progress
     var label = "Export"
     var body: some View {
-        ShareLink(item: BackupFile(data: Backup.export(progress)), preview: SharePreview("Bùbù progress")) {
+        ShareLink(item: BackupFile(progress: progress), preview: SharePreview("Bùbù progress")) {
             Text(label).font(.nunito(15, .bold)).foregroundStyle(Color.accent)
         }
         .simultaneousGesture(TapGesture().onEnded { progress.markBackedUp() })

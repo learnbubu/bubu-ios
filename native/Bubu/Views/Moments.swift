@@ -23,8 +23,9 @@ final class Moments {
     /// A full-screen study session is up: moments show there, not under it.
     var studyUp = false
 
+    private var switching = false
     func show(_ m: Moment) {
-        if current == nil { present(m) } else { queue.append(m) }
+        if current == nil && !switching { present(m) } else { queue.append(m) }
     }
 
     private func present(_ m: Moment) {
@@ -49,8 +50,12 @@ final class Moments {
     func dismiss() {
         withAnimation(.easeOut(duration: 0.25)) { current = nil }
         if !queue.isEmpty {
-            let next = queue.removeFirst()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in self?.present(next) }
+            switching = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
+                guard let self else { return }
+                self.switching = false
+                if !self.queue.isEmpty { self.present(self.queue.removeFirst()) }
+            }
         }
     }
 
@@ -226,9 +231,10 @@ struct Confetti: View {
 
     private struct Bit { let x: CGFloat; let vx: CGFloat; let vy: CGFloat; let w: CGFloat; let h: CGFloat; let r: Double; let vr: Double; let c: Int }
     @State private var bits: [Bit] = []
+    @State private var over = false
 
     var body: some View {
-        if !reduceMotion {
+        if !reduceMotion && !over {
             TimelineView(.animation) { tl in
                 let t = tl.date.timeIntervalSince(start)
                 Canvas { ctx, size in
@@ -257,6 +263,7 @@ struct Confetti: View {
                 }
                 start = Date()
             }
+            .task { try? await Task.sleep(for: .seconds(1.7)); over = true }
         }
     }
 }

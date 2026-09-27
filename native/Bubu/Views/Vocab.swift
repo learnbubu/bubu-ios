@@ -81,7 +81,7 @@ struct PickPage: View {
             HStack(spacing: 8) {
                 action("Flashcards", "rectangle.on.rectangle") { router.push(.flash(picked.map(\.id))) }
                 action("Match", "square.grid.2x2") { router.push(.match(picked.map(\.id))) }
-                action("Quiz", "checklist") { router.start(StudySession.quiz(progress, cards: picked, focuses: ["recognize", "recall", "pinyin", "listen"])) }
+                action("Quiz", "checklist") { router.start(StudySession.quiz(progress, cards: picked, focuses: ["recognize", "recall", "pinyin", "listen"], tooFew: "Pick at least 3 words to quiz.")) }
             }
             .disabled(picked.isEmpty)
             .opacity(picked.isEmpty ? 0.5 : 1)

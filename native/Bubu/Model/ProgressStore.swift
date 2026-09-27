@@ -53,8 +53,8 @@ final class ProgressStore {
     private(set) var done: Set<String> = []
     private(set) var activity = Activity()
     private(set) var hooks: [String: String] = [:]    // your own memory hooks, by character
-    var prefs = Prefs() { didSet { if prefs != oldValue { save() } } }
-    var name: String = ""
+    var prefs = Prefs() { didSet { if prefs != oldValue { saveSoon() } } }
+    var name: String = "" { didSet { if name != oldValue { saveSoon() } } }
     private(set) var onboarded = false
     private(set) var lastBackup: Double = 0           // when a backup was last made (ms)
     private(set) var backupSnooze: Double = 0         // the reminder is quiet until (ms)
@@ -93,6 +93,9 @@ final class ProgressStore {
     private func load() {
         guard let data = try? Data(contentsOf: url),
               let s = try? JSONDecoder().decode(Saved.self, from: data) else { return }
+        // loading must never write: a save half-way through would store what isn't loaded yet
+        held += 1
+        defer { held -= 1; pending = false }
         srs = s.srs; done = Set(s.done); name = s.name ?? ""; hooks = s.hooks ?? [:]
         // someone with progress from an earlier build has already started
         onboarded = s.onboarded ?? (!s.srs.isEmpty || !s.done.isEmpty)
@@ -116,7 +119,18 @@ final class ProgressStore {
         if held == 0 && pending { pending = false; save() }
     }
 
+    /// For settings and typing: one write once the changes stop.
+    @ObservationIgnored private var soon: DispatchWorkItem?
+    func saveSoon() {
+        if held > 0 { pending = true; return }
+        soon?.cancel()
+        let w = DispatchWorkItem { [weak self] in self?.save() }
+        soon = w
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: w)
+    }
+
     func save() {
+        soon?.cancel(); soon = nil
         if held > 0 { pending = true; return }
         let s = Saved(srs: srs, done: done.sorted(), name: name, hooks: hooks, prefs: prefs, activity: activity,
                       onboarded: onboarded, lastBackup: lastBackup, backupSnooze: backupSnooze)
@@ -257,7 +271,11 @@ final class ProgressStore {
         f.dateFormat = "yyyy-MM-dd"
         return f
     }()
-    static func dayKey(_ ms: Double) -> String { dayFormat.string(from: Date(timeIntervalSince1970: ms / 1000)) }
+    static func dayKey(_ ms: Double) -> String {
+        // the phone's time zone now, not the one it had when the app started
+        if dayFormat.timeZone != TimeZone.current { dayFormat.timeZone = .current }
+        return dayFormat.string(from: Date(timeIntervalSince1970: ms / 1000))
+    }
     var today: String { Self.dayKey(now()) }
     /// The day n days from today (web: dayKeyOffset).
     func day(_ offset: Int) -> String {
@@ -296,9 +314,13 @@ final class ProgressStore {
     /// Earn XP as the web's earnXP: doubled during a boost; the first time today's total
     /// crosses the daily goal, a +15 bonus (itself doubled in a boost) and its moment;
     /// then quests and levels are checked.
+    /// Every XP ever earned this run, bonuses included: a session reads the difference.
+    @ObservationIgnored private(set) var xpCounter = 0
+
     @discardableResult
     func earnXP(_ n: Int) -> (earned: Int, goalReached: Bool) {
         guard n > 0 else { return (0, false) }
+        holdSaves(); defer { releaseSaves() }
         let mult = boostActive ? 2 : 1, t = today
         let before = activity.xpDays[t] ?? 0
         activity.xpDays[t] = before + n * mult
@@ -309,10 +331,11 @@ final class ProgressStore {
             total += 15 * mult; reached = true
             Moments.shared.show(.goal)
         }
+        xpCounter += total
         save()
         checkQuests()
         let lv = level.level
-        if lv > activity.levelSeen {
+        if lv > max(activity.levelSeen, 1) {
             activity.levelSeen = lv; save()
             Moments.shared.show(.level(lv, next: level.next))
         }
@@ -351,9 +374,9 @@ final class ProgressStore {
     func setHook(_ ch: String, _ text: String?) { hooks[ch] = text; save() }
 
     func markRead(_ storyId: String) -> Bool {
-        guard activity.readsDone[storyId] == nil else { return false }
+        let first = activity.readsDone[storyId] == nil
         activity.readsDone[storyId] = today; save()
-        return true
+        return first
     }
     func readDone(_ storyId: String) -> Bool { activity.readsDone[storyId] != nil }
 
@@ -472,6 +495,13 @@ final class ProgressStore {
         return [Quest.pick(Quest.sets[0], seed: t + "a"), second, third].compactMap { Quest.all[$0] }
     }
 
+    /// Fix today's three quests the first time they're asked for, as the web does.
+    func ensureQuests() {
+        guard activity.quests?.date != today else { return }
+        activity.quests = Activity.QuestDay(date: today, ids: todayQuests.map(\.id))
+        save()
+    }
+
     private var questDay: Activity.QuestDay {
         if let q = activity.quests, q.date == today { return q }
         return Activity.QuestDay(date: today, ids: todayQuests.map(\.id))
@@ -498,6 +528,7 @@ final class ProgressStore {
 
     /// Mark quests done as they're reached; all three open a chest (web: checkQuests).
     func checkQuests() {
+        ensureQuests()
         var q = questDay
         let newly = todayQuests.filter { !(q.done[$0.id] ?? false) && progress(of: $0) >= $0.target }
         guard !newly.isEmpty else { return }

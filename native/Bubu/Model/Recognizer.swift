@@ -8,8 +8,9 @@ import AVFoundation
 final class Recognizer {
     enum Failure { case notAllowed, unavailable, noSpeech }
 
-    private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "zh-CN"))
-    private let engine = AVAudioEngine()
+    private lazy var recognizer = SFSpeechRecognizer(locale: Locale(identifier: "zh-CN"))
+    private lazy var engine = AVAudioEngine()
+    private var generation = 0
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
     private var last: [String] = []
@@ -38,8 +39,13 @@ final class Recognizer {
         guard finished else { return }
         finished = false
         last = []
+        generation += 1
+        let gen = generation
         Task {
-            guard await Self.authorize() else { onError(.notAllowed); end(); return }
+            let allowed = await Self.authorize()
+            // stopped while we were asking: don't turn the microphone on after all
+            guard !finished, gen == generation else { return }
+            guard allowed else { onError(.notAllowed); end(); return }
             guard let recognizer, recognizer.isAvailable else { onError(.unavailable); end(); return }
             do {
                 Sounds.shared.useForRecording(true)
@@ -49,6 +55,8 @@ final class Recognizer {
                 request = req
                 let input = engine.inputNode
                 let format = input.outputFormat(forBus: 0)
+                // no input yet (a call, or Bluetooth switching): installing a tap would throw
+                guard format.sampleRate > 0, format.channelCount > 0 else { onError(.unavailable); end(); return }
                 input.removeTap(onBus: 0)
                 input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak req] buf, _ in req?.append(buf) }
                 engine.prepare()
@@ -105,8 +113,7 @@ final class Recognizer {
         guard !finished else { return }
         finished = true
         quiet?.cancel(); watchdog?.cancel()
-        if engine.isRunning { engine.stop() }
-        engine.inputNode.removeTap(onBus: 0)
+        if engine.isRunning { engine.stop(); engine.inputNode.removeTap(onBus: 0) }
         request?.endAudio()
         task?.cancel()
         task = nil; request = nil

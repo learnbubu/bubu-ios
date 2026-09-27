@@ -48,6 +48,7 @@ struct HomeView: View {
                 }
                 .coordinateSpace(name: "home")
                 .onPreferenceChange(ScrollYKey.self) { scrollY = $0 }
+                .onAppear { progress.ensureQuests() }
                 .scrollIndicators(.hidden)
             }
         }
@@ -259,20 +260,21 @@ struct HomeView: View {
 
     // MARK: practice
     private var hub: some View {
-        VStack(spacing: 0) {
+        let mistakes = progress.mistakeCount, due = progress.dueCount, weak = progress.weakCount
+        return VStack(spacing: 0) {
             Button { router.start(StudySession.mistakes(progress)) } label: {
                 hubRow("xmark", "Fix your mistakes",
-                       progress.mistakeCount > 0 ? "\(progress.mistakeCount) word\(progress.mistakeCount == 1 ? "" : "s") to get right again" : "Nothing to fix. Mistakes you make land here",
-                       progress.mistakeCount, ink: .again, soft: .againSoft)
+                       mistakes > 0 ? "\(mistakes) word\(mistakes == 1 ? "" : "s") to get right again" : "Nothing to fix. Mistakes you make land here",
+                       mistakes, ink: .again, soft: .againSoft)
             }
             Button { router.start(StudySession.review(progress)) } label: {
                 hubRow("arrow.counterclockwise", "Review",
-                       progress.dueCount > 0 ? "\(progress.dueCount) word\(progress.dueCount == 1 ? "" : "s") ready to review" : "All caught up",
-                       progress.dueCount, ink: .accent, soft: .accentSoft, first: false)
+                       due > 0 ? "\(due) word\(due == 1 ? "" : "s") ready to review" : "All caught up",
+                       due, ink: .accent, soft: .accentSoft, first: false)
             }
             Button { router.start(StudySession.trouble(progress)) } label: {
-                hubRow("scope", "Weak words", progress.weakCount > 0 ? "\(progress.weakCount) word\(progress.weakCount == 1 ? "" : "s") you often miss" : "No weak words yet",
-                       progress.weakCount, ink: .gold, soft: Color.gold.opacity(0.18), first: false)
+                hubRow("scope", "Weak words", weak > 0 ? "\(weak) word\(weak == 1 ? "" : "s") you often miss" : "No weak words yet",
+                       weak, ink: .gold, soft: Color.gold.opacity(0.18), first: false)
             }
         }
         .buttonStyle(.plain)

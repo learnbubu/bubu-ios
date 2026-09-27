@@ -6,7 +6,7 @@ struct Achievement: Identifiable {
     let test: (ProgressStore) -> Bool
 
     static let all: [Achievement] = {
-        let learned = { (p: ProgressStore) in p.srs.values.filter { ($0.reps ?? 0) >= 1 }.count }
+        let learned = { (p: ProgressStore) in Course.shared.cards.filter { (p.srs[$0.id]?.reps ?? 0) >= 1 }.count }
         var a: [Achievement] = [
             .init(id: "streak-7", icon: "flame.fill", tint: .again, title: "7-day streak", sub: "Keep it going!") { $0.streak >= 7 },
             .init(id: "streak-30", icon: "flame.fill", tint: .again, title: "30-day streak", sub: "A whole month") { $0.streak >= 30 },
@@ -331,7 +331,7 @@ struct ProfileView: View {
                     if ci == 0 || course.chapters[ci - 1].unit != ch.unit {
                         Text(ch.unit).font(.nunito(12, .black)).tracking(0.8).foregroundStyle(Color.accent).padding(.top, ci == 0 ? 0 : 12).padding(.bottom, 4)
                     }
-                    let cards = course.cards.filter { ch.lessons.contains($0.lessonId) }
+                    let cards = course.chapterCards[ci]
                     let m = cards.filter { progress.isMastered($0.id) }.count
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {

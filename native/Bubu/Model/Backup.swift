@@ -105,11 +105,11 @@ enum Backup {
     }
 }
 
-/// The backup as a file to share or save.
+/// The backup as a file to share or save, built only when it's shared.
 struct BackupFile: Transferable {
-    let data: Data
+    let progress: ProgressStore
     static var transferRepresentation: some TransferRepresentation {
-        DataRepresentation(exportedContentType: .json) { $0.data }
+        DataRepresentation(exportedContentType: .json) { f in await MainActor.run { Backup.export(f.progress) } }
             .suggestedFileName { _ in "chinese-progress-\(ISO8601DateFormatter.string(from: Date(), timeZone: .current, formatOptions: [.withFullDate])).json" }
     }
 }

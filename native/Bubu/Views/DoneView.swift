@@ -111,8 +111,8 @@ struct DoneView: View {
             Text("\(streak)").font(.nunito(57.6, .black)).tracking(-1.7).foregroundStyle(Color.ink).padding(.top, 6)
             heading("day streak").padding(.top, 4)
             WeekStrip().frame(maxWidth: 330).padding(.top, 14)
-            if let f = r.fire, f.ember || progress.embers > 0 {
-                Label((f.ember ? "You earned an ember · " : "") + "\(progress.embers) ember\(progress.embers == 1 ? "" : "s") protecting it",
+            Group {
+                Label((r.fire?.ember == true ? "You earned an ember · " : "") + "\(progress.embers) ember\(progress.embers == 1 ? "" : "s") protecting it",
                       systemImage: "flame.fill")
                     .font(.nunito(13, .bold)).foregroundStyle(Color.gold)
                     .padding(.horizontal, 12).padding(.vertical, 5).background(Color.accentSoft, in: Capsule())
@@ -125,7 +125,7 @@ struct DoneView: View {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) { flameIn = true }
             if let f = r.fire, f.milestone {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { Moments.shared.show(.milestone(f.streak, ember: f.ember)) }
-            } else if r.fireJustLit && !r.goalReached { Sounds.shared.play("goal") }
+            } else if r.fireJustLit { Sounds.shared.play("goal") }
         }
     }
 

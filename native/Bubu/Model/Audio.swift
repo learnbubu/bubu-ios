@@ -49,6 +49,8 @@ final class Speech {
         return zh.max { score($0) < score($1) } ?? AVSpeechSynthesisVoice(language: "zh-CN")
     }()
 
+    func stop() { synth.stopSpeaking(at: .immediate) }
+
     func speak(_ text: String, slow: Bool = false) {
         Sounds.shared.activate()
         synth.stopSpeaking(at: .immediate)
@@ -87,9 +89,11 @@ final class Sounds {
         let session = AVAudioSession.sharedInstance()
         recording = on
         if on {
-            try? session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .duckOthers])
-            try? session.setActive(true, options: .notifyOthersOnDeactivation)
+            try? session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .duckOthers, .allowBluetooth])
+            try? session.setActive(true)
         } else {
+            // let other audio (music) come back up, then return to playback
+            try? session.setActive(false, options: .notifyOthersOnDeactivation)
             try? session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
             try? session.setActive(true)
         }
