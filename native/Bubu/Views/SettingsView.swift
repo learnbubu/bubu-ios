@@ -225,16 +225,9 @@ struct HelpPage: View {
                 p("**Study** uses spaced repetition: it brings back words you find hard and spaces out ones you know. Get a word right and it comes back less often; miss it and it returns soon, then again at the end of the session.")
                 p("Each word climbs a ladder: first you recognise it and hear it, then recall it, read its pinyin and use it in sentences, and once it's solid, write it and say it.")
                 h("Practice")
-                p("• **Fix your mistakes** asks each missed word the way you missed it.
-• **Review** brings back words that are due.
-• **Weak words** are the ones that keep slipping.
-• **Listening, Writing, Quiz, Tones, Reading and Speaking** each practise one thing.
-• **Vocabulary** lets you pick any words for flashcards, matching or a quiz.")
+                p("• **Fix your mistakes** asks each missed word the way you missed it.\n• **Review** brings back words that are due.\n• **Weak words** are the ones that keep slipping.\n• **Listening, Writing, Quiz, Tones, Reading and Speaking** each practise one thing.\n• **Vocabulary** lets you pick any words for flashcards, matching or a quiz.")
                 h("Buttons you'll see")
-                p("• The speaker plays a word; **½×** plays it slowly.
-• Tap a dotted word for its meaning, or a character to see how it's built.
-• The pencil opens a writing sheet.
-• The microphone checks what you say.")
+                p("• The speaker plays a word; **½×** plays it slowly.\n• Tap a dotted word for its meaning, or a character to see how it's built.\n• The pencil opens a writing sheet.\n• The microphone checks what you say.")
                 h("Streaks and XP")
                 p("Finish a session to light the day's fire. Miss a day and an ember can relight it; you earn embers at 3, 7, 14, 30, 60 and 100 days. XP counts toward your daily goal, your level and your daily quests.")
             }
