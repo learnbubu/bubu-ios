@@ -74,6 +74,11 @@ workflows:
           APP=$(find build/Build/Products -name "Bubu.app" -path "*iphonesimulator*" | head -1)
           xcrun simctl install "$UDID" "$APP"
           xcrun simctl status_bar "$UDID" override --time 9:41 --batteryState charged --batteryLevel 100 || true
+          # if the app is stuck, record where its main thread is
+          xcrun simctl launch "$UDID" com.domchivers.bubu
+          sleep 10
+          sample Bubu 3 -file screenshots/launch-sample.txt || true
+          xcrun simctl terminate "$UDID" com.domchivers.bubu || true
           for MODE in light dark; do
             xcrun simctl ui "$UDID" appearance $MODE
             for S in home path lesson study quiz sentence speak write done char settings; do
@@ -85,5 +90,6 @@ workflows:
           done
     artifacts:
       - screenshots/*.png
+      - screenshots/*.txt
       - test.log
       - Bubu-Xcode-project.zip
