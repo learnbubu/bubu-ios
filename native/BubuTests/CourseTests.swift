@@ -44,4 +44,18 @@ final class CourseTests: XCTestCase {
         XCTAssertEqual(b.streak, 1)
         XCTAssertNotEqual(b.currentLessonId, first)
     }
+
+    func testQuestsMatchTheWeb() {
+        // values from the web app's seededPick for the same dates
+        let s = Quest.sets
+        XCTAssertEqual([Quest.pick(s[0], seed: "2026-09-27a"), Quest.pick(s[1], seed: "2026-09-27b"), Quest.pick(s[2], seed: "2026-09-27c")],
+                       ["xp30", "perfect1", "listen5"])
+        XCTAssertEqual([Quest.pick(s[1], seed: "2026-10-01b"), Quest.pick(s[2], seed: "2026-10-01c")], ["review15", "speak3"])
+    }
+
+    func testLessonNameSplits() {
+        let l = Lesson(id: "x", title: "起步1 US.1 · 你好！ Hello! Sounds and survival", words: [])
+        XCTAssertEqual(l.nameParts.hanzi, "你好！")
+        XCTAssertEqual(l.nameParts.en, "Hello! Sounds and survival")
+    }
 }

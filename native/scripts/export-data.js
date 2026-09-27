@@ -76,6 +76,14 @@ async function imageSet(name, lightSrc, darkSrc) {
     await imageSet(a, path.join(P, l), files.has(`${a}-dark.webp`) ? path.join(P, `${a}-dark.webp`) : null); n++;
   }
   await imageSet("welcome", path.join(WEB, "images", "welcome-light.webp"), path.join(WEB, "images", "welcome-dark.webp")); n++;
+  // Home: the scenery behind it and the Continue card's art
+  const H = path.join(WEB, "images", "home");
+  for (const h of ["temple", "cloud-a", "bottom"]) {
+    await imageSet(`home-${h}`, path.join(H, `${h}-light.webp`), path.join(H, `${h}-dark.webp`)); n++;
+  }
+  await imageSet("home-peek", path.join(WEB, "images", "panda-peek.png"), null); n++;
+  await imageSet("sheet-waving", path.join(WEB, "images", "panda-waving.png"), null); n++;
+  await imageSet("home-card", path.join(WEB, "images", "card-light.webp"), path.join(WEB, "images", "card-dark.webp")); n++;
   // app icon (1024, one size: Xcode derives the rest)
   const icon = path.join(ASSETS, "AppIcon.appiconset");
   fs.rmSync(icon, { recursive: true, force: true }); fs.mkdirSync(icon, { recursive: true });

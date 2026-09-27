@@ -1,28 +1,49 @@
 import SwiftUI
+import Observation
+
+/// Where the app is: the selected tab and the lesson sheet, if one is open.
+/// The sheet lives here so it can cover the tab bar, as the web's does.
+@Observable
+final class Router {
+    enum Tab: String { case home, learn, profile, settings }
+    var tab: Tab
+    var lesson: Lesson?
+
+    init() {
+        switch Launch.screen {
+        case "path", "lesson": tab = .learn
+        case "profile": tab = .profile
+        case "settings": tab = .settings
+        default: tab = .home
+        }
+        if Launch.screen == "lesson" { lesson = Course.shared.lessons.first }
+    }
+}
 
 struct RootView: View {
-    enum Tab: String { case home, learn, profile, settings }
-    @State private var tab: Tab = {
-        switch Launch.screen {
-        case "path", "lesson": return .learn
-        case "profile": return .profile
-        case "settings": return .settings
-        default: return .home
-        }
-    }()
+    @State private var router = Router()
 
     var body: some View {
-        TabView(selection: $tab) {
-            HomeView(openLearn: { tab = .learn })
-                .tabItem { Label("Home", systemImage: "house") }.tag(Tab.home)
+        TabView(selection: $router.tab) {
+            HomeView()
+                .tabItem { Label("Home", systemImage: "house") }.tag(Router.Tab.home)
             PathView()
-                .tabItem { Label("Learn", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }.tag(Tab.learn)
+                .tabItem { Label("Learn", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }.tag(Router.Tab.learn)
             ComingSoon(title: "Profile", icon: "person.crop.circle")
-                .tabItem { Label("Profile", systemImage: "person") }.tag(Tab.profile)
+                .tabItem { Label("Profile", systemImage: "person") }.tag(Router.Tab.profile)
             ComingSoon(title: "Settings", icon: "gearshape")
-                .tabItem { Label("Settings", systemImage: "gearshape") }.tag(Tab.settings)
+                .tabItem { Label("Settings", systemImage: "gearshape") }.tag(Router.Tab.settings)
         }
-        .sensoryFeedback(.selection, trigger: tab)
+        .sensoryFeedback(.selection, trigger: router.tab)
+        .overlay {
+            if let lesson = router.lesson {
+                LessonSheet(lesson: lesson) { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { router.lesson = nil } }
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
+        }
+        .animation(.spring(response: 0.34, dampingFraction: 0.86), value: router.lesson?.id)
+        .environment(router)
     }
 }
 

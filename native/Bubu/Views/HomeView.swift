@@ -1,88 +1,338 @@
 import SwiftUI
 
+/// Home, as the web has it: greeting over the temple scenery, the streak card
+/// with Bùbù peeking up, daily quests, Continue learning, and practice.
 struct HomeView: View {
     @Environment(ProgressStore.self) private var progress
-    var openLearn: () -> Void
+    @Environment(Router.self) private var router
+    @State private var scrollY: CGFloat = 0
     private let course = Course.shared
+
+    var body: some View {
+        GeometryReader { geo in
+            let W = geo.size.width, top = geo.safeAreaInsets.top
+            ZStack(alignment: .top) {
+                Color.bg.ignoresSafeArea()
+                scenery(W: W, top: top)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        GeometryReader { g in
+                            Color.clear.preference(key: ScrollYKey.self, value: g.frame(in: .named("home")).minY)
+                        }
+                        .frame(height: 0)
+                        header
+                        streakCard.padding(.top, 14)
+                        questCard.padding(.top, 8)
+                        continueSection
+                        Text("Practice").font(.nunitoXB(17)).foregroundStyle(Color.ink)
+                            .padding(.top, 20).padding(.bottom, 10).padding(.horizontal, 2)
+                        hub
+                        tiles.padding(.top, 10)
+                        Color.clear.frame(height: 150)
+                    }
+                    .padding(.horizontal, 18)
+                }
+                .coordinateSpace(name: "home")
+                .onPreferenceChange(ScrollYKey.self) { scrollY = $0 }
+                .scrollIndicators(.hidden)
+            }
+        }
+    }
+
+    // MARK: scenery, drifting slower than the page as on the web
+    private func scenery(W: CGFloat, top: CGFloat) -> some View {
+        let up = min(0, scrollY)
+        return ZStack(alignment: .topLeading) {
+            Image("home-cloud-a").resizable().frame(width: W * 0.42, height: W * 0.42 * 0.3855)
+                .offset(x: W * 0.133, y: top - 36 + up * 0.1)
+            Image("home-temple").resizable().frame(width: W * 0.70, height: W * 0.70 * 0.5869)
+                .opacity(0.95)
+                .offset(x: W * 0.329, y: top - 24 + up * 0.28)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .overlay(alignment: .bottom) {
+            Image("home-bottom").resizable().frame(width: W * 1.5, height: W * 1.5 * 338 / 1200)
+                .offset(y: 14)
+        }
+        .ignoresSafeArea(edges: .top)
+        .allowsHitTesting(false)
+    }
+
+    // MARK: greeting
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 6) {
+                Text("步步").font(.hanzi(20, .heavy)).foregroundStyle(Color.ink)
+                Text("Bùbù").font(.nunitoXB(19)).foregroundStyle(Color.accent)
+            }
+            .padding(.top, 6).padding(.bottom, 18)
+            Text(greeting).font(.nunitoXB(28)).tracking(-0.3).foregroundStyle(Color.ink)
+            Text("A little progress goes a long way.").font(.nunito(15, .semibold)).foregroundStyle(Color.muted)
+                .padding(.top, 4)
+        }
+        .padding(.horizontal, 2)
+    }
 
     private var greeting: String {
         let h = Calendar.current.component(.hour, from: Date())
         let part = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"
-        return progress.name.isEmpty ? part : "\(part), \(progress.name)"
+        return progress.name.isEmpty ? "\(part)!" : "\(part), \(progress.name)!"
     }
 
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(spacing: 8) {
-                    Text("步步").font(.hanzi(24, .heavy)).foregroundStyle(Color.ink)
-                    Text("Bùbù").font(.nunitoXB(20)).foregroundStyle(Color.accent)
-                }
-                .padding(.top, 8)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(greeting).font(.nunitoXB(30)).foregroundStyle(Color.ink)
-                    Text("A little progress goes a long way").font(.nunito(16)).foregroundStyle(Color.muted)
-                }
-
-                Card3D {
-                    HStack(alignment: .center, spacing: 16) {
-                        Image(systemName: "flame.fill").font(.system(size: 40)).foregroundStyle(.orange)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("\(progress.streak)").font(.nunito(40, .black)).foregroundStyle(Color.ink)
-                            Text("day streak").font(.nunito(15, .semibold)).foregroundStyle(Color.muted)
-                        }
-                        Spacer()
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text("\(progress.wordsLearned)").font(.nunitoXB(24)).foregroundStyle(Color.accent)
-                            Text("words learned").font(.nunito(13, .semibold)).foregroundStyle(Color.muted)
-                        }
+    // MARK: streak
+    private var streakCard: some View {
+        let streak = progress.streak, xp = progress.xpToday, goal = progress.dailyGoal
+        let lit = xp > 0
+        let bubble = xp >= goal ? "Goal done!" : lit ? "\(goal - xp) XP to goal" : streak > 0 ? "Keep it lit!" : "Let's start!"
+        return VStack(spacing: 0) {
+            ZStack(alignment: .topTrailing) {
+                HStack(spacing: 13) {
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 38))
+                        .foregroundStyle(lit ? AnyShapeStyle(LinearGradient(colors: [Color(UIColor(hex: 0xFFB347)), Color(UIColor(hex: 0xF0742F))], startPoint: .top, endPoint: .bottom))
+                                             : AnyShapeStyle(Color.muted.opacity(0.55)))
+                        .shadow(color: lit ? Color(UIColor(hex: 0xF08A7A)).opacity(0.55) : .clear, radius: 10)
+                        .frame(width: 42, height: 42)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("\(streak)").font(.nunitoXB(34)).tracking(-0.6).foregroundStyle(Color.ink)
+                        Text("day streak").font(.nunito(14, .bold)).foregroundStyle(Color.muted)
                     }
+                    Spacer()
                 }
+                .frame(minHeight: 118)
+                .padding(.top, 12).padding(.horizontal, 2)
 
-                if let id = progress.currentLessonId, let lesson = course.lessonById[id], let ci = course.chapterOf[id] {
-                    Text("Continue learning").font(.nunitoXB(19)).foregroundStyle(Color.ink).padding(.top, 4)
-                    Card3D {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text(course.chapterLabel(ci).uppercased()).font(.nunitoXB(11)).tracking(1.2).foregroundStyle(Color.accent)
-                            Text(lesson.name).font(.nunitoXB(20)).foregroundStyle(Color.ink)
-                            HStack(spacing: 8) {
-                                ForEach(lesson.words.prefix(4), id: \.self) { w in
-                                    Text(w.hanzi).font(.hanzi(17, .medium)).foregroundStyle(Color.ink)
-                                        .lineLimit(1).fixedSize()
-                                        .padding(.horizontal, 9).padding(.vertical, 5)
-                                        .background(Color.accentSoft, in: Capsule())
-                                }
-                            }
-                            let (d, t) = progress.chapterProgress(ci)
-                            ProgressView(value: Double(d), total: Double(max(t, 1))).tint(.accent)
-                            Button("Continue", action: openLearn).buttonStyle(PrimaryButtonStyle()).padding(.top, 4)
-                        }
-                    }
-                }
-
-                Text("The course").font(.nunitoXB(19)).foregroundStyle(Color.ink).padding(.top, 4)
-                Card3D {
-                    VStack(alignment: .leading, spacing: 8) {
-                        stat("Chapters", "\(course.chapters.count)")
-                        stat("Lessons", "\(course.lessons.count)")
-                        stat("Words", "\(course.cards.count)")
-                        stat("Stories", "\(course.data.readings.count)")
-                    }
-                }
+                Image("home-peek").resizable().scaledToFit().frame(height: 92)
+                    .offset(x: -64, y: 118 + 12 - 92 + 6)
+                    .allowsHitTesting(false)
+                SpeechBubble(text: bubble).padding(.top, 13).padding(.trailing, 16)
             }
-            .padding(.horizontal, 18)
-            .padding(.bottom, 30)
+            .clipped()
+            weekStrip
         }
-        .scrollIndicators(.hidden)
-        .background(Color.bg.ignoresSafeArea())
+        .padding(.horizontal, 14).padding(.bottom, 12)
+        .panel().panelShadow()
     }
 
-    private func stat(_ k: String, _ v: String) -> some View {
-        HStack {
-            Text(k).font(.nunito(16, .semibold)).foregroundStyle(Color.muted)
-            Spacer()
-            Text(v).font(.nunitoXB(16)).foregroundStyle(Color.ink)
+    private var weekStrip: some View {
+        let days = progress.thisWeek, today = progress.today
+        let names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        return HStack(spacing: 2) {
+            ForEach(0..<7, id: \.self) { i in
+                let d = days[i], xp = progress.xp(on: d)
+                let met = xp > 0, goal = xp >= progress.dailyGoal, isToday = d == today, future = d > today
+                VStack(spacing: 4) {
+                    ZStack {
+                        Circle().fill(goal ? Color.gold : met ? Color.good : .clear)
+                        Circle().strokeBorder(goal ? Color.gold : met ? Color.good : isToday ? Color.accent : Color.line,
+                                              style: StrokeStyle(lineWidth: 2, dash: isToday && !met ? [4, 3] : []))
+                        if met { Image(systemName: "checkmark").font(.system(size: 12, weight: .heavy)).foregroundStyle(.white) }
+                    }
+                    .frame(width: 26, height: 26)
+                    Text(names[i]).font(.nunito(11, .bold))
+                        .foregroundStyle(isToday ? Color.accent : met ? Color.ink : Color.muted)
+                }
+                .frame(maxWidth: .infinity)
+                .opacity(future ? 0.5 : 1)
+            }
         }
+        .padding(.top, 10)
+        .overlay(alignment: .top) { Rectangle().fill(Color.line).frame(height: 1) }
+    }
+
+    // MARK: quests
+    private var questCard: some View {
+        let quests = progress.todayQuests
+        let done = quests.filter { progress.progress(of: $0) >= $0.target }.count
+        return VStack(spacing: 0) {
+            HStack {
+                Text("Daily quests").font(.nunitoXB(15)).foregroundStyle(Color.ink)
+                Spacer()
+                Text("\(done)/3").font(.nunitoXB(12.5)).foregroundStyle(done == 3 ? Color.gold : Color.muted)
+                    .padding(.horizontal, 10).padding(.vertical, 3)
+                    .background(Color.accentSoft, in: Capsule())
+            }
+            .padding(.bottom, 2)
+            ForEach(Array(quests.enumerated()), id: \.offset) { i, q in
+                let n = min(q.target, progress.progress(of: q)), ok = n >= q.target
+                HStack(spacing: 10) {
+                    Image(systemName: ok ? "checkmark" : q.icon).font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(ok ? Color.good : Color.accent)
+                        .frame(width: 30, height: 30)
+                        .background(ok ? Color.goodSoft : Color.accentSoft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(q.title).font(.nunito(14, .bold)).foregroundStyle(Color.ink).lineLimit(1)
+                        Bar(value: Double(n) / Double(q.target), fill: ok ? .good : .accent)
+                    }
+                    Text(ok ? "Done" : "\(n)/\(q.target)").font(.nunitoXB(13)).monospacedDigit()
+                        .foregroundStyle(ok ? Color.good : Color.muted)
+                        .frame(minWidth: 40, alignment: .trailing)
+                }
+                .padding(.vertical, 8)
+                .overlay(alignment: .top) { if i > 0 { Rectangle().fill(Color.line).frame(height: 1) } }
+            }
+        }
+        .padding(.horizontal, 14).padding(.top, 12).padding(.bottom, 4)
+        .panel()
+    }
+
+    // MARK: continue
+    @ViewBuilder
+    private var continueSection: some View {
+        Button { router.tab = .learn } label: {
+            HStack {
+                Text("Continue learning").font(.nunitoXB(17)).foregroundStyle(Color.ink)
+                Spacer()
+                Image(systemName: "chevron.right").font(.system(size: 15, weight: .semibold)).foregroundStyle(Color.muted)
+            }
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 20).padding(.horizontal, 2)
+
+        if let id = progress.currentLessonId, let lesson = course.lessonById[id], let ci = course.chapterOf[id] {
+            let cards = course.cards(in: id)
+            let learned = cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
+            let parts = lesson.nameParts
+            Button { router.tab = .learn; router.lesson = lesson } label: {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(course.chapterLabel(ci).uppercased()).font(.nunito(12.5, .bold)).foregroundStyle(Color.muted)
+                    Text(parts.hanzi).font(.hanzi(21, .heavy)).foregroundStyle(Color.ink)
+                        .shadow(color: Color.panel, radius: 6).padding(.top, 3).padding(.bottom, 1)
+                    if !parts.en.isEmpty {
+                        Text(parts.en).font(.nunito(13.5, .semibold)).foregroundStyle(Color.muted)
+                    }
+                    Bar(value: cards.isEmpty ? 0 : Double(learned) / Double(cards.count), height: 8)
+                        .padding(.top, 12).padding(.bottom, 7)
+                    Text("\(learned) / \(cards.count) words learned").font(.nunito(13, .bold)).foregroundStyle(Color.muted)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.trailing, 110)
+                .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, 14)
+                .background(alignment: .trailing) {
+                    GeometryReader { g in
+                        Image("home-card").resizable().scaledToFill()
+                            .frame(height: g.size.height * 1.53)
+                            .frame(width: g.size.width * 0.67, height: g.size.height, alignment: .trailing)
+                            .offset(x: 19)
+                            .clipped()
+                            .mask(LinearGradient(stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.7)],
+                                                 startPoint: .leading, endPoint: .trailing))
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    Image(systemName: "chevron.right").font(.system(size: 19, weight: .bold)).foregroundStyle(Color.onAccent)
+                        .frame(width: 46, height: 46)
+                        .background(Color.accent, in: Circle())
+                        .shadow(color: .black.opacity(0.35), radius: 8, y: 6)
+                        .padding(14)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .panel().panelShadow()
+            }
+            .buttonStyle(PressDown(depth: 2))
+            .padding(.top, 10)
+        }
+    }
+
+    // MARK: practice
+    private var hub: some View {
+        VStack(spacing: 0) {
+            hubRow("xmark", "Fix your mistakes",
+                   progress.mistakeCount > 0 ? "Words you missed" : "Nothing to fix. Mistakes you make land here",
+                   progress.mistakeCount, ink: .again, soft: .againSoft)
+            hubRow("arrow.counterclockwise", "Review",
+                   progress.dueCount > 0 ? "\(progress.dueCount) word\(progress.dueCount == 1 ? "" : "s") due" : "All caught up",
+                   progress.dueCount, ink: .accent, soft: .accentSoft, first: false)
+            hubRow("scope", "Weak words", progress.weakCount > 0 ? "Words that keep slipping" : "No weak words yet",
+                   progress.weakCount, ink: .gold, soft: Color.gold.opacity(0.18), first: false)
+        }
+        .panel(radius: 18).panelShadow()
+    }
+
+    private func hubRow(_ icon: String, _ title: String, _ sub: String, _ n: Int, ink: Color, soft: Color, first: Bool = true) -> some View {
+        let empty = n == 0
+        return HStack(spacing: 12) {
+            Image(systemName: icon).font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(empty ? Color.muted : ink)
+                .frame(width: 36, height: 36)
+                .background(empty ? Color.muted.opacity(0.12) : soft, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title).font(.nunitoXB(15)).foregroundStyle(empty ? Color.muted : Color.ink)
+                Text(sub).font(.nunito(12, .semibold)).foregroundStyle(Color.muted).lineLimit(1)
+            }
+            Spacer(minLength: 0)
+            if n > 0 {
+                Text("\(n)").font(.nunito(13, .black)).foregroundStyle(.white)
+                    .padding(.horizontal, 8).frame(minWidth: 26, minHeight: 26)
+                    .background(ink, in: Capsule())
+            }
+        }
+        .padding(.horizontal, 14).padding(.vertical, 11)
+        .overlay(alignment: .top) { if !first { Rectangle().fill(Color.line).frame(height: 1) } }
+    }
+
+    private struct Tile: Identifiable { let id: String; let icon: String; let title: String; let sub: String; let color: String }
+
+    private var tiles: some View {
+        let known = Set(progress.srs.filter { ($0.value.reps ?? 0) > 0 }.keys.compactMap { course.cardById[$0] }
+            .flatMap { $0.word.hanzi.filter(Course.isHan) }).count
+        let list = [
+            Tile(id: "listen", icon: "headphones", title: "Listening", sub: "Train your ear", color: "red"),
+            Tile(id: "pick", icon: "square.stack.3d.up", title: "Vocabulary", sub: "Build your words", color: "blue"),
+            Tile(id: "speak", icon: "mic", title: "Speaking", sub: "Practice out loud", color: "green"),
+            Tile(id: "write", icon: "pencil", title: "Writing", sub: "Master the strokes", color: "yellow"),
+            Tile(id: "quiz", icon: "checklist", title: "Quiz", sub: "Multiple choice", color: "purple"),
+            Tile(id: "chars", icon: "字", title: "Characters", sub: "\(known) known", color: "teal"),
+            Tile(id: "read", icon: "book", title: "Reading", sub: "Chapter stories", color: "orange"),
+            Tile(id: "tones", icon: "music.note", title: "Tones", sub: "Hear the pairs", color: "pink"),
+        ]
+        return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+            ForEach(list) { t in
+                let c = Color.tiles[t.color]!
+                Button {} label: {
+                    HStack(spacing: 10) {
+                        Group {
+                            if t.icon == "字" { Text("字").font(.hanzi(22, .bold)) }
+                            else { Image(systemName: t.icon).font(.system(size: 22, weight: .medium)) }
+                        }
+                        .foregroundStyle(c.ink).frame(width: 28)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(t.title).font(.nunitoXB(15)).foregroundStyle(Color.ink)
+                            Text(t.sub).font(.nunito(11, .semibold)).foregroundStyle(Color.muted).lineLimit(1)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.leading, 12).padding(.trailing, 10).padding(.vertical, 12)
+                    .frame(minHeight: 66)
+                    .background(c.bg, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                }
+                .buttonStyle(PressDown(depth: 2))
+            }
+        }
+    }
+}
+
+private struct ScrollYKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+/// The streak card's speech bubble, tail pointing down at Bùbù.
+struct SpeechBubble: View {
+    let text: String
+    var body: some View {
+        Text(text).font(.nunitoXB(13)).foregroundStyle(Color.accent).lineLimit(1)
+            .padding(.horizontal, 11).padding(.vertical, 6)
+            .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(alignment: .bottomLeading) {
+                Triangle().fill(Color.accentSoft).frame(width: 12, height: 6).offset(x: 15, y: 5)
+            }
+    }
+}
+
+struct Triangle: Shape {
+    func path(in r: CGRect) -> Path {
+        Path { p in p.move(to: .init(x: r.minX, y: r.minY)); p.addLine(to: .init(x: r.maxX, y: r.minY)); p.addLine(to: .init(x: r.midX, y: r.maxY)); p.closeSubpath() }
     }
 }

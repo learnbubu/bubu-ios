@@ -18,7 +18,21 @@ extension Color {
     static let gold = Color(light: 0xB7822E, dark: 0xF0B95A)
     static let good = Color(light: 0x1F8A6D, dark: 0x52D08A)
     static let again = Color(light: 0xD9695A, dark: 0xFF7B70)
+    static let goodSoft = Color(light: 0xDAF1E3, dark: 0x112A2D)
+    static let againSoft = Color(light: 0xFDE7E5, dark: 0x2B2230)
     static let todoHero = Color(light: 0x1D6B5C, dark: 0xA9C6FB)
+    // practice tiles: pastel ground and ink, one per skill
+    struct Tile { let bg: Color; let ink: Color }
+    static let tiles: [String: Tile] = [
+        "red": Tile(bg: Color(light: 0xFDE7E5, dark: 0x26232F), ink: Color(light: 0xE0574A, dark: 0xFF8A7A)),
+        "blue": Tile(bg: Color(light: 0xDCF0FE, dark: 0x122136), ink: Color(light: 0x3B82F6, dark: 0x6C9DFC)),
+        "green": Tile(bg: Color(light: 0xDAF1D3, dark: 0x112A2D), ink: Color(light: 0x0F8A68, dark: 0x4CE1AD)),
+        "yellow": Tile(bg: Color(light: 0xFEEBBB, dark: 0x2A2B23), ink: Color(light: 0xDD8512, dark: 0xF5B03D)),
+        "purple": Tile(bg: Color(light: 0xECE6FB, dark: 0x201F36), ink: Color(light: 0x7C5CD6, dark: 0xA78BFA)),
+        "teal": Tile(bg: Color(light: 0xD8F0EF, dark: 0x10282C), ink: Color(light: 0x2A8B90, dark: 0x4FC9C4)),
+        "orange": Tile(bg: Color(light: 0xFFE6D5, dark: 0x2C2219), ink: Color(light: 0xD9651C, dark: 0xFF9D5C)),
+        "pink": Tile(bg: Color(light: 0xFBE3EE, dark: 0x2A1D2A), ink: Color(light: 0xC84A86, dark: 0xF28CBC)),
+    ]
     // tone colours 1–4 and neutral
     static let tones: [Color] = [
         Color(light: 0xD4493F, dark: 0xFF7B70), Color(light: 0xC9861C, dark: 0xF3B54A),
@@ -116,5 +130,43 @@ struct PrimaryButtonStyle: ButtonStyle {
             .offset(y: configuration.isPressed ? 4 : 0)
             .animation(.spring(response: 0.18, dampingFraction: 0.7), value: configuration.isPressed)
             .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed)
+    }
+}
+
+/// The web's `--shadow`: a soft lift under panels.
+extension View {
+    func panelShadow() -> some View {
+        shadow(color: .black.opacity(0.06), radius: 12, y: 6).shadow(color: .black.opacity(0.05), radius: 1.5, y: 1)
+    }
+    /// A panel with a thin line border, the web's `.card` look
+    func panel(radius: CGFloat = 20) -> some View {
+        background(Color.panel, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).stroke(Color.line, lineWidth: 1))
+    }
+}
+
+/// A thin rounded progress bar.
+struct Bar: View {
+    var value: Double
+    var height: CGFloat = 6
+    var fill: Color = .accent
+    var body: some View {
+        GeometryReader { g in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.line)
+                Capsule().fill(fill).frame(width: g.size.width * min(1, max(0, value)))
+            }
+        }
+        .frame(height: height)
+    }
+}
+
+extension Lesson {
+    /// "你好！" and "Hello! Sounds and survival" from the lesson's name
+    var nameParts: (hanzi: String, en: String) {
+        let n = name
+        guard let i = n.firstIndex(where: { $0.isASCII && ($0.isLetter || $0 == "(") }), i != n.startIndex else { return (n, "") }
+        return (n[..<i].trimmingCharacters(in: .whitespaces),
+                n[i...].trimmingCharacters(in: CharacterSet(charactersIn: "() ")))
     }
 }

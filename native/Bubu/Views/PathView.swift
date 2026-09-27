@@ -5,7 +5,7 @@ import SwiftUI
 /// layout, so every piece lands where it was placed.
 struct PathView: View {
     @Environment(ProgressStore.self) private var progress
-    @State private var openLesson: Lesson?
+    @Environment(Router.self) private var router
     private let course = Course.shared
 
     // the web app's phone layout (PATH_CFG.phone)
@@ -36,14 +36,19 @@ struct PathView: View {
                     }
                 }
                 .scrollIndicators(.hidden)
-                .onAppear { if let c = current, (course.lessonOrder[c] ?? 0) > 3 { reader.scrollTo(c, anchor: .center) } }
+                // land on the current lesson, as the web does on every render
+                .onAppear { if let c = current { reader.scrollTo(c, anchor: .center) } }
+            }
+            .overlay(alignment: .bottom) {
+                // the web's bottom fade: solid for a few points, gone by 76
+                LinearGradient(stops: [.init(color: .bg, location: 0), .init(color: .bg, location: 0.09),
+                                       .init(color: .bg.opacity(0), location: 1)], startPoint: .bottom, endPoint: .top)
+                    .frame(height: 76).allowsHitTesting(false)
             }
             .overlay(alignment: .top) { HUD() }
             .overlay(alignment: .bottom) { ReviewButton() }
         }
         .background(Color.bg.ignoresSafeArea())
-        .sheet(item: $openLesson) { LessonSheet(lesson: $0).presentationDetents([.large]).presentationDragIndicator(.visible) }
-        .onAppear { if Launch.screen == "lesson" { openLesson = course.lessons.first } }
     }
 
     // MARK: geometry
@@ -76,7 +81,7 @@ struct PathView: View {
         let done = progress.isDone(it.lesson.id), now = it.lesson.id == current
         let state = done ? "done" : now ? "now" : "locked"
         let x = nodeX(it.index, W, count: 64)
-        Button { openLesson = it.lesson } label: {
+        Button { router.lesson = it.lesson } label: {
             ZStack {
                 if now {
                     Circle().fill(Color.accent.opacity(0.28)).frame(width: size * 2.2, height: size * 1.5).blur(radius: 18)
@@ -92,7 +97,7 @@ struct PathView: View {
                     .shadow(color: .black.opacity(done || now ? 0.3 : 0), radius: 0, y: -1.5)
                     .shadow(color: .white.opacity(done || now ? 0.2 : 0.5), radius: 0, y: 1.5)
                     .offset(y: -7.5)
-                if now { StartBubble().offset(y: -size / 2 - 22) }
+                if now { StartBubble().offset(y: -size / 2 - 18) }
             }
         }
         .buttonStyle(StoneStyle())
@@ -104,15 +109,20 @@ struct PathView: View {
         let (d, t) = progress.chapterProgress(ci)
         let right = course.data.pathLayout.headers[it.lesson.id] == "right"
         let mid = bannerMid(it, items: items, current: current)
-        VStack(alignment: right ? .trailing : .leading, spacing: 4) {
-            Text(course.chapterLabel(ci).uppercased())
-                .font(.nunitoXB(11)).tracking(1.2).foregroundStyle(Color.accent)
+        VStack(alignment: right ? .trailing : .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Text(course.chapterLabel(ci).uppercased())
+                    .font(.nunitoXB(10)).tracking(1.3).foregroundStyle(Color.accent)
+                GuidePill()
+            }
             Text(course.chapters[ci].title)
-                .font(.nunitoXB(19)).foregroundStyle(Color.ink)
+                .font(.nunitoXB(18)).tracking(-0.2).foregroundStyle(Color.ink)
                 .multilineTextAlignment(right ? .trailing : .leading)
-            ProgressView(value: Double(d), total: Double(max(t, 1)))
-                .tint(.accent)
-            Text("\(d) / \(t) lessons").font(.nunito(11, .semibold)).foregroundStyle(Color.muted)
+                .padding(.top, 2)
+            Bar(value: Double(d) / Double(max(t, 1)))
+                .scaleEffect(x: right ? -1 : 1)
+                .padding(.top, 8).padding(.bottom, 5)
+            Text("\(d) / \(t) lessons").font(.nunito(11, .bold)).foregroundStyle(Color.muted)
         }
         .padding(.horizontal, 18)
         .frame(width: W * 0.62, alignment: right ? .trailing : .leading)
@@ -287,35 +297,87 @@ struct StoneStyle: ButtonStyle {
     }
 }
 
+/// The white START tag over the current stone, with its little pointer and a
+/// hard bottom edge, bobbing gently.
 struct StartBubble: View {
     var body: some View {
         Text("START")
-            .font(.nunitoXB(13)).tracking(0.8).foregroundStyle(Color.accent)
-            .padding(.horizontal, 12).padding(.vertical, 6)
-            .background(Color.panel, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Color.line, lineWidth: 1.5))
-            .shadow(color: .black.opacity(0.08), radius: 6, y: 3)
-            .phaseAnimator([0, -4]) { v, dy in v.offset(y: dy) } animation: { _ in .easeInOut(duration: 0.9) }
+            .font(.nunito(12, .black)).tracking(0.5).foregroundStyle(Color.accent)
+            .padding(.horizontal, 12).padding(.vertical, 5)
+            .background {
+                ZStack(alignment: .bottom) {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.line).offset(y: 3)
+                    Rectangle().fill(Color.panel).frame(width: 9, height: 9)
+                        .overlay(alignment: .bottomTrailing) {
+                            Path { p in p.move(to: .init(x: 9, y: 0)); p.addLine(to: .init(x: 9, y: 9)); p.addLine(to: .init(x: 0, y: 9)) }
+                                .stroke(Color.line, lineWidth: 2)
+                        }
+                        .rotationEffect(.degrees(45)).offset(y: 5)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.panel)
+                    RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 2)
+                }
+            }
+            .phaseAnimator([0, -3]) { v, dy in v.offset(y: dy) } animation: { _ in .easeInOut(duration: 0.9) }
     }
 }
 
-/// Streak and today's XP, floating over the top of the path.
+/// The GUIDE tag beside a chapter's name.
+struct GuidePill: View {
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: "lightbulb").font(.system(size: 10, weight: .bold))
+            Text("GUIDE").font(.nunitoXB(10)).tracking(0.6)
+        }
+        .foregroundStyle(Color.gold)
+        .padding(.leading, 6).padding(.trailing, 8).padding(.vertical, 2)
+        .background(Color.gold.opacity(0.14), in: Capsule())
+    }
+}
+
+/// Streak, the daily-goal ring and settings, floating over the top of the path.
 struct HUD: View {
     @Environment(ProgressStore.self) private var progress
+    @Environment(Router.self) private var router
     var body: some View {
+        let xp = progress.xpToday, goal = progress.dailyGoal, done = xp >= goal
         HStack(spacing: 8) {
-            pill { Image(systemName: "flame.fill").foregroundStyle(.orange); Text("\(progress.streak)") }
-            pill { Image(systemName: "star.fill").foregroundStyle(Color.gold); Text("\(progress.xpToday) XP") }
+            pill {
+                Image(systemName: "flame.fill").font(.system(size: 14))
+                Text("\(progress.streak)")
+            }
+            pill(tint: done ? .good : .accent, border: done ? .good : .line) {
+                ZStack {
+                    Circle().stroke(done ? Color.goodSoft : Color.line, lineWidth: 3)
+                    Circle().trim(from: 0, to: min(1, Double(xp) / Double(goal)))
+                        .stroke(done ? Color.good : Color.accent, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .animation(.easeOut(duration: 0.5), value: xp)
+                }
+                .frame(width: 15, height: 15).padding(2)
+                Text("\(min(xp, goal))/\(goal)")
+            }
             Spacer()
+            Button { router.tab = .settings } label: {
+                Image(systemName: "gearshape.fill").font(.system(size: 17)).foregroundStyle(Color.accent)
+                    .frame(width: 38, height: 38)
+                    .background(Circle().fill(Color.line).offset(y: 1))
+                    .background(Circle().fill(Color.panel).overlay(Circle().strokeBorder(Color.line, lineWidth: 2)))
+            }
+            .buttonStyle(PressDown(depth: 1))
         }
-        .padding(.horizontal, 14).padding(.top, 4)
+        .padding(.horizontal, 14).padding(.top, 10)
     }
-    private func pill<C: View>(@ViewBuilder _ c: () -> C) -> some View {
+    private func pill<C: View>(tint: Color = .accent, border: Color = .line, @ViewBuilder _ c: () -> C) -> some View {
         HStack(spacing: 5, content: c)
-            .font(.nunitoXB(14)).foregroundStyle(Color.ink)
-            .padding(.horizontal, 12).padding(.vertical, 7)
-            .background(.ultraThinMaterial, in: Capsule())
-            .overlay(Capsule().stroke(Color.line, lineWidth: 1))
+            .font(.nunitoXB(14)).foregroundStyle(tint)
+            .padding(.horizontal, 12).padding(.vertical, 5)
+            .background {
+                ZStack {
+                    Capsule().fill(border).offset(y: 1)
+                    Capsule().fill(Color.panel)
+                    Capsule().strokeBorder(border, lineWidth: 2)
+                }
+            }
     }
 }
 
