@@ -10,11 +10,6 @@ workflows:
     environment:
       xcode: latest
       node: 22
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
     scripts:
       - name: Install
         script: npm ci
@@ -43,3 +38,49 @@ workflows:
     artifacts:
       - screenshots/*.png
       - build.log
+
+  # The native SwiftUI app in native/: generates the Xcode project, runs the unit
+  # tests, then launches each screen in the simulator in light and dark.
+  native-check:
+    name: Native app check
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    environment:
+      xcode: latest
+    scripts:
+      - name: Generate the Xcode project
+        script: |
+          brew install xcodegen
+          cd native && xcodegen generate
+      - name: Create a simulator
+        script: |
+          TYPE=$(xcrun simctl list devicetypes | grep -E "iPhone 1[5-9]( |$)" | grep -v Plus | grep -v Max | tail -1 | sed -E 's/.*\((com\.apple[^)]*)\).*/\1/')
+          UDID=$(xcrun simctl create bubu "$TYPE")
+          echo "UDID=$UDID" >> $CM_ENV
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+      - name: Unit tests
+        script: |
+          set -o pipefail
+          cd native
+          xcodebuild -project Bubu.xcodeproj -scheme Bubu -destination "id=$UDID" \
+            -derivedDataPath ../build CODE_SIGNING_ALLOWED=NO test 2>&1 | tee ../test.log \
+            | grep -E "error:|Test Case .*(failed)|XCTAssert|Executed|TEST (SUCCEEDED|FAILED)|BUILD (SUCCEEDED|FAILED)"
+      - name: Screenshots
+        script: |
+          mkdir -p screenshots
+          APP=$(find build/Build/Products -name "Bubu.app" -path "*iphonesimulator*" | head -1)
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl status_bar "$UDID" override --time 9:41 --batteryState charged --batteryLevel 100 || true
+          for MODE in light dark; do
+            xcrun simctl ui "$UDID" appearance $MODE
+            for S in home path lesson; do
+              xcrun simctl terminate "$UDID" com.domchivers.bubu || true
+              xcrun simctl launch "$UDID" com.domchivers.bubu -screen $S
+              sleep 6
+              xcrun simctl io "$UDID" screenshot screenshots/$S-$MODE.png
+            done
+          done
+    artifacts:
+      - screenshots/*.png
+      - test.log

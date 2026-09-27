@@ -1,0 +1,13 @@
+{
+  "info": {
+    "author": "xcode",
+    "version": 1
+  },
+  "images": [
+    {
+      "idiom": "universal",
+      "filename": "land-pavilion-pond.png",
+      "scale": "2x"
+    }
+  ]
+}

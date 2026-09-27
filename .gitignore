@@ -2,3 +2,7 @@ node_modules/
 ios/App/Pods/
 ios/DerivedData/
 .DS_Store
+tools/.builds/
+native/Bubu.xcodeproj/
+native/Bubu/Info.plist
+build/
