@@ -84,6 +84,10 @@ async function imageSet(name, lightSrc, darkSrc) {
   await imageSet("home-peek", path.join(WEB, "images", "panda-peek.png"), null); n++;
   await imageSet("sheet-waving", path.join(WEB, "images", "panda-waving.png"), null); n++;
   await imageSet("home-card", path.join(WEB, "images", "card-light.webp"), path.join(WEB, "images", "card-dark.webp")); n++;
+  // sound effects, as the web plays them
+  const SND = path.resolve(__dirname, "../Bubu/Resources/Sounds");
+  fs.mkdirSync(SND, { recursive: true });
+  for (const f of fs.readdirSync(path.join(WEB, "sounds"))) fs.copyFileSync(path.join(WEB, "sounds", f), path.join(SND, f));
   // app icon (1024, one size: Xcode derives the rest)
   const icon = path.join(ASSETS, "AppIcon.appiconset");
   fs.rmSync(icon, { recursive: true, force: true }); fs.mkdirSync(icon, { recursive: true });

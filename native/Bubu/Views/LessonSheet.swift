@@ -7,6 +7,7 @@ struct LessonSheet: View {
     let lesson: Lesson
     var close: () -> Void
     @Environment(ProgressStore.self) private var progress
+    @Environment(Router.self) private var router
     @State private var shown = false
     @State private var drag: CGFloat = 0
     private let course = Course.shared
@@ -41,9 +42,16 @@ struct LessonSheet: View {
                 }
                 .padding(.bottom, 12)
 
-                Button {} label: {
+                // lessons unlock in order: finished ones and the current one can be studied
+                let open = done || lesson.id == progress.currentLessonId
+                Button {
+                    guard open else { return }
+                    let s = StudySession(lessonId: lesson.id, progress: progress)
+                    router.lesson = nil
+                    router.study = s
+                } label: {
                     VStack(spacing: 1) {
-                        Text(done ? "Study again" : "Start studying").font(.nunitoXB(16))
+                        Text(done ? "Study again" : open ? "Start studying" : "Finish the lessons before this one").font(.nunitoXB(16))
                         Text("mixed skills · spaced repetition").font(.nunito(11, .medium)).opacity(0.9)
                     }
                     .foregroundStyle(Color.onAccent)

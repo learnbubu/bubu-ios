@@ -8,6 +8,7 @@ final class Router {
     enum Tab: String { case home, learn, profile, settings }
     var tab: Tab
     var lesson: Lesson?
+    var study: StudySession?
 
     init() {
         switch Launch.screen {
@@ -22,6 +23,23 @@ final class Router {
 
 struct RootView: View {
     @State private var router = Router()
+    @Environment(ProgressStore.self) private var progress
+
+    /// Screens the cloud screenshot run asks for with `-screen`.
+    private func debugScreens() {
+        #if DEBUG
+        guard let screen = Launch.screen, ["study", "quiz", "sentence", "done"].contains(screen) else { return }
+        let first = Course.shared.lessons[0].id
+        let s = StudySession(lessonId: first, progress: progress)
+        switch screen {
+        case "quiz": s.debugShow(dir: "recognize")
+        case "sentence": s.debugShow(dir: "sentence")
+        case "done": s.debugFinish()
+        default: break
+        }
+        router.study = s
+        #endif
+    }
 
     var body: some View {
         TabView(selection: $router.tab) {
@@ -43,7 +61,12 @@ struct RootView: View {
             }
         }
         .animation(.spring(response: 0.34, dampingFraction: 0.86), value: router.lesson?.id)
+        .fullScreenCover(item: $router.study) { s in
+            StudyView(session: s) { router.study = nil }
+                .environment(progress)
+        }
         .environment(router)
+        .onAppear { debugScreens() }
     }
 }
 

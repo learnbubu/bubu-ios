@@ -37,6 +37,7 @@ final class CourseTests: XCTestCase {
         a.markDone(first)
         a.review(course.cards[0].id, .good)
         a.earn(10)
+        a.lightFire()
         let b = ProgressStore(course: course, url: url)
         XCTAssertTrue(b.isDone(first))
         XCTAssertEqual(b.wordsLearned, 1)

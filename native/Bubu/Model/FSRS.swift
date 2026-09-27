@@ -11,6 +11,12 @@ struct SRSRecord: Codable, Equatable {
     var D: Double?             // FSRS difficulty, 1–10
     var last: Double?          // ms
     var lapses: Int?
+    var known: Bool?           // answered right at least once
+    var prod: Bool?            // produced it (recall, write, speak) at least once
+    var miss: Miss?            // the last mistake, until it's put right
+
+    /// Where a mistake happened: the exercise, when, and in which session.
+    struct Miss: Codable, Equatable { var d: String; var at: Double; var s: Double }
 
     init(ease: Double? = nil, interval: Double? = nil, due: Double? = nil, reps: Int? = nil,
          S: Double? = nil, D: Double? = nil, last: Double? = nil, lapses: Int? = nil) {
@@ -30,6 +36,9 @@ struct SRSRecord: Codable, Equatable {
         ease = num(.ease); interval = num(.interval); due = num(.due)
         reps = num(.reps).map { Int($0) }; S = num(.S); D = num(.D)
         last = num(.last); lapses = num(.lapses).map { Int($0) }
+        known = try? c.decodeIfPresent(Bool.self, forKey: .known)
+        prod = try? c.decodeIfPresent(Bool.self, forKey: .prod)
+        miss = try? c.decodeIfPresent(Miss.self, forKey: .miss)
     }
 }
 

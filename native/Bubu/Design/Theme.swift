@@ -119,10 +119,11 @@ struct Card3D<Content: View>: View {
 struct PrimaryButtonStyle: ButtonStyle {
     var color: Color = .accent
     var base: Color = .accentDark
+    var text: Color = .onAccent
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.nunitoXB(17))
-            .foregroundStyle(Color.onAccent)
+            .foregroundStyle(text)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)
             .background(color, in: RoundedRectangle(cornerRadius: 16, style: .continuous))

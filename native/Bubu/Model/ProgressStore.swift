@@ -11,6 +11,10 @@ final class ProgressStore {
     private(set) var xpDays: [String: Int] = [:]      // "2026-09-27" → XP earned that day
     /// today's quest counters (combo, sessions, lessons, perfect, listen, write, speak, sentence)
     private(set) var qc: [String: [String: Int]] = [:]
+    private(set) var lit: Set<String> = []            // days a session was finished: the fire
+    private(set) var days: [String: Int] = [:]        // reviews answered per day
+    private(set) var celebrated: String?              // the day the goal bonus was paid
+    private(set) var boostUntil: Double = 0           // double XP until (ms)
     var name: String = ""
 
     private let course: Course
@@ -23,6 +27,10 @@ final class ProgressStore {
         var xpDays: [String: Int]?
         var name: String?
         var qc: [String: [String: Int]]?
+        var lit: [String]?
+        var days: [String: Int]?
+        var celebrated: String?
+        var boostUntil: Double?
     }
 
     init(course: Course, url: URL? = nil) {
@@ -37,10 +45,12 @@ final class ProgressStore {
         guard let data = try? Data(contentsOf: url),
               let s = try? JSONDecoder().decode(Saved.self, from: data) else { return }
         srs = s.srs; done = Set(s.done); xpDays = s.xpDays ?? [:]; name = s.name ?? ""; qc = s.qc ?? [:]
+        lit = Set(s.lit ?? []); days = s.days ?? [:]; celebrated = s.celebrated; boostUntil = s.boostUntil ?? 0
     }
 
     func save() {
-        let s = Saved(srs: srs, done: done.sorted(), xpDays: xpDays, name: name, qc: qc)
+        let s = Saved(srs: srs, done: done.sorted(), xpDays: xpDays, name: name, qc: qc,
+                      lit: lit.sorted(), days: days, celebrated: celebrated, boostUntil: boostUntil)
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         if let data = try? JSONEncoder().encode(s) { try? data.write(to: url, options: .atomic) }
     }
@@ -69,6 +79,15 @@ final class ProgressStore {
         return srs.values.filter { ($0.due ?? 0) <= t && ($0.reps ?? 0) > 0 }.count
     }
 
+    /// Due reviews from other lessons, from lessons done or the one you're on (web: dueReviewCards).
+    func dueReviewCards(excluding lessonId: String) -> [Card] {
+        let t = now(), cur = currentLessonId
+        return course.cards.filter { c in
+            guard c.lessonId != lessonId, let r = srs[c.id], (r.due ?? 0) <= t else { return false }
+            return done.contains(c.lessonId) || c.lessonId == cur
+        }
+    }
+
     var wordsLearned: Int { srs.values.filter { ($0.reps ?? 0) > 0 }.count }
 
     // MARK: streak and XP
@@ -77,19 +96,68 @@ final class ProgressStore {
         return f.string(from: Date(timeIntervalSince1970: ms / 1000))
     }
 
-    func earn(_ xp: Int) {
-        xpDays[Self.dayKey(now()), default: 0] += xp
-        save()
-    }
+    func earn(_ xp: Int) { earnXP(xp) }
 
     var xpToday: Int { xpDays[Self.dayKey(now())] ?? 0 }
 
-    /// Days in a row with any XP, counting today if you've practised, else from yesterday.
+    /// A day counts once a session was finished on it (the web's litOn).
+    func litOn(_ day: String) -> Bool { lit.contains(day) }
+
+    /// Days in a row with the fire lit, ending today, or yesterday if today isn't lit yet.
     var streak: Int {
         var n = 0, t = now()
-        if (xpDays[Self.dayKey(t)] ?? 0) == 0 { t -= FSRS.day }
-        while (xpDays[Self.dayKey(t)] ?? 0) > 0 { n += 1; t -= FSRS.day }
+        if !litOn(Self.dayKey(t)) { t -= FSRS.day }
+        while litOn(Self.dayKey(t)) { n += 1; t -= FSRS.day }
         return n
+    }
+
+    /// Light today's fire. Returns true if it wasn't lit yet.
+    @discardableResult
+    func lightFire() -> Bool {
+        let t = today
+        guard !lit.contains(t) else { return false }
+        lit.insert(t); save()
+        return true
+    }
+
+    var boostActive: Bool { boostUntil > now() }
+    func startBoost() { boostUntil = now() + 15 * 60_000; save() }
+
+    /// Earn XP as the web's earnXP: doubled during a boost, and the first time today's
+    /// total crosses the daily goal a +15 bonus is paid. Returns what was actually earned,
+    /// and whether the goal was just reached.
+    @discardableResult
+    func earnXP(_ n: Int) -> (earned: Int, goalReached: Bool) {
+        let amount = boostActive ? n * 2 : n
+        let t = today
+        xpDays[t, default: 0] += amount
+        var total = amount, reached = false
+        if xpDays[t, default: 0] >= dailyGoal && celebrated != t {
+            celebrated = t
+            xpDays[t, default: 0] += 15
+            total += 15; reached = true
+        }
+        save()
+        return (total, reached)
+    }
+
+    func recordReview() { days[today, default: 0] += 1; save() }
+
+    /// Grade an answer in a study session, as the web's answerStudy does to the record.
+    func answer(_ cardId: String, correct: Bool, dir: String, sessionStart: Double, mistakesMode: Bool) -> (mistake: Bool, fixed: Bool) {
+        var s = FSRS.schedule(srs[cardId], grade: correct ? .good : .again, now: now())
+        var mistake = false, fixed = false
+        if correct {
+            s.known = true
+            if let m = s.miss, mistakesMode || m.s != sessionStart { s.miss = nil; fixed = true }
+            if ["recall", "write", "speak"].contains(dir) { s.prod = true }
+        } else {
+            s.miss = SRSRecord.Miss(d: dir, at: now(), s: sessionStart)
+            mistake = true
+        }
+        srs[cardId] = s
+        save()
+        return (mistake, fixed)
     }
 
     // MARK: daily goal, week and quests
