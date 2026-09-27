@@ -47,8 +47,9 @@ struct HomeView: View {
                             Text(course.chapterLabel(ci).uppercased()).font(.nunitoXB(11)).tracking(1.2).foregroundStyle(Color.accent)
                             Text(lesson.name).font(.nunitoXB(20)).foregroundStyle(Color.ink)
                             HStack(spacing: 8) {
-                                ForEach(lesson.words.prefix(5), id: \.self) { w in
+                                ForEach(lesson.words.prefix(4), id: \.self) { w in
                                     Text(w.hanzi).font(.hanzi(17, .medium)).foregroundStyle(Color.ink)
+                                        .lineLimit(1).fixedSize()
                                         .padding(.horizontal, 9).padding(.vertical, 5)
                                         .background(Color.accentSoft, in: Capsule())
                                 }

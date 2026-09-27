@@ -25,8 +25,9 @@ struct PathView: View {
                 ScrollView {
                     ZStack(alignment: .topLeading) {
                         Color.clear.frame(width: W, height: height)
-                        pebbles(items, W)
+                        grounds(items, W)
                         scenery(items, W, behind: true)
+                        pebbles(items, W, current: current)
                         ForEach(items, id: \.lesson.id) { it in
                             if let ci = it.chapter { banner(ci, items: items, it: it, W: W, current: current) }
                             stone(it, W: W, current: current).id(it.lesson.id)
@@ -102,12 +103,7 @@ struct PathView: View {
     private func banner(_ ci: Int, items: [Item], it: Item, W: CGFloat, current: String?) -> some View {
         let (d, t) = progress.chapterProgress(ci)
         let right = course.data.pathLayout.headers[it.lesson.id] == "right"
-        let top: CGFloat = {
-            if it.index == 0 { return hud + 8 }
-            let prevBottom = items[it.index - 1].y + size / 2
-            let thisTop = it.y - size / 2 - (it.lesson.id == current ? bubble : 0)
-            return (prevBottom + thisTop) / 2 - bannerH / 2
-        }()
+        let mid = bannerMid(it, items: items, current: current)
         VStack(alignment: right ? .trailing : .leading, spacing: 4) {
             Text(course.chapterLabel(ci).uppercased())
                 .font(.nunitoXB(11)).tracking(1.2).foregroundStyle(Color.accent)
@@ -115,11 +111,12 @@ struct PathView: View {
                 .font(.nunitoXB(19)).foregroundStyle(Color.ink)
                 .multilineTextAlignment(right ? .trailing : .leading)
             ProgressView(value: Double(d), total: Double(max(t, 1)))
-                .tint(.accent).frame(width: W * 0.55)
+                .tint(.accent)
             Text("\(d) / \(t) lessons").font(.nunito(11, .semibold)).foregroundStyle(Color.muted)
         }
-        .frame(width: W - 36, alignment: right ? .trailing : .leading)
-        .position(x: W / 2, y: top + bannerH / 2)
+        .padding(.horizontal, 18)
+        .frame(width: W * 0.62, alignment: right ? .trailing : .leading)
+        .position(x: right ? W * 0.69 : W * 0.31, y: mid)
     }
 
     /// The scenery composed in the path editor, anchored to its stone.
@@ -141,23 +138,142 @@ struct PathView: View {
         }
     }
 
-    /// A trail of small pebbles between stones.
-    private func pebbles(_ items: [Item], _ W: CGFloat) -> some View {
-        Canvas { ctx, _ in
-            for i in 0..<max(0, items.count - 1) {
-                let a = CGPoint(x: nodeX(i, W, count: 64), y: items[i].y)
-                let b = CGPoint(x: nodeX(i + 1, W, count: 64), y: items[i + 1].y)
-                for k in 1...5 {
-                    let t = CGFloat(k) / 6
-                    let wobble = sin(CGFloat(i * 7 + k) * 12.9898) * 9
-                    let p = CGPoint(x: a.x + (b.x - a.x) * t + wobble, y: a.y + size / 2 + (b.y - a.y - size) * t)
-                    let r = 3.2 + abs(sin(CGFloat(i + k) * 3.1)) * 2.2
-                    ctx.fill(Path(ellipseIn: CGRect(x: p.x - r * 1.3, y: p.y - r, width: r * 2.6, height: r * 1.8)),
-                             with: .color(Color.muted.opacity(0.28)))
+    /// Where a chapter header is centred: halfway between the stone above
+    /// (or the HUD) and the top of its first stone, START bubble included.
+    private func bannerMid(_ it: Item, items: [Item], current: String?) -> CGFloat {
+        let top = it.y - size / 2 - (it.lesson.id == current ? bubble : 0)
+        let prev = it.index == 0 ? hud : items[it.index - 1].y + size / 2
+        return (prev + top) / 2
+    }
+
+    // MARK: scenery constants, from the path composer (SC in the web app)
+    private let patchW: CGFloat = 1.20, patchSquash: CGFloat = 0.66
+    private let pebEvery: CGFloat = 9.2, pebSize: CGFloat = 11, pebVar: CGFloat = 0.63
+    private let pebWander: CGFloat = 31, pebClear: CGFloat = 4
+
+    /// The web app's hash noise, -1…1.
+    private func noise(_ n: Double) -> CGFloat {
+        let v = sin(n * 12.9898) * 43758.5453
+        return CGFloat((v - floor(v)) * 2 - 1)
+    }
+
+    /// Cleared earth under each stone, so it reads as resting on the ground.
+    private func grounds(_ items: [Item], _ W: CGFloat) -> some View {
+        let w = size * stoneRatio * patchW
+        return ForEach(items, id: \.lesson.id) { it in
+            GroundPatch(shape: it.index % 4)
+                .frame(width: w, height: w * patchSquash)
+                .position(x: nodeX(it.index, W, count: 64), y: it.y + size * 0.14)
+                .allowsHitTesting(false)
+        }
+    }
+
+    private struct Pebble { let x: CGFloat; let y: CGFloat; let w: CGFloat }
+
+    /// The pebble trail, laid exactly as the web app lays it: a fixed density along a
+    /// smooth walk through the stones, wandering either side, and dropped wherever
+    /// it would land on a stone or under a chapter header. Drawn one segment per
+    /// canvas so no single layer is the height of the whole course.
+    private func trail(_ items: [Item], _ W: CGFloat, current: String?) -> [Int: [Pebble]] {
+        guard items.count > 1 else { return [:] }
+        let x = (0..<items.count).map { nodeX($0, W, count: 64) }
+        let ys = items.map(\.y)
+        let unit = size / 74
+        func curve(_ t: CGFloat) -> (i: Int, x: CGFloat, y: CGFloat) {
+            let f = t * CGFloat(ys.count - 1)
+            let i = max(0, min(ys.count - 2, Int(floor(f))))
+            var u = f - CGFloat(i); u = u * u * (3 - 2 * u)
+            return (i, x[i] + (x[i + 1] - x[i]) * u, ys[i] + (ys[i + 1] - ys[i]) * u)
+        }
+        // headers, each on its own side of the page
+        var headers: [Int: CGRect] = [:]
+        for it in items where it.chapter != nil {
+            let mid = bannerMid(it, items: items, current: current)
+            let right = course.data.pathLayout.headers[it.lesson.id].map { $0 == "right" }
+                ?? (it.index > 0 && (x[it.index - 1] + x[it.index]) / 2 < W / 2)
+            headers[it.index] = CGRect(x: right ? W * 0.38 : 0, y: mid - bannerH / 2, width: W * 0.62, height: bannerH)
+        }
+        let halfW = size * stoneRatio / 2 + pebClear * unit, halfH = size / 2 + pebClear * unit
+        let count = max(0, Int(((ys[ys.count - 1] - ys[0]) / (pebEvery * unit)).rounded()))
+        var out: [Int: [Pebble]] = [:]
+        for n in stride(from: 1, through: count, by: 1) {
+            let t = CGFloat(n) / CGFloat(count + 1)
+            let p = curve(t), q = curve(min(1, t + 0.002))
+            let dx = q.x - p.x, dy = q.y - p.y, len = max(hypot(dx, dy), 1e-9)
+            let off = pebWander * unit * noise(Double(n) * 1.7)
+            let w = pebSize * unit * (1 + pebVar * noise(Double(n) * 4.3))
+            let bx = p.x - dy / len * off, by = p.y + dx / len * off
+            var hidden = false
+            for i in max(0, p.i - 1)...min(ys.count - 1, p.i + 2) {
+                let ex = (bx - x[i]) / (halfW + w / 2), ey = (by - ys[i]) / (halfH + w / 2)
+                if ex * ex + ey * ey < 1 { hidden = true; break }
+                if let h = headers[i], bx > h.minX - w, bx < h.maxX + w, by > h.minY - w, by < h.maxY + w { hidden = true; break }
+            }
+            if !hidden { out[p.i, default: []].append(Pebble(x: bx, y: by, w: w)) }
+        }
+        return out
+    }
+
+    private func pebbles(_ items: [Item], _ W: CGFloat, current: String?) -> some View {
+        let groups = trail(items, W, current: current)
+        return ForEach(groups.keys.sorted(), id: \.self) { i in
+            let peb = groups[i]!
+            let top = (peb.map(\.y).min() ?? 0) - 10, bottom = (peb.map(\.y).max() ?? 0) + 10
+            Canvas { ctx, _ in
+                let img = ctx.resolve(Image("stone-locked-4"))
+                for p in peb {
+                    let w = max(3, p.w), h = max(2, p.w * 0.62)
+                    ctx.draw(img, in: CGRect(x: p.x - w / 2, y: p.y - top - h / 2, width: w, height: h))
                 }
             }
+            .frame(width: W, height: bottom - top)
+            .position(x: W / 2, y: (top + bottom) / 2)
+            .allowsHitTesting(false)
         }
-        .allowsHitTesting(false)
+    }
+}
+
+/// The irregular oval of cleared ground under a stone (the web's .pground g0–g3).
+struct GroundPatch: View {
+    let shape: Int
+    @Environment(\.colorScheme) private var scheme
+    var body: some View {
+        BlobShape(radii: BlobShape.presets[shape % 4])
+            .fill(scheme == .dark ? Color(UIColor(hex: 0x24384F)).opacity(0.19)
+                                  : Color(UIColor(hex: 0xE6DCC6)).opacity(0.33))
+    }
+}
+
+/// A CSS `border-radius: a b c d / e f g h` shape, in percent.
+struct BlobShape: Shape {
+    let radii: [CGFloat]    // tl, tr, br, bl horizontal, then tl, tr, br, bl vertical
+    static let presets: [[CGFloat]] = [
+        [62, 38, 55, 45, 48, 62, 38, 52], [38, 62, 42, 58, 60, 40, 60, 40],
+        [55, 45, 66, 34, 40, 58, 42, 60], [45, 55, 36, 64, 63, 42, 58, 37],
+    ]
+    func path(in r: CGRect) -> Path {
+        let W = r.width, H = r.height, k: CGFloat = 0.5523
+        let h = radii[0..<4].map { $0 / 100 * W }, v = radii[4..<8].map { $0 / 100 * H }
+        var p = Path()
+        p.move(to: CGPoint(x: r.minX + h[0], y: r.minY))
+        p.addLine(to: CGPoint(x: r.maxX - h[1], y: r.minY))
+        p.addCurve(to: CGPoint(x: r.maxX, y: r.minY + v[1]),
+                   control1: CGPoint(x: r.maxX - h[1] * (1 - k), y: r.minY),
+                   control2: CGPoint(x: r.maxX, y: r.minY + v[1] * (1 - k)))
+        p.addLine(to: CGPoint(x: r.maxX, y: r.maxY - v[2]))
+        p.addCurve(to: CGPoint(x: r.maxX - h[2], y: r.maxY),
+                   control1: CGPoint(x: r.maxX, y: r.maxY - v[2] * (1 - k)),
+                   control2: CGPoint(x: r.maxX - h[2] * (1 - k), y: r.maxY))
+        p.addLine(to: CGPoint(x: r.minX + h[3], y: r.maxY))
+        p.addCurve(to: CGPoint(x: r.minX, y: r.maxY - v[3]),
+                   control1: CGPoint(x: r.minX + h[3] * (1 - k), y: r.maxY),
+                   control2: CGPoint(x: r.minX, y: r.maxY - v[3] * (1 - k)))
+        p.addLine(to: CGPoint(x: r.minX, y: r.minY + v[0]))
+        p.addCurve(to: CGPoint(x: r.minX + h[0], y: r.minY),
+                   control1: CGPoint(x: r.minX, y: r.minY + v[0] * (1 - k)),
+                   control2: CGPoint(x: r.minX + h[0] * (1 - k), y: r.minY))
+        p.closeSubpath()
+        return p
     }
 }
 
