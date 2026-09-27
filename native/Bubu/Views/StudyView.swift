@@ -118,6 +118,8 @@ struct StudyView: View {
                     if let ex = session.exercise {
                         if ex.kind == .sentence {
                             SentenceView(ex: ex, placed: $placed, result: feedback?.correct)
+                        } else if ex.kind == .write {
+                            WriteView(ex: ex, answered: session.answered) { settle(true) }
                         } else if ex.kind == .speak {
                             SpeakView(ex: ex, answered: session.answered,
                                       settle: { correct in settle(correct) },
@@ -153,7 +155,7 @@ struct StudyView: View {
         return ZStack(alignment: .bottom) {
             // a short slot, so four options fit a phone; the feedback rises over them
             Color.clear.frame(height: 84)
-            if let fb = feedback, let ex, ex.kind != .speak {
+            if let fb = feedback, let ex, ex.kind != .speak, ex.kind != .write {
                 FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text))
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
                         .shadow(color: Color.panel, radius: 12, y: -10))

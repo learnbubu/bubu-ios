@@ -64,7 +64,7 @@ def artifacts(b):
     os.makedirs(out, exist_ok=True)
     for art in b.get("artefacts", []):
         data = call("GET", art["url"], raw=True)
-        if art["name"].endswith(".zip"):
+        if art["name"].endswith(".zip") and not art["name"].startswith("Bubu-Xcode"):
             zipfile.ZipFile(io.BytesIO(data)).extractall(out)
         else:
             open(os.path.join(out, art["name"]), "wb").write(data)

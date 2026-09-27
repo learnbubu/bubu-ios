@@ -9,8 +9,8 @@ final class StudySession: Identifiable {
     static let newPerSession = 6, reviewPerSession = 4, meetGroup = 3, sessionLen = 12
     static let xpCorrect = 2, xpCombo = 3, xpPerfect = 5, xpSession = 10, xpLesson = 25, comboAt = 5
 
-    /// The exercise kinds, as the web's FOCUSES. Write joins once its screen exists.
-    static let allDirs = ["recognize", "recall", "pinyin", "listen", "sentence", "speak"]
+    /// The exercise kinds, as the web's FOCUSES.
+    static let allDirs = ["recognize", "recall", "pinyin", "listen", "write", "sentence", "speak"]
 
     enum Item {
         case meet(cards: [Card], first: Bool, left: Int)
@@ -169,6 +169,7 @@ final class StudySession: Identifiable {
         let s = progress.srs[c.id]
         var enabled = Self.allDirs.filter { focuses.contains($0) }
         if course.sentences(for: c).isEmpty { enabled.removeAll { $0 == "sentence" } }
+        if !StrokeData.shared.writable(c.word.hanzi) { enabled.removeAll { $0 == "write" } }
         if focuses.count > 1 {
             let reps = s?.reps ?? 0, interval = s?.interval ?? 0
             let level = reps >= 2 || interval >= 7 ? 2 : reps >= 1 ? 1 : 0
@@ -297,7 +298,7 @@ final class StudySession: Identifiable {
 
 /// One question on screen: what's asked, the options, and the right answer.
 struct Exercise {
-    enum Kind { case choice, sentence, speak }
+    enum Kind { case choice, sentence, speak, write }
     let kind: Kind
     let dir: String
     let card: Card
@@ -310,6 +311,8 @@ struct Exercise {
     var tiles: [Tile] = []
     /// a word not learned yet when the question was asked: shows the NEW WORD badge
     var isNew = false
+    /// writing help: 0 trace, 1 first part shown, 2 from memory
+    var writeStage = 0
 
     struct Tile: Identifiable, Hashable { let id: Int; let text: String; let pinyin: String? }
 
@@ -320,6 +323,7 @@ struct Exercise {
         case "listen": return "What did you hear?"
         case "sentence": return toChinese ? "Build the Chinese" : "Translate this sentence"
         case "speak": return "Say it out loud"
+        case "write": return ["Trace, then write it", "Write it", "Write it from memory"][writeStage]
         default: return "What does this mean?"
         }
     }
@@ -328,6 +332,11 @@ struct Exercise {
         switch dir {
         case "sentence": return sentence(c, lessonId: lessonId)
         case "speak": return speak(c)
+        case "write":
+            let s = progress.srs[c.id]
+            // the help fades: new, learning, then from memory once spaced a week out
+            let stage = (s?.reps ?? 0) < 1 ? 0 : (s?.interval ?? 0) >= 7 ? 2 : 1
+            return Exercise(kind: .write, dir: "write", card: c, writeStage: stage)
         default: return choice(c, dir: dir, lessonId: lessonId)
         }
     }

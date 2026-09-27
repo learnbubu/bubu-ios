@@ -40,7 +40,7 @@ const course = {
 };
 fs.writeFileSync(path.join(DATA, "course.json"), JSON.stringify(course));
 fs.writeFileSync(path.join(DATA, "chars.json"), JSON.stringify(W.CHARS_DATA));
-const strokes = Object.fromEntries(Object.entries(W.HANZI_DATA).map(([c, d]) => [c, { strokes: d.strokes, medians: d.medians }]));
+const strokes = Object.fromEntries(Object.entries(W.HANZI_DATA).map(([c, d]) => [c, d.radStrokes ? { strokes: d.strokes, medians: d.medians, rad: d.radStrokes } : { strokes: d.strokes, medians: d.medians }]));
 fs.writeFileSync(path.join(DATA, "strokes.json"), JSON.stringify(strokes));
 
 // ---- artwork → asset catalog image sets, with a dark variant where the art has one
