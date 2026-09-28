@@ -120,7 +120,7 @@ final class CloudMergeTests: XCTestCase {
     }
 
     func testEmbersMissingCountsAsOne() {
-        let a = activity(CloudMerge.merge(local: [A: text(["days": [:]])], remote: [A: text(["embers": 0])]))
+        let a = activity(CloudMerge.merge(local: [A: text(["days": [String: Int]()])], remote: [A: text(["embers": 0])]))
         XCTAssertEqual(a["embers"] as? Int, 1)
     }
 
@@ -129,7 +129,7 @@ final class CloudMergeTests: XCTestCase {
                                           remote: [A: text(["buns": ["n": 4, "at": 0, "t": 7]])]))
         XCTAssertEqual((a["buns"] as? [String: Int])?["n"], 1)
         // only the remote has buns: the remote's
-        let b = activity(CloudMerge.merge(local: [A: text(["days": [:]])], remote: [A: text(["buns": ["n": 3, "at": 0, "t": 1]])]))
+        let b = activity(CloudMerge.merge(local: [A: text(["days": [String: Int]()])], remote: [A: text(["buns": ["n": 3, "at": 0, "t": 1]])]))
         XCTAssertEqual((b["buns"] as? [String: Int])?["n"], 3)
     }
 
@@ -317,6 +317,8 @@ final class FakeTransport: CloudTransport {
 
 @MainActor
 final class CloudSyncTests: XCTestCase {
+    /// The cloud holds its store weakly (the app owns it), so the test keeps it alive.
+    private var keep: ProgressStore?
     private func store() -> ProgressStore {
         ProgressStore(course: Course.shared, url: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json"))
     }
@@ -343,6 +345,7 @@ final class CloudSyncTests: XCTestCase {
             return (201, [String: Any]())
         }
         let (c, p, v) = cloud(t)
+        keep = p
         try await c.signIn(email: "a@b.c", password: "secret1")
         XCTAssertTrue(c.signedIn)
         XCTAssertEqual(v.session?.accessToken, "tok1")
@@ -369,7 +372,8 @@ final class CloudSyncTests: XCTestCase {
     func testSignInErrorShowsServerMessage() async {
         let t = FakeTransport()
         t.handler = { _ in (400, ["error": "invalid_grant", "error_description": "Invalid login credentials"]) }
-        let (c, _, _) = cloud(t)
+        let (c, p, _) = cloud(t)
+        keep = p
         do { try await c.signIn(email: "a@b.c", password: "wrong12"); XCTFail() }
         catch { XCTAssertEqual(error.localizedDescription, "Invalid login credentials") }
         XCTAssertFalse(c.signedIn)
@@ -378,7 +382,8 @@ final class CloudSyncTests: XCTestCase {
     func testSignUpNeedingConfirmationDoesNotSignIn() async throws {
         let t = FakeTransport()
         t.handler = { _ in (200, ["id": "u1", "email": "a@b.c"]) }
-        let (c, _, _) = cloud(t)
+        let (c, p, _) = cloud(t)
+        keep = p
         let inNow = try await c.signUp(email: "a@b.c", password: "secret1")
         XCTAssertFalse(inNow)
         XCTAssertFalse(c.signedIn)
@@ -393,12 +398,14 @@ final class CloudSyncTests: XCTestCase {
             if u.contains("grant_type=refresh_token") { return (200, tokenJSON("tok2")) }
             if r.httpMethod == "GET" {
                 gets += 1
-                return r.value(forHTTPHeaderField: "Authorization") == "Bearer tok1" ? (401, ["message": "JWT expired"]) : (200, [Any]())
+                if r.value(forHTTPHeaderField: "Authorization") == "Bearer tok1" { return (401, ["message": "JWT expired"]) }
+                return (200, [Any]())
             }
             return (201, [String: Any]())
         }
         let s = CloudSession(accessToken: "tok1", refreshToken: "r1", expiresAt: 4_000_000_000, userId: "u1", email: "a@b.c")
-        let (c, _, v) = cloud(t, session: s)
+        let (c, p, v) = cloud(t, session: s)
+        keep = p
         let r = await c.sync()
         if case .failure(let e) = r { XCTFail("\(e)") }
         XCTAssertEqual(gets, 2)
@@ -411,10 +418,12 @@ final class CloudSyncTests: XCTestCase {
         let t = FakeTransport()
         t.handler = { r in
             if r.url!.absoluteString.contains("refresh_token") { return (200, tokenJSON("fresh")) }
-            return r.httpMethod == "GET" ? (200, [Any]()) : (201, [String: Any]())
+            if r.httpMethod == "GET" { return (200, [Any]()) }
+            return (201, [String: Any]())
         }
         let s = CloudSession(accessToken: "stale", refreshToken: "r1", expiresAt: 0, userId: "u1", email: "a@b.c")
-        let (c, _, _) = cloud(t, session: s)
+        let (c, p, _) = cloud(t, session: s)
+        keep = p
         await c.sync()
         XCTAssertTrue(t.requests[0].url!.absoluteString.contains("grant_type=refresh_token"))
         XCTAssertEqual(t.requests[1].value(forHTTPHeaderField: "Authorization"), "Bearer fresh")
@@ -428,6 +437,7 @@ final class CloudSyncTests: XCTestCase {
         }
         let s = CloudSession(accessToken: "tok1", refreshToken: "r1", expiresAt: 4_000_000_000, userId: "u1", email: "a@b.c")
         let (c, p, v) = cloud(t, session: s)
+        keep = p
         p.markDone(Course.shared.lessons[0].id)
         await c.sync()
         XCTAssertFalse(c.signedIn)
@@ -439,7 +449,8 @@ final class CloudSyncTests: XCTestCase {
         let t = FakeTransport()
         t.offline = true
         let s = CloudSession(accessToken: "tok1", refreshToken: "r1", expiresAt: 0, userId: "u1", email: "a@b.c")
-        let (c, _, v) = cloud(t, session: s)
+        let (c, p, v) = cloud(t, session: s)
+        keep = p
         let r = await c.sync()
         guard case .failure(let e) = r else { return XCTFail() }
         XCTAssertEqual(e, .offline)
@@ -452,6 +463,7 @@ final class CloudSyncTests: XCTestCase {
     func testSignOutForgetsTheSessionNotTheProgress() {
         let s = CloudSession(accessToken: "tok1", refreshToken: "r1", expiresAt: 4_000_000_000, userId: "u1", email: "a@b.c")
         let (c, p, v) = cloud(FakeTransport(), session: s)
+        keep = p
         p.markDone(Course.shared.lessons[0].id)
         c.signOut()
         XCTAssertFalse(c.signedIn); XCTAssertNil(v.session)
@@ -462,7 +474,8 @@ final class CloudSyncTests: XCTestCase {
         let t = FakeTransport()
         t.handler = { _ in (204, [String: Any]()) }
         let s = CloudSession(accessToken: "tok1", refreshToken: "r1", expiresAt: 4_000_000_000, userId: "u1", email: "a@b.c")
-        let (c, _, _) = cloud(t, session: s)
+        let (c, p, _) = cloud(t, session: s)
+        keep = p
         try await c.deleteCloudData()
         XCTAssertEqual(t.requests.last?.httpMethod, "DELETE")
         XCTAssertEqual(t.requests.last?.url?.absoluteString, CloudConfig.url.absoluteString + "/rest/v1/progress?user_id=eq.u1")

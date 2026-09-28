@@ -20,7 +20,7 @@ enum CloudMerge {
         var out: [String: String] = [:]
 
         // srs: the entry reviewed more recently wins; without dates, more reps, then the later due
-        let sa = dict(P(local[srsKey]) ?? [:]), sbb = dict(P(remote[srsKey]) ?? [:])
+        let sa = dict(P(local[srsKey])), sbb = dict(P(remote[srsKey]))
         var srsM = sbb
         for (id, e) in sa {
             let ed = dict(e)
@@ -62,7 +62,7 @@ enum CloudMerge {
         let lit = assign(ab["lit"], aa["lit"])
         let coinsIn = perDay(aa["coinsIn"], ab["coinsIn"]), coinsOut = perDay(aa["coinsOut"], ab["coinsOut"])
         // buns: whichever device changed them last
-        let bt = { (b: Any?) -> Double in num((b as? [String: Any])?["t"]) }
+        func bt(_ b: Any?) -> Double { num((b as? [String: Any])?["t"]) }
         let buns: Any? = bt(aa["buns"]) >= bt(ab["buns"]) ? aa["buns"] : ab["buns"]
         let pocketDay = max(aa["pocketDay"] as? String ?? "", ab["pocketDay"] as? String ?? "")
         let plus = truthy(aa["plus"]) || truthy(ab["plus"])
