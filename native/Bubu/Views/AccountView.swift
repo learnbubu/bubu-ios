@@ -46,7 +46,7 @@ struct AccountSection: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Sign in to back up your progress and use it on the website or another device. It's the same account as the website.")
                 .font(.nunito(13)).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true)
-            field { TextField("you@example.com", text: $email).keyboardType(.emailAddress).textContentType(.username) }
+            field { TextField("Email", text: $email, prompt: Text(verbatim: "you@example.com").foregroundStyle(Color.muted)).keyboardType(.emailAddress).textContentType(.username) }
             field { SecureField("Password", text: $password).textContentType(.password) }
             HStack(spacing: 8) {
                 Button(busy ? "Signing in…" : "Sign in") { Task { await go(signUp: false) } }.buttonStyle(WideButton())
