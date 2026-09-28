@@ -110,6 +110,7 @@ struct PathView: View {
                     .shadow(color: .white.opacity(done || now ? 0.2 : 0.5), radius: 0, y: 1.5)
                     .offset(y: -7.5)
                 if now { StartBubble().offset(y: -size / 2 - 18) }
+                if now { StepBadge(lessonId: it.lesson.id).offset(x: size * 0.66, y: size * 0.3) }
             }
         }
         .buttonStyle(StoneStyle())
@@ -319,6 +320,29 @@ struct StoneStyle: ButtonStyle {
             .offset(y: configuration.isPressed ? 2 : 0)
             .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)
             .sensoryFeedback(.impact(weight: .medium), trigger: configuration.isPressed)
+    }
+}
+
+/// Which step of a many-step lesson you're on, "1/2", tucked against the current
+/// stone's edge like a coin; nothing for a one-step lesson.
+struct StepBadge: View {
+    let lessonId: String
+    @Environment(ProgressStore.self) private var progress
+    var body: some View {
+        let s = StudySession.lessonSteps(lessonId, progress)
+        if s.total > 1 {
+            Text("\(s.step)/\(s.total)")
+                .font(.nunito(12, .black)).monospacedDigit().foregroundStyle(Color.accent)
+                .padding(.horizontal, 7).padding(.vertical, 3)
+                .background {
+                    ZStack {
+                        Capsule().fill(Color.line).offset(y: 2)
+                        Capsule().fill(Color.panel)
+                        Capsule().strokeBorder(Color.line, lineWidth: 2)
+                    }
+                }
+                .accessibilityLabel("Step \(s.step) of \(s.total)")
+        }
     }
 }
 

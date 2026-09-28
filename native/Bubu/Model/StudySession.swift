@@ -61,6 +61,10 @@ final class StudySession: Identifiable {
     private var lastDir: String?
     private var dirByCard: [String: String] = [:]
     private let source: [Card]
+    /// words met on screen this session (their record comes with the first answer)
+    private var metInSession: Set<String> = []
+    /// the lesson step this session is, for a lesson: 1 of 2, 2 of 2 (0 otherwise)
+    private(set) var stepAtStart = 0
 
     /// Set when the session is over.
     private(set) var result: Result?
@@ -82,6 +86,9 @@ final class StudySession: Identifiable {
         let mode: Mode
         /// the skip test's short result: two numbers, no fire or quests
         var simple: [(value: String, label: String)] = []
+        /// a lesson step finished that wasn't the last: "Step 1 of 2 done" (0 otherwise)
+        var step = 0
+        var steps = 0
     }
 
     // the skip test's tally
@@ -117,6 +124,7 @@ final class StudySession: Identifiable {
         self.queue = mode == .quiz || mode == .placement ? chosen.map { .card($0) } : sessionOrder(chosen)
         self.sessionTotal = queue.filter { if case .card = $0 { return true } else { return false } }.count
         self.onBuns = [.lesson, .listen, .write].contains(mode) && hasMeetLeft
+        if mode == .lesson && !lessonId.isEmpty { stepAtStart = Self.lessonSteps(lessonId, progress).step }
         next()
     }
 
@@ -247,12 +255,36 @@ final class StudySession: Identifiable {
         return !((s.reps ?? 0) >= 1) && !(s.known ?? false) && !((s.lapses ?? 0) >= 2) && !((s.interval ?? 0) > 0)
     }
 
+    /// How many sessions n new words take, in the even batches of at most six that
+    /// buildQueue makes: 6 is one, 7 is two (4 + 3), 15 is three (5 + 5 + 5).
+    static func batches(_ n: Int) -> Int {
+        var left = n, k = 0
+        while left > 0 {
+            left -= left > newPerSession ? Int(ceil(Double(left) / ceil(Double(left) / Double(newPerSession)))) : left
+            k += 1
+        }
+        return k
+    }
+
+    /// A lesson's steps (its batches of new words) and the one you're on (web: lessonSteps).
+    /// A lesson you've finished is on its last step. A lesson whose words have all been
+    /// met but aren't all right yet has one step left: the session that clears them.
+    static func lessonSteps(_ lessonId: String, _ p: ProgressStore) -> (step: Int, total: Int) {
+        let cards = Course.shared.cards(in: lessonId)
+        let total = max(1, batches(cards.count))
+        if p.isDone(lessonId) { return (total, total) }
+        let fresh = cards.filter { p.srs[$0.id] == nil }.count
+        let unsure = cards.filter { p.srs[$0.id] != nil && (p.srs[$0.id]?.reps ?? 0) < 1 }.count
+        let left = max(1, batches(fresh) + (fresh == 0 && unsure > 0 ? 1 : 0))
+        return (min(total, max(1, total - left + 1)), total)
+    }
+
     /// Which cards a lesson session studies (web: buildStudyQueue).
     static func buildQueue(lessonId: String, progress: ProgressStore, focuses: Set<String>) -> [Card] {
         let course = Course.shared
         var cards = course.cards(in: lessonId)
         if focuses == ["sentence"] {
-            let withSentences = cards.filter { !course.sentences(for: $0).isEmpty }
+            let withSentences = cards.filter { c in !course.sentences(for: c, met: { id in progress.srs[id] != nil }).isEmpty }
             if !withSentences.isEmpty { cards = withSentences }
         }
         let now = progress.now()
@@ -266,6 +298,13 @@ final class StudySession: Identifiable {
             let picked = Array(fresh.prefix(n))
             var reviews: [Card] = []
             var seen = Set(picked.map(\.id))
+            // the last step brings back every word of the lesson not yet got right, however
+            // many, so finishing it finishes the lesson
+            if picked.count == fresh.count {
+                for c in cards where !seen.contains(c.id) && progress.srs[c.id] != nil && (progress.srs[c.id]?.reps ?? 0) < 1 {
+                    reviews.append(c); seen.insert(c.id)
+                }
+            }
             let add = { (list: [Card]) in
                 for c in list.shuffled() where reviews.count < reviewPerSession && !seen.contains(c.id) {
                     reviews.append(c); seen.insert(c.id)
@@ -322,9 +361,10 @@ final class StudySession: Identifiable {
         guard !queue.isEmpty else { finish(); return }
         let item = queue.removeFirst()
         current = item
+        if case .meet(let cards, _, _) = item { metInSession.formUnion(cards.map(\.id)) }
         if case .card(let c) = item {
             dir = pickDirection(c)
-            exercise = Exercise.make(card: c, dir: dir, scope: scope, progress: progress)
+            exercise = Exercise.make(card: c, dir: dir, scope: scope, progress: progress, met: self.isMet)
             if exercise == nil {               // a sentence that couldn't be built: fall back
                 dir = "recognize"
                 exercise = Exercise.make(card: c, dir: dir, scope: scope, progress: progress)
@@ -344,7 +384,8 @@ final class StudySession: Identifiable {
             dirByCard[c.id] = m.d; lastDir = m.d; return m.d
         }
         var enabled = Self.allDirs.filter { focuses.contains($0) }
-        if course.sentences(for: c).isEmpty { enabled.removeAll { $0 == "sentence" } }
+        // a sentence only when all its other words have been met (see Course.sentences(for:met:))
+        if course.sentences(for: c, met: isMet).isEmpty { enabled.removeAll { $0 == "sentence" } }
         if !StrokeData.shared.writable(c.word.hanzi) { enabled.removeAll { $0 == "write" } }
         if focuses.count > 1 {
             let reps = s?.reps ?? 0, interval = s?.interval ?? 0
@@ -367,9 +408,12 @@ final class StudySession: Identifiable {
 
     private func missedDirPossible(_ c: Card, _ d: String) -> Bool {
         if d == "write" { return StrokeData.shared.writable(c.word.hanzi) }
-        if d == "sentence" { return !course.sentences(for: c).isEmpty }
+        if d == "sentence" { return !course.sentences(for: c, met: isMet).isEmpty }
         return Self.allDirs.contains(d)
     }
+
+    /// A word the learner has met: it has a record, or it was met on screen this session.
+    func isMet(_ cardId: String) -> Bool { progress.srs[cardId] != nil || metInSession.contains(cardId) }
 
     var card: Card? { if case .card(let c) = current { return c } else { return nil } }
 
@@ -478,8 +522,11 @@ final class StudySession: Identifiable {
         }
         let fire = progress.lightFire()
         let left = justFinished ? 0 : lessonCards.filter { (progress.srs[$0.id]?.reps ?? 0) < 1 }.count
+        // a lesson comes in steps (its batches of new words): one done, more to go
+        let total = mode == .lesson ? Self.lessonSteps(lessonId, progress).total : 0
+        let stepDone = left > 0 && stepAtStart > 0 && stepAtStart < total
         let title = mode == .quiz ? "Quiz complete" : mode == .mistakes ? "Mistakes practised" : [.review, .trouble].contains(mode) ? "Review complete"
-            : justFinished ? "Lesson complete" : left > 0 ? "Batch done" : "Session complete"
+            : justFinished ? "Lesson complete!" : stepDone ? "Step \(stepAtStart) of \(total) done" : "Session complete"
         let seconds = Int(((progress.now() - start) / 1000).rounded())
         let accuracy = answeredCount == 0 ? 100 : Int((Double(answeredCount - againCount) / Double(answeredCount) * 100).rounded())
         result = Result(title: title, xp: sessionXP, seconds: seconds, accuracy: accuracy, perfect: perfect,
@@ -487,6 +534,7 @@ final class StudySession: Identifiable {
                         mistakes: mistakes, fixed: fixedCount,
                         nextLessonId: justFinished ? nextLesson(after: lessonId) : nil, wordsLeft: left,
                         fire: fire, mode: mode)
+        if stepDone { result?.step = stepAtStart; result?.steps = total }
     }
 
     /// The skip test's verdict: lessons pass at 70%, in order, stopping at the first that
@@ -553,7 +601,8 @@ final class StudySession: Identifiable {
         let c = dir == "sentence" ? (course.cards.first { !course.sentences(for: $0).isEmpty } ?? cards[0]) : cards[0]
         current = .card(c)
         self.dir = dir
-        exercise = Exercise.make(card: c, dir: dir, scope: [c.lessonId], progress: progress)
+        // every word counts as met here, so the screenshot always has a sentence
+        exercise = Exercise.make(card: c, dir: dir, scope: [c.lessonId], progress: progress, met: { _ in true })
         exercise?.isNew = true
     }
     func debugFinish() {
@@ -603,9 +652,11 @@ struct Exercise {
         }
     }
 
-    static func make(card c: Card, dir: String, scope: Set<String>, progress: ProgressStore) -> Exercise? {
+    /// `met` says whether a word (a card id) has been met: a sentence may only use met words.
+    static func make(card c: Card, dir: String, scope: Set<String>, progress: ProgressStore,
+                     met: ((String) -> Bool)? = nil) -> Exercise? {
         switch dir {
-        case "sentence": return sentence(c)
+        case "sentence": return sentence(c, met: met ?? { progress.srs[$0] != nil })
         case "speak": return speak(c)
         case "write":
             let s = progress.srs[c.id]
@@ -677,9 +728,9 @@ struct Exercise {
     var sayEn: String { sentence?.en ?? card.word.en }
 
     /// Word tiles to put in order (web: buildSentenceExercise).
-    static func sentence(_ c: Card) -> Exercise? {
+    static func sentence(_ c: Card, met: (String) -> Bool) -> Exercise? {
         let course = Course.shared
-        guard let sent = course.sentences(for: c).randomElement() else { return nil }
+        guard let sent = course.sentences(for: c, met: met).randomElement() else { return nil }
         let enWords = Sentence.enWords(sent.en)
         let toChinese = enWords.count < 2 || Bool.random()
         let long = sent.words.count > 6 || enWords.count > 7

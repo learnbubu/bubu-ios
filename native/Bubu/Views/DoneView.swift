@@ -8,7 +8,8 @@ struct DoneView: View {
     var again: () -> Void
     var next: (String) -> Void
     @Environment(ProgressStore.self) private var progress
-    @State private var stage = 0
+    // the step screenshot opens on the last stage, where Next step is
+    @State private var stage = Launch.screen == "donenext" ? 2 : 0
     @State private var flameIn = false
     private let course = Course.shared
 
@@ -20,8 +21,9 @@ struct DoneView: View {
 
     var body: some View {
         let r = session.result!
+        // the content starts near the top and the buttons stay at the foot, so a tall
+        // phone never shows a gap above the panda
         VStack(spacing: 0) {
-            Spacer(minLength: 0)
             Group {
                 if !r.simple.isEmpty { simple(r) } else {
                 switch stage {
@@ -33,11 +35,11 @@ struct DoneView: View {
             }
             .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
             .id(stage)
-            Spacer(minLength: 12)
-            buttons(r)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            buttons(r).padding(.top, 12)
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, 16).padding(.top, 26).padding(.bottom, 18)
+        .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 18)
         .background(Color.panel, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
         .padding(.top, 8).padding(.bottom, 8)
@@ -47,7 +49,7 @@ struct DoneView: View {
     /// The short result the skip test ends on (web: doneSimple).
     private func simple(_ r: StudySession.Result) -> some View {
         VStack(spacing: 0) {
-            Image(r.title == "Not yet" ? "panda-sad" : "done-panda").resizable().scaledToFit().frame(width: 160)
+            Image(r.title == "Not yet" ? "panda-sad" : "done-panda").resizable().scaledToFit().frame(width: 120, height: 120)
             heading(r.title).padding(.top, 4)
             HStack(spacing: 10) {
                 ForEach(Array(r.simple.enumerated()), id: \.offset) { _, s in
@@ -71,8 +73,17 @@ struct DoneView: View {
 
     private func stageOne(_ r: StudySession.Result) -> some View {
         VStack(spacing: 0) {
-            Image("done-panda").resizable().scaledToFit().frame(width: 160)
-            heading(r.title).padding(.top, 4)
+            Image("done-panda").resizable().scaledToFit().frame(width: 120, height: 120)
+            Text(r.title).font(.nunito(22, .black)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                .padding(.top, 2)
+            if r.steps > 1 {
+                // a step of a longer lesson: how far through it you are, and what's next
+                StepSegments(done: r.step, total: r.steps, width: 34, height: 7).padding(.top, 8)
+                Text(r.steps - r.step == 1 ? "One more step finishes the lesson" : "\(r.steps - r.step) more steps finish the lesson")
+                    .font(.nunito(14, .semibold)).foregroundStyle(Color.muted).padding(.top, 6)
+            } else if r.lessonFinished, let l = course.lessonById[session.lessonId] {
+                Text(l.name).font(.nunito(14, .semibold)).foregroundStyle(Color.muted).lineLimit(1).padding(.top, 2)
+            }
             HStack(spacing: 10) {
                 DoneTile(value: r.xp, format: { "+\($0)" }, label: "XP", bg: Color(light: 0xFEEBBB, dark: 0x2A2B23), ink: Color(light: 0xB06A0A, dark: 0xF5B03D), delay: 0.2)
                 DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: "Time", bg: .accentSoft, ink: .accent, delay: 0.42)
@@ -87,6 +98,19 @@ struct DoneView: View {
                 else if progress.boostActive { note("Double XP is on", fg: .accent, bg: .accentSoft) }
             }
             .padding(.top, 10)
+            // this week, so the streak is in view from the first screen
+            VStack(spacing: 10) {
+                HStack {
+                    Text("THIS WEEK").font(.nunitoXB(10.9)).tracking(1.1).foregroundStyle(Color.muted)
+                    Spacer()
+                    Label("\(progress.streak) day\(progress.streak == 1 ? "" : "s")", systemImage: "flame.fill")
+                        .font(.nunitoXB(12)).foregroundStyle(Color.gold)
+                }
+                WeekStrip()
+            }
+            .padding(.horizontal, 14).padding(.vertical, 12)
+            .background(Color.bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .padding(.top, 18)
         }
     }
 
@@ -155,7 +179,8 @@ struct DoneView: View {
                     .buttonStyle(WideButton())
             } else {
                 if r.wordsLeft > 0 {
-                    Button("Keep going — \(r.wordsLeft) word\(r.wordsLeft == 1 ? "" : "s") left →") { next(session.lessonId) }
+                    // the next step of this lesson, straight away
+                    Button("Next step →") { next(session.lessonId) }
                         .buttonStyle(WideButton())
                 } else if let id = r.nextLessonId, let l = course.lessonById[id] {
                     Button("Next: \(l.name) →") { next(id) }

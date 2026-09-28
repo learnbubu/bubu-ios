@@ -524,6 +524,24 @@ final class ProgressStore {
         p.releaseSaves()
         return p
     }
+
+    /// For the lesson-step screenshots: a fresh store apart from the real one. "pathstep"
+    /// has the first lesson's first step done (the stone shows 2/2); "donefinal" has all
+    /// its words right, so the session ends the lesson; "donenext" starts from nothing.
+    static func debugSteps(_ screen: String) -> ProgressStore {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("steps-\(screen).json")
+        try? FileManager.default.removeItem(at: url)
+        let p = ProgressStore(course: Course.shared, url: url)
+        current = p
+        p.holdSaves()
+        p.onboarded = true
+        let cards = Course.shared.cards(in: Course.shared.lessons[0].id)
+        let n = screen == "pathstep" ? Int(ceil(Double(cards.count) / 2)) : screen == "donefinal" ? cards.count : 0
+        for c in cards.prefix(n) { _ = p.answer(c.id, correct: true, dir: "recognize", sessionStart: 0, mistakesMode: false) }
+        _ = p.lessonPocket(chapterEnd: false)     // today's pocket already opened: no pocket over the screenshot
+        p.releaseSaves()
+        return p
+    }
     #endif
 
     // MARK: the fire: streak, embers and relighting

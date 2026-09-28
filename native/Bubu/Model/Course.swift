@@ -183,6 +183,14 @@ final class Course {
     /// every chapter's words
     private(set) lazy var chapterCards: [[Card]] = chapters.map { ch in ch.lessons.flatMap { cardsByLesson[$0] ?? [] } }
     func notes(for lessonId: String) -> [Note] { data.notes[lessonId] ?? [] }
+    /// the cards for each word, by its characters: to tell whether a sentence's words have been met
+    private(set) lazy var cardsByHanzi: [String: [Card]] = Dictionary(grouping: cards) { $0.word.hanzi.filter(Course.isHan) }
+    /// the cards whose word has each character in it
+    private(set) lazy var cardsByChar: [Character: [Card]] = {
+        var out: [Character: [Card]] = [:]
+        for c in cards { for ch in Set(c.word.hanzi.filter(Course.isHan)) { out[ch, default: []].append(c) } }
+        return out
+    }()
 
     /// "起步 1 · Chapter 2": chapters are counted within their book
     func chapterLabel(_ ci: Int) -> String {

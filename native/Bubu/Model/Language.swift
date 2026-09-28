@@ -242,6 +242,54 @@ extension Course {
 
     func sentences(for card: Card) -> [Sentence] { sentences.filter { $0.hanzi.contains(card.word.hanzi) } }
 
+    /// Little particles that barely count as words: a sentence may have these unmet.
+    static let trivialWords: Set<String> = ["了", "吗", "呢", "吧", "啊", "哇", "呀", "嘛", "啦", "哦"]
+    /// Sentences of up to this many words are preferred when there's a choice.
+    static let shortSentence = 8
+
+    /// Whether a sentence word has been met: a card for exactly that word has, or, for a
+    /// word that isn't one of the course's own (a name, a compound), every character of
+    /// it is in a word that has. `met` says whether a card id has been met.
+    func isMetWord(_ w: String, met: (String) -> Bool) -> Bool {
+        let han = w.filter(Course.isHan)
+        if han.isEmpty { return true }
+        if let cs = cardsByHanzi[han] { return cs.contains { met($0.id) } }
+        return han.allSatisfy { ch in (cardsByChar[ch] ?? []).contains { met($0.id) } }
+    }
+
+    /// The words of a sentence the learner hasn't met yet, leaving out the card's own
+    /// word (the one new word allowed) and the little particles.
+    func unmetWords(in s: Sentence, for card: Card, met: (String) -> Bool) -> [String] {
+        let own = card.word.hanzi.filter(Course.isHan)
+        let all = s.words.map(\.hanzi).joined()
+        var ownSpan: Range<Int>?
+        if !own.isEmpty, let r = all.range(of: own) {
+            let lo = all.distance(from: all.startIndex, to: r.lowerBound)
+            ownSpan = lo..<(lo + own.count)
+        }
+        var out: [String] = [], at = 0
+        for w in s.words {
+            let span = at..<(at + w.hanzi.count)
+            at += w.hanzi.count
+            // a piece of the card's own word (不客气 can split as 不 + 客气)
+            if let o = ownSpan, span.lowerBound >= o.lowerBound, span.upperBound <= o.upperBound { continue }
+            if Course.trivialWords.contains(w.hanzi) || isMetWord(w.hanzi, met: met) { continue }
+            out.append(w.hanzi)
+        }
+        return out
+    }
+
+    /// The sentences a card's sentence exercise may use: every word met apart from the
+    /// card's own and the little particles, the short ones when there are any, else the
+    /// shortest. Empty when none will do, and another kind of exercise is asked instead.
+    func sentences(for card: Card, met: (String) -> Bool) -> [Sentence] {
+        let ok = sentences(for: card).filter { unmetWords(in: $0, for: card, met: met).isEmpty }
+        let short = ok.filter { $0.words.count <= Course.shortSentence }
+        if !short.isEmpty { return short }
+        guard let least = ok.map(\.words.count).min() else { return [] }
+        return ok.filter { $0.words.count == least }
+    }
+
     /// Up to n look-alike cards for a card, strongest first with a little shuffle (web: lookalikes).
     func lookalikes(_ c: Card, _ n: Int) -> [Card] {
         let cd = CharData.shared
