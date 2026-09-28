@@ -21,8 +21,8 @@ struct DoneView: View {
 
     var body: some View {
         let r = session.result!
-        // the content starts near the top and the buttons stay at the foot, so a tall
-        // phone never shows a gap above the panda
+        // the stage fills the space above the buttons (the first spreads its parts out,
+        // see `gap`) and the buttons stay pinned at the foot
         VStack(spacing: 0) {
             Group {
                 if !r.simple.isEmpty { simple(r) } else {
@@ -35,7 +35,7 @@ struct DoneView: View {
             }
             .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
             .id(stage)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             buttons(r).padding(.top, 12)
         }
         .frame(maxWidth: .infinity)
@@ -74,6 +74,7 @@ struct DoneView: View {
     private func stageOne(_ r: StudySession.Result) -> some View {
         VStack(spacing: 0) {
             Image("done-panda").resizable().scaledToFit().frame(width: 120, height: 120)
+            gap
             Text(r.title).font(.nunito(22, .black)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 .padding(.top, 2)
             if r.steps > 1 {
@@ -84,6 +85,7 @@ struct DoneView: View {
             } else if r.lessonFinished, let l = course.lessonById[session.lessonId] {
                 Text(l.name).font(.nunito(14, .semibold)).foregroundStyle(Color.muted).lineLimit(1).padding(.top, 2)
             }
+            gap
             HStack(spacing: 10) {
                 DoneTile(value: r.xp, format: { "+\($0)" }, label: "XP", bg: Color(light: 0xFEEBBB, dark: 0x2A2B23), ink: Color(light: 0xB06A0A, dark: 0xF5B03D), delay: 0.2)
                 DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: "Time", bg: .accentSoft, ink: .accent, delay: 0.42)
@@ -95,9 +97,10 @@ struct DoneView: View {
                 if r.lessonFinished { note("Lesson done: double XP for the next 15 minutes", fg: .accent, bg: .accentSoft) }
                 if r.fixed > 0 { note("\(r.fixed) mistake\(r.fixed == 1 ? "" : "s") fixed", fg: .good, bg: .goodSoft) }
                 else if r.mistakes > 0 { note("\(r.mistakes) mistake\(r.mistakes == 1 ? "" : "s") saved to practise in Fix your mistakes", fg: .again, bg: .againSoft) }
-                else if progress.boostActive { note("Double XP is on", fg: .accent, bg: .accentSoft) }
+                else if progress.boostActive && !r.lessonFinished { note("Double XP is on", fg: .accent, bg: .accentSoft) }
             }
             .padding(.top, 10)
+            gap
             // this week, so the streak is in view from the first screen
             VStack(spacing: 10) {
                 HStack {
@@ -110,9 +113,13 @@ struct DoneView: View {
             }
             .padding(.horizontal, 14).padding(.vertical, 12)
             .background(Color.bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .padding(.top, 18)
+            .padding(.top, 8)
         }
     }
+
+    /// Space between the first stage's parts: it grows on a tall phone (up to a point),
+    /// so the stage fills the card instead of leaving one big gap.
+    private var gap: some View { Spacer(minLength: 6).frame(maxHeight: 44) }
 
     private func note(_ t: String, fg: Color, bg: Color) -> some View {
         Text(t).font(.nunito(13.8, .bold)).foregroundStyle(fg).multilineTextAlignment(.center)

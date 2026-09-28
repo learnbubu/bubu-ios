@@ -17,6 +17,13 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
   Then call it from `Cloud.deleteCloudData()` (native) and add the same button to the website's Account box.
 - [ ] **Password reset.** Neither the website nor the app has "Forgot password?". Supabase's `POST /auth/v1/recover` sends the email, but its link lands on the website, which has no screen for choosing a new password yet. Build that page on the website first (and add the app's URL to the project's redirect allow-list if the app should handle it).
 
+## Lesson flow (from testing on a real iPhone, 28 Sep 2026)
+
+- [x] **Sentences too hard.** A sentence exercise only uses a sentence whose words have all been met (a record, or met earlier this session), apart from the card's own word and little particles (了 吗 呢 吧 啊 哇 …); ≤ 8 words preferred; otherwise another exercise. _App: `Course.sentences(for:met:)`; web: `usableSentences`._
+- [x] **Lessons come in steps.** A lesson's batches of new words are its steps: "1/2" on the current stone, "Step 2 of 2" on the lesson sheet, "Step 1 of 2 done" and **Next step** after a step, "Lesson complete!" after the last. _App: `StudySession.lessonSteps`; web: `lessonSteps`._
+- [x] **The last step always finishes the lesson.** It now brings back every word of the lesson not yet got right (a session left half-way), not just four reviews. The owner's "next stone didn't open" was the batch confusion; this was a rarer real gap.
+- [x] **Done screen without the empty space** (app): content from the top, a smaller panda, this week's streak strip on the first stage, the buttons pinned at the foot.
+
 ## Before the App Store
 
 - [x] Apple Developer membership active (28 Sep 2026)
