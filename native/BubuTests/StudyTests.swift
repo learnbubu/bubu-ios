@@ -57,4 +57,45 @@ final class StudyTests: XCTestCase {
         XCTAssertTrue(p.litOn(p.today))
         XCTAssertEqual(p.streak, 1)
     }
+
+    // MARK: the adaptive placement test
+
+    /// Runs a placement test to the course's last lesson, answering right only for words in
+    /// chapters up to `known` (-1: nothing). Returns the questions asked and the store.
+    private func place(known: Int) -> (Int, ProgressStore) {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        let p = ProgressStore(course: Course.shared, url: url)
+        let s = StudySession.placement(p, to: Course.shared.lessons.last!.id, label: "Placement test")!
+        var asked = 0
+        while s.result == nil, let c = s.card {
+            let ch = Course.shared.chapterOf[c.lessonId] ?? 0
+            _ = s.answer(ch <= known)
+            asked += 1
+            XCTAssertLessThan(asked, 40, "the test must stay short")
+            if asked >= 40 { break }
+            s.next()
+        }
+        return (asked, p)
+    }
+
+    func testPlacementStopsAtOnceForABeginner() {
+        let (asked, p) = place(known: -1)
+        XCTAssertEqual(asked, StudySession.probeSize)
+        XCTAssertTrue(Course.shared.lessons.allSatisfy { !p.isDone($0.id) })
+    }
+
+    func testPlacementIsShortEvenForTheWholeCourse() {
+        let (asked, p) = place(known: Int.max)
+        XCTAssertLessThanOrEqual(asked, StudySession.probeSize * StudySession.maxProbes)
+        XCTAssertTrue(p.isDone(Course.shared.lessons.last!.id))
+    }
+
+    func testPlacementFindsTheChapterYouKnowUpTo() {
+        let chapters = Course.shared.chapters.count
+        let known = chapters / 3
+        let (asked, p) = place(known: known)
+        XCTAssertLessThanOrEqual(asked, StudySession.probeSize * StudySession.maxProbes)
+        let done = Set(Course.shared.lessons.filter { p.isDone($0.id) }.compactMap { Course.shared.chapterOf[$0.id] })
+        XCTAssertEqual(done, Set(0...known), "unlocks exactly the chapters you know")
+    }
 }

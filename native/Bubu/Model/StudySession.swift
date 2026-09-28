@@ -89,6 +89,15 @@ final class StudySession: Identifiable {
     private var placeTarget: String?
     private var placeScores: [String: (ok: Int, total: Int)] = [:]
     private var placeCorrect: Set<String> = []
+    // The adaptive placement test, for a long way to skip: chapters are probed a few
+    // questions at a time, the first first (miss it and the test stops), then halving
+    // the range each time, so even the whole course takes ~20 questions.
+    private var placeBlocks: [[String]] = []       // the untaken lessons, grouped by chapter
+    private var placeLo = -1                        // the highest block shown to be known
+    private var placeHi = -1                        // the highest block that still might be
+    private var placeProbe: Int?                    // the block being asked about now
+    private var probeOk = 0, probeN = 0, probes = 0
+    static let probeSize = 3, probePass = 2, maxProbes = 8
     private(set) var quizScore = 0
 
     init(lessonId: String, progress: ProgressStore, focuses: Set<String>? = nil, cards: [Card]? = nil,
@@ -182,6 +191,21 @@ final class StudySession: Identifiable {
         guard let ti = order.firstIndex(of: target) else { return nil }
         let range = order[...ti].filter { !p.isDone($0) }
         guard !range.isEmpty else { Moments.shared.toast("That's already unlocked."); return nil }
+        // a few chapters or more: adaptive, a handful of questions per chapter probed
+        var blocks: [[String]] = []
+        for lid in range {
+            if let last = blocks.last?.last, Course.shared.chapterOf[last] == Course.shared.chapterOf[lid] { blocks[blocks.count - 1].append(lid) }
+            else { blocks.append([lid]) }
+        }
+        if blocks.count >= 3 {
+            let first = probeCards(blocks[0])
+            let s = StudySession(lessonId: "", progress: p, focuses: ["recognize", "recall"], cards: first, mode: .placement, title: label)
+            s.placeRange = Array(range); s.placeTarget = target
+            s.placeBlocks = blocks; s.placeHi = blocks.count - 1; s.placeProbe = 0; s.probes = 1
+            // about how long it'll take: the first probe, then halving the rest
+            s.sessionTotal = probeSize * min(maxProbes, 1 + Int(ceil(log2(Double(blocks.count)))))
+            return s
+        }
         let perLesson = max(2, min(5, 20 / range.count))
         let items = range.flatMap { lid in Course.shared.cards(in: lid).shuffled().prefix(perLesson) }.shuffled()
         let s = StudySession(lessonId: "", progress: p, focuses: ["recognize", "recall"], cards: items, mode: .placement,
@@ -189,6 +213,28 @@ final class StudySession: Identifiable {
         s.placeRange = Array(range); s.placeTarget = target
         s.placeScores = Dictionary(uniqueKeysWithValues: range.map { ($0, (0, 0)) })
         return s
+    }
+
+    /// A probe's questions: spread across the chapter's lessons, one word from each in turn.
+    private static func probeCards(_ block: [String]) -> [Card] {
+        var pools = block.map { Course.shared.cards(in: $0).shuffled() }.filter { !$0.isEmpty }.shuffled()
+        var out: [Card] = []
+        while out.count < probeSize, pools.contains(where: { !$0.isEmpty }) {
+            for i in pools.indices where !pools[i].isEmpty && out.count < probeSize { out.append(pools[i].removeFirst()) }
+        }
+        return out
+    }
+
+    /// After a probe: move the range, and pick the next chapter to ask about (nil: done).
+    private func nextProbe() -> Int? {
+        guard let b = placeProbe else { return nil }
+        let passed = probeN > 0 && probeOk >= min(Self.probePass, probeN)
+        if passed { placeLo = max(placeLo, b) } else { placeHi = min(placeHi, b - 1) }
+        probeOk = 0; probeN = 0
+        // missing the first chapter ends it: start from the beginning
+        if b == 0 && !passed { return nil }
+        guard placeLo < placeHi, probes < Self.maxProbes else { return nil }
+        return (placeLo + placeHi + 1) / 2
     }
 
     // MARK: building the session
@@ -266,6 +312,11 @@ final class StudySession: Identifiable {
         answered = false
         lastCorrect = nil
         exercise = nil
+        if queue.isEmpty, mode == .placement, !placeBlocks.isEmpty, let b = nextProbe() {
+            placeProbe = b; probes += 1
+            queue = Self.probeCards(placeBlocks[b]).map { .card($0) }
+            sessionTotal = max(sessionTotal, stepsDone + Self.probeSize)
+        }
         guard !queue.isEmpty else { finish(); return }
         let item = queue.removeFirst()
         current = item
@@ -331,6 +382,7 @@ final class StudySession: Identifiable {
         lastCorrect = correct
         if correct { quizScore += 1 }
         if mode == .placement {
+            probeN += 1; if correct { probeOk += 1 }
             placeScores[c.lessonId, default: (0, 0)].total += 1
             if correct { placeScores[c.lessonId, default: (0, 0)].ok += 1; placeCorrect.insert(c.id) }
         } else if mode == .quiz {
@@ -436,12 +488,18 @@ final class StudySession: Identifiable {
     }
 
     /// The skip test's verdict: lessons pass at 70%, in order, stopping at the first that
-    /// doesn't; the words you got right in them are seeded as known (web: finishPlacement).
+    /// doesn't (adaptive: every chapter up to the highest passed); the words you got right
+    /// in them are seeded as known (web: finishPlacement).
     private func finishPlacement() {
         var unlocked: [String] = []
-        for lid in placeRange {
-            let s = placeScores[lid] ?? (0, 0)
-            if s.total > 0 && Double(s.ok) / Double(s.total) >= 0.7 { unlocked.append(lid) } else { break }
+        if !placeBlocks.isEmpty {
+            // adaptive: every chapter up to the highest one shown to be known
+            if placeLo >= 0 { unlocked = Array(placeBlocks[0...placeLo].joined()) }
+        } else {
+            for lid in placeRange {
+                let s = placeScores[lid] ?? (0, 0)
+                if s.total > 0 && Double(s.ok) / Double(s.total) >= 0.7 { unlocked.append(lid) } else { break }
+            }
         }
         progress.holdSaves()
         unlocked.forEach(progress.markDone)
