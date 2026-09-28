@@ -232,7 +232,7 @@ struct DoneTile: View {
     }
 }
 
-/// This week, Monday to Sunday: a tick for a lit day, gold for a goal met, today dashed.
+/// This week, Monday to Sunday: a tick for a day with a finished session, today dashed.
 struct WeekStrip: View {
     @Environment(ProgressStore.self) private var progress
     var body: some View {
@@ -241,7 +241,7 @@ struct WeekStrip: View {
         HStack(spacing: 2) {
             ForEach(0..<7, id: \.self) { i in
                 let d = days[i]
-                let met = progress.litOn(d), goal = progress.xp(on: d) >= progress.dailyGoal
+                let met = progress.litOn(d), goal = false
                 let isToday = d == today, future = d > today
                 VStack(spacing: 4) {
                     ZStack {

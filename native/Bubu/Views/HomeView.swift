@@ -96,7 +96,7 @@ struct HomeView: View {
 
     // MARK: streak
     private var streakCard: some View {
-        let streak = progress.streak, xp = progress.xpToday, goal = progress.dailyGoal
+        let streak = progress.streak
         let out = progress.outSince
         let lit = progress.litOn(progress.today) && out == nil
         // from six in the evening an unlit day with a streak behind it is at risk
@@ -104,7 +104,7 @@ struct HomeView: View {
         let risk = out == nil && !lit && streak > 0 && hoursLeft <= 6
         let askable = out != nil && progress.embers > 0 && !progress.prefs.autoRelight
         let bubble = out != nil ? (askable ? "Relight it?" : "Went out")
-            : risk ? "\(hoursLeft)h left to keep it" : xp >= goal ? "Goal done!" : lit ? "\(goal - xp) XP to goal"
+            : risk ? "\(hoursLeft)h left to keep it" : lit ? "Done for today!"
             : streak > 0 ? "Keep it lit!" : "Let's start!"
         return VStack(spacing: 0) {
             ZStack(alignment: .topTrailing) {

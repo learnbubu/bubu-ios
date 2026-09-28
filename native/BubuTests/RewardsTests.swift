@@ -15,21 +15,22 @@ final class RewardsTests: XCTestCase {
     func testLevelsFollowTheWebCurve() {
         let (p, _) = make(at: noon)
         XCTAssertEqual(p.level.level, 1)
-        p.earnXP(80)                               // 80 + the 15 goal bonus = 95
+        p.earnXP(99)
         XCTAssertEqual(p.level.level, 1)
-        p.earnXP(5)                                // 100 reaches level 2
+        p.earnXP(1)                                // 100 reaches level 2
         XCTAssertEqual(p.level.level, 2)
         XCTAssertEqual(p.level.next, 300 - p.xpTotal)
     }
 
-    func testGoalBonusOncePerDay() {
+    /// No daily XP target: XP is just XP, and finishing a session is what does the day.
+    func testNoDailyXPTarget() {
         let (p, _) = make(at: noon)
-        let a = p.earnXP(19)
-        XCTAssertFalse(a.goalReached)
-        let b = p.earnXP(2)
-        XCTAssertTrue(b.goalReached)
-        XCTAssertEqual(p.xpToday, 36)             // 21 + 15
-        XCTAssertFalse(p.earnXP(2).goalReached)
+        XCTAssertFalse(p.earnXP(19).goalReached)
+        XCTAssertFalse(p.earnXP(40).goalReached)
+        XCTAssertEqual(p.xpToday, 59)
+        XCTAssertFalse(p.litOn(p.today))
+        p.lightFire()
+        XCTAssertTrue(p.litOn(p.today))
     }
 
     func testThreeDayStreakEarnsAnEmber() {
@@ -73,7 +74,7 @@ final class RewardsTests: XCTestCase {
         XCTAssertTrue(p.chestOpened)
         XCTAssertTrue(p.todayQuests.allSatisfy(p.questDone))
         XCTAssertEqual(p.activity.chests, 1)
-        XCTAssertGreaterThanOrEqual(p.xpTotal - before, 60 + 15 + 20)
+        XCTAssertGreaterThanOrEqual(p.xpTotal - before, 60 + 20)
     }
 
     func testTheWholeActivityRecordSurvivesABackup() throws {

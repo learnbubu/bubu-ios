@@ -95,14 +95,12 @@ struct OnboardingView: View {
                 }
                 .tag(1)
                 slide {
-                    Text("Pick your pace").font(.nunitoXB(24)).foregroundStyle(Color.ink)
-                    Text("Any finished session keeps your streak alive. This is the daily XP target on top, for a bonus.")
-                        .font(.nunito(15.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
-                    ForEach([(10, "Casual", "10 XP · one short session"), (20, "Regular", "20 XP · a session and a few words"),
-                             (30, "Serious", "30 XP · a lesson a day"), (50, "Intense", "50 XP · two lessons")], id: \.0) { g in
-                        choice("\(g.0)", g.1, g.2, on: progress.prefs.dailyGoal == g.0) { progress.prefs.dailyGoal = g.0 }
-                    }
-                    Text("You can change this any time in Settings.").font(.nunito(13)).foregroundStyle(Color.muted)
+                    FlameIcon(lit: true, size: 110).padding(.top, 10)
+                    Text("One lesson a day").font(.nunitoXB(24)).foregroundStyle(Color.ink)
+                    Text("Finish one session each day to keep your streak going. A lesson, a review, practice or a story all count.")
+                        .font(.nunito(16)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                    Text("Miss a day and an ember can relight your fire. You earn them as your streak grows.")
+                        .font(.nunito(14)).foregroundStyle(Color.muted).multilineTextAlignment(.center).padding(.top, 4)
                 }
                 .tag(2)
             }

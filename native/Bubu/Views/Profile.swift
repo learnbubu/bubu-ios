@@ -248,7 +248,7 @@ struct ProfileView: View {
                 ForEach(0..<lead, id: \.self) { _ in Color.clear.frame(height: 30) }
                 ForEach(1...days, id: \.self) { d in
                     let k = key(d)
-                    let lit = progress.litOn(k), goal = progress.xp(on: k) >= progress.dailyGoal
+                    let lit = progress.litOn(k), goal = false
                     let relit = progress.relitOn(k), isToday = k == today
                     ZStack {
                         Circle().fill(goal ? Color.gold : lit ? Color.good : .clear)
@@ -264,7 +264,7 @@ struct ProfileView: View {
                 Label("\(progress.embers) ember\(progress.embers == 1 ? "" : "s")", systemImage: "flame").font(.nunitoXB(12.5)).foregroundStyle(Color.gold)
                 Spacer()
                 HStack(spacing: 8) {
-                    legend("lit", .good); legend("goal met", .gold); legend("relit", .good)
+                    legend("done", .good); legend("relit", .good)
                 }
             }
         }

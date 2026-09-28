@@ -294,7 +294,6 @@ final class ProgressStore {
     }
 
     // MARK: XP, goal, levels
-    var dailyGoal: Int { prefs.dailyGoal }
     func xp(on day: String) -> Int { activity.xpDays[day] ?? 0 }
     var xpToday: Int { xp(on: today) }
     var xpTotal: Int { activity.xpDays.values.reduce(0, +) }
@@ -313,9 +312,8 @@ final class ProgressStore {
 
     func earn(_ xp: Int) { earnXP(xp) }
 
-    /// Earn XP as the web's earnXP: doubled during a boost; the first time today's total
-    /// crosses the daily goal, a +15 bonus (itself doubled in a boost) and its moment;
-    /// then quests and levels are checked.
+    /// Earn XP: doubled during a boost; then quests and levels are checked. There's no
+    /// daily XP target: a day is done by finishing a session (see lightFire).
     /// Every XP ever earned this run, bonuses included: a session reads the difference.
     @ObservationIgnored private(set) var xpCounter = 0
 
@@ -324,15 +322,8 @@ final class ProgressStore {
         guard n > 0 else { return (0, false) }
         holdSaves(); defer { releaseSaves() }
         let mult = boostActive ? 2 : 1, t = today
-        let before = activity.xpDays[t] ?? 0
-        activity.xpDays[t] = before + n * mult
-        var total = n * mult, reached = false
-        if before < dailyGoal && before + n * mult >= dailyGoal && activity.celebrated != t {
-            activity.celebrated = t
-            activity.xpDays[t, default: 0] += 15 * mult
-            total += 15 * mult; reached = true
-            Moments.shared.show(.goal)
-        }
+        activity.xpDays[t, default: 0] += n * mult
+        let total = n * mult, reached = false
         xpCounter += total
         save()
         checkQuests()

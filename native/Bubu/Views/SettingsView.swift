@@ -59,26 +59,6 @@ struct SettingsView: View {
                     }
                 }
 
-                section {
-                    row("Daily goal", "XP to earn each day for the bonus. Any finished session keeps your streak alive.", stack: true) {
-                        HStack(spacing: 6) {
-                            ForEach([(10, "Casual"), (20, "Regular"), (30, "Serious"), (50, "Intense")], id: \.0) { g in
-                                let on = p.prefs.dailyGoal == g.0
-                                Button { p.prefs.dailyGoal = g.0 } label: {
-                                    VStack(spacing: 1) {
-                                        Text(g.1).font(.nunitoXB(14))
-                                        Text("\(g.0) XP").font(.nunito(11, .semibold)).opacity(0.8)
-                                    }
-                                    .foregroundStyle(on ? Color.onAccent : Color.ink)
-                                    .frame(maxWidth: .infinity).padding(.vertical, 9)
-                                    .background(on ? Color.accent : Color.bg, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .sensoryFeedback(.selection, trigger: p.prefs.dailyGoal)
-                    }
-                }
 
                 section {
                     toggle("Embers relight automatically", "Miss a day and an ember is spent for you overnight. Off means you choose each time.", $p.prefs.autoRelight)
@@ -229,7 +209,7 @@ struct HelpPage: View {
                 h("Buttons you'll see")
                 p("• The speaker plays a word; **½×** plays it slowly.\n• Tap a dotted word for its meaning, or a character to see how it's built.\n• The pencil opens a writing sheet.\n• The microphone checks what you say.")
                 h("Streaks and XP")
-                p("Finish a session to light the day's fire. Miss a day and an ember can relight it; you earn embers at 3, 7, 14, 30, 60 and 100 days. XP counts toward your daily goal, your level and your daily quests.")
+                p("Finish a session to light the day's fire. Miss a day and an ember can relight it; you earn embers at 3, 7, 14, 30, 60 and 100 days. Finish one session a day — a lesson, a review, practice or a story — to keep your streak. XP counts toward your level and your daily quests.")
             }
             .padding(20)
         }

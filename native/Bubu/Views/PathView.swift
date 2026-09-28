@@ -389,12 +389,12 @@ struct BackupNudge: View {
     }
 }
 
-/// Streak, the daily-goal ring and settings, floating over the top of the path.
+/// Streak, today's lesson and settings, floating over the top of the path.
 struct HUD: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
     var body: some View {
-        let xp = progress.xpToday, goal = progress.dailyGoal, done = xp >= goal
+        let done = progress.litOn(progress.today)
         HStack(spacing: 8) {
             pill {
                 Image(systemName: "flame.fill").font(.system(size: 14))
@@ -402,15 +402,15 @@ struct HUD: View {
             }
             Button { router.tab = .profile } label: {
             pill(tint: done ? .good : .accent, border: done ? .good : .line) {
+                // today's lesson: an open ring until a session is finished, then a tick
                 ZStack {
-                    Circle().stroke(done ? Color.goodSoft : Color.line, lineWidth: 3)
-                    Circle().trim(from: 0, to: min(1, Double(xp) / Double(goal)))
-                        .stroke(done ? Color.good : Color.accent, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                        .animation(.easeOut(duration: 0.5), value: xp)
+                    Circle().fill(done ? Color.good : .clear)
+                    Circle().strokeBorder(done ? Color.good : Color.line, lineWidth: 2.5)
+                    if done { Image(systemName: "checkmark").font(.system(size: 9, weight: .black)).foregroundStyle(.white) }
                 }
-                .frame(width: 15, height: 15).padding(2)
-                Text("\(min(xp, goal))/\(goal)")
+                .frame(width: 17, height: 17).padding(1)
+                .animation(.spring(response: 0.3), value: done)
+                Text(done ? "Done today" : "Today")
             }
             }
             .buttonStyle(.plain)

@@ -7,7 +7,6 @@ final class Moments {
     static let shared = Moments()
 
     enum Moment: Equatable {
-        case goal
         case level(Int, next: Int)
         case chest(ember: Bool)
         case milestone(Int, ember: Bool)
@@ -31,7 +30,6 @@ final class Moments {
     private func present(_ m: Moment) {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { current = m }
         switch m {
-        case .goal: Sounds.shared.play("goal")
         case .level: Sounds.shared.play("levelup")
         case .chest: Sounds.shared.play("chest")
         case .milestone: Sounds.shared.play("milestone")
@@ -39,7 +37,7 @@ final class Moments {
         default: break
         }
         // the goal and the chest go by themselves, as on the web
-        let auto: Double? = m == .goal ? 2.8 : { if case .chest = m { return 3.2 }; return nil }()
+        let auto: Double? = { if case .chest = m { return 3.2 }; return nil }()
         if let auto {
             DispatchQueue.main.asyncAfter(deadline: .now() + auto) { [weak self] in
                 if self?.current == m { self?.dismiss() }
@@ -139,7 +137,8 @@ struct MomentCard: View {
     }
 
     private var tapToClose: Bool {
-        switch moment { case .goal, .chest: return true; default: return false }
+        if case .chest = moment { return true }
+        return false
     }
 
     private var confettiCount: Int {
@@ -169,10 +168,6 @@ struct MomentCard: View {
     @ViewBuilder
     private var content: some View {
         switch moment {
-        case .goal:
-            Image("done-panda").resizable().scaledToFit().frame(height: 150)
-            title("Daily goal reached!")
-            sub("+15 XP bonus")
         case .level(let lv, let next):
             Image(systemName: "crown.fill").font(.system(size: 46)).foregroundStyle(Color.gold)
             big(lv)
