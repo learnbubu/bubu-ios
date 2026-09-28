@@ -45,6 +45,8 @@ fs.writeFileSync(path.join(DATA, "chars.json"), JSON.stringify(W.CHARS_DATA));
   const src = fs.readFileSync(path.join(WEB, "migrate-old.js"), "utf8");
   const win = {}; new Function("window", src)(win);
   fs.writeFileSync(path.join(DATA, "oldcards.json"), JSON.stringify(win.OLD_CARDS || {}));
+  // lessons before they were cut into stones of five, and the stones holding each one's words
+  fs.writeFileSync(path.join(DATA, "oldlessons.json"), JSON.stringify(win.OLD_LESSONS || {}));
 }
 const strokes = Object.fromEntries(Object.entries(W.HANZI_DATA).map(([c, d]) => [c, d.radStrokes ? { strokes: d.strokes, medians: d.medians, rad: d.radStrokes } : { strokes: d.strokes, medians: d.medians }]));
 fs.writeFileSync(path.join(DATA, "strokes.json"), JSON.stringify(strokes));

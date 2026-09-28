@@ -181,7 +181,7 @@ enum CloudPayload {
         var d = decode(merged, fallbackName: p.name)
         _ = Backup.migrate(&d.srs)
         let lessonIds = Set(Course.shared.lessons.map(\.id))
-        d.done.formIntersection(lessonIds)
+        Backup.migrateDone(&d.done, srs: d.srs)            // old lesson ids finish their stones (web: migrateOldDone)
         if let chosen = d.prefs.lessons, chosen.contains(where: { !lessonIds.contains($0) }) { d.prefs.lessons = nil }
         let now = Decoded(srs: p.srs, done: p.done, activity: p.activity, prefs: p.prefs, name: p.name, hooks: p.hooks)
         guard d != now else { return false }

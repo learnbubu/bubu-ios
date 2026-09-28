@@ -97,23 +97,12 @@ final class LessonFlowTests: XCTestCase {
         return s.result!
     }
 
-    func testTheFinalStepCompletesTheLessonAndOpensTheNext() {
+    /// A stone holds at most five new words and a session teaches up to six, so one session
+    /// finishes it: no steps, and the next stone opens.
+    func testOneSessionFinishesAStoneAndOpensTheNext() {
         let p = store()
-        let lid = course.lessons[0].id, count = course.cards(in: lid).count
-        let total = StudySession.batches(count)
-        XCTAssertGreaterThan(total, 1, "the first lesson comes in steps")
-        XCTAssertEqual(StudySession.lessonSteps(lid, p).step, 1)
-        XCTAssertEqual(StudySession.lessonSteps(lid, p).total, total)
-        for step in 1..<total {
-            let r = play(StudySession(lessonId: lid, progress: p))
-            XCTAssertFalse(r.lessonFinished)
-            XCTAssertEqual(r.title, "Step \(step) of \(total) done")
-            XCTAssertEqual(r.step, step)
-            XCTAssertEqual(r.steps, total)
-            XCTAssertGreaterThan(r.wordsLeft, 0)
-            XCTAssertEqual(StudySession.lessonSteps(lid, p).step, step + 1)
-            XCTAssertEqual(p.currentLessonId, lid, "the next stone stays shut until the lesson is done")
-        }
+        let lid = course.lessons[0].id
+        XCTAssertEqual(StudySession.lessonSteps(lid, p).total, 1, "a stone is one step")
         let r = play(StudySession(lessonId: lid, progress: p))
         XCTAssertTrue(r.lessonFinished)
         XCTAssertEqual(r.title, "Lesson complete!")

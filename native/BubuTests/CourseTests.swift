@@ -12,7 +12,8 @@ final class CourseTests: XCTestCase {
 
     func testCardIdsAreUniqueAndWebShaped() {
         XCTAssertEqual(Set(course.cards.map(\.id)).count, course.cards.count)
-        for c in course.cards.prefix(50) { XCTAssertTrue(c.id.hasPrefix(c.lessonId + ":")) }
+        // "lesson:index", the lesson being where the word was first taught before stones were cut to five
+        for c in course.cards { XCTAssertNotNil(c.id.range(of: #"^[a-z0-9]+-[a-z0-9]+-\d+[a-z]?:\d+$"#, options: .regularExpression), c.id) }
     }
 
     func testEveryChapterLessonExists() {

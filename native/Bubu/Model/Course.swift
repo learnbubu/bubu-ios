@@ -7,6 +7,10 @@ struct Word: Codable, Hashable {
     let pinyin: String
     let pos: String?
     let en: String
+    /// the word's card id, kept when the exporter moves it to another stone ("qibu1-s0-1:8")
+    var id: String? = nil
+    /// a phrase's words, each taught in an earlier stone (我不懂 → 我, 不, 懂)
+    var parts: [String]? = nil
 }
 
 struct Lesson: Codable, Identifiable {
@@ -99,8 +103,9 @@ struct CourseData: Codable {
     let art: [String: ArtSize]
 }
 
-/// One flashcard per unique word. Ids match the web app ("lessonId:index"),
-/// so progress moves between the two without any mapping.
+/// One flashcard per unique word. Ids match the web app: the id the course data gives the
+/// word (the lesson and index where it was first taught, kept when it moves), or
+/// "lessonId:index". Progress moves between the two without any mapping.
 struct Card: Identifiable, Hashable {
     let id: String
     let lessonId: String
@@ -136,7 +141,7 @@ final class Course {
                 let key = w.hanzi + "|" + Course.normEn(w.en)
                 if seen.contains(key) { continue }
                 seen.insert(key)
-                cards.append(Card(id: "\(lesson.id):\(i)", lessonId: lesson.id, word: w))
+                cards.append(Card(id: w.id ?? "\(lesson.id):\(i)", lessonId: lesson.id, word: w))
             }
         }
         self.cards = cards

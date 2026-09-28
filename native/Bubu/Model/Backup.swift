@@ -104,6 +104,45 @@ enum Backup {
         return !old.isEmpty
     }
 
+    /// Lessons before they were cut into stones of at most five new words (web v294): each old
+    /// lesson id and the stones that now hold its words.
+    static let oldLessons: [String: [String]] = {
+        guard let url = Bundle.main.url(forResource: "oldlessons", withExtension: "json"),
+              let d = try? Data(contentsOf: url), let o = try? JSONDecoder().decode([String: [String]].self, from: d) else { return [:] }
+        return o
+    }()
+
+    /// Done lesson ids the course no longer has (web: migrateOldDone). An old lesson cut into
+    /// stones finishes each stone whose words all came from lessons that were done, so a word
+    /// brought forward from a lesson not reached yet keeps its stone open. Any other stone counts
+    /// as done once every one of its words has been answered (the old edition's ids).
+    /// Returns the stones marked done from old lessons, and those from word history.
+    @discardableResult
+    static func migrateDone(_ done: inout Set<String>, srs: [String: SRSRecord], course: Course = .shared,
+                            oldLessons: [String: [String]] = Backup.oldLessons) -> (restoned: Int, carried: Int) {
+        let stale = done.filter { course.lessonById[$0] == nil }
+        guard !stale.isEmpty else { return (0, 0) }
+        done.subtract(stale)
+        var restoned = 0, carried = 0
+        let was = stale.filter { oldLessons[$0] != nil }
+        if !was.isEmpty {
+            var from: [String: [String]] = [:]
+            for (old, stones) in oldLessons { for id in stones { from[id, default: []].append(old) } }
+            for l in course.lessons where !done.contains(l.id) {
+                if let olds = from[l.id], !olds.isEmpty, olds.allSatisfy({ was.contains($0) }) { done.insert(l.id); restoned += 1 }
+            }
+        }
+        for l in course.lessons where !done.contains(l.id) {
+            let cs = course.cards(in: l.id)
+            if !cs.isEmpty && cs.allSatisfy({ (srs[$0.id]?.reps ?? 0) > 0 }) { done.insert(l.id); carried += 1 }
+        }
+        return (restoned, carried)
+    }
+
+    static func restonedNote(_ n: Int) -> String {
+        "Lessons are now shorter: up to five new words a stone. \(n) stone\(n == 1 ? " is" : "s are") done from your progress, and your words keep their reviews."
+    }
+
     /// What a backup holds, before restoring it; nil if it isn't one.
     static func summary(_ file: Data) -> Summary? {
         guard let p = try? JSONSerialization.jsonObject(with: file) as? [String: Any],
@@ -135,14 +174,8 @@ enum Backup {
         let moved = migrate(&srs)
         let lessonIds = Set(course.lessons.map(\.id))
         let stale = done.subtracting(lessonIds)
-        var carried = 0
-        if !stale.isEmpty {
-            done.subtract(stale)
-            for l in course.lessons where !done.contains(l.id) {
-                let cs = course.cards(in: l.id)
-                if !cs.isEmpty && cs.allSatisfy({ (srs[$0.id]?.reps ?? 0) > 0 }) { done.insert(l.id); carried += 1 }
-            }
-        }
+        let (restoned, fromWords) = migrateDone(&done, srs: srs, course: course)
+        let carried = restoned + fromWords
         if let chosen = prefs.lessons, chosen.contains(where: { !lessonIds.contains($0) }) { prefs.lessons = nil }
 
         p.replaceAll(srs: srs, done: done, activity: activity, name: (prefsObj["name"] as? String) ?? "",
@@ -150,7 +183,9 @@ enum Backup {
         // a record from before levels were tracked: no level-up for XP already earned
         if let a = data[activityKey], !a.contains("\"levelSeen\"") { p.settleLevel() }
         p.markBackedUp()
-        if moved || !stale.isEmpty {
+        if restoned > 0 {
+            Moments.shared.toast(restonedNote(carried))
+        } else if moved || !stale.isEmpty {
             Moments.shared.toast(carried > 0
                 ? "Welcome to the new course! \(carried) stone\(carried == 1 ? " is" : "s are") already done from your old progress, and your words keep their reviews."
                 : "Welcome to the new course! Your words keep their reviews.")

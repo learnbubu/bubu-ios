@@ -96,6 +96,7 @@ final class ProgressStore {
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         self.url = url ?? dir.appendingPathComponent("progress.json")
         load()
+        migrateLessons(announce: url == nil)
         if url == nil { Self.current = self }
     }
 
@@ -117,6 +118,21 @@ final class ProgressStore {
             a.lit = Dictionary(uniqueKeysWithValues: (s.lit ?? []).map { ($0, true) })
             a.celebrated = s.celebrated; a.boostUntil = s.boostUntil ?? 0
             activity = a
+        }
+    }
+
+    /// Progress saved before lessons were cut into stones of five: the old lesson ids
+    /// finish their stones (see Backup.migrateDone), once, and it's saved.
+    private func migrateLessons(announce: Bool) {
+        guard done.contains(where: { course.lessonById[$0] == nil }) else { return }
+        var d = done
+        let (restoned, carried) = Backup.migrateDone(&d, srs: srs, course: course)
+        done = d
+        if let chosen = prefs.lessons, chosen.contains(where: { course.lessonById[$0] == nil }) { prefs.lessons = nil }
+        save()
+        if restoned > 0 && announce {
+            let n = restoned + carried
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { Moments.shared.toast(Backup.restonedNote(n)) }
         }
     }
 
