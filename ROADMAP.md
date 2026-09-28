@@ -20,7 +20,7 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 ## Before the App Store
 
 - [x] Apple Developer membership active (28 Sep 2026)
-- [ ] TestFlight: app record in App Store Connect, API key into Codemagic, builds upload automatically
+- [x] TestFlight: app record in App Store Connect, API key into Codemagic, builds upload automatically _(first upload 28 Sep 2026; run `python tools/cm.py run testflight main`)_
 - [ ] Buying Plus in the app with StoreKit (subscription), then turn the Plus rows back on
 - [ ] Privacy policy (a URL is required) and the App Store privacy labels
 - [ ] Wardrobe items to spend coins on (art needed)
