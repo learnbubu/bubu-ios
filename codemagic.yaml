@@ -93,3 +93,40 @@ workflows:
       - screenshots/*.txt
       - test.log
       - Bubu-Xcode-project.zip
+
+  # Signs the native app and sends it to TestFlight (private testing only; nothing
+  # goes to the App Store). Signing is automatic through the App Store Connect API
+  # key saved in Codemagic as "Bubu ASC". Each build gets the next build number.
+  testflight:
+    name: TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    integrations:
+      app_store_connect: Bubu ASC
+    environment:
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.bubu
+    scripts:
+      - name: Generate the Xcode project
+        script: |
+          brew install xcodegen
+          cd native && xcodegen generate
+      - name: Use the signing profiles
+        script: xcode-project use-profiles --project native/Bubu.xcodeproj
+      - name: Build the app for TestFlight
+        script: |
+          # the next build number after the newest one App Store Connect has
+          LATEST=$(app-store-connect get-latest-testflight-build-number --bundle-id com.bubu 2>/dev/null || echo 0)
+          NEXT=$(( ${LATEST:-0} + 1 ))
+          echo "Build number $NEXT"
+          xcode-project build-ipa --project native/Bubu.xcodeproj --scheme Bubu \
+            --archive-xcargs "CURRENT_PROJECT_VERSION=$NEXT"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
