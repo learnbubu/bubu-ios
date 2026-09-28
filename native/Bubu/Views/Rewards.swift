@@ -232,7 +232,7 @@ struct BunsCard: View {
                     }
                     ShopRow("Steam a fresh batch", sub: "Refill all \(full) buns", price: ProgressStore.ShopItem.buns.price,
                             disabled: s.n >= full, action: buy) {
-                        BunIcon(width: 36)
+                        Image("bun").resizable().scaledToFit().frame(width: 36, height: 31)
                     }
                     ShopRow("Unlimited buns", sub: "With Bùbù Plus, never run out", plus: true,
                             action: { Moments.shared.replace(with: .plus) }) {
@@ -456,8 +456,8 @@ struct PocketCard: View {
                 }
                 .padding(.top, 10).padding(.bottom, 4)
             }
+            // not disabled once open: a disabled button fades its label, and the reward is in it
             .buttonStyle(.plain)
-            .disabled(open)
             .accessibilityLabel("Open the pocket")
             Text(open ? (red ? "coins" : "good luck!") : "Tap to open").font(.nunito(13.6, .heavy)).foregroundStyle(Color.muted)
             Button("Nice", action: close).buttonStyle(WideButton()).padding(.top, 10)
