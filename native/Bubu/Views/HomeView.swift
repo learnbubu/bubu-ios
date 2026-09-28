@@ -1,11 +1,12 @@
 import SwiftUI
+import Observation
 
 /// Home, as the web has it: greeting over the temple scenery, the streak card
 /// with Bùbù peeking up, daily quests, Continue learning, and practice.
 struct HomeView: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
-    @State private var scrollY: CGFloat = 0
+    @State private var scroll = HomeScroll()
     private let course = Course.shared
 
     var body: some View {
@@ -13,7 +14,7 @@ struct HomeView: View {
             let W = geo.size.width, top = geo.safeAreaInsets.top
             ZStack(alignment: .top) {
                 Color.bg.ignoresSafeArea()
-                scenery(W: W, top: top)
+                HomeScenery(scroll: scroll, W: W, top: top)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         GeometryReader { g in
@@ -47,30 +48,16 @@ struct HomeView: View {
                     .padding(.horizontal, 18)
                 }
                 .coordinateSpace(name: "home")
-                .onPreferenceChange(ScrollYKey.self) { scrollY = $0 }
+                // the scenery drifts as the page scrolls: the offset goes to a box that only the
+                // scenery reads, so scrolling redraws the scenery each frame, not all of Home
+                .onPreferenceChange(ScrollYKey.self) { y in
+                    let up = min(0, y)
+                    if scroll.up != up { scroll.up = up }
+                }
                 .onAppear { progress.ensureQuests() }
                 .scrollIndicators(.hidden)
             }
         }
-    }
-
-    // MARK: scenery, drifting slower than the page as on the web
-    private func scenery(W: CGFloat, top: CGFloat) -> some View {
-        let up = min(0, scrollY)
-        return ZStack(alignment: .topLeading) {
-            Image("home-cloud-a").resizable().frame(width: W * 0.42, height: W * 0.42 * 0.3855)
-                .offset(x: W * 0.133, y: top - 36 + up * 0.1)
-            Image("home-temple").resizable().frame(width: W * 0.70, height: W * 0.70 * 0.5869)
-                .opacity(0.95)
-                .offset(x: W * 0.329, y: top - 24 + up * 0.28)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .overlay(alignment: .bottom) {
-            Image("home-bottom").resizable().frame(width: W * 1.5, height: W * 1.5 * 338 / 1200)
-                .offset(y: 14)
-        }
-        .ignoresSafeArea(edges: .top)
-        .allowsHitTesting(false)
     }
 
     // MARK: greeting
@@ -342,6 +329,37 @@ struct HomeView: View {
                 .buttonStyle(PressDown(depth: 2))
             }
         }
+    }
+}
+
+/// How far Home has scrolled up from its top (0 or less, in points). A class, so writing it
+/// redraws only the scenery that reads it, not all of Home.
+@Observable
+final class HomeScroll {
+    var up: CGFloat = 0
+}
+
+/// The scenery behind Home, drifting slower than the page as on the web.
+private struct HomeScenery: View {
+    let scroll: HomeScroll
+    let W: CGFloat
+    let top: CGFloat
+    var body: some View {
+        let up = scroll.up
+        ZStack(alignment: .topLeading) {
+            Image("home-cloud-a").resizable().frame(width: W * 0.42, height: W * 0.42 * 0.3855)
+                .offset(x: W * 0.133, y: top - 36 + up * 0.1)
+            Image("home-temple").resizable().frame(width: W * 0.70, height: W * 0.70 * 0.5869)
+                .opacity(0.95)
+                .offset(x: W * 0.329, y: top - 24 + up * 0.28)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .overlay(alignment: .bottom) {
+            Image("home-bottom").resizable().frame(width: W * 1.5, height: W * 1.5 * 338 / 1200)
+                .offset(y: 14)
+        }
+        .ignoresSafeArea(edges: .top)
+        .allowsHitTesting(false)
     }
 }
 

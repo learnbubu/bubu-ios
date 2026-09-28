@@ -17,6 +17,9 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
   Then call it from `Cloud.deleteCloudData()` (native) and add the same button to the website's Account box.
 - [ ] **Password reset.** Neither the website nor the app has "Forgot password?". Supabase's `POST /auth/v1/recover` sends the email, but its link lands on the website, which has no screen for choosing a new password yet. Build that page on the website first (and add the app's URL to the project's redirect allow-list if the app should handle it).
 
+- [x] **Learn tab lag on switching tabs** (reported from TestFlight). _App: the path's layout and pebble trail are worked out once (`PathModel`) instead of on every render; only the stretch near the screen is drawn instead of all ~365 stones; the path no longer re-renders for XP, quests or coins; it scrolls to the current stone the first time and when it moves on, not on every visit; Home's scenery parallax no longer re-renders all of Home each scroll frame._ Check on a real iPhone.
+- [x] **No "Back up your progress" banner** on the path, and no "Coming from the website? Restore a backup" on the welcome screen. _App: sign-in and sync live in Settings; Export/Restore backup stay in Settings._
+
 ## Before the App Store
 
 - [x] Apple Developer membership active (28 Sep 2026)
