@@ -16,6 +16,11 @@ struct Prefs: Codable, Equatable {
     var lessons: [String]?      // "What to study": the lessons chosen (nil or empty = all)
     var focuses: [String]?      // and the skills switched on (nil or empty = all)
     var avatar: AvatarConfig?   // your avatar's look
+    // reminder notifications (see Reminders.swift); nil means never chosen
+    var reminders: Bool?        // the daily reminder is on
+    var reminderMinutes: Int?   // its time, minutes after midnight (nil = 19:00)
+    var streakNudge: Bool?      // the late "streak at risk" nudge (nil = on)
+    var remindersAsked: Bool?   // the "Want a daily reminder?" card has been answered
 
     init() {}
     init(from decoder: Decoder) throws {
@@ -32,6 +37,10 @@ struct Prefs: Codable, Equatable {
         lessons = try? c.decode([String].self, forKey: .lessons)
         focuses = try? c.decode([String].self, forKey: .focuses)
         avatar = try? c.decode(AvatarConfig.self, forKey: .avatar)
+        reminders = try? c.decode(Bool.self, forKey: .reminders)
+        reminderMinutes = try? c.decode(Int.self, forKey: .reminderMinutes)
+        streakNudge = try? c.decode(Bool.self, forKey: .streakNudge)
+        remindersAsked = try? c.decode(Bool.self, forKey: .remindersAsked)
     }
 
     var colorScheme: ColorScheme? { theme == "light" ? .light : theme == "dark" ? .dark : nil }

@@ -31,6 +31,8 @@ struct SettingsView: View {
                     }
                 }
 
+                ReminderSettings()
+
                 section {
                     row("Audio speed", "How fast words are spoken.", stack: true) {
                         HStack {

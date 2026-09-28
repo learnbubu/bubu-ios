@@ -81,7 +81,7 @@ workflows:
           xcrun simctl terminate "$UDID" com.domchivers.bubu || true
           for MODE in light dark; do
             xcrun simctl ui "$UDID" appearance $MODE
-            for S in home path lesson study quiz sentence sentencedrag speak write done char settings chars guide story tones profile avatar welcome hud buns shop pocket; do
+            for S in home path lesson study quiz sentence sentencedrag speak write done char settings chars guide story tones profile avatar welcome hud buns shop pocket remind; do
               xcrun simctl terminate "$UDID" com.domchivers.bubu || true
               xcrun simctl launch "$UDID" com.domchivers.bubu -screen $S
               sleep 6

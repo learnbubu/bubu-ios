@@ -10,6 +10,9 @@ struct BubuApp: App {
         return ProgressStore(course: Course.shared)
     }()
 
+    // reminder taps are handled from the first moment, even on a cold launch
+    init() { Reminders.shared.install() }
+
     var body: some Scene {
         WindowGroup {
             RootView()

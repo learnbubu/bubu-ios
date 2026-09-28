@@ -8,7 +8,7 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 
 - [x] **Soften buns for beginners.** _App: the first try at a word just met is free._ 5 buns can run out in a single ~11-exercise lesson, and Chinese beginners miss a lot. Options: first try at a brand-new word is free / one free mistake per lesson / buns only count from the second lesson of the day.
 - [x] **Hide Plus in App Store builds** _App: `ProgressStore.plusForSale` (false; `-plusShop` turns it on in debug)._ until it can actually be bought. Apple rejects "coming soon" placeholders (guideline 2.1).
-- [ ] **Reminder notifications** ("Bùbù's hungry, keep your 12-day streak"). Neither the website nor the app has any.
+- [x] **Reminder notifications** ("Bùbù's hungry, keep your 12-day streak"). Neither the website nor the app has any.
 - [ ] **Sign-in and cloud sync in the app** (the website already syncs through Supabase). Until then, website and app keep separate progress, coins and buns, and a lost phone loses everything without a backup.
 
 ## Before the App Store
