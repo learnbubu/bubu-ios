@@ -147,7 +147,11 @@ final class ProgressStore {
                       onboarded: onboarded, lastBackup: lastBackup, backupSnooze: backupSnooze)
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         if let data = try? JSONEncoder().encode(s) { try? data.write(to: url, options: .atomic) }
+        didSave?()
     }
+
+    /// Called after every save; cloud sync uses it to queue a push (see Cloud.swift).
+    @ObservationIgnored var didSave: (() -> Void)?
 
     /// Everything replaced at once, from a backup.
     func replaceAll(srs: [String: SRSRecord], done: Set<String>, activity: Activity, name: String,

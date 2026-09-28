@@ -9,7 +9,13 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 - [ ] **Soften buns for beginners.** 5 buns can run out in a single ~11-exercise lesson, and Chinese beginners miss a lot. Options: first try at a brand-new word is free / one free mistake per lesson / buns only count from the second lesson of the day.
 - [ ] **Hide Plus in App Store builds** until it can actually be bought. Apple rejects "coming soon" placeholders (guideline 2.1).
 - [ ] **Reminder notifications** ("Bùbù's hungry, keep your 12-day streak"). Neither the website nor the app has any.
-- [ ] **Sign-in and cloud sync in the app** (the website already syncs through Supabase). Until then, website and app keep separate progress, coins and buns, and a lost phone loses everything without a backup.
+- [x] **Sign-in and cloud sync in the app** (the website already syncs through Supabase). Settings → Account: the same account, table (`progress`), payload and merge as the website, so both show the same progress. Pulls on sign-in, launch and coming to the front; pushes 4 s after changes; retries quietly when offline.
+- [ ] **Full account deletion (server piece missing; Apple requires it, guideline 5.1.1(v)).** The app's "Delete account…" can only erase the `progress` row (the table's row-level-security policy allows a user to delete their own row) and sign out. Deleting the sign-in itself (the row in `auth.users`) needs the service_role key, which must never be in a client. Needed on the Supabase project, one of:
+  - a Postgres function callable as `POST /rest/v1/rpc/delete_user` (`create function public.delete_user() returns void language sql security definer set search_path = '' as $$ delete from auth.users where id = auth.uid(); $$;` then `revoke all on function public.delete_user() from public, anon; grant execute on function public.delete_user() to authenticated;`; `progress` goes with it through `on delete cascade`), or
+  - an Edge Function that checks the caller's JWT and calls `auth.admin.deleteUser(uid)` with the service_role key held server-side.
+
+  Then call it from `Cloud.deleteCloudData()` (native) and add the same button to the website's Account box.
+- [ ] **Password reset.** Neither the website nor the app has "Forgot password?". Supabase's `POST /auth/v1/recover` sends the email, but its link lands on the website, which has no screen for choosing a new password yet. Build that page on the website first (and add the app's URL to the project's redirect allow-list if the app should handle it).
 
 ## Before the App Store
 

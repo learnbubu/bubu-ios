@@ -17,6 +17,8 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Settings").font(.nunitoXB(28)).foregroundStyle(Color.ink).padding(.top, 8)
 
+                AccountSection()
+
                 section {
                     row("Your name", "Shown in the greeting on the Home screen.", stack: true) {
                         TextField("e.g. Dominic", text: $p.name)
