@@ -477,8 +477,11 @@ final class CloudSyncTests: XCTestCase {
         let (c, p, _) = cloud(t, session: s)
         keep = p
         try await c.deleteCloudData()
-        XCTAssertEqual(t.requests.last?.httpMethod, "DELETE")
-        XCTAssertEqual(t.requests.last?.url?.absoluteString, CloudConfig.url.absoluteString + "/rest/v1/progress?user_id=eq.u1")
+        let n = t.requests.count
+        XCTAssertEqual(t.requests[n - 2].httpMethod, "DELETE")
+        XCTAssertEqual(t.requests[n - 2].url?.absoluteString, CloudConfig.url.absoluteString + "/rest/v1/progress?user_id=eq.u1")
+        XCTAssertEqual(t.requests.last?.httpMethod, "POST")
+        XCTAssertEqual(t.requests.last?.url?.absoluteString, CloudConfig.url.absoluteString + "/rest/v1/rpc/delete_user")
         XCTAssertFalse(c.signedIn)
     }
 }

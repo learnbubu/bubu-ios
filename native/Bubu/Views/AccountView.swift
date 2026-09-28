@@ -36,7 +36,7 @@ struct AccountSection: View {
             Button("Delete", role: .destructive) { Task { await deleteAccount() } }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This erases the progress saved in the cloud for \(cloud.email) and signs you out. Progress on this phone stays.\n\nSign out on the website and any other device first, or they'll upload their progress again.\n\nThe sign-in itself (your email and password) can't be removed from the app yet.")
+            Text("This deletes the account \(cloud.email) and the progress saved with it, and signs you out. It can't be undone. Progress on this phone stays.")
         }
     }
 
@@ -125,7 +125,7 @@ struct AccountSection: View {
     private func deleteAccount() async {
         do {
             try await cloud.deleteCloudData()
-            note = ("Your cloud progress is deleted and you're signed out. Progress on this phone stays.", true)
+            note = ("Your account is deleted and you're signed out. Progress on this phone stays.", true)
         } catch {
             note = (error.localizedDescription, false)
         }
