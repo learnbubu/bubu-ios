@@ -94,57 +94,18 @@ struct StudyView: View {
 
     // MARK: chrome
 
+    /// The top of a session, as Duolingo has it: close, the progress bar and the buns
+    /// in one row; the combo, double XP, the count and shuffle in a slim row under it.
     private var topBar: some View {
-        HStack(spacing: 8) {
-            Button { close() } label: {
-                Text("← Home").font(.nunito(16, .bold)).foregroundStyle(Color.ink)
-                    .padding(.horizontal, 13).padding(.vertical, 9)
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
-            }
-            .buttonStyle(PressDown(depth: 1))
-            Text(session.title).font(.nunito(16, .bold)).foregroundStyle(Color.ink)
-            Spacer()
-            if session.combo >= 3 {
-                let hot = session.combo >= 5
-                HStack(spacing: 3) {
-                    Image(systemName: "flame.fill").font(.system(size: 12))
-                    Text("\(session.combo)").font(.nunitoXB(12.8))
+        VStack(spacing: 6) {
+            HStack(spacing: 12) {
+                Button { close() } label: {
+                    Image(systemName: "xmark").font(.system(size: 17, weight: .bold)).foregroundStyle(Color.muted)
+                        .frame(width: 34, height: 34).contentShape(Rectangle())
                 }
-                .foregroundStyle(hot ? Color.white : Color.again)
-                .padding(.leading, 6).padding(.trailing, 9).padding(.vertical, 3)
-                .background(hot ? Color.again : Color.againSoft, in: Capsule())
-                .transition(.scale.combined(with: .opacity))
-            }
-            if progress.boostActive {
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    let left = max(0, Int((progress.boostUntil - progress.now()) / 1000))
-                    (Text("2×").font(.nunito(12.5, .black)) + Text(" XP · \(left / 60):\(String(format: "%02d", left % 60))").font(.nunito(12.5, .bold)))
-                        .monospacedDigit()
-                        .foregroundStyle(Color.gold)
-                        .padding(.horizontal, 9).padding(.vertical, 3)
-                        .background(Color.accentSoft, in: Capsule())
-                }
-            }
-            Text("\(min(session.stepsDone, session.sessionTotal)) / \(session.sessionTotal)")
-                .font(.nunito(13, .semibold)).monospacedDigit().foregroundStyle(Color.muted)
-            if !session.isQuiz {
-                Button {
-                    withAnimation {
-                        if session.shuffleRest() { resetExercise() }
-                        else { Moments.shared.toast("Shuffle is available once all the new words have been introduced.") }
-                    }
-                } label: { Image(systemName: "shuffle").font(.system(size: 15, weight: .bold)).foregroundStyle(Color.muted) }
                 .buttonStyle(.plain)
-            }
-        }
-        .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, 12)
-        .animation(.spring(response: 0.3), value: session.combo)
-    }
-
-    private var content: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 10) {
-                ProgressBarShine(value: session.progressFraction)
+                .accessibilityLabel("Close")
+                ProgressBarShine(value: session.progressFraction, height: 12)
                 // buns in a lesson, and in a review while they're being earned back
                 if session.onBuns || (session.earnsBuns && progress.buns < ProgressStore.bunsMax) {
                     BunRow(n: progress.isPlus ? ProgressStore.bunsMax : progress.bunState.n, plus: progress.isPlus, bump: session.bunsEarned)
@@ -155,8 +116,54 @@ struct StudyView: View {
                         })
                 }
             }
+            HStack(spacing: 8) {
+                Text(session.title).font(.nunito(13, .bold)).foregroundStyle(Color.muted)
+                Spacer()
+                if session.combo >= 3 {
+                    let hot = session.combo >= 5
+                    HStack(spacing: 3) {
+                        Image(systemName: "flame.fill").font(.system(size: 11))
+                        Text("\(session.combo)").font(.nunitoXB(12))
+                    }
+                    .foregroundStyle(hot ? Color.white : Color.again)
+                    .padding(.leading, 6).padding(.trailing, 8).padding(.vertical, 2)
+                    .background(hot ? Color.again : Color.againSoft, in: Capsule())
+                    .transition(.scale.combined(with: .opacity))
+                }
+                if progress.boostActive {
+                    TimelineView(.periodic(from: .now, by: 1)) { _ in
+                        let left = max(0, Int((progress.boostUntil - progress.now()) / 1000))
+                        (Text("2×").font(.nunito(12, .black)) + Text(" XP · \(left / 60):\(String(format: "%02d", left % 60))").font(.nunito(12, .bold)))
+                            .monospacedDigit()
+                            .foregroundStyle(Color.gold)
+                            .padding(.horizontal, 8).padding(.vertical, 2)
+                            .background(Color.accentSoft, in: Capsule())
+                    }
+                }
+                Text("\(min(session.stepsDone, session.sessionTotal)) / \(session.sessionTotal)")
+                    .font(.nunito(12.5, .semibold)).monospacedDigit().foregroundStyle(Color.muted)
+                if !session.isQuiz {
+                    Button {
+                        withAnimation {
+                            if session.shuffleRest() { resetExercise() }
+                            else { Moments.shared.toast("Shuffle is available once all the new words have been introduced.") }
+                        }
+                    } label: { Image(systemName: "shuffle").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.muted) }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Shuffle")
+                }
+            }
+            .padding(.leading, 46)
+            .frame(height: 20)
+        }
+        .padding(.leading, 10).padding(.trailing, 18).padding(.top, 2).padding(.bottom, 10)
+        .animation(.spring(response: 0.3), value: session.combo)
+    }
+
+    private var content: some View {
+        VStack(alignment: .leading, spacing: 0) {
             Text(promptLabel).font(.nunitoXB(19.2)).tracking(-0.2).foregroundStyle(Color.ink)
-                .padding(.top, 18).padding(.bottom, 14)
+                .padding(.top, 4).padding(.bottom, 14)
             Group {
                 switch session.current {
                 case .meet(let cards, let first, let left):
@@ -270,6 +277,7 @@ struct StudyView: View {
 
 struct ProgressBarShine: View {
     var value: Double
+    var height: CGFloat = 6
     var body: some View {
         GeometryReader { g in
             ZStack(alignment: .leading) {
@@ -281,7 +289,7 @@ struct ProgressBarShine: View {
                     }
             }
         }
-        .frame(height: 6)
+        .frame(height: height)
         .animation(.easeOut(duration: 0.3), value: value)
     }
 }
@@ -291,6 +299,7 @@ struct ProgressBarShine: View {
 struct MascotPrompt<Content: View>: View {
     var mood: Bool?          // nil: asking; true: pleased; false: sad
     var sentence = false
+    var long = false         // a long sentence: a smaller Bùbù, so the bubble gets the width
     @ViewBuilder var content: Content
     @State private var pop = false
 
@@ -298,12 +307,12 @@ struct MascotPrompt<Content: View>: View {
         HStack(alignment: .center, spacing: 10) {
             Image(mood == nil ? "panda-teacher" : mood! ? "panda-celebrate" : "panda-sad")
                 .resizable().scaledToFit()
-                .frame(width: 122, height: 148, alignment: .bottom)
+                .frame(width: long ? 64 : 122, height: long ? 80 : 148, alignment: .bottom)
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)
             SpeechBubbleBox(sentence: sentence) { content }
         }
-        .frame(minHeight: 140)
+        .frame(minHeight: long ? 80 : 140)
         .onChange(of: mood) { _, new in
             guard new != nil else { return }
             withAnimation(.easeOut(duration: 0.17)) { pop = true }
@@ -759,7 +768,8 @@ struct SentenceView: View {
         let sent = ex.sentence!
         let anyNew = sent.words.contains { isNew($0.hanzi) }
         VStack(spacing: 16) {
-            MascotPrompt(mood: result, sentence: !ex.toChinese) {
+            MascotPrompt(mood: result, sentence: !ex.toChinese,
+                         long: ex.toChinese ? sent.en.count > 48 : sent.words.map(\.hanzi).joined().count > 10) {
                 if ex.toChinese {
                     if anyNew { NewBadge() }
                     FlowLayout(spacing: 4, lineSpacing: 4, center: true) {
