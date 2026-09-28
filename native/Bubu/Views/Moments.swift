@@ -9,7 +9,7 @@ final class Moments {
     enum Moment: Equatable {
         case level(Int, next: Int)
         case pocket(Pocket)
-        case milestone(Int, ember: Bool)
+        case milestone(Int, ember: Bool, coins: Int = 0)
         case relit(streak: Int, left: Int)
         case fireOut(lost: Int)
         case askRelight(lost: Int, embers: Int)
@@ -209,12 +209,21 @@ struct MomentCard: View {
             PlusCard(close: close)
         case .shop:
             ShopCard(progress: progress, close: close)
-        case .milestone(let s, let ember):
+        case .milestone(let s, let ember, let coins):
             FlameIcon(lit: true, size: 90)
             big(s)
             title("day streak!")
             sub(DoneView.milestoneWords[s] ?? "Keep the fire lit.")
             if ember { note("You earned an ember") }
+            if coins > 0 {
+                HStack(spacing: 6) {
+                    CoinIcon(size: 20)
+                    Text("+\(coins) coins").monospacedDigit()
+                }
+                .font(.nunito(14, .bold)).foregroundStyle(Color.gold)
+                .padding(.horizontal, 12).padding(.vertical, 5).background(Color.accentSoft, in: Capsule())
+                .padding(.top, 4)
+            }
             button("Keep going", close).padding(.top, 10)
         case .relit(let streak, let left):
             FlameIcon(lit: true, size: 90)

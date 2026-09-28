@@ -731,7 +731,23 @@ struct SentenceView: View {
     @Environment(ProgressStore.self) private var progress
     @State private var pinyinOpen = false
     @State private var held: Exercise.Tile?
+    // dragging a tile (web: the tile follows the finger and its place in the answer
+    // follows it): the tile's slot stays in the answer, empty, while a copy is carried
+    @State private var drag: TileDrag?
+    @State private var frames: [Int: CGRect] = [:]     // answer tiles by id, bank tiles by id + bankKey
+    @State private var answerFrame: CGRect = .zero
+    @State private var justDragged = false
+    @State private var moves = 0
+    fileprivate static let bankKey = 100_000
     private let course = Course.shared
+
+    struct TileDrag: Equatable {
+        let tile: Exercise.Tile
+        var grab: CGSize            // where the finger holds the tile, from its corner
+        var at: CGPoint             // the finger
+        var settling = false
+        var origin: CGPoint { CGPoint(x: at.x - grab.width, y: at.y - grab.height) }
+    }
 
     /// whether a word of the sentence is itself a word not learned yet
     private func isNew(_ hanzi: String) -> Bool {
@@ -786,6 +802,35 @@ struct SentenceView: View {
             answerArea
             bank
         }
+        .coordinateSpace(.named("sentence"))
+        .onPreferenceChange(TileFrames.self) { frames = $0 }
+        .overlay(alignment: .topLeading) {
+            // the tile being carried, over everything, a little lifted
+            if let d = drag {
+                tileFace(d.tile, tint: nil)
+                    .scaleEffect(d.settling ? 1 : 1.08)
+                    .shadow(color: .black.opacity(d.settling ? 0 : 0.18), radius: 8, y: 5)
+                    .offset(x: d.origin.x, y: d.origin.y)
+                    .allowsHitTesting(false)
+            }
+        }
+        .sensoryFeedback(.selection, trigger: moves)
+        .onAppear {
+            #if DEBUG
+            // the drag screenshot: the answer's tiles all placed, the first carried part-way
+            if Launch.screen == "sentencedrag", let sent = ex.sentence {
+                let words = ex.toChinese ? sent.words.map(\.hanzi) : Sentence.enWords(sent.en)
+                var pool = ex.tiles
+                placed = words.compactMap { w in pool.firstIndex { $0.text == w }.map { pool.remove(at: $0) } }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    guard placed.count > 1, let f = frames[placed[0].id] else { return }
+                    let v = CGPoint(x: f.midX + 80, y: f.midY + 20)
+                    drag = TileDrag(tile: placed[0], grab: CGSize(width: f.width / 2, height: f.height / 2), at: v)
+                    moveSlot(placed[0])
+                }
+            }
+            #endif
+        }
     }
 
     private var rowHeight: CGFloat { ex.toChinese ? 78 : 64 }
@@ -801,9 +846,18 @@ struct SentenceView: View {
                     guard result == nil else { return }
                     withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) { placed.removeAll { $0.id == t.id } }
                 }
+                .opacity(drag?.tile == t ? 0 : 1)
+                .background(GeometryReader { g in
+                    Color.clear.preference(key: TileFrames.self, value: [t.id: g.frame(in: .named("sentence"))])
+                })
             }
         }
         .frame(maxWidth: .infinity, minHeight: rowHeight * CGFloat(rows), alignment: .topLeading)
+        .background(GeometryReader { g in
+            Color.clear
+                .onAppear { answerFrame = g.frame(in: .named("sentence")) }
+                .onChange(of: g.frame(in: .named("sentence"))) { _, f in answerFrame = f }
+        })
         .background(alignment: .top) {
             VStack(spacing: 0) {
                 ForEach(0..<rows, id: \.self) { _ in
@@ -823,31 +877,41 @@ struct SentenceView: View {
                 }
                 .opacity(used ? 0 : 1)
                 .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.line.opacity(used ? 0.6 : 0)))
+                .background(GeometryReader { g in
+                    Color.clear.preference(key: TileFrames.self, value: [t.id + Self.bankKey: g.frame(in: .named("sentence"))])
+                })
             }
         }
         .frame(maxWidth: .infinity)
     }
 
-    private func tile(_ t: Exercise.Tile, inAnswer: Bool, tap: @escaping () -> Void) -> some View {
-        let tint: Color? = inAnswer ? (result == true ? .good : result == false ? .again : nil) : nil
-        return Button(action: tap) {
-            VStack(spacing: 1) {
-                Text(t.text).font(ex.toChinese ? .hanzi(20.8, .medium) : .nunito(16.8, .semibold))
-                if let py = t.pinyin { Text(py).font(.nunito(11.5)).foregroundStyle(Color.muted) }
-            }
-            .foregroundStyle(tint ?? Color.ink)
-            .padding(.horizontal, 12).padding(.vertical, 9)
-            .background {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous).fill(tint ?? Color.line).offset(y: 2)
-                    RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.panel)
-                    RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(tint ?? Color.line, lineWidth: 2)
-                }
+    private func tileFace(_ t: Exercise.Tile, tint: Color?) -> some View {
+        VStack(spacing: 1) {
+            Text(t.text).font(ex.toChinese ? .hanzi(20.8, .medium) : .nunito(16.8, .semibold))
+            if let py = t.pinyin { Text(py).font(.nunito(11.5)).foregroundStyle(Color.muted) }
+        }
+        .foregroundStyle(tint ?? Color.ink)
+        .padding(.horizontal, 12).padding(.vertical, 9)
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12, style: .continuous).fill(tint ?? Color.line).offset(y: 2)
+                RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.panel)
+                RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(tint ?? Color.line, lineWidth: 2)
             }
         }
+    }
+
+    private func tile(_ t: Exercise.Tile, inAnswer: Bool, tap: @escaping () -> Void) -> some View {
+        let tint: Color? = inAnswer ? (result == true ? .good : result == false ? .again : nil) : nil
+        return Button { if !justDragged { tap() } } label: { tileFace(t, tint: tint) }
         .buttonStyle(PressDown(depth: 2))
         .sensoryFeedback(.selection, trigger: placed.count)
-        .simultaneousGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in held = t; HintTip.used = true })
+        .simultaneousGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in if drag == nil { held = t; HintTip.used = true } })
+        .highPriorityGesture(
+            DragGesture(minimumDistance: 8, coordinateSpace: .named("sentence"))
+                .onChanged { v in dragMoved(t, v, fromBank: !inAnswer) }
+                .onEnded { v in dragEnded(t, v) },
+            including: result == nil ? .all : .subviews)
         .popover(isPresented: Binding(get: { held == t && (inAnswer || !placed.contains(t)) }, set: { if !$0 { held = nil } })) {
             VStack(spacing: 3) {
                 if let py = t.pinyin {
@@ -864,6 +928,67 @@ struct SentenceView: View {
             .presentationCompactAdaptation(.popover)
         }
     }
+}
+
+extension SentenceView {
+    /// The finger moved with a tile: lift it (out of the bank into the answer if it
+    /// was there), carry it, and move its slot to where it would drop (web: pointermove).
+    fileprivate func dragMoved(_ t: Exercise.Tile, _ v: DragGesture.Value, fromBank: Bool) {
+        guard result == nil else { return }
+        if drag?.tile != t {
+            if fromBank && placed.contains(t) { return }       // its empty place in the bank
+            let inAnswer = placed.contains(t)
+            let f = frames[inAnswer ? t.id : t.id + Self.bankKey] ?? CGRect(origin: v.startLocation, size: .zero)
+            held = nil
+            drag = TileDrag(tile: t, grab: CGSize(width: v.startLocation.x - f.minX, height: v.startLocation.y - f.minY), at: v.location)
+            if !inAnswer { placed.append(t); moves += 1 }
+        }
+        drag?.at = v.location
+        moveSlot(t)
+    }
+
+    /// Put the carried tile's slot where its middle is, among the answer's other tiles.
+    fileprivate func moveSlot(_ t: Exercise.Tile) {
+        guard let d = drag else { return }
+        let size = frames[t.id]?.size ?? frames[t.id + Self.bankKey]?.size ?? .zero
+        let mid = CGPoint(x: d.origin.x + size.width / 2, y: d.origin.y + size.height / 2)
+        let others = placed.filter { $0 != t }
+        var at = others.count
+        for (i, o) in others.enumerated() {
+            guard let r = frames[o.id] else { continue }
+            let row = r.insetBy(dx: 0, dy: -12)
+            if mid.y < row.minY || (mid.y <= row.maxY && mid.x < r.midX) { at = i; break }
+        }
+        var next = others
+        next.insert(t, at: at)
+        if next != placed {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) { placed = next }
+            moves += 1
+        }
+    }
+
+    /// Let go: dropped well below the answer, the tile goes back to the bank;
+    /// anywhere else it settles into its slot (web: release).
+    fileprivate func dragEnded(_ t: Exercise.Tile, _ v: DragGesture.Value) {
+        guard drag?.tile == t else { return }
+        justDragged = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { justDragged = false }
+        let toBank = v.location.y > answerFrame.maxY + 24
+        if toBank { withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) { placed.removeAll { $0 == t } } }
+        // glide the carried copy home, then let the real tile show
+        let home = toBank ? frames[t.id + Self.bankKey] : frames[t.id]
+        guard let home else { drag = nil; return }
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
+            drag = TileDrag(tile: t, grab: .zero, at: home.origin, settling: true)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.24) { if drag?.tile == t && drag?.settling == true { drag = nil } }
+    }
+}
+
+/// Where the sentence tiles are, for dragging.
+struct TileFrames: PreferenceKey {
+    static let defaultValue: [Int: CGRect] = [:]
+    static func reduce(value: inout [Int: CGRect], nextValue: () -> [Int: CGRect]) { value.merge(nextValue()) { $1 } }
 }
 
 struct Line: Shape {

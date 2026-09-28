@@ -212,9 +212,11 @@ struct BunsCard: View {
                             disabled: s.n >= full, action: buy) {
                         Image("bun").resizable().scaledToFit().frame(width: 36, height: 31)
                     }
-                    ShopRow("Unlimited buns", sub: "With Bùbù Plus, never run out", plus: true,
-                            action: { Moments.shared.replace(with: .plus) }) {
-                        Text("∞")
+                    if progress.offersPlus {
+                        ShopRow("Unlimited buns", sub: "With Bùbù Plus, never run out", plus: true,
+                                action: { Moments.shared.replace(with: .plus) }) {
+                            Text("∞")
+                        }
                     }
                 }
                 .padding(.top, 12)
@@ -318,8 +320,8 @@ struct ShopCard: View {
                         BunIcon(width: 36)
                     }
                     section("Streak")
-                    ShopRow("Ember", sub: plus ? "Relights a missed day · you have \(ne) of \(cap)" : "Relights a missed day. Plus members only",
-                            tag: "PLUS", price: ProgressStore.ShopItem.ember.price, disabled: plus && ne >= cap,
+                    ShopRow("Ember", sub: "Relights a missed day · you have \(ne) of \(cap)",
+                            price: ProgressStore.ShopItem.ember.price, disabled: ne >= cap,
                             action: { buy(.ember, "An ember, ready to relight a missed day.") }) {
                         Image(systemName: "flame.fill").font(.system(size: 22)).foregroundStyle(Color.ember)
                     }
@@ -333,7 +335,7 @@ struct ShopCard: View {
                     ShopRow("Avatar items", sub: "Hats, bags and more, coming soon", disabled: true, action: {}) {
                         Image(systemName: "person.fill").font(.system(size: 21))
                     }
-                    if !plus {
+                    if progress.offersPlus {
                         ShopRow("Bùbù Plus", sub: "Unlimited buns, more pockets, embers", plus: true,
                                 action: { Moments.shared.replace(with: .plus) }) {
                             Text("∞")
@@ -357,8 +359,7 @@ struct ShopCard: View {
     }
 
     private func buy(_ item: ProgressStore.ShopItem, _ done: String) {
-        // an ember is for Plus members: everyone else hears about Plus
-        if item == .ember && !progress.isPlus { Moments.shared.replace(with: .plus); return }
+        guard progress.canBuy(item) else { return }
         guard progress.buy(item) else {
             Moments.shared.toast("You need \(item.price - progress.coins) more coins.")
             return
@@ -377,6 +378,10 @@ struct PocketCard: View {
     var close: () -> Void
     @State private var open = false
     @State private var amountIn = false
+    // once their animations are over the pocket and the flying coins leave the view
+    // altogether: faded to nothing, their shadows still left a faint glow behind
+    @State private var pocketGone = false
+    @State private var burst = false
     private struct Fly { var t = 0.0; var o = 0.0 }
 
     var body: some View {
@@ -386,6 +391,9 @@ struct PocketCard: View {
             cardSub(pocket.sub)
             Button { openIt() } label: {
                 ZStack {
+                    // holds the pocket's place, so nothing moves when it goes
+                    Image("pocket-\(pocket.kind.rawValue)").resizable().scaledToFit().frame(width: 170).hidden()
+                    if !pocketGone {
                     Image("pocket-\(pocket.kind.rawValue)").resizable().scaledToFit().frame(width: 170)
                         .shadow(color: (red ? Color(UIColor(hex: 0x781E14)) : Color(UIColor(hex: 0x14503C))).opacity(0.28), radius: 10, y: 12)
                         .keyframeAnimator(initialValue: 0.0, repeating: true) { v, a in
@@ -402,6 +410,7 @@ struct PocketCard: View {
                         }
                         .scaleEffect(open ? 0.01 : 1)
                         .opacity(open ? 0 : 1)
+                    }
                     if amountIn {
                         HStack(spacing: 8) {
                             if red { CoinIcon(size: 36) }
@@ -410,11 +419,11 @@ struct PocketCard: View {
                         .font(.nunito(38, .black)).foregroundStyle(red ? Color.gold : Color.accent)
                         .transition(.scale(scale: 0.3).combined(with: .opacity))
                     }
-                    if red {
+                    if red && burst {
                         ForEach(0..<10, id: \.self) { i in
                             let a = Double(i) / 10 * 2 * .pi
                             CoinIcon(size: 20)
-                                .keyframeAnimator(initialValue: Fly(), trigger: open) { v, f in
+                                .keyframeAnimator(initialValue: Fly(), repeating: false) { v, f in
                                     v.scaleEffect(0.5 + 0.5 * f.t)
                                         .offset(x: cos(a) * 120 * f.t, y: sin(a) * 120 * f.t)
                                         .opacity(f.o)
@@ -452,6 +461,9 @@ struct PocketCard: View {
     private func openIt() {
         guard !open else { return }
         withAnimation(.easeOut(duration: 0.5)) { open = true }
+        burst = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { pocketGone = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { burst = false }
         withAnimation(.spring(response: 0.45, dampingFraction: 0.55).delay(0.35)) { amountIn = true }
         Sounds.shared.play("chest")
         opened()

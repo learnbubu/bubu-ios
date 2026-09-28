@@ -15,6 +15,7 @@ struct Activity: Codable, Equatable {
     var qc: [String: [String: Int]] = [:]    // today's quest counters
     var embers: Int?                         // nil means the one you start with
     var emberFor: [String: String] = [:]     // streak milestone → the day its ember was given
+    var coinsFor: [String: String] = [:]     // streak milestone → the day its coins were given
     var best: Int = 0                        // longest streak
     var levelSeen: Int = 1
     var chests: Int = 0
@@ -48,7 +49,7 @@ struct Activity: Codable, Equatable {
         days = get(.days, [:]); xpDays = get(.xpDays, [:]); lit = get(.lit, [:]); relit = get(.relit, [:])
         celebrated = try? c.decode(String.self, forKey: .celebrated)
         boostUntil = get(.boostUntil, 0); qc = get(.qc, [:]); embers = try? c.decode(Int.self, forKey: .embers)
-        emberFor = get(.emberFor, [:]); best = get(.best, 0); levelSeen = get(.levelSeen, 1); chests = get(.chests, 0)
+        emberFor = get(.emberFor, [:]); coinsFor = get(.coinsFor, [:]); best = get(.best, 0); levelSeen = get(.levelSeen, 1); chests = get(.chests, 0)
         questMonths = get(.questMonths, [:]); quests = try? c.decode(QuestDay.self, forKey: .quests)
         achv = get(.achv, [:]); readsDone = get(.readsDone, [:])
         relightAsked = try? c.decode(String.self, forKey: .relightAsked)
@@ -399,6 +400,19 @@ final class ProgressStore {
     static let pocketLesson = (lo: 20, hi: 35), pocketChapter = 100
     static let chestXP = 50
 
+    /// Whether Bùbù Plus is offered at all. It can't be bought yet (no StoreKit), and
+    /// Apple rejects "coming soon" placeholders, so release builds never show it.
+    /// In debug builds `-plusShop` turns the rows back on. The Plus logic stays.
+    static let plusForSale: Bool = {
+        #if DEBUG
+        return ProcessInfo.processInfo.arguments.contains("-plusShop")
+        #else
+        return false
+        #endif
+    }()
+    /// A Plus row (buns sheet, shop) is shown: Plus is on sale and you aren't a member.
+    var offersPlus: Bool { Self.plusForSale && !isPlus }
+
     var isPlus: Bool {
         #if DEBUG
         if Launch.plus { return true }
@@ -456,9 +470,19 @@ final class ProgressStore {
         case buns, ember, boost
         var price: Int { switch self { case .buns: return 350; case .ember: return 250; case .boost: return 200 } }
     }
-    /// Pay for something and have it; false if there aren't the coins.
+    /// Whether an item can be had now, coins aside: an ember only below your cap.
+    func canBuy(_ item: ShopItem) -> Bool {
+        switch item {
+        case .ember: return embers < emberCap
+        case .buns: return !isPlus && bunState.n < Self.bunsMax
+        case .boost: return !boostActive
+        }
+    }
+    /// Pay for something and have it; false if there aren't the coins, or an ember
+    /// is already at your cap (nothing is spent then).
     @discardableResult
     func buy(_ item: ShopItem) -> Bool {
+        if item == .ember && !canBuy(.ember) { return false }
         guard spendCoins(item.price) else { return false }
         switch item {
         case .buns: setBuns(Self.bunsMax)
@@ -519,11 +543,13 @@ final class ProgressStore {
 
     static let milestones = [3, 7, 14, 30, 50, 100, 200, 365]
     static let emberAt = [3, 7, 14, 30, 60, 100]
+    /// Coins for reaching a milestone, once per streak.
+    static let milestoneCoins = [3: 20, 7: 50, 14: 75, 30: 150, 50: 200, 100: 300, 200: 400, 365: 500]
     var embers: Int { activity.embers ?? 1 }
     /// One ember held at a time, three with Plus; any already held above that are kept.
     var emberCap: Int { isPlus ? 3 : 1 }
 
-    struct Fire { let streak: Int; let ember: Bool; let milestone: Bool }
+    struct Fire { let streak: Int; let ember: Bool; let milestone: Bool; var coins = 0 }
 
     /// Light today's fire (web: lightFire). Nil if it was already lit today.
     @discardableResult
@@ -540,9 +566,16 @@ final class ProgressStore {
             activity.emberFor[key] = t
             if embers < emberCap { activity.embers = embers + 1; ember = true }
         }
+        // a milestone's coins, once per streak, kept the same way as its ember
+        var coins = 0
+        if let n = Self.milestoneCoins[s], !(activity.coinsFor[String(s)].map { $0 >= start } ?? false) {
+            activity.coinsFor[String(s)] = t
+            activity.coinsIn[t, default: 0] += n
+            coins = n
+        }
         if s > activity.best { activity.best = s }
         save()
-        return Fire(streak: s, ember: ember, milestone: Self.milestones.contains(s))
+        return Fire(streak: s, ember: ember, milestone: Self.milestones.contains(s), coins: coins)
     }
 
     /// The day the fire went out, if it can still be relit: yesterday was missed

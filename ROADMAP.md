@@ -6,8 +6,8 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 
 ## Next up
 
-- [ ] **Soften buns for beginners.** 5 buns can run out in a single ~11-exercise lesson, and Chinese beginners miss a lot. Options: first try at a brand-new word is free / one free mistake per lesson / buns only count from the second lesson of the day.
-- [ ] **Hide Plus in App Store builds** until it can actually be bought. Apple rejects "coming soon" placeholders (guideline 2.1).
+- [x] **Soften buns for beginners.** _App: the first try at a word just met is free._ 5 buns can run out in a single ~11-exercise lesson, and Chinese beginners miss a lot. Options: first try at a brand-new word is free / one free mistake per lesson / buns only count from the second lesson of the day.
+- [x] **Hide Plus in App Store builds** _App: `ProgressStore.plusForSale` (false; `-plusShop` turns it on in debug)._ until it can actually be bought. Apple rejects "coming soon" placeholders (guideline 2.1).
 - [ ] **Reminder notifications** ("Bùbù's hungry, keep your 12-day streak"). Neither the website nor the app has any.
 - [ ] **Sign-in and cloud sync in the app** (the website already syncs through Supabase). Until then, website and app keep separate progress, coins and buns, and a lost phone loses everything without a backup.
 
@@ -21,14 +21,14 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 
 ## Economy and balance
 
-- [ ] **Coins are scarce.** About 30 a day free against a 350-coin batch is roughly 2 weeks of lessons per refill. Also give coins for streak milestones and daily quests.
-- [ ] **Free players can't buy embers.** Losing a long streak with no way to save it is a common reason people quit. Consider letting free players buy one ember at a time.
-- [ ] **Free-lesson loophole.** Home's general "Study" teaches new words without costing buns.
+- [ ] **Coins are scarce.** _App: streak milestones now pay 20–500 coins; daily-quest coins still to do._ About 30 a day free against a 350-coin batch is roughly 2 weeks of lessons per refill. Also give coins for streak milestones and daily quests.
+- [x] **Free players can't buy embers.** _App: anyone can buy one below their cap (1 free, 3 Plus)._ Losing a long streak with no way to save it is a common reason people quit. Consider letting free players buy one ember at a time.
+- [x] **Free-lesson loophole.** _App: any session that introduces new words is played on buns._ Home's general "Study" teaches new words without costing buns.
 - [ ] Double XP is free for 15 min after every lesson and also sold for 200 coins. Is the shop one worth it?
 
 ## Missing features
 
-- [ ] App: drag sentence tiles to reorder them (currently tap in and out only)
+- [x] App: drag sentence tiles to reorder them (currently tap in and out only)
 - [ ] Home-screen widget showing the streak
 - [ ] Leagues / weekly leaderboard (needs a server)
 - [ ] Friends: friend streaks, friend quests, following
@@ -38,13 +38,14 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 
 - [ ] Speaking practice checks the words, not the tones (Apple's recogniser), so a wrong tone can pass
 - [ ] Website coin merging across devices is approximate when both are used on the same day
-- [ ] Opened pocket leaves a very faint glow where the pocket was (app)
+- [x] Opened pocket leaves a very faint glow where the pocket was (app)
 
 ## Decisions made (for reference)
 
-- Buns: max 5, lost only for mistakes in new lessons from the path; one back every 4h, +1 per right answer in reviews/mistakes/trouble; fresh batch 350 coins; unlimited with Plus.
+- Buns: max 5, lost only for mistakes in sessions that introduce new words (not on a word's first try); one back every 4h, +1 per right answer in reviews/mistakes/trouble; fresh batch 350 coins; unlimited with Plus.
 - Coins: start at 100. Red pocket (福) 20–35 for the first lesson each day (every lesson with Plus), 100 for finishing a chapter. Jade pocket (吉) +50 XP for all 3 daily quests.
-- Shop: fresh batch 350, ember 250 (Plus only), double XP 200 for 15 min, wardrobe coming soon.
+- Shop: fresh batch 350, ember 250 (anyone below their cap), double XP 200 for 15 min, wardrobe coming soon.
 - Embers: hold 1 free, 3 with Plus; existing extras kept.
+- Streak milestones pay coins once per streak: 3→20, 7→50, 14→75, 30→150, 50→200, 100→300, 200→400, 365→500.
 - One lesson a day keeps the streak; no daily XP target.
 - Backups before this release: tags `backup-v286-before-rewards` (website) and `backup-before-rewards` (app).

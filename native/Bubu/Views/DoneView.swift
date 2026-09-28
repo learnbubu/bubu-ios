@@ -124,7 +124,7 @@ struct DoneView: View {
         .onAppear {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) { flameIn = true }
             if let f = r.fire, f.milestone {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { Moments.shared.show(.milestone(f.streak, ember: f.ember)) }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { Moments.shared.show(.milestone(f.streak, ember: f.ember, coins: f.coins)) }
             } else if r.fireJustLit { Sounds.shared.play("goal") }
         }
     }

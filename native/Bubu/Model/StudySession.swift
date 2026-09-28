@@ -28,8 +28,10 @@ final class StudySession: Identifiable {
     /// the lessons whose words make the wrong options
     let scope: Set<String>
     let focuses: Set<String>
-    /// A lesson not yet done, started from the path: played on buns (web: bunMode).
-    let onBuns: Bool
+    /// A session that introduces new words (it has words to meet) is played on buns,
+    /// wherever it was started: the path, Home or after onboarding (web: bunMode).
+    /// Reviews, mistakes, trouble words, quizzes and the skip test never are.
+    private(set) var onBuns = false
     /// Buns are earned back here, one per right answer (web: a review while below five).
     var earnsBuns: Bool { !onBuns && [.review, .mistakes, .trouble].contains(mode) }
     /// Counted so the screen can show a bun eaten or earned.
@@ -90,9 +92,8 @@ final class StudySession: Identifiable {
     private(set) var quizScore = 0
 
     init(lessonId: String, progress: ProgressStore, focuses: Set<String>? = nil, cards: [Card]? = nil,
-         mode: Mode = .lesson, title: String = "Study", scope: Set<String>? = nil, onBuns: Bool = false) {
+         mode: Mode = .lesson, title: String = "Study", scope: Set<String>? = nil) {
         self.lessonId = lessonId
-        self.onBuns = onBuns
         self.progress = progress
         self.mode = mode
         self.title = title
@@ -104,22 +105,25 @@ final class StudySession: Identifiable {
         self.source = chosen
         self.queue = mode == .quiz || mode == .placement ? chosen.map { .card($0) } : sessionOrder(chosen)
         self.sessionTotal = queue.filter { if case .card = $0 { return true } else { return false } }.count
+        self.onBuns = hasMeetLeft
         next()
     }
 
     // MARK: the practice modes
 
-    /// A lesson from the path, Home or the done screen (web: launchLesson). One not yet
-    /// done is played on buns, and with none left it can't start: the buns sheet opens
-    /// instead. `review` is what its Review button does, when not the usual.
+    /// A lesson from the path, Home, the done screen or onboarding (web: launchLesson).
+    /// `review` is what the buns sheet's Review button does, when not the usual.
     static func lesson(_ id: String, _ p: ProgressStore, focuses: Set<String>? = nil,
                        review: (() -> Void)? = nil) -> StudySession? {
-        let onBuns = !p.isDone(id)
-        if onBuns && p.buns < 1 {
-            Moments.shared.show(.buns(.init(ctx: .start, review: review)))
-            return nil
-        }
-        return StudySession(lessonId: id, progress: p, focuses: focuses, onBuns: onBuns)
+        onBunsCheck(StudySession(lessonId: id, progress: p, focuses: focuses), p, review: review)
+    }
+
+    /// A session with new words in it needs a bun to start: with none left the buns
+    /// sheet opens instead and there's no session.
+    static func onBunsCheck(_ s: StudySession, _ p: ProgressStore, review: (() -> Void)? = nil) -> StudySession? {
+        guard s.onBuns && p.buns < 1 else { return s }
+        Moments.shared.show(.buns(.init(ctx: .start, review: review)))
+        return nil
     }
 
     /// Words from the lessons you've reached: done ones and the one you're on.
@@ -151,8 +155,8 @@ final class StudySession: Identifiable {
         let studied = cards.filter { p.srs[$0.id] != nil }
         let pool = studied.isEmpty ? cards : studied
         guard !pool.isEmpty else { Moments.shared.toast("Pick at least one lesson — open “What to study”."); return nil }
-        return StudySession(lessonId: "", progress: p, focuses: ["listen"], cards: Array(pool.shuffled().prefix(20)), mode: .listen, title: "Listening",
-                            scope: p.selectedLessons)
+        return onBunsCheck(StudySession(lessonId: "", progress: p, focuses: ["listen"], cards: Array(pool.shuffled().prefix(20)),
+                                        mode: .listen, title: "Listening", scope: p.selectedLessons), p)
     }
 
     static func writing(_ p: ProgressStore) -> StudySession? {
@@ -160,8 +164,8 @@ final class StudySession: Identifiable {
         let studied = cards.filter { p.srs[$0.id] != nil }
         let pool = studied.isEmpty ? cards : studied
         guard !pool.isEmpty else { Moments.shared.toast("Pick at least one lesson — open “What to study”."); return nil }
-        return StudySession(lessonId: "", progress: p, focuses: ["write"], cards: Array(pool.shuffled().prefix(12)), mode: .write, title: "Writing",
-                            scope: p.selectedLessons)
+        return onBunsCheck(StudySession(lessonId: "", progress: p, focuses: ["write"], cards: Array(pool.shuffled().prefix(12)),
+                                        mode: .write, title: "Writing", scope: p.selectedLessons), p)
     }
 
     /// A quiz on some words: up to 20, multiple choice only (web: startQuiz).
@@ -338,8 +342,9 @@ final class StudySession: Identifiable {
             if r.fixed { fixedCount += 1 }
             progress.recordReview()
         }
-        // a mistake in a new lesson eats a bun; a right answer in a review earns one back
-        if !correct && onBuns { progress.eatBun(); bunsEaten += 1 }
+        // a mistake in a session of new words eats a bun, except on a word's first try
+        // (it was only just met); a right answer in a review earns one back
+        if !correct && onBuns && !wasNew { progress.eatBun(); bunsEaten += 1 }
         else if correct && earnsBuns && progress.earnBun() { bunsEarned += 1 }
         // XP for the answer, more on a run
         var xp = 0

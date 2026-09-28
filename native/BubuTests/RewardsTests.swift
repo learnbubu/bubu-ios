@@ -197,6 +197,7 @@ final class RewardsTests: XCTestCase {
         XCTAssertEqual(p.coins, 650)
         XCTAssertTrue(p.buy(.boost))
         XCTAssertTrue(p.boostActive)
+        p.setPlus(true)                            // room for a second ember
         XCTAssertTrue(p.buy(.ember))
         XCTAssertEqual(p.embers, 2)
         XCTAssertEqual(p.coins, 650 - 200 - 250)
@@ -220,35 +221,156 @@ final class RewardsTests: XCTestCase {
         }
     }
 
-    /// A lesson not yet done is played on buns: a mistake eats one, and with none left it can't start.
+    /// A session of new words is played on buns: a mistake eats one, except on a
+    /// word's first try, and with none left it can't start.
     func testANewLessonIsPlayedOnBuns() throws {
         let (p, _) = make(at: noon)
         let lesson = Course.shared.lessons[0].id
         let s = try XCTUnwrap(StudySession.lesson(lesson, p))
         XCTAssertTrue(s.onBuns)
         XCTAssertFalse(s.earnsBuns)
-        var wrong = 0, steps = 0
-        while wrong < 2 && steps < 50 {
+        // every word's first try is wrong: nothing eaten
+        var tried = Set<String>(), steps = 0
+        while steps < 200 && s.result == nil {
             steps += 1
-            if s.card != nil { s.answer(false); wrong += 1 }
+            if let c = s.card {
+                if tried.contains(c.id) { break }          // a word coming round again
+                tried.insert(c.id); s.answer(false)
+            }
+            s.next()
+        }
+        XCTAssertFalse(tried.isEmpty)
+        XCTAssertEqual(s.bunsEaten, 0)
+        XCTAssertEqual(p.buns, 5)
+        // after the first try, mistakes cost buns
+        var wrong = 0
+        while wrong < 2 && steps < 400 {
+            steps += 1
+            if let c = s.card, tried.contains(c.id) { s.answer(false); wrong += 1 }
+            else if let c = s.card { tried.insert(c.id); s.answer(true) }
             s.next()
         }
         XCTAssertEqual(s.bunsEaten, 2)
         XCTAssertEqual(p.buns, 3)
         // right answers in a lesson don't earn them back
         var right = 0
-        while right < 2 && steps < 100 {
+        while right < 2 && steps < 500 {
             steps += 1
             if s.card != nil { s.answer(true); right += 1 }
             s.next()
         }
         XCTAssertEqual(p.buns, 3)
         p.setBuns(0)
-        XCTAssertNil(StudySession.lesson(lesson, p))
-        // practice again, or a lesson already done, isn't played on buns
+        XCTAssertNil(StudySession.lesson(Course.shared.lessons[1].id, p))
+        // practice again of words already met isn't played on buns
         XCTAssertFalse(s.again().onBuns)
+    }
+
+    /// Only the first try at a word just met is free: one missed twice costs one bun.
+    func testOnlyTheFirstTryIsFree() throws {
+        let (p, _) = make(at: noon)
+        let s = try XCTUnwrap(StudySession.lesson(Course.shared.lessons[0].id, p))
+        var steps = 0
+        while s.card == nil && steps < 10 { steps += 1; s.next() }   // past the meet screen
+        let c = try XCTUnwrap(s.card)
+        XCTAssertNil(p.srs[c.id])
+        s.answer(false)
+        XCTAssertEqual(s.bunsEaten, 0)
+        s.next()
+        // the same word, missed again when it comes back
+        while s.card?.id != c.id && s.result == nil && steps < 300 {
+            steps += 1
+            if s.card != nil { s.answer(true) }
+            s.next()
+        }
+        XCTAssertEqual(s.card?.id, c.id)
+        s.answer(false)
+        XCTAssertEqual(s.bunsEaten, 1)
+        XCTAssertEqual(p.buns, 4)
+    }
+
+    /// Any session that introduces new words is on buns, not only a lesson from the
+    /// path; practice of known words, reviews, quizzes and the skip test are free.
+    func testEverySessionOfNewWordsIsOnBuns() throws {
+        let (p, _) = make(at: noon)
+        let lesson = Course.shared.lessons[0].id
+        let cards = Course.shared.cards(in: lesson)
+        // a lesson already marked done (e.g. skipped) that still has new words
         p.markDone(lesson)
-        XCTAssertFalse(try XCTUnwrap(StudySession.lesson(lesson, p)).onBuns)
+        XCTAssertTrue(try XCTUnwrap(StudySession.lesson(lesson, p)).onBuns)
+        // listening with nothing studied yet teaches its words
+        XCTAssertTrue(try XCTUnwrap(StudySession.listening(p)).onBuns)
+        XCTAssertFalse(try XCTUnwrap(StudySession.quiz(p, cards: cards)).onBuns)
+        XCTAssertFalse(try XCTUnwrap(StudySession.placement(p, to: Course.shared.lessons[1].id)).onBuns)
+        // with none left, a session of new words can't start
+        p.setBuns(0)
+        XCTAssertNil(StudySession.lesson(lesson, p))
+        XCTAssertNil(StudySession.listening(p))
+        // once the words are known, the same practice is free and starts with no buns
+        for c in cards { p.seedKnown(c.id) }
+        let again = try XCTUnwrap(StudySession.lesson(lesson, p))
+        XCTAssertFalse(again.onBuns)
+        XCTAssertFalse(try XCTUnwrap(StudySession.listening(p)).onBuns)
+        let review = StudySession(lessonId: "", progress: p, cards: cards, mode: .review, title: "Review")
+        XCTAssertFalse(review.onBuns)
+        XCTAssertTrue(review.earnsBuns)
+    }
+
+    /// Free players can buy an ember while below their cap; nothing is spent at it.
+    func testFreePlayersCanBuyAnEmber() {
+        let (p, _) = make(at: noon)
+        p.addCoins(1000)
+        XCTAssertEqual(p.embers, 1)
+        XCTAssertFalse(p.canBuy(.ember))           // one held, the free cap
+        XCTAssertFalse(p.buy(.ember))
+        XCTAssertEqual(p.coins, 1100)
+        var a = p.activity; a.embers = 0
+        p.replaceAll(srs: [:], done: [], activity: a, name: "", hooks: [:], prefs: Prefs())
+        XCTAssertTrue(p.canBuy(.ember))
+        XCTAssertTrue(p.buy(.ember))
+        XCTAssertEqual(p.embers, 1)
+        XCTAssertEqual(p.coins, 1100 - 250)
+        XCTAssertFalse(p.buy(.ember))
+        // Plus holds three
+        p.setPlus(true)
+        XCTAssertTrue(p.buy(.ember)); XCTAssertTrue(p.buy(.ember))
+        XCTAssertEqual(p.embers, 3)
+        XCTAssertFalse(p.buy(.ember))
+        XCTAssertEqual(p.coins, 1100 - 750)
+    }
+
+    /// Streak milestones pay coins, once per streak.
+    func testStreakMilestonesPayCoins() {
+        let (p, setNow) = make(at: noon)
+        var got: [Int: Int] = [:]
+        for d in 0..<14 {
+            setNow(noon + Double(d) * dayMs)
+            if let f = p.lightFire(), f.coins > 0 { got[f.streak] = f.coins }
+        }
+        XCTAssertEqual(got, [3: 20, 7: 50, 14: 75])
+        XCTAssertEqual(p.coins, 100 + 145)
+        XCTAssertEqual(ProgressStore.milestoneCoins[365], 500)
+        XCTAssertEqual(Set(ProgressStore.milestoneCoins.keys), Set(ProgressStore.milestones))
+        // the same day lit again (e.g. after a merge) pays nothing more
+        var a = p.activity; a.lit[p.today] = nil
+        p.replaceAll(srs: [:], done: [], activity: a, name: "", hooks: [:], prefs: Prefs())
+        XCTAssertEqual(p.lightFire()?.coins, 0)
+        XCTAssertEqual(p.coins, 245)
+        // a new streak earns them again
+        setNow(noon + 20 * dayMs)
+        for d in 0..<3 { setNow(noon + Double(20 + d) * dayMs); p.lightFire() }
+        XCTAssertEqual(p.coins, 265)
+        XCTAssertEqual(p.activity.coinsFor["3"], p.today)
+    }
+
+    /// Plus isn't for sale in release builds, nor in debug unless asked for.
+    func testPlusIsNotOffered() {
+        let (p, _) = make(at: noon)
+        XCTAssertFalse(ProgressStore.plusForSale)
+        XCTAssertFalse(p.offersPlus)
+        p.setPlus(true)
+        XCTAssertFalse(p.offersPlus)
+        XCTAssertEqual(p.buns, Int.max)            // the Plus logic itself still works
     }
 
     func testRightAnswersInAReviewEarnBunsBack() {
@@ -275,7 +397,7 @@ final class RewardsTests: XCTestCase {
         var sessions = 0
         while !p.isDone(lesson) && sessions < 8 {
             sessions += 1
-            let s = StudySession(lessonId: lesson, progress: p, onBuns: true)
+            let s = StudySession(lessonId: lesson, progress: p)
             var steps = 0
             while s.result == nil && steps < 300 {
                 steps += 1
