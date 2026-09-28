@@ -90,8 +90,8 @@ async function imageSet(name, lightSrc, darkSrc) {
   await imageSet("home-peek", path.join(WEB, "images", "panda-peek.png"), null); n++;
   await imageSet("sheet-waving", path.join(WEB, "images", "panda-waving.png"), null); n++;
   await imageSet("done-panda", path.join(WEB, "images", "panda-celebrate.png"), null); n++;
-  // rewards: buns, the red and jade pockets, and Bùbù with a bun for the buns sheet
-  for (const r of ["bun", "bun-bitten", "pocket-red", "pocket-jade"]) {
+  // rewards: the coin, buns, the red and jade pockets, and Bùbù with a bun for the buns sheet
+  for (const r of ["bun", "bun-bitten", "pocket-red", "pocket-jade", "coin"]) {
     await imageSet(r, path.join(WEB, "images", "rewards", `${r}.webp`), null); n++;
   }
   await imageSet("sprite-baozi", path.join(WEB, "images", "sprite-baozi.png"), null); n++;

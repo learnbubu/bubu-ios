@@ -8,34 +8,12 @@ extension Color {
     static let bunBrown = Color(UIColor(hex: 0xB98540))
 }
 
-/// The coin, as the web's i-coin: gold with a darker rim, an inner ring, a soft
-/// highlight, and a square hole the background shows through.
+/// The coin: a gold cash coin with a square hole (web: images/rewards/coin.webp).
 struct CoinIcon: View {
     var size: CGFloat = 20
-    private static let gold = Color(UIColor(hex: 0xE7B64A)), rim = Color(UIColor(hex: 0xA9782A))
-    private static let ring = Color(UIColor(hex: 0xC7922F)), shine = Color(UIColor(hex: 0xFFE7A6))
-
     var body: some View {
-        Canvas { ctx, s in
-            let k = s.width / 24
-            func circle(_ r: CGFloat, _ cx: CGFloat = 12, _ cy: CGFloat = 12) -> Path {
-                Path(ellipseIn: CGRect(x: (cx - r) * k, y: (cy - r) * k, width: 2 * r * k, height: 2 * r * k))
-            }
-            let hole = Path(roundedRect: CGRect(x: 9.3 * k, y: 9.3 * k, width: 5.4 * k, height: 5.4 * k), cornerRadius: k)
-            var face = circle(10.4)
-            face.addPath(hole)
-            // everything on the face, with the hole left empty
-            ctx.drawLayer { l in
-                l.clip(to: face, style: FillStyle(eoFill: true))
-                l.fill(circle(10.4), with: .color(Self.gold))
-                l.stroke(circle(7.4), with: .color(Self.ring), lineWidth: k)
-                l.fill(circle(2.6, 9, 8), with: .color(Self.shine.opacity(0.55)))
-            }
-            ctx.stroke(circle(10.4), with: .color(Self.rim), lineWidth: 1.4 * k)
-            ctx.stroke(hole, with: .color(Self.rim), lineWidth: 1.2 * k)
-        }
-        .frame(width: size, height: size)
-        .accessibilityHidden(true)
+        Image("coin").resizable().scaledToFit().frame(width: size, height: size)
+            .accessibilityHidden(true)
     }
 }
 
