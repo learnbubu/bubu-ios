@@ -17,6 +17,8 @@ struct StudyView: View {
     // a bun eaten: the bitten one flies from the middle into the bun row
     @State private var munch: Int?
     @State private var bunRowFrame: CGRect = .zero
+    // the stone's notes, shown once as a tip before it starts
+    @State private var tips: [Note] = []
 
     struct Feedback { let correct: Bool; let chosen: String? }
 
@@ -37,7 +39,7 @@ struct StudyView: View {
                         }
                         .scrollIndicators(.hidden)
                         .scrollBounceBehavior(.basedOnSize)
-                        if case .card = session.current { bottomSlot }
+                        if tips.isEmpty, case .card = session.current { bottomSlot }
                     }
                     .frame(maxHeight: .infinity)
                     .background(Color.panel, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
@@ -62,7 +64,8 @@ struct StudyView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.7) { if munch == n { munch = nil } }
         }
         .onAppear {
-            if let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
+            loadTips()
+            if tips.isEmpty, let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
             #if DEBUG
             // the buns screenshot: out of buns part-way through a lesson
             if Launch.screen == "buns" { DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { advance() } }
@@ -77,7 +80,28 @@ struct StudyView: View {
     private func restart(_ s: StudySession) {
         session = s
         munch = nil
+        loadTips()
         resetExercise()
+    }
+
+    /// The stone's notes not yet seen, as a tip before it starts (not over the screenshots,
+    /// apart from the tip's own).
+    private func loadTips() {
+        #if DEBUG
+        if let sc = Launch.screen, sc != "tip" { tips = []; return }
+        #endif
+        tips = session.tips
+    }
+
+    private func dismissTip() {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+            tips.removeFirst()
+            if tips.isEmpty {
+                Coach.markTipSeen(session.lessonId)
+                exerciseKey = UUID()
+            }
+        }
+        if tips.isEmpty, let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
     }
 
     /// Review in place of this session, from the buns sheet.
@@ -153,9 +177,12 @@ struct StudyView: View {
             Text(promptLabel).font(.nunitoXB(19.2)).tracking(-0.2).foregroundStyle(Color.ink)
                 .padding(.top, 4).padding(.bottom, 14)
             Group {
+                if let tip = tips.first {
+                    TipCard(note: tip, more: tips.count - 1) { dismissTip() }
+                } else {
                 switch session.current {
-                case .meet(let cards, let first, let left):
-                    MeetView(cards: cards, first: first, left: left) { advance() }
+                case .meet(let cards, _, _):
+                    MeetView(cards: cards) { advance() }
                 case .card:
                     if let ex = session.exercise {
                         if ex.kind == .sentence {
@@ -173,6 +200,7 @@ struct StudyView: View {
                 case nil:
                     EmptyView()
                 }
+                }
             }
             .id(exerciseKey)
             .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
@@ -181,7 +209,8 @@ struct StudyView: View {
     }
 
     private var promptLabel: String {
-        if case .meet = session.current { return "New words" }
+        if !tips.isEmpty { return "Before you start" }
+        if case .meet = session.current { return "New word" }
         return session.exercise?.label ?? ""
     }
 
@@ -357,72 +386,66 @@ extension Color {
     static let newBg = Color.tiles["purple"]!.bg
 }
 
-// MARK: - meet the new words
+// MARK: - meet a new word
 
+/// One new word, as Duolingo shows it: big characters, the pinyin, a short meaning and its
+/// sound (played once on arrival), then straight on to an easy exercise on it. How the
+/// characters are built is a tap away, not on the card.
 struct MeetView: View {
     let cards: [Card]
-    let first: Bool
-    let left: Int
     var done: () -> Void
-    private let course = Course.shared
+    @State private var built = false
+    @State private var played = false
 
     var body: some View {
-        let shown = Array(cards.prefix(15))
-        let later = left
-        let count = shown.count == 2 ? "Two" : shown.count == 3 ? "Three" : "\(shown.count)"
-        let intro = (shown.count == 1 ? "A new word. Tap the speaker to hear it, then practise it."
-            : "\(count) new words. Tap each speaker to hear it, then practise them.")
-            + (later > 0 ? " \(later) more come\(later == 1 ? "s" : "") later in this session." : "")
-        let lid = first && !cards.isEmpty && cards.allSatisfy { $0.lessonId == cards[0].lessonId } ? cards[0].lessonId : nil
-        let note = lid.flatMap { course.notes(for: $0).first }
-        VStack(spacing: 8) {
-            NewBadge()
-            Text(intro).font(.nunito(14.4)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
-                .padding(.bottom, 4)
-            if let note {
-                VStack(alignment: .leading, spacing: 4) {
-                    Label { Text(note.title) } icon: { Image(systemName: "lightbulb") }
-                        .font(.nunito(14.4, .bold)).foregroundStyle(Color.ink)
-                    Text(note.body).font(.nunito(13.8)).lineSpacing(4).foregroundStyle(Color.ink)
-                        .fixedSize(horizontal: false, vertical: true)
+        let c = cards[0]
+        let w = c.word
+        let parts = partLines(w.hanzi)
+        VStack(spacing: 10) {
+            VStack(spacing: 8) {
+                NewBadge()
+                TappableHanzi(text: w.hanzi, pinyin: w.pinyin, size: w.hanzi.count > 3 ? 44 : 64, weight: .bold)
+                    .padding(.top, 6)
+                PinyinText(pinyin: w.pinyin, size: 24, weight: .semibold)
+                Text(w.gloss).font(.nunitoXB(21)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                SpeakerButton(text: w.hanzi, size: 28).padding(.top, 2)
+                if !parts.isEmpty {
+                    Button { withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { built.toggle() } } label: {
+                        Label(built ? "Hide how it's built" : "How it's built", systemImage: built ? "chevron.up" : "square.split.2x2")
+                            .font(.nunito(13.5, .bold)).foregroundStyle(Color.accent)
+                            .padding(.horizontal, 12).padding(.vertical, 6)
+                            .overlay(Capsule().strokeBorder(Color.line, lineWidth: 1.5))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 6)
+                    if built {
+                        VStack(alignment: .leading, spacing: 4) {
+                            ForEach(parts, id: \.self) { line in Text(line).font(.nunito(14)).foregroundStyle(Color.muted) }
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
                 }
-                .padding(.horizontal, 12.8).padding(.vertical, 9.6)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
             }
-            ForEach(shown, id: \.id) { c in row(c) }
+            .padding(.horizontal, 16).padding(.vertical, 20)
+            .frame(maxWidth: 440)
+            .background(Color.panel, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
             Button(action: done) {
-                Text(shown.count == 1 ? "Practise it →" : "Practise them →")
-                    .font(.nunito(16, .bold)).foregroundStyle(Color.onAccent)
-                    .padding(.horizontal, 25.6).padding(.vertical, 12)
-                    .background(Color.accent, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                Text("Continue").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
+                    .frame(maxWidth: .infinity).padding(14)
+                    .background(Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(PressDown(depth: 3))
-            .background(Color.accentDark, in: RoundedRectangle(cornerRadius: 14, style: .continuous).offset(y: 3))
-            .padding(.top, 17.6).padding(.bottom, 3)
+            .background(Color.accentDark, in: RoundedRectangle(cornerRadius: 16, style: .continuous).offset(y: 3))
+            .padding(.top, 18)
         }
         .frame(maxWidth: .infinity)
-    }
-
-    private func row(_ c: Card) -> some View {
-        HStack(spacing: 12) {
-            TappableHanzi(text: c.word.hanzi, pinyin: c.word.pinyin, size: 27, weight: .bold)
-                .frame(minWidth: 60)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(c.word.pinyin).font(.nunito(16)).foregroundStyle(Color.ink)
-                Text(c.word.en).font(.nunito(13.5)).foregroundStyle(Color.muted)
-                ForEach(partLines(c.word.hanzi), id: \.self) { line in
-                    Text(line).font(.nunito(12.5)).foregroundStyle(Color.muted)
-                }
-            }
-            Spacer(minLength: 0)
-            SpeakerButton(text: c.word.hanzi, size: 22)
+        .onAppear {
+            guard !played else { return }
+            played = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { Speech.shared.speak(w.hanzi) }
         }
-        .padding(.horizontal, 11).padding(.vertical, 8)
-        .frame(maxWidth: 440)
-        .background(Color.panel, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
     }
 
     /// "好 = 女 woman + 子 child", sound parts showing their pinyin.
@@ -434,14 +457,14 @@ struct MeetView: View {
             .prefix(3)
             .map { ch in
                 var s = AttributedString(ch)
-                s.foregroundColor = Color.ink; s.font = Font.nunitoXB(12.5)
+                s.foregroundColor = Color.ink; s.font = Font.nunitoXB(14)
                 s += AttributedString(" = ")
                 for (i, part) in (cd.chars[ch]?.c ?? []).enumerated() {
                     guard let comp = part.first else { continue }
                     let sound = part.count > 1 && part[1] == "s"
                     if i > 0 { s += AttributedString(" + ") }
                     var c = AttributedString(comp)
-                    c.foregroundColor = sound ? Color.gold : Color.accent; c.font = Font.nunitoXB(12.5)
+                    c.foregroundColor = sound ? Color.gold : Color.accent; c.font = Font.nunitoXB(14)
                     s += c
                     let names = cd.partNames[comp] ?? (cd.chars[comp].map { [$0.d ?? "", $0.p ?? ""] })
                     if let names, names.count > 1 {
@@ -451,6 +474,36 @@ struct MeetView: View {
                 }
                 return s
             }
+    }
+}
+
+/// A stone's note, shown once as a short tip before the stone starts.
+struct TipCard: View {
+    let note: Note
+    let more: Int
+    var done: () -> Void
+    var body: some View {
+        VStack(spacing: 14) {
+            VStack(alignment: .leading, spacing: 8) {
+                Label { Text(note.title) } icon: { Image(systemName: "lightbulb.fill").foregroundStyle(Color.gold) }
+                    .font(.nunitoXB(17)).foregroundStyle(Color.ink)
+                Text(note.body).font(.nunito(15.5)).lineSpacing(4).foregroundStyle(Color.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            Text("You can read this again on the lesson sheet or in the Guide.")
+                .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+            Button(action: done) {
+                Text(more > 0 ? "Next tip" : "Got it").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
+                    .frame(maxWidth: .infinity).padding(14)
+                    .background(Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .buttonStyle(PressDown(depth: 3))
+            .background(Color.accentDark, in: RoundedRectangle(cornerRadius: 16, style: .continuous).offset(y: 3))
+            .padding(.top, 6)
+        }
     }
 }
 
@@ -513,15 +566,15 @@ struct ChoiceView: View {
                 case "recall":
                     if isNew {
                         HintChip(hanzi: w.hanzi, pinyin: w.pinyin, reverse: true) {
-                            Text(w.en).font(.nunito(16.3)).foregroundStyle(Color.newInk).multilineTextAlignment(.center)
+                            Text(w.gloss).font(.nunito(16.3)).foregroundStyle(Color.newInk).multilineTextAlignment(.center)
                         }
                     } else {
-                        Text(w.en).font(.nunito(16.3)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                        Text(w.gloss).font(.nunito(16.3)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                     }
                     SpeakerButton(text: w.hanzi)
                 case "pinyin":
                     Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(isNew ? Color.newInk : Color.ink)
-                    Text(w.en).font(.nunito(16)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                    Text(w.gloss).font(.nunito(16)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 case "listen":
                     Button { Speech.shared.speak(w.hanzi) } label: {
                         Image(systemName: "headphones").font(.system(size: 54, weight: .light)).foregroundStyle(Color.accent)
@@ -545,8 +598,8 @@ struct ChoiceView: View {
             if ex.dir == "recognize" || (ex.dir == "recall" && !showPinyin) {
                 PinyinHint(pinyin: w.pinyin, shown: showPinyin).frame(minHeight: 44)
             }
-            if ex.dir == "pinyin" {
-                Button("What are tones?") { tonesOpen = true }
+            if ex.dir == "pinyin" && Coach.showTonesLink {
+                Button("What are tones?") { Coach.tonesLinkTapped(); tonesOpen = true }
                     .font(.nunito(14, .bold)).foregroundStyle(Color.accent).padding(.top, 8)
             }
             VStack(spacing: 8) {
@@ -617,7 +670,7 @@ struct FeedbackBanner: View {
         let lookalike: Card? = {
             guard !correct, let chosen else { return nil }
             let c = ex.dir == "recall" ? course.cards.first { $0.word.hanzi == chosen }
-                : ex.dir == "recognize" ? course.cards.first { $0.word.en == chosen } : nil
+                : ex.dir == "recognize" || ex.dir == "listen" ? course.cards.first { $0.word.gloss == chosen } : nil
             guard let c, CharData.shared.wordSim(w.hanzi, c.word.hanzi) >= 1.5 else { return nil }
             return c
         }()
@@ -636,7 +689,7 @@ struct FeedbackBanner: View {
                 }
                 if let diff, let other = lookalike {
                     diffBlock(diff, other: other)
-                } else if ex.kind != .sentence, w.hanzi.contains(where: { CharData.shared.chars[String($0)] != nil }) {
+                } else if ex.kind != .sentence, Coach.sessions < 3, w.hanzi.contains(where: { CharData.shared.chars[String($0)] != nil }) {
                     Text("Tap a character to see how it's built").font(.nunito(11.5, .bold)).opacity(0.75).padding(.top, 6)
                 }
             }
@@ -663,7 +716,7 @@ struct FeedbackBanner: View {
     @ViewBuilder
     private func piece(_ k: String, _ w: Word, big: Bool) -> some View {
         switch k {
-        case "en": Text(w.en).font(.nunito(big ? 17.6 : 14.4)).foregroundStyle(big ? Color.ink : Color.gold)
+        case "en": Text(w.gloss).font(.nunito(big ? 17.6 : 14.4)).foregroundStyle(big ? Color.ink : Color.gold)
         case "py": PinyinText(pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .regular)
         default: TappableHanzi(text: w.hanzi, pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .medium)
         }
@@ -692,8 +745,8 @@ struct FeedbackBanner: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("SPOT THE DIFFERENCE").font(.nunito(11.2, .black)).tracking(1.1).foregroundStyle(Color.again)
             HStack(spacing: 8) {
-                cell(ex.card.word.hanzi, mark: d.right, en: ex.card.word.en, good: true)
-                cell(other.word.hanzi, mark: d.wrong, en: other.word.en, good: false)
+                cell(ex.card.word.hanzi, mark: d.right, en: ex.card.word.gloss, good: true)
+                cell(other.word.hanzi, mark: d.wrong, en: other.word.gloss, good: false)
             }
             Text(d.note).font(.nunito(13.4)).foregroundStyle(Color.ink).fixedSize(horizontal: false, vertical: true)
         }

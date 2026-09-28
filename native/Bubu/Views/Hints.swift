@@ -136,3 +136,20 @@ enum HintTip {
         set { UserDefaults.standard.set(newValue, forKey: "hintUsed") }
     }
 }
+
+/// What a beginner is shown only at first, and what's shown once: kept on this phone.
+enum Coach {
+    private static let d = UserDefaults.standard
+    /// Sessions finished here (any kind), for help that fades after the first few.
+    static var sessions: Int { d.integer(forKey: "coachSessions") }
+    static func sessionFinished() { d.set(sessions + 1, forKey: "coachSessions") }
+    /// "What are tones?" beside a pinyin drill: for the first three sessions, or until tapped once.
+    static var showTonesLink: Bool { sessions < 3 && !d.bool(forKey: "tonesLinkTapped") }
+    static func tonesLinkTapped() { d.set(true, forKey: "tonesLinkTapped") }
+    /// A stone's notes are shown as a tip once, when it's first started.
+    static func tipSeen(_ lessonId: String) -> Bool { (d.stringArray(forKey: "tipsSeen") ?? []).contains(lessonId) }
+    static func markTipSeen(_ lessonId: String) {
+        var seen = d.stringArray(forKey: "tipsSeen") ?? []
+        if !seen.contains(lessonId) { seen.append(lessonId); d.set(seen, forKey: "tipsSeen") }
+    }
+}

@@ -211,9 +211,10 @@ struct HomeView: View {
                     if !parts.en.isEmpty {
                         Text(parts.en).font(.nunito(13.5, .semibold)).foregroundStyle(Color.muted)
                     }
-                    Bar(value: cards.isEmpty ? 0 : Double(learned) / Double(cards.count), height: 8)
+                    Bar(value: lesson.isPractice || cards.isEmpty ? 0 : Double(learned) / Double(cards.count), height: 8)
                         .padding(.top, 12).padding(.bottom, 7)
-                    Text("\(learned) / \(cards.count) words learned").font(.nunito(13, .bold)).foregroundStyle(Color.muted)
+                    Text(lesson.isPractice ? "No new words · practise what you know" : "\(learned) / \(cards.count) words learned")
+                        .font(.nunito(13, .bold)).foregroundStyle(Color.muted)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.trailing, 110)

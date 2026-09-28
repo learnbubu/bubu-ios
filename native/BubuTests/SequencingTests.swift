@@ -18,7 +18,7 @@ final class SequencingTests: XCTestCase {
         for l in course.lessons {
             XCTAssertLessThanOrEqual(course.cards(in: l.id).count, 5, l.id)
             XCTAssertLessThanOrEqual(l.words.count, 5, l.id)
-            XCTAssertFalse(l.words.isEmpty, l.id)
+            XCTAssertEqual(l.words.isEmpty, l.isPractice, l.id)     // only a practice stone has none
         }
     }
 
@@ -66,7 +66,7 @@ final class SequencingTests: XCTestCase {
     func testOneSessionTeachesAWholeStone() {
         let most = course.lessons.map { course.cards(in: $0.id).count }.max()!
         XCTAssertGreaterThanOrEqual(StudySession.newPerSession, most)
-        for l in course.lessons { XCTAssertEqual(StudySession.batches(course.cards(in: l.id).count), 1, l.id) }
+        for l in course.lessons where !l.isPractice { XCTAssertEqual(StudySession.batches(course.cards(in: l.id).count), 1, l.id) }
     }
 
     func testWordsKeepTheirCardIds() {
@@ -88,7 +88,7 @@ final class SequencingTests: XCTestCase {
         }
         // every stone is fed by some old lesson
         let fed = Set(map.values.flatMap { $0 })
-        for l in course.lessons { XCTAssertTrue(fed.contains(l.id), l.id) }
+        for l in course.lessons where !l.isPractice { XCTAssertTrue(fed.contains(l.id), l.id) }
     }
 
     func testAFinishedOldLessonFinishesItsStones() {
@@ -134,8 +134,9 @@ final class SequencingTests: XCTestCase {
         try json.write(to: url)
         let p = ProgressStore(course: course, url: url)
         XCTAssertTrue(p.done.allSatisfy { course.lessonById[$0] != nil })
-        XCTAssertTrue(p.isDone(course.lessons[0].id))     // 你 好 你好 谢谢 我
-        XCTAssertTrue(p.isDone(card("客气").lessonId))       // fed by qibu1-s0-1, -u1-4 and qibu5-u2-4, all done
+        XCTAssertTrue(p.isDone(course.lessons[0].id))     // 你 好 你好, from qibu1-u1-1 and qibu1-s0-1
+        XCTAssertTrue(p.isDone(card("再见").lessonId))       // 谢谢 再见, both from qibu1-s0-1
+        XCTAssertFalse(p.isDone(card("客气").lessonId))      // 请 comes from 起步 2, not done
         XCTAssertFalse(p.isDone(card("懂").lessonId))       // 懂 comes from 起步 4
         // and it was saved: a second load finds the new ids
         let again = ProgressStore(course: course, url: url)

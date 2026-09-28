@@ -106,28 +106,37 @@ enum Backup {
 
     /// Lessons before they were cut into stones of at most five new words (web v294): each old
     /// lesson id and the stones that now hold its words.
-    static let oldLessons: [String: [String]] = {
-        guard let url = Bundle.main.url(forResource: "oldlessons", withExtension: "json"),
+    static let oldLessons: [String: [String]] = bundled("oldlessons")
+    /// Web v294's stones retired when chapter 1 was shaped by hand (v295), and the stones now
+    /// holding their words.
+    static let oldStones: [String: [String]] = bundled("oldstones")
+
+    private static func bundled(_ name: String) -> [String: [String]] {
+        guard let url = Bundle.main.url(forResource: name, withExtension: "json"),
               let d = try? Data(contentsOf: url), let o = try? JSONDecoder().decode([String: [String]].self, from: d) else { return [:] }
         return o
-    }()
+    }
 
     /// Done lesson ids the course no longer has (web: migrateOldDone). An old lesson cut into
     /// stones finishes each stone whose words all came from lessons that were done, so a word
-    /// brought forward from a lesson not reached yet keeps its stone open. Any other stone counts
-    /// as done once every one of its words has been answered (the old edition's ids).
+    /// brought forward from a lesson not reached yet keeps its stone open; v294's retired stones
+    /// do the same, checked on their own. Any other stone counts as done once every one of its
+    /// words has been answered (the old edition's ids), and a practice stone once every stone
+    /// before it in its chapter is done.
     /// Returns the stones marked done from old lessons, and those from word history.
     @discardableResult
     static func migrateDone(_ done: inout Set<String>, srs: [String: SRSRecord], course: Course = .shared,
-                            oldLessons: [String: [String]] = Backup.oldLessons) -> (restoned: Int, carried: Int) {
+                            oldLessons: [String: [String]] = Backup.oldLessons,
+                            oldStones: [String: [String]] = Backup.oldStones) -> (restoned: Int, carried: Int) {
         let stale = done.filter { course.lessonById[$0] == nil }
         guard !stale.isEmpty else { return (0, 0) }
         done.subtract(stale)
         var restoned = 0, carried = 0
-        let was = stale.filter { oldLessons[$0] != nil }
-        if !was.isEmpty {
+        for map in [oldLessons, oldStones] {
+            let was = stale.filter { map[$0] != nil }
+            guard !was.isEmpty else { continue }
             var from: [String: [String]] = [:]
-            for (old, stones) in oldLessons { for id in stones { from[id, default: []].append(old) } }
+            for (old, stones) in map { for id in stones { from[id, default: []].append(old) } }
             for l in course.lessons where !done.contains(l.id) {
                 if let olds = from[l.id], !olds.isEmpty, olds.allSatisfy({ was.contains($0) }) { done.insert(l.id); restoned += 1 }
             }
@@ -135,6 +144,11 @@ enum Backup {
         for l in course.lessons where !done.contains(l.id) {
             let cs = course.cards(in: l.id)
             if !cs.isEmpty && cs.allSatisfy({ (srs[$0.id]?.reps ?? 0) > 0 }) { done.insert(l.id); carried += 1 }
+        }
+        for ch in course.chapters {
+            for (i, id) in ch.lessons.enumerated() where i > 0 && !done.contains(id) && course.lessonById[id]?.isPractice == true {
+                if ch.lessons[..<i].allSatisfy({ done.contains($0) }) { done.insert(id); carried += 1 }
+            }
         }
         return (restoned, carried)
     }

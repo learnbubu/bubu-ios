@@ -41,5 +41,5 @@ enum Launch {
     static var plus: Bool { ProcessInfo.processInfo.arguments.contains("-plus") }
     static let rewardScreens: Set<String> = ["hud", "buns", "shop", "pocket"]
     /// the lesson-step screenshots: the path with a step badge, and the done screens
-    static let stepScreens: Set<String> = ["pathstep", "donefinal", "donenext"]
+    static let stepScreens: Set<String> = ["pathstep", "donefinal", "donenext", "pathpractice", "practice", "practicerun"]
 }

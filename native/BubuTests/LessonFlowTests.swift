@@ -48,7 +48,7 @@ final class LessonFlowTests: XCTestCase {
 
     func testShortSentencesArePreferred() {
         let everything: (String) -> Bool = { _ in true }
-        for c in course.cards(in: course.lessons[3].id) {
+        for c in course.cards(in: course.lessons[4].id) {
             let all = course.sentences(for: c)
             let chosen = course.sentences(for: c, met: everything)
             if all.contains(where: { $0.words.count <= Course.shortSentence }) {
@@ -116,7 +116,7 @@ final class LessonFlowTests: XCTestCase {
     /// step, even more than the usual four reviews, so it still finishes the lesson.
     func testTheLastStepBringsBackEveryWordNotYetRight() {
         let p = store()
-        let lid = course.lessons[0].id
+        let lid = course.lessons.first { course.cards(in: $0.id).count == 5 }!.id
         let cards = course.cards(in: lid)
         let first = StudySession.buildQueue(lessonId: lid, progress: p, focuses: p.selectedFocuses).filter { $0.lessonId == lid }
         // the first step's words were all met, and all missed

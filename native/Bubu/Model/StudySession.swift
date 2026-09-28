@@ -6,7 +6,10 @@ import Observation
 @Observable
 final class StudySession: Identifiable {
     // web constants
-    static let newPerSession = 6, reviewPerSession = 4, meetGroup = 3, sessionLen = 12
+    /// New words are met one at a time, each practised straight away (Duolingo's way).
+    static let newPerSession = 6, reviewPerSession = 4, meetGroup = 1, sessionLen = 12
+    /// A practice stone's exercises.
+    static let practiceLen = 10
     static let xpCorrect = 2, xpCombo = 3, xpPerfect = 5, xpSession = 10, xpLesson = 25, comboAt = 5
 
     /// The exercise kinds, as the web's FOCUSES.
@@ -32,8 +35,11 @@ final class StudySession: Identifiable {
     /// wherever it was started: the path, Home or after onboarding (web: bunMode).
     /// Reviews, mistakes, trouble words, quizzes and the skip test never are.
     private(set) var onBuns = false
-    /// Buns are earned back here, one per right answer (web: a review while below five).
-    var earnsBuns: Bool { !onBuns && [.review, .mistakes, .trouble].contains(mode) }
+    /// A practice stone's session: no new words, the chapter so far, weaker words first.
+    let isPractice: Bool
+    /// Buns are earned back here, one per right answer (web: a review while below five);
+    /// a practice stone earns them back too.
+    var earnsBuns: Bool { !onBuns && ([.review, .mistakes, .trouble].contains(mode) || isPractice) }
     /// Counted so the screen can show a bun eaten or earned.
     private(set) var bunsEaten = 0
     private(set) var bunsEarned = 0
@@ -118,10 +124,14 @@ final class StudySession: Identifiable {
         // a mixed session uses the skills switched on in "What to study"
         self.focuses = focuses ?? (mode == .mistakes ? Set(Self.allDirs) : progress.selectedFocuses)
         self.start = progress.now()
-        let chosen = cards ?? StudySession.buildQueue(lessonId: lessonId, progress: progress, focuses: self.focuses)
-        self.scope = scope ?? (mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId)))
+        let practice = mode == .lesson && Course.shared.lessonById[lessonId]?.isPractice == true
+        self.isPractice = practice
+        let chosen = cards ?? (practice ? StudySession.practiceQueue(lessonId, progress)
+                                        : StudySession.buildQueue(lessonId: lessonId, progress: progress, focuses: self.focuses))
+        self.scope = scope ?? (practice ? Set(Course.shared.practiceScope(lessonId)) : mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId)))
         self.source = chosen
-        self.queue = mode == .quiz || mode == .placement ? chosen.map { .card($0) } : sessionOrder(chosen)
+        // a practice stone meets no words: it's all exercises, in the order they were picked
+        self.queue = mode == .quiz || mode == .placement || practice ? chosen.map { .card($0) } : sessionOrder(chosen)
         self.sessionTotal = queue.filter { if case .card = $0 { return true } else { return false } }.count
         self.onBuns = [.lesson, .listen, .write].contains(mode) && hasMeetLeft
         if mode == .lesson && !lessonId.isEmpty { stepAtStart = Self.lessonSteps(lessonId, progress).step }
@@ -134,7 +144,39 @@ final class StudySession: Identifiable {
     /// `review` is what the buns sheet's Review button does, when not the usual.
     static func lesson(_ id: String, _ p: ProgressStore, focuses: Set<String>? = nil,
                        review: (() -> Void)? = nil) -> StudySession? {
-        onBunsCheck(StudySession(lessonId: id, progress: p, focuses: focuses), p, review: review)
+        onBunsCheck(StudySession(lessonId: id, progress: p, focuses: focuses, title: title(id)), p, review: review)
+    }
+
+    /// A session's name in its top bar: "Practice" or "Chapter review" for a practice stone.
+    static func title(_ lessonId: String) -> String {
+        guard let l = Course.shared.lessonById[lessonId], l.isPractice else { return "Study" }
+        return l.review == true ? "Chapter review" : "Practice"
+    }
+
+    /// How weak a word is: never answered, missed lately, lapsed, not yet right, little practised.
+    static func weakness(_ s: SRSRecord?) -> Double {
+        guard let s else { return 100 }
+        let miss: Double = s.miss != nil ? 50 : 0
+        let lapses = Double(s.lapses ?? 0) * 10
+        let unsure: Double = (s.reps ?? 0) >= 1 ? 0 : 20
+        let reps = Double(min(s.reps ?? 0, 5)) * 2
+        let spaced = min(s.interval ?? 0, 30) / 3
+        return miss + lapses + unsure - reps - spaced
+    }
+
+    /// A practice stone's exercises: about ten on the words its chapter has taught so far,
+    /// weakest first; with fewer than ten words the weakest come twice, never twice in a row.
+    static func practiceQueue(_ lessonId: String, _ p: ProgressStore) -> [Card] {
+        let pool = Course.shared.practiceCards(lessonId).shuffled()
+            .sorted { weakness(p.srs[$0.id]) > weakness(p.srs[$1.id]) }
+        guard !pool.isEmpty else { return [] }
+        var picked = Array(pool.prefix(practiceLen))
+        var i = 0
+        while picked.count < practiceLen { picked.append(pool[i % pool.count]); i += 1 }
+        var out = picked.shuffled()
+        var tries = 0
+        while tries < 50, out.indices.dropFirst().contains(where: { out[$0].id == out[$0 - 1].id }) { out.shuffle(); tries += 1 }
+        return out
     }
 
     /// A session with new words in it needs a bun to start: with none left the buns
@@ -504,7 +546,8 @@ final class StudySession: Identifiable {
         progress.holdSaves(); defer { progress.releaseSaves() }
         if mode == .placement { return finishPlacement() }
         let lessonCards = mode == .lesson ? course.cards(in: lessonId) : []
-        let cleared = !lessonCards.isEmpty && lessonCards.allSatisfy { (progress.srs[$0.id]?.reps ?? 0) >= 1 }
+        // a practice stone is finished by playing it through
+        let cleared = isPractice || (!lessonCards.isEmpty && lessonCards.allSatisfy { (progress.srs[$0.id]?.reps ?? 0) >= 1 })
         let justFinished = mode == .lesson && !progress.isDone(lessonId) && cleared
         if justFinished { progress.markDone(lessonId) }
         let perfect = againCount == 0 && answeredCount >= 5
@@ -526,6 +569,7 @@ final class StudySession: Identifiable {
         let total = mode == .lesson ? Self.lessonSteps(lessonId, progress).total : 0
         let stepDone = left > 0 && stepAtStart > 0 && stepAtStart < total
         let title = mode == .quiz ? "Quiz complete" : mode == .mistakes ? "Mistakes practised" : [.review, .trouble].contains(mode) ? "Review complete"
+            : isPractice ? (self.title == "Chapter review" ? "Chapter review done!" : "Practice done!")
             : justFinished ? "Lesson complete!" : stepDone ? "Step \(stepAtStart) of \(total) done" : "Session complete"
         let seconds = Int(((progress.now() - start) / 1000).rounded())
         let accuracy = answeredCount == 0 ? 100 : Int((Double(answeredCount - againCount) / Double(answeredCount) * 100).rounded())
@@ -535,6 +579,14 @@ final class StudySession: Identifiable {
                         nextLessonId: justFinished ? nextLesson(after: lessonId) : nil, wordsLeft: left,
                         fire: fire, mode: mode)
         if stepDone { result?.step = stepAtStart; result?.steps = total }
+        Coach.sessionFinished()
+    }
+
+    /// The notes to show as a tip before this lesson starts: once per stone, then never again
+    /// (they stay on the lesson sheet and in the Guide).
+    var tips: [Note] {
+        guard mode == .lesson, !isPractice, !lessonId.isEmpty, !Coach.tipSeen(lessonId) else { return [] }
+        return course.notes(for: lessonId)
     }
 
     /// The skip test's verdict: lessons pass at 70%, in order, stopping at the first that
@@ -547,6 +599,8 @@ final class StudySession: Identifiable {
             if placeLo >= 0 { unlocked = Array(placeBlocks[0...placeLo].joined()) }
         } else {
             for lid in placeRange {
+                // a practice stone has no words to be asked: it passes with the stones before it
+                if course.cards(in: lid).isEmpty { unlocked.append(lid); continue }
                 let s = placeScores[lid] ?? (0, 0)
                 if s.total > 0 && Double(s.ok) / Double(s.total) >= 0.7 { unlocked.append(lid) } else { break }
             }
@@ -639,6 +693,8 @@ struct Exercise {
     var writeStage = 0
 
     struct Tile: Identifiable, Hashable { let id: Int; let text: String; let pinyin: String? }
+    /// How many stones away a wrong option may come from, for a stone with too few words of its own.
+    static let nearby = 12
 
     var label: String {
         switch dir {
@@ -671,7 +727,7 @@ struct Exercise {
         switch dir {
         case "recall": return w.hanzi
         case "pinyin": return w.pinyin
-        default: return w.en
+        default: return w.gloss             // the short meaning, when the word has one
         }
     }
 
@@ -694,18 +750,25 @@ struct Exercise {
         case "listen":
             let bare = Pinyin.toneless(c.word.pinyin)
             var near: [String] = []
-            for x in cards.shuffled() where Pinyin.toneless(x.word.pinyin) == bare && x.word.en != answer && !near.contains(x.word.en) { near.append(x.word.en) }
+            for x in cards.shuffled() where Pinyin.toneless(x.word.pinyin) == bare && x.word.gloss != answer && !near.contains(x.word.gloss) { near.append(x.word.gloss) }
             distractors = Array(near.prefix(3))
             distractors += others(distractors).prefix(3 - distractors.count)
         default:
             var near: [String] = []
-            for x in course.lookalikes(c, 2) { let v = field(x.word, dir); if v != answer && !near.contains(v) { near.append(v) } }
+            // look-alikes the learner has reached, or nearly (not one from a later book)
+            let here = course.lessonOrder[c.lessonId] ?? 0
+            let reached = course.lookalikes(c, 8).filter { (course.lessonOrder[$0.lessonId] ?? 0) <= here + Exercise.nearby }
+            for x in reached.prefix(2) { let v = field(x.word, dir); if v != answer && !near.contains(v) { near.append(v) } }
             distractors = near + others(near).prefix(3 - near.count)
         }
-        // a lesson with very few words borrows from the whole course, so there are always four options
+        // a lesson with very few words borrows from the words nearest it in the course (not
+        // "portion, serving" beside 你 on day one), so there are always four options
         if distractors.count < 3 {
             var seen = Set(distractors + [answer])
-            for x in course.cards.shuffled() where distractors.count < 3 {
+            let here = course.lessonOrder[c.lessonId] ?? 0
+            let nearest = course.cards.sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
+            for x in nearest.prefix(40).filter({ abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby }).shuffled() + nearest.shuffled()
+                where distractors.count < 3 {
                 let v = field(x.word, dir)
                 if seen.insert(v).inserted { distractors.append(v) }
             }
@@ -725,7 +788,7 @@ struct Exercise {
     /// What to say, its pinyin and its meaning.
     var sayHanzi: String { sentence?.hanzi ?? card.word.hanzi }
     var sayPinyin: String { sentence?.pinyin ?? card.word.pinyin }
-    var sayEn: String { sentence?.en ?? card.word.en }
+    var sayEn: String { sentence?.en ?? card.word.gloss }
 
     /// Word tiles to put in order (web: buildSentenceExercise).
     static func sentence(_ c: Card, met: (String) -> Bool) -> Exercise? {

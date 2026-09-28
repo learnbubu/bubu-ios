@@ -106,6 +106,8 @@ struct PathView: View {
                     .shadow(color: .black.opacity(done || now ? 0.3 : 0), radius: 0, y: -1.5)
                     .shadow(color: .white.opacity(done || now ? 0.2 : 0.5), radius: 0, y: 1.5)
                     .offset(y: -7.5)
+                // a practice stone: its 练 (or 复 for the chapter review) and a small repeat mark
+                if it.lesson.isPractice { PracticeMark(active: done || now).offset(x: -size * 0.62, y: size * 0.28) }
                 if now { StartBubble().offset(y: -size / 2 - 18) }
                 if now { StepBadge(lessonId: it.lesson.id).offset(x: size * 0.66, y: size * 0.3) }
             }
@@ -258,6 +260,26 @@ struct StoneStyle: ButtonStyle {
             .offset(y: configuration.isPressed ? 2 : 0)
             .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)
             .sensoryFeedback(.impact(weight: .medium), trigger: configuration.isPressed)
+    }
+}
+
+/// The mark on a practice stone: a round repeat badge tucked against its edge, like the
+/// step badge, in the path's panel colours.
+struct PracticeMark: View {
+    let active: Bool
+    var body: some View {
+        Image(systemName: "arrow.triangle.2.circlepath")
+            .font(.system(size: 12, weight: .heavy))
+            .foregroundStyle(active ? Color.accent : Color.muted)
+            .frame(width: 26, height: 26)
+            .background {
+                ZStack {
+                    Circle().fill(Color.line).offset(y: 2)
+                    Circle().fill(Color.panel)
+                    Circle().strokeBorder(Color.line, lineWidth: 2)
+                }
+            }
+            .accessibilityLabel("Practice")
     }
 }
 

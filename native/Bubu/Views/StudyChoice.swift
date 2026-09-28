@@ -68,7 +68,7 @@ struct StudyChoicePage: View {
             }
 
             Section {
-                ForEach(course.lessons, id: \.id) { l in
+                ForEach(course.lessons.filter { !$0.isPractice }, id: \.id) { l in
                     let cards = course.cards(in: l.id)
                     let due = cards.filter { (progress.srs[$0.id]?.due).map { $0 <= progress.now() } ?? false }.count
                     let mastered = cards.filter { progress.isMastered($0.id) }.count

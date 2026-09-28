@@ -42,12 +42,13 @@ final class Router {
 
     init() {
         switch Launch.screen {
-        case "path", "pathstep", "lesson", "hud", "shop", "pocket": tab = .learn
+        case "path", "pathstep", "pathpractice", "practice", "lesson", "hud", "shop", "pocket": tab = .learn
         case "profile": tab = .profile
         case "settings", "account": tab = .settings
         default: tab = .home
         }
         if Launch.screen == "lesson" { lesson = Course.shared.lessons.first }
+        if Launch.screen == "practice" { lesson = Course.shared.lessons.first { $0.isPractice } }
     }
 }
 
@@ -87,7 +88,12 @@ struct RootView: View {
             }
             return
         }
-        guard let screen = Launch.screen, ["study", "quiz", "sentence", "sentencedrag", "speak", "write", "done", "donefinal", "donenext", "char", "buns"].contains(screen) else { return }
+        guard let screen = Launch.screen, ["study", "meet", "tip", "practicerun", "quiz", "sentence", "sentencedrag", "speak", "write", "done", "donefinal", "donenext", "char", "buns"].contains(screen) else { return }
+        if screen == "practicerun", let pr = Course.shared.lessons.first(where: { $0.isPractice }) {
+            router.tab = .learn
+            router.study = StudySession.lesson(pr.id, progress)
+            return
+        }
         let first = Course.shared.lessons[0].id
         // "buns": a new lesson with none left, which asks for more on the first Continue
         let s = StudySession(lessonId: first, progress: progress)

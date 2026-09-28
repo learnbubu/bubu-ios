@@ -11,12 +11,24 @@ struct Word: Codable, Hashable {
     var id: String? = nil
     /// a phrase's words, each taught in an earlier stone (我不懂 → 我, 不, 懂)
     var parts: [String]? = nil
+    /// a short meaning for the moment ("please" for 请), when `en` is long
+    var short: String? = nil
+
+    /// What the word means, briefly: shown when it's met, in the options and in the feedback.
+    /// The full meaning (`en`) stays on the character sheet and in the word lists.
+    var gloss: String { short ?? en }
 }
 
 struct Lesson: Codable, Identifiable {
     let id: String
     let title: String          // "起步1 U1.2 · 很高兴认识你！ Nice to meet you!"
     let words: [Word]
+    /// "practice": a practice stone, with no new words (see Course.practiceScope)
+    var kind: String? = nil
+    /// a practice stone that reviews its whole chapter, at the chapter's end
+    var review: Bool? = nil
+
+    var isPractice: Bool { kind == "practice" }
 
     /// "起步1 U1.2"
     var code: String { title.components(separatedBy: " · ").first ?? title }
@@ -171,10 +183,12 @@ final class Course {
         c.unicodeScalars.contains { (0x3400...0x9FFF).contains($0.value) }
     }
 
-    /// Each lesson's stone shows the first character of its words that no earlier stone used.
+    /// Each lesson's stone shows the first character of its words that no earlier stone used;
+    /// a practice stone shows 练 (练习, practice), the chapter review 复 (复习, review).
     static func heroes(_ lessons: [Lesson]) -> [String: String] {
         var used = Set<Character>(), out: [String: String] = [:]
         for l in lessons {
+            if l.isPractice { out[l.id] = l.review == true ? "复" : "练"; continue }
             let firsts = l.words.compactMap { $0.hanzi.first(where: isHan) }
             let all = l.words.flatMap { $0.hanzi.filter(isHan) }
             let c = firsts.first { !used.contains($0) } ?? all.first { !used.contains($0) } ?? firsts.first ?? "字"
@@ -185,6 +199,16 @@ final class Course {
     }
 
     func cards(in lessonId: String) -> [Card] { cardsByLesson[lessonId] ?? [] }
+
+    /// A practice stone's stones: those before it in its chapter that teach words (for the
+    /// chapter review, the whole chapter). Empty for any other lesson.
+    func practiceScope(_ lessonId: String) -> [String] {
+        guard lessonById[lessonId]?.isPractice == true, let ci = chapterOf[lessonId] else { return [] }
+        let ids = chapters[ci].lessons
+        return Array(ids.prefix { $0 != lessonId }).filter { lessonById[$0]?.isPractice != true }
+    }
+    /// The words a practice stone practises.
+    func practiceCards(_ lessonId: String) -> [Card] { practiceScope(lessonId).flatMap { cards(in: $0) } }
     /// every chapter's words
     private(set) lazy var chapterCards: [[Card]] = chapters.map { ch in ch.lessons.flatMap { cardsByLesson[$0] ?? [] } }
     func notes(for lessonId: String) -> [Note] { data.notes[lessonId] ?? [] }

@@ -544,6 +544,13 @@ final class ProgressStore {
         let cards = Course.shared.cards(in: Course.shared.lessons[0].id)
         let n = screen == "pathstep" ? Int(ceil(Double(cards.count) / 2)) : screen == "donefinal" ? cards.count : 0
         for c in cards.prefix(n) { _ = p.answer(c.id, correct: true, dir: "recognize", sessionStart: 0, mistakesMode: false) }
+        // the practice screenshots: chapter 1's first three stones done, its practice stone next
+        if ["pathpractice", "practice", "practicerun"].contains(screen) {
+            for l in Course.shared.lessons.prefix(3) {
+                for c in Course.shared.cards(in: l.id) { _ = p.answer(c.id, correct: true, dir: "recognize", sessionStart: 0, mistakesMode: false) }
+                p.markDone(l.id)
+            }
+        }
         _ = p.lessonPocket(chapterEnd: false)     // today's pocket already opened: no pocket over the screenshot
         p.releaseSaves()
         return p
