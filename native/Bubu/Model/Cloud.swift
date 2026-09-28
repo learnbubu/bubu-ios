@@ -371,6 +371,9 @@ final class Cloud {
         guard let uid = session?.userId else { return }
         let r = try await authed("/rest/v1/progress?user_id=eq.\(uid)", method: "DELETE")
         guard (200..<300).contains(r.status) else { throw CloudError.server("The cloud copy couldn't be deleted. Try again later.") }
+        // then the sign-in itself (the project's delete_user() function removes the caller)
+        let d = try await authed("/rest/v1/rpc/delete_user", method: "POST", body: [String: Any]())
+        guard (200..<300).contains(d.status) else { throw CloudError.server("Your progress is deleted, but the account couldn't be. Try again later.") }
         endSession()
     }
 
