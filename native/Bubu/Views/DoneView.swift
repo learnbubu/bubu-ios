@@ -21,8 +21,8 @@ struct DoneView: View {
 
     var body: some View {
         let r = session.result!
-        // the stage fills the space above the buttons (the first spreads its parts out,
-        // see `gap`) and the buttons stay pinned at the foot
+        // the stage fills the space above the buttons (the first keeps its parts together,
+        // centred) and the buttons stay pinned at the foot
         VStack(spacing: 0) {
             Group {
                 if !r.simple.isEmpty { simple(r) } else {
@@ -73,9 +73,9 @@ struct DoneView: View {
 
     private func stageOne(_ r: StudySession.Result) -> some View {
         VStack(spacing: 0) {
+            Spacer(minLength: 0)
             // the image has room around Bùbù, so it's drawn big enough to read as the hero
-            Image("done-panda").resizable().scaledToFit().frame(height: 200)
-            gap
+            Image("done-panda").resizable().scaledToFit().frame(height: 230)
             Text(r.title).font(.nunito(22, .black)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 .padding(.top, 2)
             if r.steps > 1 {
@@ -86,13 +86,12 @@ struct DoneView: View {
             } else if r.lessonFinished, let l = course.lessonById[session.lessonId] {
                 Text(l.name).font(.nunito(14, .semibold)).foregroundStyle(Color.muted).lineLimit(1).padding(.top, 2)
             }
-            gap
             HStack(spacing: 10) {
                 DoneTile(value: r.xp, format: { "+\($0)" }, label: "XP", bg: Color(light: 0xFEEBBB, dark: 0x2A2B23), ink: Color(light: 0xB06A0A, dark: 0xF5B03D), delay: 0.2)
                 DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: "Time", bg: .accentSoft, ink: .accent, delay: 0.42)
                 DoneTile(value: r.accuracy, format: { "\($0)%" }, label: "Accuracy", bg: .goodSoft, ink: .good, delay: 0.64)
             }
-            .padding(.top, 14).padding(.bottom, 6)
+            .padding(.top, 22).padding(.bottom, 6)
             VStack(spacing: 6) {
                 if r.perfect { note("Perfect! No mistakes, +5 XP", fg: .gold, bg: .accentSoft) }
                 if r.lessonFinished { note("Lesson done: double XP for the next 15 minutes", fg: .accent, bg: .accentSoft) }
@@ -101,7 +100,6 @@ struct DoneView: View {
                 else if progress.boostActive && !r.lessonFinished { note("Double XP is on", fg: .accent, bg: .accentSoft) }
             }
             .padding(.top, 10)
-            gap
             // this week, so the streak is in view from the first screen
             VStack(spacing: 10) {
                 HStack {
@@ -114,14 +112,10 @@ struct DoneView: View {
             }
             .padding(.horizontal, 14).padding(.vertical, 12)
             .background(Color.bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .padding(.top, 8)
-            gap
+            .padding(.top, 18)
+            Spacer(minLength: 0)
         }
     }
-
-    /// Space between the first stage's parts, shared out evenly: the panda sits at the
-    /// top and the parts spread down the card, so a tall phone shows no one big gap.
-    private var gap: some View { Spacer(minLength: 8) }
 
     private func note(_ t: String, fg: Color, bg: Color) -> some View {
         Text(t).font(.nunito(13.8, .bold)).foregroundStyle(fg).multilineTextAlignment(.center)
