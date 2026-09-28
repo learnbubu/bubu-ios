@@ -158,8 +158,10 @@ struct MomentCard: View {
             .multilineTextAlignment(.center)
             .padding(.horizontal, wide ? 18 : 24).padding(.vertical, wide ? 22 : 26)
             .frame(maxWidth: wide ? 360 : 330)
-            .background(Color.panel, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-            .shadow(color: .black.opacity(0.25), radius: 30, y: 12)
+            // the shadow belongs to the card's shape only: on the whole stack it was cast by
+            // every text and image inside too, a faint glow around each (the pocket's "glow")
+            .background(RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Color.panel)
+                .shadow(color: .black.opacity(0.25), radius: 30, y: 12))
             .scaleEffect(shown ? 1 : 0.85)
             .padding(wide ? 16 : 24)
             if confettiCount > 0 { Confetti(count: confettiCount).allowsHitTesting(false) }
