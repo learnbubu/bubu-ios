@@ -95,7 +95,7 @@ struct StudyView: View {
     // MARK: chrome
 
     /// The top of a session, as Duolingo has it: close, the progress bar and the buns
-    /// in one row; the combo, double XP, the count and shuffle in a slim row under it.
+    /// in one row; the session's name, the combo and double XP in a slim row under it.
     private var topBar: some View {
         VStack(spacing: 6) {
             HStack(spacing: 12) {
@@ -139,18 +139,6 @@ struct StudyView: View {
                             .padding(.horizontal, 8).padding(.vertical, 2)
                             .background(Color.accentSoft, in: Capsule())
                     }
-                }
-                Text("\(min(session.stepsDone, session.sessionTotal)) / \(session.sessionTotal)")
-                    .font(.nunito(12.5, .semibold)).monospacedDigit().foregroundStyle(Color.muted)
-                if !session.isQuiz {
-                    Button {
-                        withAnimation {
-                            if session.shuffleRest() { resetExercise() }
-                            else { Moments.shared.toast("Shuffle is available once all the new words have been introduced.") }
-                        }
-                    } label: { Image(systemName: "shuffle").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.muted) }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Shuffle")
                 }
             }
             .padding(.leading, 46)

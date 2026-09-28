@@ -42,6 +42,8 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 
 ## Known limits
 
+- [ ] Website: a very long sentence's word tiles spill over the Check button
+- [ ] Pick the permanent bundle ID before the first TestFlight upload (currently `com.domchivers.bubu`; suggested `com.bubuchinese.app`)
 - [ ] Speaking practice checks the words, not the tones (Apple's recogniser), so a wrong tone can pass
 - [ ] Website coin merging across devices is approximate when both are used on the same day
 - [x] Opened pocket leaves a very faint glow where the pocket was (app)

@@ -35,24 +35,23 @@ struct BunRow: View {
     let n: Int
     let plus: Bool
     var bump = 0
+    /// One bun and the count, as Duolingo shows its hearts: × 5, red when it's down to one.
     var body: some View {
-        HStack(spacing: 1) {
-            if plus {
-                BunIcon(width: 21)
-                Text("∞").font(.nunito(16, .black)).foregroundStyle(Color.bunBrown).padding(.leading, 3)
-            } else {
-                ForEach(0..<ProgressStore.bunsMax, id: \.self) { i in
-                    BunIcon(width: 21, gone: i >= n)
-                        .keyframeAnimator(initialValue: 1.0, trigger: i == n - 1 ? bump : 0) { v, s in
-                            v.scaleEffect(s)
-                        } keyframes: { _ in
-                            KeyframeTrack {
-                                LinearKeyframe(0.4, duration: 0.01)
-                                CubicKeyframe(1.35, duration: 0.3)
-                                CubicKeyframe(1, duration: 0.2)
-                            }
-                        }
-                }
+        HStack(spacing: 4) {
+            BunIcon(width: 24, gone: !plus && n == 0)
+            Text(plus ? "∞" : "×\(n)")
+                .font(.nunito(16, .black)).monospacedDigit()
+                .foregroundStyle(!plus && n <= 1 ? Color.again : Color.bunBrown)
+                .contentTransition(.numericText(value: Double(n)))
+                .animation(.spring(response: 0.35), value: n)
+        }
+        .keyframeAnimator(initialValue: 1.0, trigger: bump) { v, s in
+            v.scaleEffect(s)
+        } keyframes: { _ in
+            KeyframeTrack {
+                LinearKeyframe(0.6, duration: 0.01)
+                CubicKeyframe(1.25, duration: 0.3)
+                CubicKeyframe(1, duration: 0.2)
             }
         }
         .padding(.vertical, -6)
