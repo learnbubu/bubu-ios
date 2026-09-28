@@ -139,6 +139,7 @@ struct RootView: View {
                 .preferredColorScheme(progress.prefs.colorScheme)
         }
         .preferredColorScheme(progress.prefs.colorScheme)
+        .reminderHost()
         .environment(router)
         .onAppear {
             Moments.shared.launch = { router.start($0) }

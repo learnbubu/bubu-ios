@@ -542,6 +542,7 @@ final class ProgressStore {
         }
         if s > activity.best { activity.best = s }
         save()
+        NotificationCenter.default.post(name: .bubuDayLit, object: self)   // today's reminders go
         return Fire(streak: s, ember: ember, milestone: Self.milestones.contains(s))
     }
 

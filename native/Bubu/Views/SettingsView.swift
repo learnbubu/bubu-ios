@@ -72,6 +72,8 @@ struct SettingsView: View {
                     toggle("Stroke checking", "Check each stroke as you write (off = free tracing).", $p.prefs.checkStrokes)
                 }
 
+                ReminderSettings()
+
                 section {
                     NavigationLink { HelpPage() } label: {
                         row("How it works", "Spaced repetition, the practice modes, and the buttons you'll see.") {
