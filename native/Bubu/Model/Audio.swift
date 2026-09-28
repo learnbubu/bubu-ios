@@ -29,25 +29,26 @@ final class Speech {
         case .enhanced: s += 8
         default: break
         }
-        if ["Tingting", "Meijia", "Lili", "Yu-shu"].contains(where: v.name.contains) { s += 4 }
+        if ["Lilian", "Tingting", "Meijia", "Lili", "Yu-shu"].contains(where: v.name.contains) { s += 4 }
         return s
     }
 
-    lazy var bestVoice: AVSpeechSynthesisVoice? = {
-        let zh = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.hasPrefix("zh") || $0.language.hasPrefix("cmn") }
-        func score(_ v: AVSpeechSynthesisVoice) -> Int {
-            var s = 0
-            if v.language == "zh-CN" { s += 3 } else { s += 1 }
-            switch v.quality {
-            case .premium: s += 10
-            case .enhanced: s += 8
-            default: break
+    /// The best Chinese voice installed, looked up again whenever the phone's voices
+    /// change (a Premium or Enhanced voice downloaded in iOS Settings is used straight away).
+    private var cachedBest: AVSpeechSynthesisVoice??
+    private var voicesObserver: NSObjectProtocol?
+    var bestVoice: AVSpeechSynthesisVoice? {
+        if voicesObserver == nil {
+            voicesObserver = NotificationCenter.default.addObserver(
+                forName: AVSpeechSynthesizer.availableVoicesDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
+                self?.cachedBest = nil
             }
-            if ["Tingting", "Meijia", "Lili", "Yu-shu"].contains(where: v.name.contains) { s += 4 }
-            return s
         }
-        return zh.max { score($0) < score($1) } ?? AVSpeechSynthesisVoice(language: "zh-CN")
-    }()
+        if let c = cachedBest { return c }
+        let v = Self.chineseVoices.first ?? AVSpeechSynthesisVoice(language: "zh-CN")
+        cachedBest = .some(v)
+        return v
+    }
 
     func stop() { synth.stopSpeaking(at: .immediate) }
 
@@ -60,7 +61,7 @@ final class Speech {
             Moments.shared.toast("No Chinese voice on this phone, so audio is silent. Add one in Settings → Accessibility → Spoken Content → Voices.")
         } else if let v = voice, v.quality == .default, !d.bool(forKey: "voiceTip") {
             d.set(true, forKey: "voiceTip")
-            Moments.shared.toast("Tip: for a far more natural voice, go to Settings → Accessibility → Spoken Content → Voices → Chinese and download an “Enhanced” voice.")
+            Moments.shared.toast("Tip: for a far more natural voice, go to iPhone Settings → Accessibility → Spoken Content → Voices → Chinese (China mainland) and download Lilian (Premium) or Tingting (Enhanced).")
         }
     }
 
