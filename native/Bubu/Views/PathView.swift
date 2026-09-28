@@ -3,48 +3,66 @@ import SwiftUI
 /// The learning path: stepping stones on a gentle wave, chapter banners between them,
 /// and the scenery composed in the path editor. Same geometry as the web app's phone
 /// layout, so every piece lands where it was placed.
+///
+/// Built for speed: the layout is worked out once (`PathModel`) and kept until the
+/// width or the current lesson changes, only the stretch near the screen is drawn,
+/// and the body reads nothing from the store but which lessons are done, so a quest
+/// counter or XP changing elsewhere doesn't redo the path.
 struct PathView: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
     private let course = Course.shared
+    @State private var cache = PathModel.Cache()
+    /// the scroll band the drawn stretch is centred on (nil until the first scroll report)
+    @State private var band: Int?
+    /// the lesson the path last scrolled to, so coming back to the tab doesn't jump
+    @State private var landedOn: String??
 
-    // the web app's phone layout (PATH_CFG.phone)
-    private let size: CGFloat = 74, gap: CGFloat = 143, wave: CGFloat = 106, per: CGFloat = 8, phase: CGFloat = 6
-    private let hud: CGFloat = 62, bannerH: CGFloat = 72, hgap: CGFloat = 36, bubble: CGFloat = 40, pad: CGFloat = 170
-    private let stoneRatio: CGFloat = 1.62
-
-    private struct Item { let lesson: Lesson; let index: Int; let chapter: Int?; let y: CGFloat }
+    private let size = PathModel.size, stoneRatio = PathModel.stoneRatio
+    private typealias Item = PathModel.Item
 
     var body: some View {
         GeometryReader { geo in
-            let W = geo.size.width
+            let W = geo.size.width, H = geo.size.height
             let current = progress.currentLessonId
-            let items = layout(current: current)
-            let height = (items.last?.y ?? 0) + pad
+            let model = cache.model(course, width: W, current: current)
+            let win = PathModel.window(band: band ?? model.landingBand(viewport: H), viewport: H)
             ScrollViewReader { reader in
                 ScrollView {
                     ZStack(alignment: .topLeading) {
-                        Color.clear.frame(width: W, height: height)
-                        grounds(items, W)
-                        scenery(items, W, behind: true)
-                        pebbles(items, W, current: current)
-                        ForEach(items, id: \.lesson.id) { it in
-                            if let ci = it.chapter { banner(ci, items: items, it: it, W: W, current: current) }
+                        Color.clear.frame(width: W, height: model.height)
+                        grounds(model, win)
+                        scenery(model, win, behind: true)
+                        pebbles(model, win)
+                        ForEach(model.items(in: win), id: \.lesson.id) { it in
+                            if let ci = it.chapter { banner(ci, model: model, it: it, W: W) }
                             stone(it, W: W, current: current)
                         }
-                        scenery(items, W, behind: false)
+                        scenery(model, win, behind: false)
                         // a marker at the current stone, for the scroll to land on: positioned
                         // views all report the full canvas as their frame, so they can't be targets
                         VStack(spacing: 0) {
-                            Color.clear.frame(height: max(0, (items.first { $0.lesson.id == current }?.y ?? 0)))
+                            Color.clear.frame(height: max(0, model.currentY))
                             Color.clear.frame(width: 1, height: 1).id("current")
                         }
                         .allowsHitTesting(false)
                     }
+                    .background {
+                        GeometryReader { g in
+                            Color.clear.preference(key: PathOffsetKey.self, value: -g.frame(in: .named("path")).minY)
+                        }
+                    }
                 }
+                .coordinateSpace(name: "path")
                 .scrollIndicators(.hidden)
-                // land on the current lesson, as the web does on every render
-                .onAppear { if current != nil { reader.scrollTo("current", anchor: .center) } }
+                .onPreferenceChange(PathOffsetKey.self) { y in
+                    let b = PathModel.band(for: y)
+                    if b != band { band = b }
+                }
+                // land on the current lesson the first time, and again when it moves on;
+                // not on every visit to the tab, which would throw away where you'd scrolled
+                .onAppear { land(reader, current) }
+                .onChange(of: current) { _, c in land(reader, c) }
             }
             .overlay(alignment: .bottom) {
                 // the web's bottom fade: solid for a few points, gone by 76
@@ -52,40 +70,19 @@ struct PathView: View {
                                        .init(color: .bg.opacity(0), location: 1)], startPoint: .bottom, endPoint: .top)
                     .frame(height: 76).allowsHitTesting(false)
             }
-            .overlay(alignment: .top) {
-                VStack(spacing: 8) {
-                    HUD()
-                    if progress.backupOverdue { BackupNudge().padding(.horizontal, 14) }
-                }
-            }
+            .overlay(alignment: .top) { HUD() }
             .overlay(alignment: .bottom) { ReviewButton() }
         }
         .background(Color.bg.ignoresSafeArea())
     }
 
-    // MARK: geometry
-    private func layout(current: String?) -> [Item] {
-        var items: [Item] = [], y: CGFloat = 0, i = 0
-        let bub = { (id: String) -> CGFloat in id == current ? bubble : 0 }
-        for (ci, ch) in course.chapters.enumerated() {
-            for (li, id) in ch.lessons.enumerated() {
-                guard let lesson = course.lessonById[id] else { continue }
-                if i == 0 { y = hud + 16 + bannerH + bub(id) + size / 2 }
-                else if li == 0 { y += hgap + bannerH + bub(id) }
-                items.append(Item(lesson: lesson, index: i, chapter: li == 0 ? ci : nil, y: y))
-                y += gap; i += 1
-            }
-        }
-        return items
+    private func land(_ reader: ScrollViewProxy, _ current: String?) {
+        guard landedOn != .some(current) else { return }
+        landedOn = .some(current)
+        if current != nil { reader.scrollTo("current", anchor: .center) }
     }
 
-    private func nodeX(_ i: Int, _ W: CGFloat, count: Int) -> CGFloat {
-        var k: CGFloat = 0
-        for j in 0..<min(count, Int(per)) { k = max(k, abs(sin(CGFloat(j) * 2 * .pi / per))) }
-        if k < 1e-6 { k = 1 }
-        let half = size / 2 + 8
-        return max(half, min(W - half, W / 2 + wave * sin((CGFloat(i) + phase) * 2 * .pi / per) / k))
-    }
+    private func nodeX(_ i: Int, _ W: CGFloat, count: Int) -> CGFloat { PathModel.nodeX(i, W, count: count) }
 
     // MARK: pieces
     @ViewBuilder
@@ -117,10 +114,10 @@ struct PathView: View {
     }
 
     @ViewBuilder
-    private func banner(_ ci: Int, items: [Item], it: Item, W: CGFloat, current: String?) -> some View {
+    private func banner(_ ci: Int, model: PathModel, it: Item, W: CGFloat) -> some View {
         let (d, t) = progress.chapterProgress(ci)
         let right = course.data.pathLayout.headers[it.lesson.id] == "right"
-        let mid = bannerMid(it, items: items, current: current)
+        let mid = model.bannerMids[it.index] ?? it.y
         VStack(alignment: right ? .trailing : .leading, spacing: 0) {
             HStack(spacing: 8) {
                 Text(course.chapterLabel(ci).uppercased())
@@ -137,16 +134,7 @@ struct PathView: View {
             HStack(spacing: 8) {
                 Text("\(d) / \(t) lessons").font(.nunito(11, .bold)).foregroundStyle(Color.muted)
                 // a finished chapter ends in its story
-                if d == t, let story = course.storyFor(chapter: ci) {
-                    let read = progress.readDone(story.id)
-                    Button { router.push(.story(story.id)) } label: {
-                        Label(read ? "Read again" : "Read the story", systemImage: "book.fill")
-                            .font(.nunitoXB(11)).foregroundStyle(read ? Color.muted : Color.onAccent)
-                            .padding(.horizontal, 9).padding(.vertical, 3)
-                            .background(read ? Color.line : Color.accent, in: Capsule())
-                    }
-                    .buttonStyle(.plain)
-                }
+                if d == t, let story = course.storyFor(chapter: ci) { StoryPill(storyId: story.id) }
             }
         }
         .padding(.horizontal, 18)
@@ -155,116 +143,66 @@ struct PathView: View {
     }
 
     /// The scenery composed in the path editor, anchored to its stone.
-    @ViewBuilder
-    private func scenery(_ items: [Item], _ W: CGFloat, behind: Bool) -> some View {
-        let kx = W / 390
-        let byId = Dictionary(uniqueKeysWithValues: items.map { ($0.lesson.id, $0) })
-        ForEach(Array(course.data.pathLayout.pieces.enumerated()), id: \.offset) { _, p in
-            if p.behind == behind, let it = byId[p.stone], let a = course.data.art[p.art] {
-                let w = W * p.w / 100, h = w * a.ar
-                let cx = nodeX(it.index, W, count: 64) + p.dx * kx, base = it.y + p.dy
-                Image(p.art)
-                    .resizable()
-                    .frame(width: w, height: h)
-                    .scaleEffect(x: p.flip ? -1 : 1, y: 1)
-                    .position(x: cx, y: base - h / 2)
-                    .allowsHitTesting(false)
-            }
-        }
-    }
-
-    /// Where a chapter header is centred: halfway between the stone above
-    /// (or the HUD) and the top of its first stone, START bubble included.
-    private func bannerMid(_ it: Item, items: [Item], current: String?) -> CGFloat {
-        let top = it.y - size / 2 - (it.lesson.id == current ? bubble : 0)
-        let prev = it.index == 0 ? hud : items[it.index - 1].y + size / 2
-        return (prev + top) / 2
-    }
-
-    // MARK: scenery constants, from the path composer (SC in the web app)
-    private let patchW: CGFloat = 1.20, patchSquash: CGFloat = 0.66
-    private let pebEvery: CGFloat = 9.2, pebSize: CGFloat = 11, pebVar: CGFloat = 0.63
-    private let pebWander: CGFloat = 31, pebClear: CGFloat = 4
-
-    /// The web app's hash noise, -1…1.
-    private func noise(_ n: Double) -> CGFloat {
-        let v = sin(n * 12.9898) * 43758.5453
-        return CGFloat((v - floor(v)) * 2 - 1)
-    }
-
-    /// Cleared earth under each stone, so it reads as resting on the ground.
-    private func grounds(_ items: [Item], _ W: CGFloat) -> some View {
-        let w = size * stoneRatio * patchW
-        return ForEach(items, id: \.lesson.id) { it in
-            GroundPatch(shape: it.index % 4)
-                .frame(width: w, height: w * patchSquash)
-                .position(x: nodeX(it.index, W, count: 64), y: it.y + size * 0.14)
+    private func scenery(_ model: PathModel, _ win: ClosedRange<CGFloat>, behind: Bool) -> some View {
+        ForEach(model.pieces(in: win, behind: behind), id: \.id) { p in
+            Image(p.art)
+                .resizable()
+                .frame(width: p.w, height: p.h)
+                .scaleEffect(x: p.flip ? -1 : 1, y: 1)
+                .position(x: p.x, y: p.y)
                 .allowsHitTesting(false)
         }
     }
 
-    private struct Pebble { let x: CGFloat; let y: CGFloat; let w: CGFloat }
-
-    /// The pebble trail, laid exactly as the web app lays it: a fixed density along a
-    /// smooth walk through the stones, wandering either side, and dropped wherever
-    /// it would land on a stone or under a chapter header. Drawn one segment per
-    /// canvas so no single layer is the height of the whole course.
-    private func trail(_ items: [Item], _ W: CGFloat, current: String?) -> [Int: [Pebble]] {
-        guard items.count > 1 else { return [:] }
-        let x = (0..<items.count).map { nodeX($0, W, count: 64) }
-        let ys = items.map(\.y)
-        let unit = size / 74
-        func curve(_ t: CGFloat) -> (i: Int, x: CGFloat, y: CGFloat) {
-            let f = t * CGFloat(ys.count - 1)
-            let i = max(0, min(ys.count - 2, Int(floor(f))))
-            var u = f - CGFloat(i); u = u * u * (3 - 2 * u)
-            return (i, x[i] + (x[i + 1] - x[i]) * u, ys[i] + (ys[i + 1] - ys[i]) * u)
+    /// Cleared earth under each stone, so it reads as resting on the ground.
+    private func grounds(_ model: PathModel, _ win: ClosedRange<CGFloat>) -> some View {
+        let w = size * stoneRatio * PathModel.patchW
+        return ForEach(model.items(in: win), id: \.lesson.id) { it in
+            GroundPatch(shape: it.index % 4)
+                .frame(width: w, height: w * PathModel.patchSquash)
+                .position(x: model.xs[it.index], y: it.y + size * 0.14)
+                .allowsHitTesting(false)
         }
-        // headers, each on its own side of the page
-        var headers: [Int: CGRect] = [:]
-        for it in items where it.chapter != nil {
-            let mid = bannerMid(it, items: items, current: current)
-            let right = course.data.pathLayout.headers[it.lesson.id].map { $0 == "right" }
-                ?? (it.index > 0 && (x[it.index - 1] + x[it.index]) / 2 < W / 2)
-            headers[it.index] = CGRect(x: right ? W * 0.38 : 0, y: mid - bannerH / 2, width: W * 0.62, height: bannerH)
-        }
-        let halfW = size * stoneRatio / 2 + pebClear * unit, halfH = size / 2 + pebClear * unit
-        let count = max(0, Int(((ys[ys.count - 1] - ys[0]) / (pebEvery * unit)).rounded()))
-        var out: [Int: [Pebble]] = [:]
-        for n in stride(from: 1, through: count, by: 1) {
-            let t = CGFloat(n) / CGFloat(count + 1)
-            let p = curve(t), q = curve(min(1, t + 0.002))
-            let dx = q.x - p.x, dy = q.y - p.y, len = max(hypot(dx, dy), 1e-9)
-            let off = pebWander * unit * noise(Double(n) * 1.7)
-            let w = pebSize * unit * (1 + pebVar * noise(Double(n) * 4.3))
-            let bx = p.x - dy / len * off, by = p.y + dx / len * off
-            var hidden = false
-            for i in max(0, p.i - 1)...min(ys.count - 1, p.i + 2) {
-                let ex = (bx - x[i]) / (halfW + w / 2), ey = (by - ys[i]) / (halfH + w / 2)
-                if ex * ex + ey * ey < 1 { hidden = true; break }
-                if let h = headers[i], bx > h.minX - w, bx < h.maxX + w, by > h.minY - w, by < h.maxY + w { hidden = true; break }
-            }
-            if !hidden { out[p.i, default: []].append(Pebble(x: bx, y: by, w: w)) }
-        }
-        return out
     }
 
-    private func pebbles(_ items: [Item], _ W: CGFloat, current: String?) -> some View {
-        let groups = trail(items, W, current: current)
-        return ForEach(groups.keys.sorted(), id: \.self) { i in
-            let peb = groups[i]!
-            let top = (peb.map(\.y).min() ?? 0) - 10, bottom = (peb.map(\.y).max() ?? 0) + 10
+    /// The pebble trail (see `PathModel.trail`), one canvas per stretch between stones.
+    private func pebbles(_ model: PathModel, _ win: ClosedRange<CGFloat>) -> some View {
+        let W = model.width
+        return ForEach(model.pebbles(in: win), id: \.key) { g in
             Canvas { ctx, _ in
                 let img = ctx.resolve(Image("stone-locked-4"))
-                for p in peb {
+                for p in g.pebbles {
                     let w = max(3, p.w), h = max(2, p.w * 0.62)
-                    ctx.draw(img, in: CGRect(x: p.x - w / 2, y: p.y - top - h / 2, width: w, height: h))
+                    ctx.draw(img, in: CGRect(x: p.x - w / 2, y: p.y - g.top - h / 2, width: w, height: h))
                 }
             }
-            .frame(width: W, height: bottom - top)
-            .position(x: W / 2, y: (top + bottom) / 2)
+            .frame(width: W, height: g.bottom - g.top)
+            .position(x: W / 2, y: (g.top + g.bottom) / 2)
             .allowsHitTesting(false)
         }
+    }
+}
+
+private struct PathOffsetKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+/// "Read the story" under a finished chapter. Its own view, so the read/unread
+/// check (the whole activity record) is watched here and not by the whole path.
+struct StoryPill: View {
+    let storyId: String
+    @Environment(ProgressStore.self) private var progress
+    @Environment(Router.self) private var router
+    var body: some View {
+        let read = progress.readDone(storyId)
+        Button { router.push(.story(storyId)) } label: {
+            Label(read ? "Read again" : "Read the story", systemImage: "book.fill")
+                .font(.nunitoXB(11)).foregroundStyle(read ? Color.muted : Color.onAccent)
+                .padding(.horizontal, 9).padding(.vertical, 3)
+                .background(read ? Color.line : Color.accent, in: Capsule())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -362,30 +300,6 @@ struct GuidePill: View {
             .contentShape(Rectangle().inset(by: -8))
         }
         .buttonStyle(.plain)
-    }
-}
-
-/// "Back up your progress", when it's been a while (web: #backupNudge).
-struct BackupNudge: View {
-    @Environment(ProgressStore.self) private var progress
-    var body: some View {
-        HStack(spacing: 10) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text("Back up your progress").font(.nunitoXB(14)).foregroundStyle(Color.ink)
-                Text(progress.lastBackup == 0 ? "Your streak and history live only on this phone." : "Last \(progress.backupAge).")
-                    .font(.nunito(12)).foregroundStyle(Color.muted)
-            }
-            Spacer(minLength: 0)
-            ExportButton()
-            Button { withAnimation { progress.snoozeBackup() } } label: {
-                Image(systemName: "xmark").font(.system(size: 12, weight: .bold)).foregroundStyle(Color.muted).padding(6)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 14).padding(.vertical, 10)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.line))
-        .transition(.move(edge: .top).combined(with: .opacity))
     }
 }
 

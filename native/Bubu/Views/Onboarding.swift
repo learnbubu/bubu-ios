@@ -1,16 +1,14 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// The first run: the welcome, then the web's three slides (web: the auth gate's
 /// splash, then runOnboarding). Ends in the first lesson, or a placement test.
+/// There's no restore here: a backup restores from Settings, and progress from
+/// the website comes with signing in (Settings → Account).
 struct OnboardingView: View {
     var finish: (_ level: String) -> Void
-    @Environment(ProgressStore.self) private var progress
     @State private var started = false
     @State private var page = 0
     @State private var level = "new"
-    @State private var importing = false
-    @State private var message: String?
 
     var body: some View {
         ZStack {
@@ -18,16 +16,6 @@ struct OnboardingView: View {
             if !started { welcome.transition(.opacity) } else { slides.transition(.move(edge: .trailing).combined(with: .opacity)) }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.9), value: started)
-        .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
-            guard case .success(let url) = result else { return }
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            if let data = try? Data(contentsOf: url), Backup.restore(data, into: progress) {
-                progress.markOnboarded()
-            } else {
-                message = "That isn't a progress backup."
-            }
-        }
     }
 
     // MARK: the welcome
@@ -61,13 +49,6 @@ struct OnboardingView: View {
                         .shadow(color: .black.opacity(0.2), radius: 12, y: 6)
                 }
                 .buttonStyle(PressDown(depth: 2))
-                Button { importing = true } label: {
-                    (Text("Coming from the website? ").foregroundColor(.ink) + Text("Restore a backup").foregroundColor(.accent).bold())
-                        .font(.nunito(15)).padding(.horizontal, 16).padding(.vertical, 10)
-                        .background(Color.bg.opacity(0.85), in: Capsule())
-                }
-                .buttonStyle(.plain)
-                if let m = message { Text(m).font(.nunito(13, .bold)).foregroundStyle(Color.again) }
             }
             .padding(.horizontal, 22).padding(.bottom, 16)
         }
