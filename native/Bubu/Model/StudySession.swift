@@ -96,7 +96,9 @@ final class StudySession: Identifiable {
     private var placeLo = -1                        // the highest block shown to be known
     private var placeHi = -1                        // the highest block that still might be
     private var placeProbe: Int?                    // the block being asked about now
-    private var probeOk = 0, probeN = 0, probes = 0
+    private var probeOk = 0
+    private var probeN = 0
+    private var probes = 0
     static let probeSize = 3, probePass = 2, maxProbes = 8
     private(set) var quizScore = 0
 
