@@ -12,12 +12,19 @@ struct BubuApp: App {
 
     // reminder taps are handled from the first moment, even on a cold launch
     init() { Reminders.shared.install() }
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(progress)
                 .tint(.accent)
+        }
+        // signed in: pull and merge on launch and whenever the app comes to the front
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            guard phase == .active, Launch.screen == nil else { return }
+            Cloud.shared.attach(progress)
+            Task { await Cloud.shared.sync() }
         }
     }
 }

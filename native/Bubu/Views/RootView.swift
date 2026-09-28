@@ -44,7 +44,7 @@ final class Router {
         switch Launch.screen {
         case "path", "lesson", "hud", "shop", "pocket": tab = .learn
         case "profile": tab = .profile
-        case "settings": tab = .settings
+        case "settings", "account": tab = .settings
         default: tab = .home
         }
         if Launch.screen == "lesson" { lesson = Course.shared.lessons.first }
