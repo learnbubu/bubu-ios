@@ -73,7 +73,8 @@ struct DoneView: View {
 
     private func stageOne(_ r: StudySession.Result) -> some View {
         VStack(spacing: 0) {
-            Image("done-panda").resizable().scaledToFit().frame(width: 120, height: 120)
+            // the image has room around Bùbù, so it's drawn big enough to read as the hero
+            Image("done-panda").resizable().scaledToFit().frame(height: 200)
             gap
             Text(r.title).font(.nunito(22, .black)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 .padding(.top, 2)
