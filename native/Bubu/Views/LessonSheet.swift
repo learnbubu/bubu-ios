@@ -20,6 +20,8 @@ struct LessonSheet: View {
         let studied = done || cards.contains { progress.srs[$0.id] != nil }
         let pct = cards.isEmpty ? 0 : Double(mastered) / Double(cards.count)
         let locked = !done && lesson.id != progress.currentLessonId
+        // a lesson with many new words comes in steps (its batches)
+        let steps = StudySession.lessonSteps(lesson.id, progress)
         let pose = pct >= 1 ? "done-panda" : studied ? "panda-idle" : "sheet-waving"
         ZStack(alignment: .bottom) {
             Color.black.opacity(shown ? 0.55 : 0)
@@ -43,6 +45,13 @@ struct LessonSheet: View {
                                 Bar(value: pct, height: 7, fill: .good).padding(.top, 3).padding(.bottom, 4)
                                 Text(studied ? "\(mastered) / \(cards.count) mastered\(due > 0 ? " · \(due) due" : "")" : "new lesson · \(cards.count) words")
                                     .font(.nunito(11)).foregroundStyle(Color.muted)
+                                if !done && !locked && steps.total > 1 {
+                                    HStack(spacing: 8) {
+                                        Text("STEP \(steps.step) OF \(steps.total)").font(.nunitoXB(11)).tracking(0.6).foregroundStyle(Color.accent)
+                                        StepSegments(done: steps.step - 1, total: steps.total, current: true)
+                                    }
+                                    .padding(.top, 5)
+                                }
                             }
                         }
                         .padding(.bottom, 12)
@@ -122,7 +131,7 @@ struct LessonSheet: View {
                     Label("Take the skip test", systemImage: "scope").font(.nunitoXB(16))
                     Text("pass to unlock this — and everything before it").font(.nunito(11, .medium)).opacity(0.9)
                 } else {
-                    Text(studied ? "Study" : "Start studying").font(.nunitoXB(16))
+                    Text(stepLabel(studied: studied)).font(.nunitoXB(16))
                     Text("mixed skills · spaced repetition").font(.nunito(11, .medium)).opacity(0.9)
                 }
             }
@@ -132,6 +141,13 @@ struct LessonSheet: View {
         }
         .buttonStyle(PressDown())
         .background(Color.accentDark, in: RoundedRectangle(cornerRadius: 14, style: .continuous).offset(y: 5))
+    }
+
+    /// "Start studying", or for a lesson in steps "Start step 2 of 2".
+    private func stepLabel(studied: Bool) -> String {
+        let s = StudySession.lessonSteps(lesson.id, progress)
+        if !progress.isDone(lesson.id) && s.total > 1 { return "Start step \(s.step) of \(s.total)" }
+        return studied ? "Study" : "Start studying"
     }
 
     /// One skill on its own, for a lesson that's been studied (web: launchLesson with a focus).
@@ -168,5 +184,27 @@ struct PressDown: ButtonStyle {
             .offset(y: configuration.isPressed ? depth - 1 : 0)
             .animation(.spring(response: 0.18, dampingFraction: 0.7), value: configuration.isPressed)
             .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed)
+    }
+}
+
+
+/// A lesson's steps as a row of short bars: the finished ones filled, the one you're
+/// on (when `current`) half-filled.
+struct StepSegments: View {
+    let done: Int
+    let total: Int
+    var current = false
+    var width: CGFloat = 16
+    var height: CGFloat = 5
+    var body: some View {
+        HStack(spacing: 3) {
+            ForEach(0..<max(total, 1), id: \.self) { i in
+                Capsule()
+                    .fill(i < done ? Color.accent : current && i == done ? Color.accent.opacity(0.4) : Color.line)
+                    .frame(width: width, height: height)
+            }
+        }
+        .accessibilityElement()
+        .accessibilityLabel("Step \(min(done + (current ? 1 : 0), total)) of \(total)")
     }
 }

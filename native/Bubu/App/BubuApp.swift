@@ -6,6 +6,7 @@ struct BubuApp: App {
         #if DEBUG
         // the reward screenshots each start from a store of their own
         if let s = Launch.screen, Launch.rewardScreens.contains(s) { return ProgressStore.debugRewards(s) }
+        if let s = Launch.screen, Launch.stepScreens.contains(s) { return ProgressStore.debugSteps(s) }
         #endif
         return ProgressStore(course: Course.shared)
     }()
@@ -39,4 +40,6 @@ enum Launch {
     /// `-plus`, in debug builds only: run as a Bùbù Plus member (there's no purchase yet).
     static var plus: Bool { ProcessInfo.processInfo.arguments.contains("-plus") }
     static let rewardScreens: Set<String> = ["hud", "buns", "shop", "pocket"]
+    /// the lesson-step screenshots: the path with a step badge, and the done screens
+    static let stepScreens: Set<String> = ["pathstep", "donefinal", "donenext"]
 }

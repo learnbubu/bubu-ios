@@ -42,7 +42,7 @@ final class Router {
 
     init() {
         switch Launch.screen {
-        case "path", "lesson", "hud", "shop", "pocket": tab = .learn
+        case "path", "pathstep", "lesson", "hud", "shop", "pocket": tab = .learn
         case "profile": tab = .profile
         case "settings", "account": tab = .settings
         default: tab = .home
@@ -87,7 +87,7 @@ struct RootView: View {
             }
             return
         }
-        guard let screen = Launch.screen, ["study", "quiz", "sentence", "sentencedrag", "speak", "write", "done", "char", "buns"].contains(screen) else { return }
+        guard let screen = Launch.screen, ["study", "quiz", "sentence", "sentencedrag", "speak", "write", "done", "donefinal", "donenext", "char", "buns"].contains(screen) else { return }
         let first = Course.shared.lessons[0].id
         // "buns": a new lesson with none left, which asks for more on the first Continue
         let s = StudySession(lessonId: first, progress: progress)
@@ -96,7 +96,7 @@ struct RootView: View {
         case "sentence", "sentencedrag": s.debugShow(dir: "sentence")
         case "speak": s.debugShow(dir: "speak")
         case "write": s.debugShow(dir: "write")
-        case "done": s.debugFinish()
+        case "done", "donefinal", "donenext": s.debugFinish()
         default: break
         }
         router.study = s

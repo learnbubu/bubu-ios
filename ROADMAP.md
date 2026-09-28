@@ -20,6 +20,13 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 - [x] **Learn tab lag on switching tabs** (reported from TestFlight). _App: the path's layout and pebble trail are worked out once (`PathModel`) instead of on every render; only the stretch near the screen is drawn instead of all ~365 stones; the path no longer re-renders for XP, quests or coins; it scrolls to the current stone the first time and when it moves on, not on every visit; Home's scenery parallax no longer re-renders all of Home each scroll frame._ Check on a real iPhone.
 - [x] **No "Back up your progress" banner** on the path, and no "Coming from the website? Restore a backup" on the welcome screen. _App: sign-in and sync live in Settings; Export/Restore backup stay in Settings._
 
+## Lesson flow (from testing on a real iPhone, 28 Sep 2026)
+
+- [x] **Sentences too hard.** A sentence exercise only uses a sentence whose words have all been met (a record, or met earlier this session), apart from the card's own word and little particles (了 吗 呢 吧 啊 哇 …); ≤ 8 words preferred; otherwise another exercise. _App: `Course.sentences(for:met:)`; web: `usableSentences`._
+- [x] **Lessons come in steps.** A lesson's batches of new words are its steps: "1/2" on the current stone, "Step 2 of 2" on the lesson sheet, "Step 1 of 2 done" and **Next step** after a step, "Lesson complete!" after the last. _App: `StudySession.lessonSteps`; web: `lessonSteps`._
+- [x] **The last step always finishes the lesson.** It now brings back every word of the lesson not yet got right (a session left half-way), not just four reviews. The owner's "next stone didn't open" was the batch confusion; this was a rarer real gap.
+- [x] **Done screen without the empty space** (app): content from the top, a smaller panda, this week's streak strip on the first stage, the buttons pinned at the foot.
+
 ## Before the App Store
 
 - [x] Apple Developer membership active (28 Sep 2026)
