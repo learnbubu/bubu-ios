@@ -136,7 +136,7 @@ struct DoneView: View {
         let done = quests.filter { progress.progress(of: $0) >= $0.target }.count
         return VStack(spacing: 4) {
             heading("Daily quests")
-            Text(done == 3 ? "All three done. Chest opened!" : "\(done) of 3 done today")
+            Text(done == 3 ? "All three done. Lucky pocket opened!" : "\(done) of 3 done today")
                 .font(.nunito(16)).foregroundStyle(Color.muted)
             QuestRows().padding(.top, 6).padding(.bottom, 14)
         }

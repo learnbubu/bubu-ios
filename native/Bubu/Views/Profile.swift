@@ -16,7 +16,7 @@ struct Achievement: Identifiable {
             .init(id: "level-5", icon: "crown.fill", tint: .gold, title: "Level 5", sub: "1,000 XP") { $0.level.level >= 5 },
             .init(id: "level-10", icon: "crown.fill", tint: .gold, title: "Level 10", sub: "5,500 XP") { $0.level.level >= 10 },
             .init(id: "quests-20", icon: "scope", tint: Color.tiles["teal"]!.ink, title: "Quest month", sub: "20 quests in a month") { $0.activity.questMonths.values.contains { $0 >= 20 } },
-            .init(id: "chests-10", icon: "gift.fill", tint: .gold, title: "Treasure hunter", sub: "10 chests opened") { $0.activity.chests >= 10 },
+            .init(id: "chests-10", icon: "gift.fill", tint: .gold, title: "Lucky panda", sub: "10 lucky pockets opened") { $0.activity.chests >= 10 },
         ]
         for (i, ch) in Course.shared.chapters.enumerated() {
             a.append(.init(id: "chapter-\(i)", icon: "book.fill", tint: Color.tiles["blue"]!.ink, title: "Chapter \(i + 1) complete", sub: ch.title) { $0.chapterDone(i) })

@@ -23,6 +23,15 @@ struct Activity: Codable, Equatable {
     var achv: [String: String] = [:]         // achievement → the day it was earned
     var readsDone: [String: String] = [:]    // story → the day it was first read
     var relightAsked: String?
+    var coinsIn: [String: Int] = [:]         // coins from red pockets, per day
+    var coinsOut: [String: Int] = [:]        // coins spent in the shop, per day
+    var buns: Buns?                          // nil means a full five
+    var pocketDay: String?                   // the day the daily red pocket was given
+    var plus = false                         // Bùbù Plus
+
+    /// n buns as of `at` (ms), one growing back every four hours; `t` is when
+    /// they were last changed, so the newer record wins a merge.
+    struct Buns: Codable, Equatable { var n: Int; var at: Double; var t: Double }
 
     struct QuestDay: Codable, Equatable {
         var date: String
@@ -43,6 +52,8 @@ struct Activity: Codable, Equatable {
         questMonths = get(.questMonths, [:]); quests = try? c.decode(QuestDay.self, forKey: .quests)
         achv = get(.achv, [:]); readsDone = get(.readsDone, [:])
         relightAsked = try? c.decode(String.self, forKey: .relightAsked)
+        coinsIn = get(.coinsIn, [:]); coinsOut = get(.coinsOut, [:]); buns = try? c.decode(Buns.self, forKey: .buns)
+        pocketDay = try? c.decode(String.self, forKey: .pocketDay); plus = get(.plus, false)
     }
 }
 
@@ -373,6 +384,120 @@ final class ProgressStore {
     }
     func readDone(_ storyId: String) -> Bool { activity.readsDone[storyId] != nil }
 
+    // MARK: coins, buns and red pockets
+    // Coins come in red pockets (福): one for the first lesson finished each day
+    // (every lesson with Plus) and a fuller one at the end of a chapter. They buy
+    // a fresh batch of buns, double XP and, with Plus, embers. The daily quests'
+    // reward is the jade pocket (吉), full of XP.
+    // Buns (包子) are a new lesson's lives: each mistake in one eats a bun, and
+    // with none left a new lesson can't be started. One comes back every four
+    // hours, one for each right answer in a review (up to five), or a batch from
+    // the shop. Plus has no limit. Coins are kept as earned and spent per day,
+    // so they merge across devices like XP does.
+
+    static let bunsMax = 5, bunMs = 4 * 60 * 60 * 1000.0, coinsStart = 100
+    static let pocketLesson = (lo: 20, hi: 35), pocketChapter = 100
+    static let chestXP = 50
+
+    var isPlus: Bool {
+        #if DEBUG
+        if Launch.plus { return true }
+        #endif
+        return activity.plus
+    }
+    /// There's no purchase yet: this is for the debug switch and the tests.
+    func setPlus(_ on: Bool) { activity.plus = on; save() }
+
+    var coins: Int {
+        max(0, Self.coinsStart + activity.coinsIn.values.reduce(0, +) - activity.coinsOut.values.reduce(0, +))
+    }
+    func addCoins(_ n: Int) { activity.coinsIn[today, default: 0] += n; save() }
+    @discardableResult
+    func spendCoins(_ n: Int) -> Bool {
+        guard coins >= n else { return false }
+        activity.coinsOut[today, default: 0] += n
+        save()
+        return true
+    }
+
+    /// The buns there are now, and how long (ms) until the next grows back; 0 when full.
+    var bunState: (n: Int, next: Double) {
+        guard let b = activity.buns, b.n < Self.bunsMax else { return (Self.bunsMax, 0) }
+        let t = now()
+        let k = max(0, Int(((t - b.at) / Self.bunMs).rounded(.down)))
+        let n = min(Self.bunsMax, b.n + k)
+        return (n, n >= Self.bunsMax ? 0 : b.at + Double(k + 1) * Self.bunMs - t)
+    }
+    /// Int.max with Plus: no limit.
+    var buns: Int { isPlus ? Int.max : bunState.n }
+    func setBuns(_ n: Int) {
+        let s = bunState, t = now()
+        let n = max(0, min(Self.bunsMax, n))
+        // the time already grown toward the next bun is kept
+        let at = s.n >= Self.bunsMax || n >= Self.bunsMax ? t : t - (Self.bunMs - s.next)
+        activity.buns = Activity.Buns(n: n, at: at, t: t)
+        save()
+    }
+    func eatBun() { if !isPlus { setBuns(bunState.n - 1) } }
+    @discardableResult
+    func earnBun() -> Bool {
+        guard !isPlus, bunState.n < Self.bunsMax else { return false }
+        setBuns(bunState.n + 1)
+        return true
+    }
+    /// "2h 5m", or "40m" under the hour (web: fmtWait).
+    static func waitText(_ ms: Double) -> String {
+        let m = Int((ms / 60000).rounded(.up)), h = m / 60
+        return h > 0 ? "\(h)h \(m % 60)m" : "\(m)m"
+    }
+
+    /// What coins buy.
+    enum ShopItem {
+        case buns, ember, boost
+        var price: Int { switch self { case .buns: return 350; case .ember: return 250; case .boost: return 200 } }
+    }
+    /// Pay for something and have it; false if there aren't the coins.
+    @discardableResult
+    func buy(_ item: ShopItem) -> Bool {
+        guard spendCoins(item.price) else { return false }
+        switch item {
+        case .buns: setBuns(Self.bunsMax)
+        case .ember: activity.embers = embers + 1; save()
+        case .boost: startBoost()
+        }
+        return true
+    }
+
+    /// A red pocket for a finished lesson: the first each day (every one with Plus),
+    /// and a fuller one when it finishes a chapter. The coins in it, 0 for none.
+    func lessonPocket(chapterEnd: Bool) -> Int {
+        if chapterEnd { return Self.pocketChapter }
+        let t = today
+        if !isPlus && activity.pocketDay == t { return 0 }
+        activity.pocketDay = t
+        save()
+        let (lo, hi) = Self.pocketLesson
+        return lo + 5 * Int.random(in: 0...((hi - lo) / 5))
+    }
+
+    #if DEBUG
+    /// For the reward screenshots: a fresh store each launch, apart from the real one,
+    /// with today's fire lit, a few coins and one bun left (none for the buns sheet).
+    static func debugRewards(_ screen: String) -> ProgressStore {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("rewards-\(screen).json")
+        try? FileManager.default.removeItem(at: url)
+        let p = ProgressStore(course: Course.shared, url: url)
+        current = p
+        p.holdSaves()
+        p.onboarded = true
+        p.lightFire()
+        p.addCoins(35)
+        p.setBuns(screen == "buns" ? 0 : 1)
+        p.releaseSaves()
+        return p
+    }
+    #endif
+
     // MARK: the fire: streak, embers and relighting
 
     /// Before this day XP lit the fire; days from then count if they met the old goal.
@@ -395,6 +520,8 @@ final class ProgressStore {
     static let milestones = [3, 7, 14, 30, 50, 100, 200, 365]
     static let emberAt = [3, 7, 14, 30, 60, 100]
     var embers: Int { activity.embers ?? 1 }
+    /// One ember held at a time, three with Plus; any already held above that are kept.
+    var emberCap: Int { isPlus ? 3 : 1 }
 
     struct Fire { let streak: Int; let ember: Bool; let milestone: Bool }
 
@@ -411,7 +538,7 @@ final class ProgressStore {
             let key = String(m)
             if s < m || (activity.emberFor[key].map { $0 >= start } ?? false) { continue }
             activity.emberFor[key] = t
-            if embers < 3 { activity.embers = embers + 1; ember = true }
+            if embers < emberCap { activity.embers = embers + 1; ember = true }
         }
         if s > activity.best { activity.best = s }
         save()
@@ -519,7 +646,7 @@ final class ProgressStore {
         }
     }
 
-    /// Mark quests done as they're reached; all three open a chest (web: checkQuests).
+    /// Mark quests done as they're reached; all three open the jade pocket (web: checkQuests).
     func checkQuests() {
         ensureQuests()
         var q = questDay
@@ -533,13 +660,14 @@ final class ProgressStore {
         if all && !q.chest {
             q.chest = true
             activity.chests += 1
-            if activity.chests % 5 == 0 && embers < 3 { activity.embers = embers + 1; ember = true }
+            if activity.chests % 5 == 0 && embers < emberCap { activity.embers = embers + 1; ember = true }
         }
         activity.quests = q
         save()
         if all {
-            earnXP(20)
-            Moments.shared.show(.chest(ember: ember))
+            earnXP(Self.chestXP)
+            Moments.shared.show(.pocket(.init(kind: .jade, reward: Self.chestXP, title: "All 3 daily quests done!",
+                                              sub: ember ? "A lucky pocket, full of XP, and an ember" : "A lucky pocket, full of XP")))
         } else {
             for n in newly { Moments.shared.toast("Quest done: \(n.title)") }
         }

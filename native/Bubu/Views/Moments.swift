@@ -8,12 +8,40 @@ final class Moments {
 
     enum Moment: Equatable {
         case level(Int, next: Int)
-        case chest(ember: Bool)
+        case pocket(Pocket)
         case milestone(Int, ember: Bool)
         case relit(streak: Int, left: Int)
         case fireOut(lost: Int)
         case askRelight(lost: Int, embers: Int)
+        case buns(BunsSheet)
+        case plus
+        case shop
     }
+
+    /// A pocket to tap open: red (福) holds coins, jade (吉) XP. The reward is already credited.
+    struct Pocket: Equatable {
+        enum Kind: String { case red, jade }
+        let kind: Kind
+        let reward: Int
+        let title: String
+        let sub: String
+    }
+
+    /// Out of buns, or a look at them. Where it opened decides what its buttons do:
+    /// `review` replaces the usual review start, `refilled` runs after a fresh batch,
+    /// and `end` after "End the lesson".
+    struct BunsSheet: Equatable {
+        enum Ctx { case hud, start, mid }
+        let ctx: Ctx
+        var review: (() -> Void)? = nil
+        var refilled: (() -> Void)? = nil
+        var end: (() -> Void)? = nil
+        let id = UUID()
+        static func == (a: BunsSheet, b: BunsSheet) -> Bool { a.id == b.id }
+    }
+
+    /// Starts a session from a moment shown off the study screen (set by the root view).
+    @ObservationIgnored var launch: ((StudySession?) -> Void)?
 
     private(set) var current: Moment?
     private var queue: [Moment] = []
@@ -31,18 +59,16 @@ final class Moments {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { current = m }
         switch m {
         case .level: Sounds.shared.play("levelup")
-        case .chest: Sounds.shared.play("chest")
         case .milestone: Sounds.shared.play("milestone")
         case .relit: DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { Sounds.shared.play("relight") }
         default: break
         }
-        // the goal and the chest go by themselves, as on the web
-        let auto: Double? = { if case .chest = m { return 3.2 }; return nil }()
-        if let auto {
-            DispatchQueue.main.asyncAfter(deadline: .now() + auto) { [weak self] in
-                if self?.current == m { self?.dismiss() }
-            }
-        }
+    }
+
+    /// Close this moment and open another in its place.
+    func replace(with m: Moment) {
+        queue.insert(m, at: 0)
+        dismiss()
     }
 
     func dismiss() {
@@ -87,6 +113,14 @@ private struct MomentsHost: ViewModifier {
     func body(content: Content) -> some View {
         let here = study == moments.studyUp
         content
+            .overlay {
+                if here, let m = moments.current {
+                    MomentCard(moment: m, progress: progress) { moments.dismiss() }
+                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                        .zIndex(5)
+                }
+            }
+            // toasts sit over moments too: the shop's "You need more coins" is said over it
             .overlay(alignment: .bottom) {
                 if here, let t = moments.toastText {
                     Text(t).font(.nunito(15, .bold)).foregroundStyle(Color.bg).multilineTextAlignment(.center)
@@ -95,13 +129,6 @@ private struct MomentsHost: ViewModifier {
                         .padding(.horizontal, 24).padding(.bottom, study ? 110 : 96)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                         .allowsHitTesting(false)
-                }
-            }
-            .overlay {
-                if here, let m = moments.current {
-                    MomentCard(moment: m, progress: progress) { moments.dismiss() }
-                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
-                        .zIndex(5)
                 }
             }
             .onAppear { if study { moments.studyUp = true } }
@@ -115,36 +142,36 @@ struct MomentCard: View {
     let progress: ProgressStore
     var close: () -> Void
     @State private var shown = false
+    @State private var pocketOpened = false
+
+    /// the shop and the buns sheet hold rows of things to buy: a wider card
+    private var wide: Bool {
+        switch moment { case .shop, .buns: return true; default: return false }
+    }
 
     var body: some View {
         ZStack {
             Color.black.opacity(0.5).ignoresSafeArea()
-                .onTapGesture { if tapToClose { close() } }
             VStack(spacing: 6) {
                 content
             }
             .multilineTextAlignment(.center)
-            .padding(.horizontal, 24).padding(.vertical, 26)
-            .frame(maxWidth: 330)
+            .padding(.horizontal, wide ? 18 : 24).padding(.vertical, wide ? 22 : 26)
+            .frame(maxWidth: wide ? 360 : 330)
             .background(Color.panel, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
             .shadow(color: .black.opacity(0.25), radius: 30, y: 12)
             .scaleEffect(shown ? 1 : 0.85)
-            .padding(24)
+            .padding(wide ? 16 : 24)
             if confettiCount > 0 { Confetti(count: confettiCount).allowsHitTesting(false) }
         }
         .onAppear { withAnimation(.spring(response: 0.45, dampingFraction: 0.62)) { shown = true } }
         .sensoryFeedback(.success, trigger: shown) { _, n in n }
     }
 
-    private var tapToClose: Bool {
-        if case .chest = moment { return true }
-        return false
-    }
-
     private var confettiCount: Int {
         switch moment {
         case .level: return 100
-        case .chest: return 80
+        case .pocket: return pocketOpened ? 60 : 0
         case .milestone: return 120
         case .relit: return 70
         default: return 0
@@ -174,11 +201,14 @@ struct MomentCard: View {
             title("Level \(lv)!")
             sub("\(next) XP to level \(lv + 1)")
             button("Nice", close).padding(.top, 10)
-        case .chest(let ember):
-            Image("done-panda").resizable().scaledToFit().frame(height: 150)
-            title("All quests done!")
-            sub("+20 XP from the chest")
-            if ember { note("and an ember") }
+        case .pocket(let p):
+            PocketCard(pocket: p, opened: { pocketOpened = true }, close: close)
+        case .buns(let b):
+            BunsCard(sheet: b, progress: progress, close: close)
+        case .plus:
+            PlusCard(close: close)
+        case .shop:
+            ShopCard(progress: progress, close: close)
         case .milestone(let s, let ember):
             FlameIcon(lit: true, size: 90)
             big(s)

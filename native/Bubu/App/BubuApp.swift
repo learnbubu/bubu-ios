@@ -2,7 +2,13 @@ import SwiftUI
 
 @main
 struct BubuApp: App {
-    @State private var progress = ProgressStore(course: Course.shared)
+    @State private var progress: ProgressStore = {
+        #if DEBUG
+        // the reward screenshots each start from a store of their own
+        if let s = Launch.screen, Launch.rewardScreens.contains(s) { return ProgressStore.debugRewards(s) }
+        #endif
+        return ProgressStore(course: Course.shared)
+    }()
 
     var body: some Scene {
         WindowGroup {
@@ -20,4 +26,7 @@ enum Launch {
         guard let i = a.firstIndex(of: "-screen"), i + 1 < a.count else { return nil }
         return a[i + 1]
     }
+    /// `-plus`, in debug builds only: run as a Bùbù Plus member (there's no purchase yet).
+    static var plus: Bool { ProcessInfo.processInfo.arguments.contains("-plus") }
+    static let rewardScreens: Set<String> = ["hud", "buns", "shop", "pocket"]
 }

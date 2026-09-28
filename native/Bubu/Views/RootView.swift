@@ -42,7 +42,7 @@ final class Router {
 
     init() {
         switch Launch.screen {
-        case "path", "lesson": tab = .learn
+        case "path", "lesson", "hud", "shop", "pocket": tab = .learn
         case "profile": tab = .profile
         case "settings": tab = .settings
         default: tab = .home
@@ -67,7 +67,7 @@ struct RootView: View {
         let end = { (u: String) in Course.shared.chapters.last { $0.unit == u }?.lessons.last }
         let target = level == "a" ? end(books[0]) : level == "b" ? end(books[1]) : nil
         if let t = target { router.start(StudySession.placement(progress, to: t, label: "Placement test")) }
-        else if let cur = progress.currentLessonId ?? Course.shared.lessons.last?.id { router.start(StudySession(lessonId: cur, progress: progress)) }
+        else if let cur = progress.currentLessonId ?? Course.shared.lessons.last?.id { router.start(StudySession.lesson(cur, progress)) }
     }
 
     /// Screens the cloud screenshot run asks for with `-screen`.
@@ -79,9 +79,18 @@ struct RootView: View {
         if Launch.screen == "story", let r = Course.shared.data.readings.first { router.tab = .home; router.homePath = [.story(r.id)]; return }
         if Launch.screen == "chars" { router.tab = .home; router.homePath = [.chars]; return }
         if Launch.screen == "char" { router.tab = .learn; CharNav.shared.open("好"); return }
-        guard let screen = Launch.screen, ["study", "quiz", "sentence", "speak", "write", "done", "char"].contains(screen) else { return }
+        // the rewards: the shop, and a red pocket opened (it opens itself for this)
+        if Launch.screen == "shop" { DispatchQueue.main.asyncAfter(deadline: .now() + 1) { Moments.shared.show(.shop) }; return }
+        if Launch.screen == "pocket" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                Moments.shared.show(.pocket(.init(kind: .red, reward: 30, title: "Lesson complete!", sub: "Bùbù has something for you.")))
+            }
+            return
+        }
+        guard let screen = Launch.screen, ["study", "quiz", "sentence", "speak", "write", "done", "char", "buns"].contains(screen) else { return }
         let first = Course.shared.lessons[0].id
-        let s = StudySession(lessonId: first, progress: progress)
+        // "buns": a new lesson with none left, which asks for more on the first Continue
+        let s = StudySession(lessonId: first, progress: progress, onBuns: screen == "buns")
         switch screen {
         case "quiz": s.debugShow(dir: "recognize")
         case "sentence": s.debugShow(dir: "sentence")
@@ -131,7 +140,10 @@ struct RootView: View {
         }
         .preferredColorScheme(progress.prefs.colorScheme)
         .environment(router)
-        .onAppear { debugScreens() }
+        .onAppear {
+            Moments.shared.launch = { router.start($0) }
+            debugScreens()
+        }
         .fullScreenCover(isPresented: Binding(get: { (!progress.onboarded && Launch.screen == nil) || showWelcome },
                                               set: { if !$0 { showWelcome = false } }),
                          onDismiss: startAfterOnboarding) {

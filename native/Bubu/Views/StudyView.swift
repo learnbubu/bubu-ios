@@ -14,6 +14,9 @@ struct StudyView: View {
     @State private var placed: [Exercise.Tile] = []
     @State private var feedback: Feedback?
     @State private var exerciseKey = UUID()
+    // a bun eaten: the bitten one flies from the middle into the bun row
+    @State private var munch: Int?
+    @State private var bunRowFrame: CGRect = .zero
 
     struct Feedback { let correct: Bool; let chosen: String? }
 
@@ -22,7 +25,7 @@ struct StudyView: View {
             Color.bg.ignoresSafeArea()
             if session.result != nil {
                 DoneView(session: session, close: close, again: { restart(session.again()) },
-                         next: { id in restart(StudySession(lessonId: id, progress: progress)) })
+                         next: { id in if let s = StudySession.lesson(id, progress, review: reviewHere) { restart(s) } })
                     .padding(.horizontal, 18)
                     .transition(.opacity)
             } else {
@@ -42,10 +45,28 @@ struct StudyView: View {
                     .padding(.horizontal, 18)
                 }
             }
+            if let m = munch {
+                GeometryReader { g in
+                    Munch(from: CGPoint(x: g.size.width / 2, y: g.size.height * 0.42),
+                          to: CGPoint(x: bunRowFrame.maxX - 14, y: bunRowFrame.midY))
+                }
+                .id(m)
+                .allowsHitTesting(false)
+            }
         }
+        .coordinateSpace(.named("study"))
         .animation(.easeInOut(duration: 0.25), value: session.result != nil)
+        .onChange(of: session.bunsEaten) { _, n in
+            guard n > 0 else { return }
+            munch = n
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.7) { if munch == n { munch = nil } }
+        }
         .onAppear {
             if let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
+            #if DEBUG
+            // the buns screenshot: out of buns part-way through a lesson
+            if Launch.screen == "buns" { DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { advance() } }
+            #endif
         }
         .sensoryFeedback(trigger: feedback?.correct) { _, new in
             guard let new else { return nil }
@@ -55,7 +76,13 @@ struct StudyView: View {
 
     private func restart(_ s: StudySession) {
         session = s
+        munch = nil
         resetExercise()
+    }
+
+    /// Review in place of this session, from the buns sheet.
+    private func reviewHere() {
+        if let s = StudySession.review(progress) { restart(s) } else { close() }
     }
 
     private func resetExercise() {
@@ -116,13 +143,24 @@ struct StudyView: View {
 
     private var content: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ProgressBarShine(value: session.progressFraction)
+            HStack(spacing: 10) {
+                ProgressBarShine(value: session.progressFraction)
+                // buns in a lesson, and in a review while they're being earned back
+                if session.onBuns || (session.earnsBuns && progress.buns < ProgressStore.bunsMax) {
+                    BunRow(n: progress.isPlus ? ProgressStore.bunsMax : progress.bunState.n, plus: progress.isPlus, bump: session.bunsEarned)
+                        .background(GeometryReader { g in
+                            Color.clear
+                                .onAppear { bunRowFrame = g.frame(in: .named("study")) }
+                                .onChange(of: g.frame(in: .named("study"))) { _, f in bunRowFrame = f }
+                        })
+                }
+            }
             Text(promptLabel).font(.nunitoXB(19.2)).tracking(-0.2).foregroundStyle(Color.ink)
                 .padding(.top, 18).padding(.bottom, 14)
             Group {
                 switch session.current {
                 case .meet(let cards, let first, let left):
-                    MeetView(cards: cards, first: first, left: left) { session.next(); resetExercise() }
+                    MeetView(cards: cards, first: first, left: left) { advance() }
                 case .card:
                     if let ex = session.exercise {
                         if ex.kind == .sentence {
@@ -215,6 +253,11 @@ struct StudyView: View {
     }
 
     private func advance() {
+        // out of buns part-way through a lesson: more buns, a review, or the end
+        if session.onBuns && progress.buns < 1 && !session.queue.isEmpty {
+            Moments.shared.show(.buns(.init(ctx: .mid, review: reviewHere, refilled: { advance() }, end: close)))
+            return
+        }
         withAnimation {
             session.next()
             resetExercise()

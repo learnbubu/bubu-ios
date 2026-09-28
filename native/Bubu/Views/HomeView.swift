@@ -127,7 +127,7 @@ struct HomeView: View {
                     .allowsHitTesting(false)
                 Button {
                     if askable, let o = out { Moments.shared.show(.askRelight(lost: o.lost, embers: progress.embers)) }
-                    else if risk, let id = progress.currentLessonId { router.start(StudySession(lessonId: id, progress: progress)) }
+                    else if risk, let id = progress.currentLessonId { router.start(StudySession.lesson(id, progress)) }
                 } label: {
                     SpeechBubble(text: bubble, hot: askable || risk)
                         .phaseAnimator(risk ? [0.0, -3.0] : [0.0]) { v, y in v.offset(y: y) } animation: { _ in .easeInOut(duration: 1.1) }
@@ -153,7 +153,7 @@ struct HomeView: View {
             HStack {
                 Text("Daily quests").font(.nunitoXB(15)).foregroundStyle(Color.ink)
                 Spacer()
-                Text(done == 3 ? (opened ? "Chest opened" : "3/3") : "\(done)/3").font(.nunitoXB(12.5)).foregroundStyle(done == 3 ? Color.gold : Color.muted)
+                Text(done == 3 ? (opened ? "Pocket opened" : "3/3") : "\(done)/3").font(.nunitoXB(12.5)).foregroundStyle(done == 3 ? Color.gold : Color.muted)
                     .padding(.horizontal, 10).padding(.vertical, 3)
                     .background(Color.accentSoft, in: Capsule())
             }
@@ -216,7 +216,7 @@ struct HomeView: View {
             let cards = course.cards(in: id)
             let learned = cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
             let parts = lesson.nameParts
-            Button { router.tab = .learn; router.start(StudySession(lessonId: lesson.id, progress: progress)) } label: {
+            Button { router.tab = .learn; router.start(StudySession.lesson(lesson.id, progress)) } label: {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(course.chapterLabel(ci).uppercased()).font(.nunito(12.5, .bold)).foregroundStyle(Color.muted)
                     Text(parts.hanzi).font(.hanzi(21, .heavy)).foregroundStyle(Color.ink)

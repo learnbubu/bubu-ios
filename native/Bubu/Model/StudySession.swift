@@ -28,6 +28,13 @@ final class StudySession: Identifiable {
     /// the lessons whose words make the wrong options
     let scope: Set<String>
     let focuses: Set<String>
+    /// A lesson not yet done, started from the path: played on buns (web: bunMode).
+    let onBuns: Bool
+    /// Buns are earned back here, one per right answer (web: a review while below five).
+    var earnsBuns: Bool { !onBuns && [.review, .mistakes, .trouble].contains(mode) }
+    /// Counted so the screen can show a bun eaten or earned.
+    private(set) var bunsEaten = 0
+    private(set) var bunsEarned = 0
     private let course = Course.shared
     private let progress: ProgressStore
 
@@ -83,8 +90,9 @@ final class StudySession: Identifiable {
     private(set) var quizScore = 0
 
     init(lessonId: String, progress: ProgressStore, focuses: Set<String>? = nil, cards: [Card]? = nil,
-         mode: Mode = .lesson, title: String = "Study", scope: Set<String>? = nil) {
+         mode: Mode = .lesson, title: String = "Study", scope: Set<String>? = nil, onBuns: Bool = false) {
         self.lessonId = lessonId
+        self.onBuns = onBuns
         self.progress = progress
         self.mode = mode
         self.title = title
@@ -100,6 +108,19 @@ final class StudySession: Identifiable {
     }
 
     // MARK: the practice modes
+
+    /// A lesson from the path, Home or the done screen (web: launchLesson). One not yet
+    /// done is played on buns, and with none left it can't start: the buns sheet opens
+    /// instead. `review` is what its Review button does, when not the usual.
+    static func lesson(_ id: String, _ p: ProgressStore, focuses: Set<String>? = nil,
+                       review: (() -> Void)? = nil) -> StudySession? {
+        let onBuns = !p.isDone(id)
+        if onBuns && p.buns < 1 {
+            Moments.shared.show(.buns(.init(ctx: .start, review: review)))
+            return nil
+        }
+        return StudySession(lessonId: id, progress: p, focuses: focuses, onBuns: onBuns)
+    }
 
     /// Words from the lessons you've reached: done ones and the one you're on.
     static func reachedCards(_ p: ProgressStore) -> [Card] {
@@ -317,6 +338,9 @@ final class StudySession: Identifiable {
             if r.fixed { fixedCount += 1 }
             progress.recordReview()
         }
+        // a mistake in a new lesson eats a bun; a right answer in a review earns one back
+        if !correct && onBuns { progress.eatBun(); bunsEaten += 1 }
+        else if correct && earnsBuns && progress.earnBun() { bunsEarned += 1 }
         // XP for the answer, more on a run
         var xp = 0
         if correct {
@@ -390,6 +414,7 @@ final class StudySession: Identifiable {
         sessionXP += progress.xpCounter - mark
         if justFinished {
             progress.startBoost()
+            redPocket()
             storyUnlocked()
         }
         let fire = progress.lightFire()
@@ -428,6 +453,17 @@ final class StudySession: Identifiable {
         r.simple = [("\(quizScore)/\(answeredCount)", "correct"),
                     ("\(unlocked.count)", unlocked.count == 1 ? "lesson unlocked" : "lessons unlocked")]
         result = r
+    }
+
+    /// A red pocket for the lesson just finished: credited now, opened on screen (web: finishStudy).
+    private func redPocket() {
+        let chapterEnd = course.chapterOf[lessonId].map(progress.chapterDone) ?? false
+        let got = progress.lessonPocket(chapterEnd: chapterEnd)
+        guard got > 0 else { return }
+        progress.addCoins(got)
+        let pocket = Moments.Pocket(kind: .red, reward: got, title: chapterEnd ? "Chapter complete!" : "Lesson complete!",
+                                    sub: chapterEnd ? "A fuller pocket for a whole chapter" : "Bùbù has something for you.")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { Moments.shared.show(.pocket(pocket)) }
     }
 
     /// Finishing a chapter's last lesson unlocks its story (web: finishStudy's toast).

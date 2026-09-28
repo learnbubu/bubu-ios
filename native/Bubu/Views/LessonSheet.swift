@@ -115,7 +115,7 @@ struct LessonSheet: View {
     private func studyButton(locked: Bool, studied: Bool) -> some View {
         Button {
             if locked { router.start(StudySession.placement(progress, to: lesson.id)) }
-            else { router.start(StudySession(lessonId: lesson.id, progress: progress)) }
+            else { router.start(StudySession.lesson(lesson.id, progress)) }
         } label: {
             VStack(spacing: 1) {
                 if locked {
@@ -140,7 +140,7 @@ struct LessonSheet: View {
             switch focus {
             case "quiz": router.start(StudySession.quiz(progress, cards: course.cards(in: lesson.id)))
             case "browse": router.lesson = nil; router.push(.browse(lesson.id))
-            default: router.start(StudySession(lessonId: lesson.id, progress: progress, focuses: [focus]))
+            default: router.start(StudySession.lesson(lesson.id, progress, focuses: [focus]))
             }
         } label: {
             HStack(spacing: 9) {

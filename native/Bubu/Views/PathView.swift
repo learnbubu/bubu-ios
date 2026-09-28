@@ -389,53 +389,53 @@ struct BackupNudge: View {
     }
 }
 
-/// Streak, today's lesson and settings, floating over the top of the path.
+/// Streak, coins and buns in one bar across the top of the path (web: .hud-bar).
+/// The flame opens Profile, the coins the shop, the buns the buns sheet.
 struct HUD: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
     var body: some View {
-        let done = progress.litOn(progress.today)
-        HStack(spacing: 8) {
-            pill {
-                Image(systemName: "flame.fill").font(.system(size: 14))
+        let lit = progress.litOn(progress.today), plus = progress.isPlus, n = progress.buns
+        HStack(spacing: 0) {
+            segment("Streak, view progress") { router.tab = .profile } label: {
+                Image(systemName: "flame.fill").font(.system(size: 16))
                 Text("\(progress.streak)")
             }
-            Button { router.tab = .profile } label: {
-            pill(tint: done ? .good : .accent, border: done ? .good : .line) {
-                // today's lesson: an open ring until a session is finished, then a tick
-                ZStack {
-                    Circle().fill(done ? Color.good : .clear)
-                    Circle().strokeBorder(done ? Color.good : Color.line, lineWidth: 2.5)
-                    if done { Image(systemName: "checkmark").font(.system(size: 9, weight: .black)).foregroundStyle(.white) }
-                }
-                .frame(width: 17, height: 17).padding(1)
-                .animation(.spring(response: 0.3), value: done)
-                Text(done ? "Done today" : "Today")
+            .foregroundStyle(lit ? Color.ember : Color.muted)
+            divider
+            segment("Coins, open the shop") { Moments.shared.show(.shop) } label: {
+                CoinIcon(size: 20)
+                Text("\(progress.coins)").foregroundStyle(Color.gold)
             }
+            divider
+            segment("Buns") { Moments.shared.show(.buns(.init(ctx: .hud))) } label: {
+                BunIcon(width: 24)
+                Text(plus ? "∞" : "\(n)").foregroundStyle(!plus && n <= 1 ? Color.again : Color.bunBrown)
             }
-            .buttonStyle(.plain)
-            Spacer()
-            Button { router.tab = .settings } label: {
-                Image(systemName: "gearshape.fill").font(.system(size: 17)).foregroundStyle(Color.accent)
-                    .frame(width: 38, height: 38)
-                    .background(Circle().fill(Color.line).offset(y: 1))
-                    .background(Circle().fill(Color.panel).overlay(Circle().strokeBorder(Color.line, lineWidth: 2)))
+        }
+        .fixedSize(horizontal: false, vertical: true)     // the dividers take the bar's height, no more
+        .padding(2)
+        .background {
+            ZStack {
+                Capsule().fill(Color.line).offset(y: 1)
+                Capsule().fill(Color.panel)
+                Capsule().strokeBorder(Color.line, lineWidth: 2)
             }
-            .buttonStyle(PressDown(depth: 1))
         }
         .padding(.horizontal, 14).padding(.top, 10)
     }
-    private func pill<C: View>(tint: Color = .accent, border: Color = .line, @ViewBuilder _ c: () -> C) -> some View {
-        HStack(spacing: 5, content: c)
-            .font(.nunitoXB(14)).foregroundStyle(tint)
-            .padding(.horizontal, 12).padding(.vertical, 5)
-            .background {
-                ZStack {
-                    Capsule().fill(border).offset(y: 1)
-                    Capsule().fill(Color.panel)
-                    Capsule().strokeBorder(border, lineWidth: 2)
-                }
-            }
+
+    private var divider: some View { Rectangle().fill(Color.line).frame(width: 2) }
+
+    private func segment<L: View>(_ label: String, _ action: @escaping () -> Void, @ViewBuilder label content: () -> L) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6, content: content)
+                .font(.nunito(15, .black)).monospacedDigit()
+                .frame(maxWidth: .infinity).padding(.vertical, 6)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(PressDown(depth: 1))
+        .accessibilityLabel(label)
     }
 }
 
