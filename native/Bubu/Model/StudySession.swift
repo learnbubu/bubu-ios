@@ -105,7 +105,7 @@ final class StudySession: Identifiable {
         self.source = chosen
         self.queue = mode == .quiz || mode == .placement ? chosen.map { .card($0) } : sessionOrder(chosen)
         self.sessionTotal = queue.filter { if case .card = $0 { return true } else { return false } }.count
-        self.onBuns = hasMeetLeft
+        self.onBuns = [.lesson, .listen, .write].contains(mode) && hasMeetLeft
         next()
     }
 
