@@ -31,6 +31,8 @@ struct SettingsView: View {
                     }
                 }
 
+                ReminderSettings()
+
                 section {
                     row("Audio speed", "How fast words are spoken.", stack: true) {
                         HStack {
@@ -71,8 +73,6 @@ struct SettingsView: View {
                     divider
                     toggle("Stroke checking", "Check each stroke as you write (off = free tracing).", $p.prefs.checkStrokes)
                 }
-
-                ReminderSettings()
 
                 section {
                     NavigationLink { HelpPage() } label: {
