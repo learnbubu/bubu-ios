@@ -7,7 +7,7 @@ Everything is prepared on Windows; a Mac is only needed to build and install.
 - `www/`: a copy of the web app, made by `npm run copy-web` (the service worker is switched off: the app ships every file itself)
 - `ios/`: the Xcode project. It uses Swift Package Manager, so there's no CocoaPods to install.
 - `assets/`: the source icon and launch screens (`npx capacitor-assets generate --ios` rebuilds them)
-- `capacitor.config.json`: app id `com.domchivers.bubu`, name 步步 Bùbù
+- `capacitor.config.json`: app id `com.bubu`, name 步步 Bùbù
 - One plugin: `@capgo/capacitor-speech-recognition`, Apple's speech recogniser for speaking practice
 
 ## On Windows: after changing the web app
@@ -22,7 +22,7 @@ Then copy the folder to the Mac again (or use `bubu-ios-for-mac.zip`, see below)
 3. Open `ios/App/App.xcodeproj` in Xcode. Wait for "Resolving package graph" to finish (top bar); it downloads Capacitor.
 4. **Signing:** click the blue **App** project at the top of the left sidebar → target **App** → **Signing & Capabilities** →
    tick *Automatically manage signing* → **Team**: *Add an Account…* and sign in with **your** Apple ID. Pick "(Personal Team)".
-   If it says the bundle identifier isn't available, change it to something unique, such as `com.domchivers.bubu.dev`.
+   If it says the bundle identifier isn't available, change it to something unique, such as `com.bubu.dev`.
 5. **Your iPhone:** plug it into the Mac with a cable, unlock it and tap *Trust*.
    On the iPhone: **Settings → Privacy & Security → Developer Mode → On** (it restarts).
 6. In Xcode's top bar, choose your iPhone as the run destination, then press **▶ Run**.

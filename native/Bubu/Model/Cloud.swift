@@ -59,7 +59,7 @@ protocol SessionVault {
 
 /// The Keychain, this device only.
 struct KeychainVault: SessionVault {
-    var service = "com.domchivers.bubu.cloud"
+    var service = "com.bubu.cloud"
     var account = "session"
     private var query: [String: Any] {
         [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: account]

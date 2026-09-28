@@ -19,7 +19,7 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 
 ## Before the App Store
 
-- [ ] Apple Developer membership active (enrolled 28 Sep 2026, waiting on processing)
+- [x] Apple Developer membership active (28 Sep 2026)
 - [ ] TestFlight: app record in App Store Connect, API key into Codemagic, builds upload automatically
 - [ ] Buying Plus in the app with StoreKit (subscription), then turn the Plus rows back on
 - [ ] Privacy policy (a URL is required) and the App Store privacy labels
@@ -43,7 +43,7 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 ## Known limits
 
 - [ ] Website: a very long sentence's word tiles spill over the Check button
-- [ ] Pick the permanent bundle ID before the first TestFlight upload (currently `com.domchivers.bubu`; suggested `com.bubuchinese.app`)
+- [x] Permanent bundle ID: `com.bubu` (registered 28 Sep 2026)
 - [ ] Speaking practice checks the words, not the tones (Apple's recogniser), so a wrong tone can pass
 - [ ] Website coin merging across devices is approximate when both are used on the same day
 - [x] Opened pocket leaves a very faint glow where the pocket was (app)

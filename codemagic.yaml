@@ -30,7 +30,7 @@ workflows:
           xcrun simctl boot "$UDID"
           xcrun simctl bootstatus "$UDID" -b
           xcrun simctl install "$UDID" build/Build/Products/Debug-iphonesimulator/App.app
-          xcrun simctl launch "$UDID" com.domchivers.bubu
+          xcrun simctl launch "$UDID" com.bubu
           sleep 15; xcrun simctl io "$UDID" screenshot screenshots/1-launch.png
           sleep 20; xcrun simctl io "$UDID" screenshot screenshots/2-after-35s.png
           xcrun simctl ui "$UDID" appearance dark; sleep 5
@@ -75,15 +75,15 @@ workflows:
           xcrun simctl install "$UDID" "$APP"
           xcrun simctl status_bar "$UDID" override --time 9:41 --batteryState charged --batteryLevel 100 || true
           # if the app is stuck, record where its main thread is
-          xcrun simctl launch "$UDID" com.domchivers.bubu
+          xcrun simctl launch "$UDID" com.bubu
           sleep 10
           sample Bubu 3 -file screenshots/launch-sample.txt || true
-          xcrun simctl terminate "$UDID" com.domchivers.bubu || true
+          xcrun simctl terminate "$UDID" com.bubu || true
           for MODE in light dark; do
             xcrun simctl ui "$UDID" appearance $MODE
             for S in home path lesson study quiz sentence sentencedrag speak write done char settings chars guide story tones profile avatar welcome account hud buns shop pocket remind; do
-              xcrun simctl terminate "$UDID" com.domchivers.bubu || true
-              xcrun simctl launch "$UDID" com.domchivers.bubu -screen $S
+              xcrun simctl terminate "$UDID" com.bubu || true
+              xcrun simctl launch "$UDID" com.bubu -screen $S
               sleep 6
               xcrun simctl io "$UDID" screenshot screenshots/$S-$MODE.png
             done
