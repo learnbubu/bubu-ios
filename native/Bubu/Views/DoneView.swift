@@ -114,12 +114,13 @@ struct DoneView: View {
             .padding(.horizontal, 14).padding(.vertical, 12)
             .background(Color.bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .padding(.top, 8)
+            gap
         }
     }
 
-    /// Space between the first stage's parts: it grows on a tall phone (up to a point),
-    /// so the stage fills the card instead of leaving one big gap.
-    private var gap: some View { Spacer(minLength: 6).frame(maxHeight: 44) }
+    /// Space between the first stage's parts, shared out evenly: the panda sits at the
+    /// top and the parts spread down the card, so a tall phone shows no one big gap.
+    private var gap: some View { Spacer(minLength: 8) }
 
     private func note(_ t: String, fg: Color, bg: Color) -> some View {
         Text(t).font(.nunito(13.8, .bold)).foregroundStyle(fg).multilineTextAlignment(.center)
