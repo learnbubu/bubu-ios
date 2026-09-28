@@ -182,8 +182,8 @@ final class Reminders {
     }
 
     private func apply(_ plan: [ReminderPlan.Request]) {
-        let keep = Set(plan.map(\.id))
-        center.getPendingNotificationRequests { [center] pending in
+        let keep = Set(plan.map(\.id)), center = self.center
+        center.getPendingNotificationRequests { pending in
             let stale = pending.map(\.identifier).filter { $0.hasPrefix(ReminderPlan.prefix) && !keep.contains($0) }
             center.removePendingNotificationRequests(withIdentifiers: stale)
             for r in plan {
