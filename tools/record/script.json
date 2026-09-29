@@ -1,0 +1,5089 @@
+[
+ {
+  "n": 1,
+  "pinyin": "nǐ",
+  "file": "ni3",
+  "chars": [
+   "你"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 2,
+  "pinyin": "hǎo",
+  "file": "hao3",
+  "chars": [
+   "好"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 3,
+  "pinyin": "wǒ",
+  "file": "wo3",
+  "chars": [
+   "我"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 4,
+  "pinyin": "shì",
+  "file": "shi4",
+  "chars": [
+   "是",
+   "试",
+   "事",
+   "式",
+   "市"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 5,
+  "pinyin": "jiào",
+  "file": "jiao4",
+  "chars": [
+   "叫",
+   "较",
+   "觉"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 6,
+  "pinyin": "hěn",
+  "file": "hen3",
+  "chars": [
+   "很"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 7,
+  "pinyin": "ma",
+  "file": "ma5",
+  "chars": [
+   "吗",
+   "嘛"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 8,
+  "pinyin": "yě",
+  "file": "ye3",
+  "chars": [
+   "也"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 9,
+  "pinyin": "ne",
+  "file": "ne5",
+  "chars": [
+   "呢"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 10,
+  "pinyin": "bù",
+  "file": "bu4",
+  "chars": [
+   "不",
+   "布",
+   "部",
+   "步"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 11,
+  "pinyin": "qǐng",
+  "file": "qing3",
+  "chars": [
+   "请"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 12,
+  "pinyin": "zài",
+  "file": "zai4",
+  "chars": [
+   "再",
+   "在"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 13,
+  "pinyin": "màn",
+  "file": "man4",
+  "chars": [
+   "慢"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 14,
+  "pinyin": "dǒng",
+  "file": "dong3",
+  "chars": [
+   "懂"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 15,
+  "pinyin": "yòng",
+  "file": "yong4",
+  "chars": [
+   "用"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 16,
+  "pinyin": "nǎ",
+  "file": "na3",
+  "chars": [
+   "哪"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 17,
+  "pinyin": "guó",
+  "file": "guo2",
+  "chars": [
+   "国"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 18,
+  "pinyin": "rén",
+  "file": "ren2",
+  "chars": [
+   "人"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 19,
+  "pinyin": "zhù",
+  "file": "zhu4",
+  "chars": [
+   "住",
+   "祝"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 20,
+  "pinyin": "cóng",
+  "file": "cong2",
+  "chars": [
+   "从"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 21,
+  "pinyin": "lái",
+  "file": "lai2",
+  "chars": [
+   "来"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 22,
+  "pinyin": "huì",
+  "file": "hui4",
+  "chars": [
+   "会"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 23,
+  "pinyin": "shuō",
+  "file": "shuo1",
+  "chars": [
+   "说"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 24,
+  "pinyin": "hé",
+  "file": "he2",
+  "chars": [
+   "和",
+   "盒",
+   "河"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 25,
+  "pinyin": "zhǐ",
+  "file": "zhi3",
+  "chars": [
+   "只",
+   "纸",
+   "止"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 26,
+  "pinyin": "xué",
+  "file": "xue2",
+  "chars": [
+   "学"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 27,
+  "pinyin": "xìng",
+  "file": "xing4",
+  "chars": [
+   "姓",
+   "性"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 28,
+  "pinyin": "duì",
+  "file": "dui4",
+  "chars": [
+   "对",
+   "队"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 29,
+  "pinyin": "zhè",
+  "file": "zhe4",
+  "chars": [
+   "这"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 30,
+  "pinyin": "hē",
+  "file": "he1",
+  "chars": [
+   "喝"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 31,
+  "pinyin": "chá",
+  "file": "cha2",
+  "chars": [
+   "茶",
+   "查"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 32,
+  "pinyin": "tā",
+  "file": "ta1",
+  "chars": [
+   "他",
+   "她",
+   "它"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 33,
+  "pinyin": "shuǐ",
+  "file": "shui3",
+  "chars": [
+   "水"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 34,
+  "pinyin": "zuò",
+  "file": "zuo4",
+  "chars": [
+   "做",
+   "坐",
+   "座"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 35,
+  "pinyin": "nà",
+  "file": "na4",
+  "chars": [
+   "那"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 36,
+  "pinyin": "de",
+  "file": "de5",
+  "chars": [
+   "的",
+   "得",
+   "地"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 37,
+  "pinyin": "jiā",
+  "file": "jia1",
+  "chars": [
+   "家",
+   "加",
+   "夹"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 38,
+  "pinyin": "shéi",
+  "file": "shei2",
+  "chars": [
+   "谁"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 39,
+  "pinyin": "líng",
+  "file": "ling2",
+  "chars": [
+   "零"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 40,
+  "pinyin": "yī",
+  "file": "yi1",
+  "chars": [
+   "一"
+  ],
+  "batch": 1
+ },
+ {
+  "n": 41,
+  "pinyin": "èr",
+  "file": "er4",
+  "chars": [
+   "二"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 42,
+  "pinyin": "sān",
+  "file": "san1",
+  "chars": [
+   "三"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 43,
+  "pinyin": "sì",
+  "file": "si4",
+  "chars": [
+   "四"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 44,
+  "pinyin": "wǔ",
+  "file": "wu3",
+  "chars": [
+   "五"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 45,
+  "pinyin": "liù",
+  "file": "liu4",
+  "chars": [
+   "六"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 46,
+  "pinyin": "qī",
+  "file": "qi1",
+  "chars": [
+   "七",
+   "期"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 47,
+  "pinyin": "bā",
+  "file": "ba1",
+  "chars": [
+   "八"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 48,
+  "pinyin": "jiǔ",
+  "file": "jiu3",
+  "chars": [
+   "九",
+   "久",
+   "酒"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 49,
+  "pinyin": "shí",
+  "file": "shi2",
+  "chars": [
+   "十",
+   "时"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 50,
+  "pinyin": "bǎi",
+  "file": "bai3",
+  "chars": [
+   "百",
+   "摆"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 51,
+  "pinyin": "qiān",
+  "file": "qian1",
+  "chars": [
+   "千",
+   "签"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 52,
+  "pinyin": "gè",
+  "file": "ge4",
+  "chars": [
+   "个",
+   "各"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 53,
+  "pinyin": "ba",
+  "file": "ba5",
+  "chars": [
+   "吧"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 54,
+  "pinyin": "a",
+  "file": "a5",
+  "chars": [
+   "啊"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 55,
+  "pinyin": "sǎo",
+  "file": "sao3",
+  "chars": [
+   "扫"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 56,
+  "pinyin": "yāo",
+  "file": "yao1",
+  "chars": [
+   "幺",
+   "腰"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 57,
+  "pinyin": "dà",
+  "file": "da4",
+  "chars": [
+   "大"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 58,
+  "pinyin": "suì",
+  "file": "sui4",
+  "chars": [
+   "岁",
+   "碎"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 59,
+  "pinyin": "yǒu",
+  "file": "you3",
+  "chars": [
+   "有"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 60,
+  "pinyin": "jǐ",
+  "file": "ji3",
+  "chars": [
+   "几",
+   "挤"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 61,
+  "pinyin": "liǎng",
+  "file": "liang3",
+  "chars": [
+   "两"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 62,
+  "pinyin": "tiān",
+  "file": "tian1",
+  "chars": [
+   "天"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 63,
+  "pinyin": "tài",
+  "file": "tai4",
+  "chars": [
+   "太"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 64,
+  "pinyin": "duō",
+  "file": "duo1",
+  "chars": [
+   "多"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 65,
+  "pinyin": "gàn",
+  "file": "gan4",
+  "chars": [
+   "干"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 66,
+  "pinyin": "tīng",
+  "file": "ting1",
+  "chars": [
+   "听"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 67,
+  "pinyin": "fàn",
+  "file": "fan4",
+  "chars": [
+   "饭",
+   "犯"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 68,
+  "pinyin": "kàn",
+  "file": "kan4",
+  "chars": [
+   "看"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 69,
+  "pinyin": "shū",
+  "file": "shu1",
+  "chars": [
+   "书",
+   "输"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 70,
+  "pinyin": "méi",
+  "file": "mei2",
+  "chars": [
+   "没"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 71,
+  "pinyin": "xiǎng",
+  "file": "xiang3",
+  "chars": [
+   "想",
+   "响"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 72,
+  "pinyin": "yào",
+  "file": "yao4",
+  "chars": [
+   "要",
+   "药"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 73,
+  "pinyin": "qù",
+  "file": "qu4",
+  "chars": [
+   "去"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 74,
+  "pinyin": "chī",
+  "file": "chi1",
+  "chars": [
+   "吃"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 75,
+  "pinyin": "jiàn",
+  "file": "jian4",
+  "chars": [
+   "见",
+   "件",
+   "建"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 76,
+  "pinyin": "wèn",
+  "file": "wen4",
+  "chars": [
+   "问"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 77,
+  "pinyin": "guàng",
+  "file": "guang4",
+  "chars": [
+   "逛"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 78,
+  "pinyin": "tán",
+  "file": "tan2",
+  "chars": [
+   "弹",
+   "谈"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 79,
+  "pinyin": "wán",
+  "file": "wan2",
+  "chars": [
+   "玩",
+   "完"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 80,
+  "pinyin": "máng",
+  "file": "mang2",
+  "chars": [
+   "忙"
+  ],
+  "batch": 2
+ },
+ {
+  "n": 81,
+  "pinyin": "shàng",
+  "file": "shang4",
+  "chars": [
+   "上"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 82,
+  "pinyin": "le",
+  "file": "le5",
+  "chars": [
+   "了"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 83,
+  "pinyin": "mǎi",
+  "file": "mai3",
+  "chars": [
+   "买"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 84,
+  "pinyin": "cài",
+  "file": "cai4",
+  "chars": [
+   "菜"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 85,
+  "pinyin": "pāi",
+  "file": "pai1",
+  "chars": [
+   "拍"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 86,
+  "pinyin": "hái",
+  "file": "hai2",
+  "chars": [
+   "还"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 87,
+  "pinyin": "xià",
+  "file": "xia4",
+  "chars": [
+   "下",
+   "吓"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 88,
+  "pinyin": "cì",
+  "file": "ci4",
+  "chars": [
+   "次"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 89,
+  "pinyin": "diǎn",
+  "file": "dian3",
+  "chars": [
+   "点"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 90,
+  "pinyin": "bàn",
+  "file": "ban4",
+  "chars": [
+   "半",
+   "办"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 91,
+  "pinyin": "kè",
+  "file": "ke4",
+  "chars": [
+   "刻",
+   "课"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 92,
+  "pinyin": "dōu",
+  "file": "dou1",
+  "chars": [
+   "都"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 93,
+  "pinyin": "fēn",
+  "file": "fen1",
+  "chars": [
+   "分"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 94,
+  "pinyin": "wǎn",
+  "file": "wan3",
+  "chars": [
+   "晚",
+   "碗"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 95,
+  "pinyin": "dào",
+  "file": "dao4",
+  "chars": [
+   "到",
+   "倒",
+   "道"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 96,
+  "pinyin": "xiān",
+  "file": "xian1",
+  "chars": [
+   "先"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 97,
+  "pinyin": "piào",
+  "file": "piao4",
+  "chars": [
+   "票"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 98,
+  "pinyin": "děng",
+  "file": "deng3",
+  "chars": [
+   "等"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 99,
+  "pinyin": "chà",
+  "file": "cha4",
+  "chars": [
+   "差"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 100,
+  "pinyin": "kuài",
+  "file": "kuai4",
+  "chars": [
+   "快",
+   "块"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 101,
+  "pinyin": "zǒu",
+  "file": "zou3",
+  "chars": [
+   "走"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 102,
+  "pinyin": "diàn",
+  "file": "dian4",
+  "chars": [
+   "店",
+   "电"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 103,
+  "pinyin": "bēi",
+  "file": "bei1",
+  "chars": [
+   "杯"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 104,
+  "pinyin": "shǎo",
+  "file": "shao3",
+  "chars": [
+   "少"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 105,
+  "pinyin": "táng",
+  "file": "tang2",
+  "chars": [
+   "糖"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 106,
+  "pinyin": "zhōng",
+  "file": "zhong1",
+  "chars": [
+   "中",
+   "钟"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 107,
+  "pinyin": "xiǎo",
+  "file": "xiao3",
+  "chars": [
+   "小"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 108,
+  "pinyin": "bīng",
+  "file": "bing1",
+  "chars": [
+   "冰"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 109,
+  "pinyin": "píng",
+  "file": "ping2",
+  "chars": [
+   "瓶",
+   "平",
+   "凭"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 110,
+  "pinyin": "zhāng",
+  "file": "zhang1",
+  "chars": [
+   "张"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 111,
+  "pinyin": "kǎ",
+  "file": "ka3",
+  "chars": [
+   "卡"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 112,
+  "pinyin": "gěi",
+  "file": "gei3",
+  "chars": [
+   "给"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 113,
+  "pinyin": "sòng",
+  "file": "song4",
+  "chars": [
+   "送"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 114,
+  "pinyin": "tiáo",
+  "file": "tiao2",
+  "chars": [
+   "条",
+   "调"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 115,
+  "pinyin": "jiē",
+  "file": "jie1",
+  "chars": [
+   "街",
+   "接"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 116,
+  "pinyin": "bié",
+  "file": "bie2",
+  "chars": [
+   "别"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 117,
+  "pinyin": "běn",
+  "file": "ben3",
+  "chars": [
+   "本"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 118,
+  "pinyin": "yuè",
+  "file": "yue4",
+  "chars": [
+   "月",
+   "越"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 119,
+  "pinyin": "hào",
+  "file": "hao4",
+  "chars": [
+   "号"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 120,
+  "pinyin": "rì",
+  "file": "ri4",
+  "chars": [
+   "日"
+  ],
+  "batch": 3
+ },
+ {
+  "n": 121,
+  "pinyin": "nián",
+  "file": "nian2",
+  "chars": [
+   "年"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 122,
+  "pinyin": "guò",
+  "file": "guo4",
+  "chars": [
+   "过"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 123,
+  "pinyin": "qiǎo",
+  "file": "qiao3",
+  "chars": [
+   "巧"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 124,
+  "pinyin": "huí",
+  "file": "hui2",
+  "chars": [
+   "回"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 125,
+  "pinyin": "zhēn",
+  "file": "zhen1",
+  "chars": [
+   "真"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 126,
+  "pinyin": "yuán",
+  "file": "yuan2",
+  "chars": [
+   "圆",
+   "元"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 127,
+  "pinyin": "qí",
+  "file": "qi2",
+  "chars": [
+   "骑"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 128,
+  "pinyin": "chē",
+  "file": "che1",
+  "chars": [
+   "车"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 129,
+  "pinyin": "cháng",
+  "file": "chang2",
+  "chars": [
+   "长",
+   "尝",
+   "常"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 130,
+  "pinyin": "lù",
+  "file": "lu4",
+  "chars": [
+   "路"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 131,
+  "pinyin": "guo",
+  "file": "guo5",
+  "chars": [
+   "过"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 132,
+  "pinyin": "kāi",
+  "file": "kai1",
+  "chars": [
+   "开"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 133,
+  "pinyin": "chuán",
+  "file": "chuan2",
+  "chars": [
+   "船",
+   "传"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 134,
+  "pinyin": "lěng",
+  "file": "leng3",
+  "chars": [
+   "冷"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 135,
+  "pinyin": "dù",
+  "file": "du4",
+  "chars": [
+   "度"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 136,
+  "pinyin": "bǐ",
+  "file": "bi3",
+  "chars": [
+   "比",
+   "笔"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 137,
+  "pinyin": "rè",
+  "file": "re4",
+  "chars": [
+   "热"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 138,
+  "pinyin": "chuān",
+  "file": "chuan1",
+  "chars": [
+   "穿"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 139,
+  "pinyin": "dài",
+  "file": "dai4",
+  "chars": [
+   "带",
+   "戴",
+   "代",
+   "袋"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 140,
+  "pinyin": "sǎn",
+  "file": "san3",
+  "chars": [
+   "伞"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 141,
+  "pinyin": "là",
+  "file": "la4",
+  "chars": [
+   "辣"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 142,
+  "pinyin": "pà",
+  "file": "pa4",
+  "chars": [
+   "怕"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 143,
+  "pinyin": "gèng",
+  "file": "geng4",
+  "chars": [
+   "更"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 144,
+  "pinyin": "tián",
+  "file": "tian2",
+  "chars": [
+   "甜",
+   "填"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 145,
+  "pinyin": "gāo",
+  "file": "gao1",
+  "chars": [
+   "高"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 146,
+  "pinyin": "ǎi",
+  "file": "ai3",
+  "chars": [
+   "矮"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 147,
+  "pinyin": "pàng",
+  "file": "pang4",
+  "chars": [
+   "胖"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 148,
+  "pinyin": "shòu",
+  "file": "shou4",
+  "chars": [
+   "瘦"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 149,
+  "pinyin": "shuài",
+  "file": "shuai4",
+  "chars": [
+   "帅"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 150,
+  "pinyin": "nín",
+  "file": "nin2",
+  "chars": [
+   "您"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 151,
+  "pinyin": "lí",
+  "file": "li2",
+  "chars": [
+   "离",
+   "梨"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 152,
+  "pinyin": "yuǎn",
+  "file": "yuan3",
+  "chars": [
+   "远"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 153,
+  "pinyin": "jìn",
+  "file": "jin4",
+  "chars": [
+   "近",
+   "进"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 154,
+  "pinyin": "wǎng",
+  "file": "wang3",
+  "chars": [
+   "往"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 155,
+  "pinyin": "qián",
+  "file": "qian2",
+  "chars": [
+   "前",
+   "钱"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 156,
+  "pinyin": "dì",
+  "file": "di4",
+  "chars": [
+   "第",
+   "递"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 157,
+  "pinyin": "zuǒ",
+  "file": "zuo3",
+  "chars": [
+   "左"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 158,
+  "pinyin": "guǎi",
+  "file": "guai3",
+  "chars": [
+   "拐"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 159,
+  "pinyin": "yòu",
+  "file": "you4",
+  "chars": [
+   "右",
+   "又"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 160,
+  "pinyin": "hòu",
+  "file": "hou4",
+  "chars": [
+   "后"
+  ],
+  "batch": 4
+ },
+ {
+  "n": 161,
+  "pinyin": "mǐ",
+  "file": "mi3",
+  "chars": [
+   "米"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 162,
+  "pinyin": "jiù",
+  "file": "jiu4",
+  "chars": [
+   "就",
+   "旧"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 163,
+  "pinyin": "tóu",
+  "file": "tou2",
+  "chars": [
+   "头",
+   "投"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 164,
+  "pinyin": "téng",
+  "file": "teng2",
+  "chars": [
+   "疼"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 165,
+  "pinyin": "děi",
+  "file": "dei3",
+  "chars": [
+   "得"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 166,
+  "pinyin": "lèi",
+  "file": "lei4",
+  "chars": [
+   "累",
+   "类"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 167,
+  "pinyin": "yá",
+  "file": "ya2",
+  "chars": [
+   "牙"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 168,
+  "pinyin": "mài",
+  "file": "mai4",
+  "chars": [
+   "卖"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 169,
+  "pinyin": "guì",
+  "file": "gui4",
+  "chars": [
+   "贵"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 170,
+  "pinyin": "néng",
+  "file": "neng2",
+  "chars": [
+   "能"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 171,
+  "pinyin": "máo",
+  "file": "mao2",
+  "chars": [
+   "毛"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 172,
+  "pinyin": "wèi",
+  "file": "wei4",
+  "chars": [
+   "位",
+   "喂",
+   "为",
+   "未",
+   "胃"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 173,
+  "pinyin": "yú",
+  "file": "yu2",
+  "chars": [
+   "鱼",
+   "于",
+   "余"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 174,
+  "pinyin": "jī",
+  "file": "ji1",
+  "chars": [
+   "鸡",
+   "机"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 175,
+  "pinyin": "chǎo",
+  "file": "chao3",
+  "chars": [
+   "炒",
+   "吵"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 176,
+  "pinyin": "fèn",
+  "file": "fen4",
+  "chars": [
+   "份"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 177,
+  "pinyin": "fàng",
+  "file": "fang4",
+  "chars": [
+   "放"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 178,
+  "pinyin": "hú",
+  "file": "hu2",
+  "chars": [
+   "壶"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 179,
+  "pinyin": "ròu",
+  "file": "rou4",
+  "chars": [
+   "肉"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 180,
+  "pinyin": "tāng",
+  "file": "tang1",
+  "chars": [
+   "汤"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 181,
+  "pinyin": "è",
+  "file": "e4",
+  "chars": [
+   "饿"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 182,
+  "pinyin": "kě",
+  "file": "ke3",
+  "chars": [
+   "渴",
+   "可"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 183,
+  "pinyin": "suān",
+  "file": "suan1",
+  "chars": [
+   "酸"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 184,
+  "pinyin": "xián",
+  "file": "xian2",
+  "chars": [
+   "咸",
+   "弦",
+   "嫌"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 185,
+  "pinyin": "pán",
+  "file": "pan2",
+  "chars": [
+   "盘"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 186,
+  "pinyin": "lǐ",
+  "file": "li3",
+  "chars": [
+   "里",
+   "礼"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 187,
+  "pinyin": "bǎo",
+  "file": "bao3",
+  "chars": [
+   "饱"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 188,
+  "pinyin": "zhēng",
+  "file": "zheng1",
+  "chars": [
+   "争"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 189,
+  "pinyin": "měi",
+  "file": "mei3",
+  "chars": [
+   "每",
+   "美"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 190,
+  "pinyin": "fù",
+  "file": "fu4",
+  "chars": [
+   "付"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 191,
+  "pinyin": "xiào",
+  "file": "xiao4",
+  "chars": [
+   "笑",
+   "孝"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 192,
+  "pinyin": "yóu",
+  "file": "you2",
+  "chars": [
+   "游",
+   "油",
+   "由"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 193,
+  "pinyin": "dǎ",
+  "file": "da3",
+  "chars": [
+   "打"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 194,
+  "pinyin": "qiú",
+  "file": "qiu2",
+  "chars": [
+   "球"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 195,
+  "pinyin": "tī",
+  "file": "ti1",
+  "chars": [
+   "踢"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 196,
+  "pinyin": "nán",
+  "file": "nan2",
+  "chars": [
+   "难",
+   "男"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 197,
+  "pinyin": "jiāo",
+  "file": "jiao1",
+  "chars": [
+   "教",
+   "交",
+   "跤"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 198,
+  "pinyin": "xié",
+  "file": "xie2",
+  "chars": [
+   "鞋"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 199,
+  "pinyin": "xíng",
+  "file": "xing2",
+  "chars": [
+   "行"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 200,
+  "pinyin": "ná",
+  "file": "na2",
+  "chars": [
+   "拿"
+  ],
+  "batch": 5
+ },
+ {
+  "n": 201,
+  "pinyin": "diào",
+  "file": "diao4",
+  "chars": [
+   "掉"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 202,
+  "pinyin": "huài",
+  "file": "huai4",
+  "chars": [
+   "坏"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 203,
+  "pinyin": "xīn",
+  "file": "xin1",
+  "chars": [
+   "新",
+   "心"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 204,
+  "pinyin": "qīng",
+  "file": "qing1",
+  "chars": [
+   "轻"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 205,
+  "pinyin": "zhòng",
+  "file": "zhong4",
+  "chars": [
+   "重",
+   "种"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 206,
+  "pinyin": "zuì",
+  "file": "zui4",
+  "chars": [
+   "最"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 207,
+  "pinyin": "xiū",
+  "file": "xiu1",
+  "chars": [
+   "修",
+   "休"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 208,
+  "pinyin": "ké",
+  "file": "ke2",
+  "chars": [
+   "壳"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 209,
+  "pinyin": "bāng",
+  "file": "bang1",
+  "chars": [
+   "帮"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 210,
+  "pinyin": "cuò",
+  "file": "cuo4",
+  "chars": [
+   "错"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 211,
+  "pinyin": "zhǎo",
+  "file": "zhao3",
+  "chars": [
+   "找"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 212,
+  "pinyin": "gēn",
+  "file": "gen1",
+  "chars": [
+   "跟",
+   "根"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 213,
+  "pinyin": "fā",
+  "file": "fa1",
+  "chars": [
+   "发"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 214,
+  "pinyin": "zhàn",
+  "file": "zhan4",
+  "chars": [
+   "占",
+   "站",
+   "蘸"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 215,
+  "pinyin": "xiàn",
+  "file": "xian4",
+  "chars": [
+   "线",
+   "现",
+   "县"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 216,
+  "pinyin": "dìng",
+  "file": "ding4",
+  "chars": [
+   "订",
+   "定"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 217,
+  "pinyin": "chǎng",
+  "file": "chang3",
+  "chars": [
+   "场",
+   "厂"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 218,
+  "pinyin": "yíng",
+  "file": "ying2",
+  "chars": [
+   "赢"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 219,
+  "pinyin": "zǎo",
+  "file": "zao3",
+  "chars": [
+   "早"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 220,
+  "pinyin": "tǐng",
+  "file": "ting3",
+  "chars": [
+   "挺"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 221,
+  "pinyin": "shǒu",
+  "file": "shou3",
+  "chars": [
+   "首",
+   "手",
+   "守"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 222,
+  "pinyin": "gē",
+  "file": "ge1",
+  "chars": [
+   "歌"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 223,
+  "pinyin": "jù",
+  "file": "ju4",
+  "chars": [
+   "句",
+   "聚",
+   "据"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 224,
+  "pinyin": "chàng",
+  "file": "chang4",
+  "chars": [
+   "唱"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 225,
+  "pinyin": "bàng",
+  "file": "bang4",
+  "chars": [
+   "棒",
+   "镑"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 226,
+  "pinyin": "xiāng",
+  "file": "xiang1",
+  "chars": [
+   "香"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 227,
+  "pinyin": "kǎo",
+  "file": "kao3",
+  "chars": [
+   "烤",
+   "考"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 228,
+  "pinyin": "xǐ",
+  "file": "xi3",
+  "chars": [
+   "洗"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 229,
+  "pinyin": "qiē",
+  "file": "qie1",
+  "chars": [
+   "切"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 230,
+  "pinyin": "yán",
+  "file": "yan2",
+  "chars": [
+   "盐"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 231,
+  "pinyin": "guō",
+  "file": "guo1",
+  "chars": [
+   "锅"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 232,
+  "pinyin": "dāo",
+  "file": "dao1",
+  "chars": [
+   "刀"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 233,
+  "pinyin": "dàn",
+  "file": "dan4",
+  "chars": [
+   "淡",
+   "但"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 234,
+  "pinyin": "pǎo",
+  "file": "pao3",
+  "chars": [
+   "跑"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 235,
+  "pinyin": "kuā",
+  "file": "kua1",
+  "chars": [
+   "夸"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 236,
+  "pinyin": "gāng",
+  "file": "gang1",
+  "chars": [
+   "刚"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 237,
+  "pinyin": "xǐng",
+  "file": "xing3",
+  "chars": [
+   "醒"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 238,
+  "pinyin": "cái",
+  "file": "cai2",
+  "chars": [
+   "才"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 239,
+  "pinyin": "bān",
+  "file": "ban1",
+  "chars": [
+   "班",
+   "搬"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 240,
+  "pinyin": "gǎn",
+  "file": "gan3",
+  "chars": [
+   "赶",
+   "擀",
+   "敢"
+  ],
+  "batch": 6
+ },
+ {
+  "n": 241,
+  "pinyin": "huàn",
+  "file": "huan4",
+  "chars": [
+   "换"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 242,
+  "pinyin": "dāi",
+  "file": "dai1",
+  "chars": [
+   "待"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 243,
+  "pinyin": "dǐ",
+  "file": "di3",
+  "chars": [
+   "底"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 244,
+  "pinyin": "xiě",
+  "file": "xie3",
+  "chars": [
+   "写"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 245,
+  "pinyin": "gǎi",
+  "file": "gai3",
+  "chars": [
+   "改"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 246,
+  "pinyin": "liú",
+  "file": "liu2",
+  "chars": [
+   "留",
+   "流"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 247,
+  "pinyin": "xìn",
+  "file": "xin4",
+  "chars": [
+   "信"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 248,
+  "pinyin": "jì",
+  "file": "ji4",
+  "chars": [
+   "寄",
+   "既",
+   "记"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 249,
+  "pinyin": "piān",
+  "file": "pian1",
+  "chars": [
+   "篇"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 250,
+  "pinyin": "fēng",
+  "file": "feng1",
+  "chars": [
+   "封",
+   "风",
+   "疯"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 251,
+  "pinyin": "kū",
+  "file": "ku1",
+  "chars": [
+   "哭"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 252,
+  "pinyin": "lǎo",
+  "file": "lao3",
+  "chars": [
+   "老"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 253,
+  "pinyin": "chéng",
+  "file": "cheng2",
+  "chars": [
+   "成"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 254,
+  "pinyin": "wàng",
+  "file": "wang4",
+  "chars": [
+   "忘"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 255,
+  "pinyin": "biàn",
+  "file": "bian4",
+  "chars": [
+   "遍",
+   "变"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 256,
+  "pinyin": "jiǎ",
+  "file": "jia3",
+  "chars": [
+   "假"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 257,
+  "pinyin": "fáng",
+  "file": "fang2",
+  "chars": [
+   "房"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 258,
+  "pinyin": "chuáng",
+  "file": "chuang2",
+  "chars": [
+   "床"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 259,
+  "pinyin": "lóu",
+  "file": "lou2",
+  "chars": [
+   "楼"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 260,
+  "pinyin": "tuì",
+  "file": "tui4",
+  "chars": [
+   "退"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 261,
+  "pinyin": "mǎn",
+  "file": "man3",
+  "chars": [
+   "满"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 262,
+  "pinyin": "bà",
+  "file": "ba4",
+  "chars": [
+   "爸"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 263,
+  "pinyin": "mā",
+  "file": "ma1",
+  "chars": [
+   "妈"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 264,
+  "pinyin": "chū",
+  "file": "chu1",
+  "chars": [
+   "出"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 265,
+  "pinyin": "mǎ",
+  "file": "ma3",
+  "chars": [
+   "码",
+   "马"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 266,
+  "pinyin": "kǒu",
+  "file": "kou3",
+  "chars": [
+   "口"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 267,
+  "pinyin": "ài",
+  "file": "ai4",
+  "chars": [
+   "爱"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 268,
+  "pinyin": "dàng",
+  "file": "dang4",
+  "chars": [
+   "当"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 269,
+  "pinyin": "má",
+  "file": "ma2",
+  "chars": [
+   "麻"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 270,
+  "pinyin": "shù",
+  "file": "shu4",
+  "chars": [
+   "树"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 271,
+  "pinyin": "pá",
+  "file": "pa2",
+  "chars": [
+   "爬"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 272,
+  "pinyin": "diū",
+  "file": "diu1",
+  "chars": [
+   "丢"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 273,
+  "pinyin": "duǎn",
+  "file": "duan3",
+  "chars": [
+   "短"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 274,
+  "pinyin": "jǐn",
+  "file": "jin3",
+  "chars": [
+   "紧"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 275,
+  "pinyin": "féi",
+  "file": "fei2",
+  "chars": [
+   "肥"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 276,
+  "pinyin": "kuǎn",
+  "file": "kuan3",
+  "chars": [
+   "款"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 277,
+  "pinyin": "liǎ",
+  "file": "lia3",
+  "chars": [
+   "俩"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 278,
+  "pinyin": "xiàng",
+  "file": "xiang4",
+  "chars": [
+   "像",
+   "向"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 279,
+  "pinyin": "zhǒng",
+  "file": "zhong3",
+  "chars": [
+   "种",
+   "肿"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 280,
+  "pinyin": "hóng",
+  "file": "hong2",
+  "chars": [
+   "红"
+  ],
+  "batch": 7
+ },
+ {
+  "n": 281,
+  "pinyin": "wa",
+  "file": "wa5",
+  "chars": [
+   "哇"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 282,
+  "pinyin": "sǐ",
+  "file": "si3",
+  "chars": [
+   "死"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 283,
+  "pinyin": "piàn",
+  "file": "pian4",
+  "chars": [
+   "片",
+   "骗"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 284,
+  "pinyin": "cōng",
+  "file": "cong1",
+  "chars": [
+   "葱"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 285,
+  "pinyin": "suàn",
+  "file": "suan4",
+  "chars": [
+   "蒜",
+   "算"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 286,
+  "pinyin": "bāo",
+  "file": "bao1",
+  "chars": [
+   "包"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 287,
+  "pinyin": "ràng",
+  "file": "rang4",
+  "chars": [
+   "让"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 288,
+  "pinyin": "bào",
+  "file": "bao4",
+  "chars": [
+   "报"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 289,
+  "pinyin": "shēn",
+  "file": "shen1",
+  "chars": [
+   "深"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 290,
+  "pinyin": "jiàng",
+  "file": "jiang4",
+  "chars": [
+   "酱"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 291,
+  "pinyin": "juǎn",
+  "file": "juan3",
+  "chars": [
+   "卷"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 292,
+  "pinyin": "bǎ",
+  "file": "ba3",
+  "chars": [
+   "把"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 293,
+  "pinyin": "fú",
+  "file": "fu2",
+  "chars": [
+   "幅",
+   "福",
+   "扶"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 294,
+  "pinyin": "huà",
+  "file": "hua4",
+  "chars": [
+   "画",
+   "话",
+   "化"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 295,
+  "pinyin": "guà",
+  "file": "gua4",
+  "chars": [
+   "挂"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 296,
+  "pinyin": "miàn",
+  "file": "mian4",
+  "chars": [
+   "面"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 297,
+  "pinyin": "qiáng",
+  "file": "qiang2",
+  "chars": [
+   "墙"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 298,
+  "pinyin": "dī",
+  "file": "di1",
+  "chars": [
+   "低"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 299,
+  "pinyin": "wāi",
+  "file": "wai1",
+  "chars": [
+   "歪"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 300,
+  "pinyin": "dòng",
+  "file": "dong4",
+  "chars": [
+   "动",
+   "冻",
+   "洞"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 301,
+  "pinyin": "liáng",
+  "file": "liang2",
+  "chars": [
+   "凉"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 302,
+  "pinyin": "āi",
+  "file": "ai1",
+  "chars": [
+   "哎"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 303,
+  "pinyin": "kōng",
+  "file": "kong1",
+  "chars": [
+   "空"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 304,
+  "pinyin": "mén",
+  "file": "men2",
+  "chars": [
+   "门"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 305,
+  "pinyin": "dēng",
+  "file": "deng1",
+  "chars": [
+   "灯"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 306,
+  "pinyin": "liàng",
+  "file": "liang4",
+  "chars": [
+   "亮",
+   "量",
+   "晾"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 307,
+  "pinyin": "zhào",
+  "file": "zhao4",
+  "chars": [
+   "照"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 308,
+  "pinyin": "guān",
+  "file": "guan1",
+  "chars": [
+   "关"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 309,
+  "pinyin": "yí",
+  "file": "yi2",
+  "chars": [
+   "咦"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 310,
+  "pinyin": "rēng",
+  "file": "reng1",
+  "chars": [
+   "扔"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 311,
+  "pinyin": "suǒ",
+  "file": "suo3",
+  "chars": [
+   "锁",
+   "所"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 312,
+  "pinyin": "xiā",
+  "file": "xia1",
+  "chars": [
+   "虾"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 313,
+  "pinyin": "jiè",
+  "file": "jie4",
+  "chars": [
+   "借",
+   "戒"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 314,
+  "pinyin": "péi",
+  "file": "pei2",
+  "chars": [
+   "陪",
+   "赔"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 315,
+  "pinyin": "pèi",
+  "file": "pei4",
+  "chars": [
+   "配"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 316,
+  "pinyin": "shuāng",
+  "file": "shuang1",
+  "chars": [
+   "双"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 317,
+  "pinyin": "kuān",
+  "file": "kuan1",
+  "chars": [
+   "宽"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 318,
+  "pinyin": "nǚ",
+  "file": "nv3",
+  "chars": [
+   "女"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 319,
+  "pinyin": "zì",
+  "file": "zi4",
+  "chars": [
+   "字",
+   "自"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 320,
+  "pinyin": "sè",
+  "file": "se4",
+  "chars": [
+   "色"
+  ],
+  "batch": 8
+ },
+ {
+  "n": 321,
+  "pinyin": "zhī",
+  "file": "zhi1",
+  "chars": [
+   "只",
+   "织",
+   "支"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 322,
+  "pinyin": "huó",
+  "file": "huo2",
+  "chars": [
+   "活"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 323,
+  "pinyin": "miǎo",
+  "file": "miao3",
+  "chars": [
+   "秒"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 324,
+  "pinyin": "shān",
+  "file": "shan1",
+  "chars": [
+   "山",
+   "删"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 325,
+  "pinyin": "huā",
+  "file": "hua1",
+  "chars": [
+   "花"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 326,
+  "pinyin": "niǎo",
+  "file": "niao3",
+  "chars": [
+   "鸟"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 327,
+  "pinyin": "qióng",
+  "file": "qiong2",
+  "chars": [
+   "穷"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 328,
+  "pinyin": "fēi",
+  "file": "fei1",
+  "chars": [
+   "飞",
+   "非"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 329,
+  "pinyin": "mò",
+  "file": "mo4",
+  "chars": [
+   "墨"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 330,
+  "pinyin": "nóng",
+  "file": "nong2",
+  "chars": [
+   "浓",
+   "侬"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 331,
+  "pinyin": "zhěng",
+  "file": "zheng3",
+  "chars": [
+   "整"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 332,
+  "pinyin": "hēi",
+  "file": "hei1",
+  "chars": [
+   "黑"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 333,
+  "pinyin": "bái",
+  "file": "bai2",
+  "chars": [
+   "白"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 334,
+  "pinyin": "qiǎn",
+  "file": "qian3",
+  "chars": [
+   "浅"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 335,
+  "pinyin": "shī",
+  "file": "shi1",
+  "chars": [
+   "诗",
+   "湿"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 336,
+  "pinyin": "yìn",
+  "file": "yin4",
+  "chars": [
+   "印"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 337,
+  "pinyin": "yè",
+  "file": "ye4",
+  "chars": [
+   "页"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 338,
+  "pinyin": "liáo",
+  "file": "liao2",
+  "chars": [
+   "聊"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 339,
+  "pinyin": "lǎn",
+  "file": "lan3",
+  "chars": [
+   "懒"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 340,
+  "pinyin": "zhái",
+  "file": "zhai2",
+  "chars": [
+   "宅"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 341,
+  "pinyin": "shuì",
+  "file": "shui4",
+  "chars": [
+   "睡"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 342,
+  "pinyin": "cā",
+  "file": "ca1",
+  "chars": [
+   "擦"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 343,
+  "pinyin": "yǎng",
+  "file": "yang3",
+  "chars": [
+   "养"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 344,
+  "pinyin": "yō",
+  "file": "yo1",
+  "chars": [
+   "哟"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 345,
+  "pinyin": "béng",
+  "file": "beng2",
+  "chars": [
+   "甭"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 346,
+  "pinyin": "pí",
+  "file": "pi2",
+  "chars": [
+   "皮"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 347,
+  "pinyin": "niē",
+  "file": "nie1",
+  "chars": [
+   "捏"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 348,
+  "pinyin": "bei",
+  "file": "bei5",
+  "chars": [
+   "呗"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 349,
+  "pinyin": "shuí",
+  "file": "shui2",
+  "chars": [
+   "谁"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 350,
+  "pinyin": "zhǔ",
+  "file": "zhu3",
+  "chars": [
+   "煮"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 351,
+  "pinyin": "pò",
+  "file": "po4",
+  "chars": [
+   "破"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 352,
+  "pinyin": "tiē",
+  "file": "tie1",
+  "chars": [
+   "贴"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 353,
+  "pinyin": "cù",
+  "file": "cu4",
+  "chars": [
+   "醋"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 354,
+  "pinyin": "tú",
+  "file": "tu2",
+  "chars": [
+   "图"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 355,
+  "pinyin": "zuǐ",
+  "file": "zui3",
+  "chars": [
+   "嘴"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 356,
+  "pinyin": "chuàn",
+  "file": "chuan4",
+  "chars": [
+   "串"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 357,
+  "pinyin": "gòu",
+  "file": "gou4",
+  "chars": [
+   "够"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 358,
+  "pinyin": "shǔ",
+  "file": "shu3",
+  "chars": [
+   "属",
+   "数"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 359,
+  "pinyin": "tái",
+  "file": "tai2",
+  "chars": [
+   "台"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 360,
+  "pinyin": "liǎn",
+  "file": "lian3",
+  "chars": [
+   "脸"
+  ],
+  "batch": 9
+ },
+ {
+  "n": 361,
+  "pinyin": "cāi",
+  "file": "cai1",
+  "chars": [
+   "猜"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 362,
+  "pinyin": "xì",
+  "file": "xi4",
+  "chars": [
+   "戏"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 363,
+  "pinyin": "gǔ",
+  "file": "gu3",
+  "chars": [
+   "鼓"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 364,
+  "pinyin": "luó",
+  "file": "luo2",
+  "chars": [
+   "锣"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 365,
+  "pinyin": "lā",
+  "file": "la1",
+  "chars": [
+   "拉"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 366,
+  "pinyin": "duàn",
+  "file": "duan4",
+  "chars": [
+   "段"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 367,
+  "pinyin": "gōng",
+  "file": "gong1",
+  "chars": [
+   "弓",
+   "供"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 368,
+  "pinyin": "jiǎng",
+  "file": "jiang3",
+  "chars": [
+   "讲",
+   "奖"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 369,
+  "pinyin": "lián",
+  "file": "lian2",
+  "chars": [
+   "连"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 370,
+  "pinyin": "dú",
+  "file": "du2",
+  "chars": [
+   "读"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 371,
+  "pinyin": "jí",
+  "file": "ji2",
+  "chars": [
+   "集",
+   "级",
+   "吉",
+   "及",
+   "即",
+   "急"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 372,
+  "pinyin": "bǎn",
+  "file": "ban3",
+  "chars": [
+   "版"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 373,
+  "pinyin": "tào",
+  "file": "tao4",
+  "chars": [
+   "套"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 374,
+  "pinyin": "fān",
+  "file": "fan1",
+  "chars": [
+   "翻"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 375,
+  "pinyin": "dǒu",
+  "file": "dou3",
+  "chars": [
+   "陡"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 376,
+  "pinyin": "lóng",
+  "file": "long2",
+  "chars": [
+   "龙"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 377,
+  "pinyin": "tuǐ",
+  "file": "tui3",
+  "chars": [
+   "腿"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 378,
+  "pinyin": "huá",
+  "file": "hua2",
+  "chars": [
+   "滑"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 379,
+  "pinyin": "shuāi",
+  "file": "shuai1",
+  "chars": [
+   "摔"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 380,
+  "pinyin": "yǎo",
+  "file": "yao3",
+  "chars": [
+   "咬"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 381,
+  "pinyin": "bèi",
+  "file": "bei4",
+  "chars": [
+   "被",
+   "背",
+   "倍"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 382,
+  "pinyin": "tōu",
+  "file": "tou1",
+  "chars": [
+   "偷"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 383,
+  "pinyin": "mō",
+  "file": "mo1",
+  "chars": [
+   "摸"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 384,
+  "pinyin": "yǔ",
+  "file": "yu3",
+  "chars": [
+   "雨",
+   "与"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 385,
+  "pinyin": "lín",
+  "file": "lin2",
+  "chars": [
+   "淋"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 386,
+  "pinyin": "dùn",
+  "file": "dun4",
+  "chars": [
+   "顿",
+   "炖"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 387,
+  "pinyin": "qiǎng",
+  "file": "qiang3",
+  "chars": [
+   "抢"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 388,
+  "pinyin": "zhuàng",
+  "file": "zhuang4",
+  "chars": [
+   "撞",
+   "幢"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 389,
+  "pinyin": "nòng",
+  "file": "nong4",
+  "chars": [
+   "弄"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 390,
+  "pinyin": "zāng",
+  "file": "zang1",
+  "chars": [
+   "脏"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 391,
+  "pinyin": "mà",
+  "file": "ma4",
+  "chars": [
+   "骂"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 392,
+  "pinyin": "biǎo",
+  "file": "biao3",
+  "chars": [
+   "表"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 393,
+  "pinyin": "yūn",
+  "file": "yun1",
+  "chars": [
+   "晕"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 394,
+  "pinyin": "tí",
+  "file": "ti2",
+  "chars": [
+   "题",
+   "提"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 395,
+  "pinyin": "liàn",
+  "file": "lian4",
+  "chars": [
+   "练"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 396,
+  "pinyin": "tíng",
+  "file": "ting2",
+  "chars": [
+   "停"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 397,
+  "pinyin": "yuē",
+  "file": "yue1",
+  "chars": [
+   "约"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 398,
+  "pinyin": "qún",
+  "file": "qun2",
+  "chars": [
+   "群"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 399,
+  "pinyin": "zhe",
+  "file": "zhe5",
+  "chars": [
+   "着"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 400,
+  "pinyin": "tì",
+  "file": "ti4",
+  "chars": [
+   "替"
+  ],
+  "batch": 10
+ },
+ {
+  "n": 401,
+  "pinyin": "kào",
+  "file": "kao4",
+  "chars": [
+   "靠"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 402,
+  "pinyin": "tǎng",
+  "file": "tang3",
+  "chars": [
+   "躺"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 403,
+  "pinyin": "ó",
+  "file": "o2",
+  "chars": [
+   "哦"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 404,
+  "pinyin": "men",
+  "file": "men5",
+  "chars": [
+   "们"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 405,
+  "pinyin": "hǎi",
+  "file": "hai3",
+  "chars": [
+   "海"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 406,
+  "pinyin": "ǹg",
+  "file": "ǹg5",
+  "chars": [
+   "嗯"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 407,
+  "pinyin": "quán",
+  "file": "quan2",
+  "chars": [
+   "全"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 408,
+  "pinyin": "chuī",
+  "file": "chui1",
+  "chars": [
+   "吹"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 409,
+  "pinyin": "chāi",
+  "file": "chai1",
+  "chars": [
+   "拆"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 410,
+  "pinyin": "cí",
+  "file": "ci2",
+  "chars": [
+   "词"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 411,
+  "pinyin": "nǎo",
+  "file": "nao3",
+  "chars": [
+   "脑"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 412,
+  "pinyin": "huǒ",
+  "file": "huo3",
+  "chars": [
+   "火"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 413,
+  "pinyin": "shāo",
+  "file": "shao1",
+  "chars": [
+   "烧"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 414,
+  "pinyin": "xióng",
+  "file": "xiong2",
+  "chars": [
+   "熊"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 415,
+  "pinyin": "māo",
+  "file": "mao1",
+  "chars": [
+   "猫"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 416,
+  "pinyin": "zào",
+  "file": "zao4",
+  "chars": [
+   "造"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 417,
+  "pinyin": "yǐng",
+  "file": "ying3",
+  "chars": [
+   "影"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 418,
+  "pinyin": "mù",
+  "file": "mu4",
+  "chars": [
+   "木"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 419,
+  "pinyin": "sēn",
+  "file": "sen1",
+  "chars": [
+   "森"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 420,
+  "pinyin": "míng",
+  "file": "ming2",
+  "chars": [
+   "明",
+   "名"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 421,
+  "pinyin": "kē",
+  "file": "ke1",
+  "chars": [
+   "棵"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 422,
+  "pinyin": "gǒu",
+  "file": "gou3",
+  "chars": [
+   "狗"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 423,
+  "pinyin": "niú",
+  "file": "niu2",
+  "chars": [
+   "牛"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 424,
+  "pinyin": "niàn",
+  "file": "nian4",
+  "chars": [
+   "念"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 425,
+  "pinyin": "zhě",
+  "file": "zhe3",
+  "chars": [
+   "者"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 426,
+  "pinyin": "sàn",
+  "file": "san4",
+  "chars": [
+   "散"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 427,
+  "pinyin": "zǒng",
+  "file": "zong3",
+  "chars": [
+   "总"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 428,
+  "pinyin": "jú",
+  "file": "ju2",
+  "chars": [
+   "橘"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 429,
+  "pinyin": "guāi",
+  "file": "guai1",
+  "chars": [
+   "乖"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 430,
+  "pinyin": "zhí",
+  "file": "zhi2",
+  "chars": [
+   "值"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 431,
+  "pinyin": "xuǎn",
+  "file": "xuan3",
+  "chars": [
+   "选"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 432,
+  "pinyin": "tuī",
+  "file": "tui1",
+  "chars": [
+   "推"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 433,
+  "pinyin": "pài",
+  "file": "pai4",
+  "chars": [
+   "派"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 434,
+  "pinyin": "gào",
+  "file": "gao4",
+  "chars": [
+   "告"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 435,
+  "pinyin": "céng",
+  "file": "ceng2",
+  "chars": [
+   "曾",
+   "层"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 436,
+  "pinyin": "háng",
+  "file": "hang2",
+  "chars": [
+   "行"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 437,
+  "pinyin": "biān",
+  "file": "bian1",
+  "chars": [
+   "边",
+   "编"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 438,
+  "pinyin": "yīn",
+  "file": "yin1",
+  "chars": [
+   "因"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 439,
+  "pinyin": "bìng",
+  "file": "bing4",
+  "chars": [
+   "并"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 440,
+  "pinyin": "huò",
+  "file": "huo4",
+  "chars": [
+   "或",
+   "获"
+  ],
+  "batch": 11
+ },
+ {
+  "n": 441,
+  "pinyin": "zhì",
+  "file": "zhi4",
+  "chars": [
+   "至"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 442,
+  "pinyin": "nèi",
+  "file": "nei4",
+  "chars": [
+   "内"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 443,
+  "pinyin": "bǔ",
+  "file": "bu3",
+  "chars": [
+   "补"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 444,
+  "pinyin": "què",
+  "file": "que4",
+  "chars": [
+   "却"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 445,
+  "pinyin": "kǔ",
+  "file": "ku3",
+  "chars": [
+   "苦"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 446,
+  "pinyin": "zé",
+  "file": "ze2",
+  "chars": [
+   "则"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 447,
+  "pinyin": "qū",
+  "file": "qu1",
+  "chars": [
+   "区"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 448,
+  "pinyin": "yǐ",
+  "file": "yi3",
+  "chars": [
+   "已",
+   "以"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 449,
+  "pinyin": "jiāng",
+  "file": "jiang1",
+  "chars": [
+   "将",
+   "江",
+   "僵"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 450,
+  "pinyin": "shǐ",
+  "file": "shi3",
+  "chars": [
+   "使"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 451,
+  "pinyin": "rú",
+  "file": "ru2",
+  "chars": [
+   "如"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 452,
+  "pinyin": "zhèng",
+  "file": "zheng4",
+  "chars": [
+   "挣"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 453,
+  "pinyin": "zū",
+  "file": "zu1",
+  "chars": [
+   "租"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 454,
+  "pinyin": "jiān",
+  "file": "jian1",
+  "chars": [
+   "间",
+   "尖"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 455,
+  "pinyin": "quàn",
+  "file": "quan4",
+  "chars": [
+   "劝"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 456,
+  "pinyin": "chèn",
+  "file": "chen4",
+  "chars": [
+   "趁"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 457,
+  "pinyin": "guāng",
+  "file": "guang1",
+  "chars": [
+   "光"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 458,
+  "pinyin": "fán",
+  "file": "fan2",
+  "chars": [
+   "烦"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 459,
+  "pinyin": "ér",
+  "file": "er2",
+  "chars": [
+   "而"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 460,
+  "pinyin": "zhǎi",
+  "file": "zhai3",
+  "chars": [
+   "窄"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 461,
+  "pinyin": "cháo",
+  "file": "chao2",
+  "chars": [
+   "朝"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 462,
+  "pinyin": "dǎng",
+  "file": "dang3",
+  "chars": [
+   "挡"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 463,
+  "pinyin": "lìng",
+  "file": "ling4",
+  "chars": [
+   "另"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 464,
+  "pinyin": "yā",
+  "file": "ya1",
+  "chars": [
+   "押"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 465,
+  "pinyin": "fèi",
+  "file": "fei4",
+  "chars": [
+   "费"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 466,
+  "pinyin": "shěng",
+  "file": "sheng3",
+  "chars": [
+   "省"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 467,
+  "pinyin": "fāng",
+  "file": "fang1",
+  "chars": [
+   "方"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 468,
+  "pinyin": "jīng",
+  "file": "jing1",
+  "chars": [
+   "经"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 469,
+  "pinyin": "mǒu",
+  "file": "mou3",
+  "chars": [
+   "某"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 470,
+  "pinyin": "lòng",
+  "file": "long4",
+  "chars": [
+   "弄"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 471,
+  "pinyin": "gòng",
+  "file": "gong4",
+  "chars": [
+   "共"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 472,
+  "pinyin": "xū",
+  "file": "xu1",
+  "chars": [
+   "须",
+   "需"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 473,
+  "pinyin": "àn",
+  "file": "an4",
+  "chars": [
+   "按",
+   "岸"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 474,
+  "pinyin": "yīng",
+  "file": "ying1",
+  "chars": [
+   "应"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 475,
+  "pinyin": "wú",
+  "file": "wu2",
+  "chars": [
+   "无"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 476,
+  "pinyin": "shèng",
+  "file": "sheng4",
+  "chars": [
+   "剩"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 477,
+  "pinyin": "tǒng",
+  "file": "tong3",
+  "chars": [
+   "桶"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 478,
+  "pinyin": "zhū",
+  "file": "zhu1",
+  "chars": [
+   "猪"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 479,
+  "pinyin": "yìng",
+  "file": "ying4",
+  "chars": [
+   "硬"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 480,
+  "pinyin": "gǎo",
+  "file": "gao3",
+  "chars": [
+   "搞"
+  ],
+  "batch": 12
+ },
+ {
+  "n": 481,
+  "pinyin": "mái",
+  "file": "mai2",
+  "chars": [
+   "埋"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 482,
+  "pinyin": "yùn",
+  "file": "yun4",
+  "chars": [
+   "运"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 483,
+  "pinyin": "cūn",
+  "file": "cun1",
+  "chars": [
+   "村"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 484,
+  "pinyin": "zhuàn",
+  "file": "zhuan4",
+  "chars": [
+   "赚"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 485,
+  "pinyin": "duǒ",
+  "file": "duo3",
+  "chars": [
+   "躲"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 486,
+  "pinyin": "kǎn",
+  "file": "kan3",
+  "chars": [
+   "砍",
+   "坎"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 487,
+  "pinyin": "fá",
+  "file": "fa2",
+  "chars": [
+   "伐"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 488,
+  "pinyin": "tān",
+  "file": "tan1",
+  "chars": [
+   "摊"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 489,
+  "pinyin": "pái",
+  "file": "pai2",
+  "chars": [
+   "排"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 490,
+  "pinyin": "diǎ",
+  "file": "dia3",
+  "chars": [
+   "嗲"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 491,
+  "pinyin": "yǒng",
+  "file": "yong3",
+  "chars": [
+   "涌"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 492,
+  "pinyin": "ruǎn",
+  "file": "ruan3",
+  "chars": [
+   "软"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 493,
+  "pinyin": "lán",
+  "file": "lan2",
+  "chars": [
+   "拦"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 494,
+  "pinyin": "duān",
+  "file": "duan1",
+  "chars": [
+   "端"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 495,
+  "pinyin": "luò",
+  "file": "luo4",
+  "chars": [
+   "落"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 496,
+  "pinyin": "mēn",
+  "file": "men1",
+  "chars": [
+   "闷"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 497,
+  "pinyin": "shuā",
+  "file": "shua1",
+  "chars": [
+   "刷"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 498,
+  "pinyin": "jīn",
+  "file": "jin1",
+  "chars": [
+   "斤"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 499,
+  "pinyin": "zhuǎn",
+  "file": "zhuan3",
+  "chars": [
+   "转"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 500,
+  "pinyin": "kěn",
+  "file": "ken3",
+  "chars": [
+   "肯"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 501,
+  "pinyin": "bǎng",
+  "file": "bang3",
+  "chars": [
+   "绑"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 502,
+  "pinyin": "dié",
+  "file": "die2",
+  "chars": [
+   "叠"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 503,
+  "pinyin": "shuǎi",
+  "file": "shuai3",
+  "chars": [
+   "甩"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 504,
+  "pinyin": "yì",
+  "file": "yi4",
+  "chars": [
+   "亿"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 505,
+  "pinyin": "shēng",
+  "file": "sheng1",
+  "chars": [
+   "声",
+   "生"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 506,
+  "pinyin": "dǔ",
+  "file": "du3",
+  "chars": [
+   "赌"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 507,
+  "pinyin": "dòu",
+  "file": "dou4",
+  "chars": [
+   "斗"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 508,
+  "pinyin": "tiāo",
+  "file": "tiao1",
+  "chars": [
+   "挑"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 509,
+  "pinyin": "chún",
+  "file": "chun2",
+  "chars": [
+   "纯"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 510,
+  "pinyin": "shōu",
+  "file": "shou1",
+  "chars": [
+   "收"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 511,
+  "pinyin": "sōu",
+  "file": "sou1",
+  "chars": [
+   "搜"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 512,
+  "pinyin": "qǔ",
+  "file": "qu3",
+  "chars": [
+   "取",
+   "娶"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 513,
+  "pinyin": "chēng",
+  "file": "cheng1",
+  "chars": [
+   "称"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 514,
+  "pinyin": "jié",
+  "file": "jie2",
+  "chars": [
+   "截",
+   "节"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 515,
+  "pinyin": "cuī",
+  "file": "cui1",
+  "chars": [
+   "催"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 516,
+  "pinyin": "jiǎo",
+  "file": "jiao3",
+  "chars": [
+   "角"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 517,
+  "pinyin": "guǎn",
+  "file": "guan3",
+  "chars": [
+   "管"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 518,
+  "pinyin": "guài",
+  "file": "guai4",
+  "chars": [
+   "怪"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 519,
+  "pinyin": "bī",
+  "file": "bi1",
+  "chars": [
+   "逼"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 520,
+  "pinyin": "jià",
+  "file": "jia4",
+  "chars": [
+   "嫁"
+  ],
+  "batch": 13
+ },
+ {
+  "n": 521,
+  "pinyin": "qiáo",
+  "file": "qiao2",
+  "chars": [
+   "桥"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 522,
+  "pinyin": "luàn",
+  "file": "luan4",
+  "chars": [
+   "乱"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 523,
+  "pinyin": "mó",
+  "file": "mo2",
+  "chars": [
+   "磨"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 524,
+  "pinyin": "ái",
+  "file": "ai2",
+  "chars": [
+   "挨"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 525,
+  "pinyin": "káng",
+  "file": "kang2",
+  "chars": [
+   "扛"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 526,
+  "pinyin": "gāi",
+  "file": "gai1",
+  "chars": [
+   "该"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 527,
+  "pinyin": "hù",
+  "file": "hu4",
+  "chars": [
+   "户"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 528,
+  "pinyin": "yān",
+  "file": "yan1",
+  "chars": [
+   "烟"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 529,
+  "pinyin": "quē",
+  "file": "que1",
+  "chars": [
+   "缺"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 530,
+  "pinyin": "páng",
+  "file": "pang2",
+  "chars": [
+   "旁"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 531,
+  "pinyin": "gài",
+  "file": "gai4",
+  "chars": [
+   "盖",
+   "钙"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 532,
+  "pinyin": "zhǎn",
+  "file": "zhan3",
+  "chars": [
+   "盏"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 533,
+  "pinyin": "zhōu",
+  "file": "zhou1",
+  "chars": [
+   "粥"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 534,
+  "pinyin": "xiāo",
+  "file": "xiao1",
+  "chars": [
+   "消"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 535,
+  "pinyin": "shāng",
+  "file": "shang1",
+  "chars": [
+   "伤"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 536,
+  "pinyin": "wū",
+  "file": "wu1",
+  "chars": [
+   "屋"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 537,
+  "pinyin": "hàn",
+  "file": "han4",
+  "chars": [
+   "汗"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 538,
+  "pinyin": "quān",
+  "file": "quan1",
+  "chars": [
+   "圈"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 539,
+  "pinyin": "pào",
+  "file": "pao4",
+  "chars": [
+   "泡"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 540,
+  "pinyin": "hài",
+  "file": "hai4",
+  "chars": [
+   "害"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 541,
+  "pinyin": "sī",
+  "file": "si1",
+  "chars": [
+   "撕"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 542,
+  "pinyin": "pī",
+  "file": "pi1",
+  "chars": [
+   "批"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 543,
+  "pinyin": "jiǎn",
+  "file": "jian3",
+  "chars": [
+   "剪"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 544,
+  "pinyin": "shàn",
+  "file": "shan4",
+  "chars": [
+   "扇"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 545,
+  "pinyin": "nào",
+  "file": "nao4",
+  "chars": [
+   "闹"
+  ],
+  "batch": 14
+ },
+ {
+  "n": 546,
+  "pinyin": "jǔ",
+  "file": "ju3",
+  "chars": [
+   "举"
+  ],
+  "batch": 14
+ }
+]

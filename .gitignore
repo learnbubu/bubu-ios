@@ -7,3 +7,4 @@ native/Bubu.xcodeproj/
 native/Bubu/Info.plist
 build/
 tools/.voices/
+tools/record/out/
