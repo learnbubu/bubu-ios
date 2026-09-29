@@ -360,8 +360,13 @@ final class ProgressStore {
     func recordReview() { activity.days[today, default: 0] += 1; save() }
 
     /// Grade an answer in a study session, as the web's answerStudy does to the record.
-    func answer(_ cardId: String, correct: Bool, dir: String, sessionStart: Double, mistakesMode: Bool) -> (mistake: Bool, fixed: Bool) {
-        var s = FSRS.schedule(srs[cardId], grade: correct ? .good : .again, now: now())
+    /// `schedule: false` (a stone's extra practice on a word) leaves a right answer's review
+    /// timing alone; a wrong answer is always scheduled.
+    func answer(_ cardId: String, correct: Bool, dir: String, sessionStart: Double, mistakesMode: Bool,
+                schedule: Bool = true) -> (mistake: Bool, fixed: Bool) {
+        var s: SRSRecord
+        if let old = srs[cardId], correct, !schedule { s = old }
+        else { s = FSRS.schedule(srs[cardId], grade: correct ? .good : .again, now: now()) }
         var mistake = false, fixed = false
         if correct {
             s.known = true
