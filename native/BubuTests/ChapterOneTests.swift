@@ -90,7 +90,9 @@ final class ChapterOneTests: XCTestCase {
             let q = StudySession.practiceQueue(practice.id, p)
             XCTAssertEqual(q.count, StudySession.practiceLen)
             XCTAssertEqual(Set(q.map(\.id)), Set(words.map(\.id)), "every word comes up")
-            XCTAssertEqual(q.filter { $0.id == weak.id }.count, 2, "the weakest comes twice")
+            // 15 exercises on 7 words: each twice, the weakest a third time
+            XCTAssertEqual(q.filter { $0.id == weak.id }.count, 3, "the weakest comes most")
+            for c in words where c.id != weak.id { XCTAssertEqual(q.filter { $0.id == c.id }.count, 2, c.word.hanzi) }
             for i in q.indices.dropFirst() { XCTAssertNotEqual(q[i].id, q[i - 1].id, "never twice in a row") }
         }
     }

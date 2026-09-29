@@ -19,6 +19,10 @@ struct StudyView: View {
     @State private var bunRowFrame: CGRect = .zero
     // the stone's notes, shown once as a tip before it starts
     @State private var tips: [Note] = []
+    // the tones' one-time intro, before the first session that asks about them
+    @State private var tonesIntro = false
+    /// Something shown before the session starts: the tones' intro or a tip.
+    private var preStart: Bool { tonesIntro || !tips.isEmpty }
 
     struct Feedback { let correct: Bool; let chosen: String? }
 
@@ -39,7 +43,7 @@ struct StudyView: View {
                         }
                         .scrollIndicators(.hidden)
                         .scrollBounceBehavior(.basedOnSize)
-                        if tips.isEmpty, case .card = session.current { bottomSlot }
+                        if !preStart, case .card = session.current { bottomSlot }
                     }
                     .frame(maxHeight: .infinity)
                     .background(Color.panel, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
@@ -65,7 +69,7 @@ struct StudyView: View {
         }
         .onAppear {
             loadTips()
-            if tips.isEmpty, let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
+            if !preStart, let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
             #if DEBUG
             // the buns screenshot: out of buns part-way through a lesson
             if Launch.screen == "buns" { DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { advance() } }
@@ -88,9 +92,19 @@ struct StudyView: View {
     /// apart from the tip's own).
     private func loadTips() {
         #if DEBUG
-        if let sc = Launch.screen, sc != "tip" { tips = []; return }
+        if let sc = Launch.screen, sc != "tip" { tips = []; tonesIntro = false; return }
         #endif
         tips = session.tips
+        tonesIntro = session.showsTonesIntro
+    }
+
+    private func dismissTonesIntro() {
+        Coach.markTonesSeen()
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+            tonesIntro = false
+            if tips.isEmpty { exerciseKey = UUID() }
+        }
+        if !preStart, let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
     }
 
     private func dismissTip() {
@@ -101,7 +115,7 @@ struct StudyView: View {
                 exerciseKey = UUID()
             }
         }
-        if tips.isEmpty, let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
+        if !preStart, let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
     }
 
     /// Review in place of this session, from the buns sheet.
@@ -177,7 +191,9 @@ struct StudyView: View {
             Text(promptLabel).font(.nunitoXB(19.2)).tracking(-0.2).foregroundStyle(Color.ink)
                 .padding(.top, 4).padding(.bottom, 14)
             Group {
-                if let tip = tips.first {
+                if tonesIntro {
+                    TonesIntroCard { dismissTonesIntro() }
+                } else if let tip = tips.first {
                     TipCard(note: tip, more: tips.count - 1) { dismissTip() }
                 } else {
                 switch session.current {
@@ -209,6 +225,7 @@ struct StudyView: View {
     }
 
     private var promptLabel: String {
+        if tonesIntro { return "Meet the tones" }
         if !tips.isEmpty { return "Before you start" }
         if case .meet = session.current { return "New word" }
         return session.exercise?.label ?? ""
@@ -497,6 +514,30 @@ struct TipCard: View {
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
             Button(action: done) {
                 Text(more > 0 ? "Next tip" : "Got it").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
+                    .frame(maxWidth: .infinity).padding(14)
+                    .background(Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .buttonStyle(PressDown(depth: 3))
+            .background(Color.accentDark, in: RoundedRectangle(cornerRadius: 16, style: .continuous).offset(y: 3))
+            .padding(.top, 6)
+        }
+    }
+}
+
+/// The tones, introduced once before the first session that asks about them: the primer,
+/// with its sounds to play, and a button to start.
+struct TonesIntroCard: View {
+    var done: () -> Void
+    var body: some View {
+        VStack(spacing: 14) {
+            TonesPrimer()
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            Text("From here on, some exercises ask for the right tones. You can read this again in Settings.")
+                .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+            Button(action: done) {
+                Text("Got it").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
                     .frame(maxWidth: .infinity).padding(14)
                     .background(Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             }

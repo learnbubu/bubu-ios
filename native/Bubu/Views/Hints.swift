@@ -146,6 +146,9 @@ enum Coach {
     /// "What are tones?" beside a pinyin drill: for the first three sessions, or until tapped once.
     static var showTonesLink: Bool { sessions < 3 && !d.bool(forKey: "tonesLinkTapped") }
     static func tonesLinkTapped() { d.set(true, forKey: "tonesLinkTapped") }
+    /// The tones' intro card has been seen (or, before it existed, the primer opened itself once).
+    static var tonesSeen: Bool { d.bool(forKey: "tonesSeen") }
+    static func markTonesSeen() { d.set(true, forKey: "tonesSeen") }
     /// A stone's notes are shown as a tip once, when it's first started.
     static func tipSeen(_ lessonId: String) -> Bool { (d.stringArray(forKey: "tipsSeen") ?? []).contains(lessonId) }
     static func markTipSeen(_ lessonId: String) {

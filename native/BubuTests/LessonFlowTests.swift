@@ -113,7 +113,7 @@ final class LessonFlowTests: XCTestCase {
     }
 
     /// Words met but not yet right (a session left half-way) all come back in the last
-    /// step, even more than the usual four reviews, so it still finishes the lesson.
+    /// step, even more than the usual reviews, so it still finishes the lesson.
     func testTheLastStepBringsBackEveryWordNotYetRight() {
         let p = store()
         let lid = course.lessons.first { course.cards(in: $0.id).count == 5 }!.id
@@ -121,7 +121,7 @@ final class LessonFlowTests: XCTestCase {
         let first = StudySession.buildQueue(lessonId: lid, progress: p, focuses: p.selectedFocuses).filter { $0.lessonId == lid }
         // the first step's words were all met, and all missed
         for c in first { _ = p.answer(c.id, correct: false, dir: "recognize", sessionStart: 0, mistakesMode: false) }
-        XCTAssertGreaterThan(first.count, StudySession.reviewPerSession)
+        XCTAssertGreaterThan(first.count, StudySession.reviewsWanted(new: first.count))
         let last = StudySession.buildQueue(lessonId: lid, progress: p, focuses: p.selectedFocuses)
         XCTAssertTrue(Set(cards.map(\.id)).isSubset(of: Set(last.map(\.id))))
         let r = play(StudySession(lessonId: lid, progress: p))

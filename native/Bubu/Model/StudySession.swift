@@ -7,9 +7,18 @@ import Observation
 final class StudySession: Identifiable {
     // web constants
     /// New words are met one at a time, each practised straight away (Duolingo's way).
-    static let newPerSession = 6, reviewPerSession = 4, meetGroup = 1, sessionLen = 12
+    static let newPerSession = 6, meetGroup = 1, sessionLen = 12
+    /// A stone's session is about this many exercises (Duolingo's lesson: ~15, 3–5 minutes).
+    static let stoneLen = 15
+    /// How often each new word comes up in its stone's session: usually `newReps` (3 when a
+    /// stone has 4–5 new words), up to `newRepsMax` when there are too few earlier words to
+    /// review (the course's first stones).
+    static let newRepsMin = 3, newReps = 4, newRepsMax = 5
+    /// A new word's first right answers in a session schedule its reviews; the extra practice
+    /// after them doesn't push its first review further out.
+    static let scheduledPerSession = 2
     /// A practice stone's exercises.
-    static let practiceLen = 10
+    static let practiceLen = 15
     static let xpCorrect = 2, xpCombo = 3, xpPerfect = 5, xpSession = 10, xpLesson = 25, comboAt = 5
 
     /// The exercise kinds, as the web's FOCUSES.
@@ -37,6 +46,17 @@ final class StudySession: Identifiable {
     private(set) var onBuns = false
     /// A practice stone's session: no new words, the chapter so far, weaker words first.
     let isPractice: Bool
+    /// A stone's session of new words (Duolingo's shape): each new word comes up several
+    /// times on a ladder of its own, earlier words fill the rest (see stoneOrder).
+    let stoneShaped: Bool
+    /// "Which pinyin?" asks about tones: only once they've been introduced (see tonesIntroduced).
+    let tonesTaught: Bool
+    /// the words new when the session started
+    private let freshIds: Set<String>
+    /// right answers this session, per word: a new word's rung on its ladder
+    private var rightInSession: [String: Int] = [:]
+    /// how often each kind of exercise has been asked this session
+    private var dirsUsed: [String: Int] = [:]
     /// Buns are earned back here, one per right answer (web: a review while below five);
     /// a practice stone earns them back too.
     var earnsBuns: Bool { !onBuns && ([.review, .mistakes, .trouble].contains(mode) || isPractice) }
@@ -126,10 +146,16 @@ final class StudySession: Identifiable {
         self.start = progress.now()
         let practice = mode == .lesson && Course.shared.lessonById[lessonId]?.isPractice == true
         self.isPractice = practice
+        // as buildQueue: a session of only writing or only speaking isn't shaped like a stone
+        let fs = self.focuses
+        let shaped = mode == .lesson && !practice && fs != ["write"] && fs != ["speak"]
+        self.stoneShaped = shaped
+        self.tonesTaught = StudySession.tonesIntroduced(lessonId, mode: mode, progress)
         let chosen = cards ?? (practice ? StudySession.practiceQueue(lessonId, progress)
                                         : StudySession.buildQueue(lessonId: lessonId, progress: progress, focuses: self.focuses))
         self.scope = scope ?? (practice ? Set(Course.shared.practiceScope(lessonId)) : mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId)))
         self.source = chosen
+        self.freshIds = shaped ? Set(chosen.filter { progress.srs[$0.id] == nil }.map(\.id)) : []
         // a practice stone meets no words: it's all exercises, in the order they were picked
         self.queue = mode == .quiz || mode == .placement || practice ? chosen.map { .card($0) } : sessionOrder(chosen)
         self.sessionTotal = queue.filter { if case .card = $0 { return true } else { return false } }.count
@@ -153,6 +179,23 @@ final class StudySession: Identifiable {
         return l.review == true ? "Chapter review" : "Practice"
     }
 
+    /// Where the tones are introduced: the course's first practice stone (chapter 1's stone 4),
+    /// when there are seven familiar words to hear them on.
+    static var tonesStone: String? { Course.shared.lessons.first { $0.isPractice }?.id }
+
+    /// Whether a session may ask "Which pinyin?": once the tones stone is done, and in that
+    /// stone or any after it, not before.
+    static func tonesIntroduced(_ lessonId: String, mode: Mode, _ p: ProgressStore) -> Bool {
+        guard let t = tonesStone else { return true }
+        if p.isDone(t) { return true }
+        guard mode == .lesson, let here = Course.shared.lessonOrder[lessonId],
+              let at = Course.shared.lessonOrder[t] else { return false }
+        return here >= at
+    }
+
+    /// The tones' one-time intro card, shown before the first session that may ask about them.
+    var showsTonesIntro: Bool { mode == .lesson && tonesTaught && focuses.contains("pinyin") && !Coach.tonesSeen }
+
     /// How weak a word is: never answered, missed lately, lapsed, not yet right, little practised.
     static func weakness(_ s: SRSRecord?) -> Double {
         guard let s else { return 100 }
@@ -164,8 +207,8 @@ final class StudySession: Identifiable {
         return miss + lapses + unsure - reps - spaced
     }
 
-    /// A practice stone's exercises: about ten on the words its chapter has taught so far,
-    /// weakest first; with fewer than ten words the weakest come twice, never twice in a row.
+    /// A practice stone's exercises: about fifteen on the words its chapter has taught so far,
+    /// weakest first; with fewer words than that the weakest come again, never twice in a row.
     static func practiceQueue(_ lessonId: String, _ p: ProgressStore) -> [Card] {
         let pool = Course.shared.practiceCards(lessonId).shuffled()
             .sorted { weakness(p.srs[$0.id]) > weakness(p.srs[$1.id]) }
@@ -308,6 +351,28 @@ final class StudySession: Identifiable {
         return k
     }
 
+    /// How often each of n new words usually comes up in a stone's session: 4 for up to three
+    /// words, 3 for four or more (so five new words alone make 15).
+    static func baseReps(new n: Int) -> Int {
+        guard n > 0 else { return 0 }
+        return min(newReps, max(newRepsMin, stoneLen / n))
+    }
+
+    /// How many earlier words a stone's session brings back around n new ones, to make
+    /// about `stoneLen`: 3 around three new words, 7 around two.
+    static func reviewsWanted(new n: Int) -> Int {
+        guard n > 0 else { return 0 }
+        return max(0, stoneLen - n * baseReps(new: n))
+    }
+
+    /// How often each of n new words comes up beside this many reviews: enough to make about
+    /// `stoneLen`, between newRepsMin and newRepsMax (the first stone: 3 words × 5).
+    static func repsPerNew(new n: Int, reviews: Int) -> Int {
+        guard n > 0 else { return 0 }
+        let want = (stoneLen - reviews + n - 1) / n
+        return min(newRepsMax, max(newRepsMin, want))
+    }
+
     /// A lesson's steps (its batches of new words) and the one you're on (web: lessonSteps).
     /// A lesson you've finished is on its last step. A lesson whose words have all been
     /// met but aren't all right yet has one step left: the session that clears them.
@@ -338,6 +403,7 @@ final class StudySession: Identifiable {
                 ? Int(ceil(Double(fresh.count) / ceil(Double(fresh.count) / Double(newPerSession))))
                 : fresh.count
             let picked = Array(fresh.prefix(n))
+            let want = reviewsWanted(new: picked.count)
             var reviews: [Card] = []
             var seen = Set(picked.map(\.id))
             // the last step brings back every word of the lesson not yet got right, however
@@ -348,13 +414,23 @@ final class StudySession: Identifiable {
                 }
             }
             let add = { (list: [Card]) in
-                for c in list.shuffled() where reviews.count < reviewPerSession && !seen.contains(c.id) {
+                for c in list where reviews.count < want && !seen.contains(c.id) {
                     reviews.append(c); seen.insert(c.id)
                 }
             }
-            add(due.filter { progress.srs[$0.id] != nil })
-            add(progress.dueReviewCards(excluding: lessonId))
-            add(cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 })
+            add(due.filter { progress.srs[$0.id] != nil }.shuffled())
+            add(progress.dueReviewCards(excluding: lessonId).shuffled())
+            // then the earlier words met so far, weakest first
+            add(reachedCards(progress).filter { $0.lessonId != lessonId && progress.srs[$0.id] != nil }
+                .shuffled().sorted { weakness(progress.srs[$0.id]) > weakness(progress.srs[$1.id]) })
+            add(cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.shuffled())
+            // too few earlier words (the course's first stones): the new words come up more
+            // often, up to newRepsMax each, and then the earlier ones come round again
+            let spare = want - reviews.count - picked.count * (newRepsMax - baseReps(new: picked.count))
+            if spare > 0 && !reviews.isEmpty {
+                let again = Array(reviews.prefix(spare))
+                reviews += again
+            }
             return picked + reviews
         }
         let pool = (due.isEmpty ? cards : due).shuffled()
@@ -364,12 +440,14 @@ final class StudySession: Identifiable {
         return Array(pool.prefix(n))
     }
 
-    /// New words met in threes, each practised twice, reviews woven between (web: sessionOrder).
+    /// New words met one at a time, reviews woven between (web: sessionOrder). A stone's
+    /// session is laid out by stoneOrder; other sessions of new words practise each twice.
     private func sessionOrder(_ cards: [Card]) -> [Item] {
         let order = Dictionary(uniqueKeysWithValues: course.cards.enumerated().map { ($1.id, $0) })
         let fresh = cards.filter { progress.srs[$0.id] == nil }.sorted { (order[$0.id] ?? 0) < (order[$1.id] ?? 0) }
         var known = cards.filter { progress.srs[$0.id] != nil }.shuffled()
         if fresh.isEmpty { return cards.shuffled().map { .card($0) } }
+        if stoneShaped { return Self.stoneOrder(fresh: fresh, known: known) }
         let k = Int(ceil(Double(fresh.count) / Double(Self.meetGroup)))
         let size = Int(ceil(Double(fresh.count) / Double(k)))
         let groups = stride(from: 0, to: fresh.count, by: size).map { Array(fresh[$0..<min(fresh.count, $0 + size)]) }
@@ -386,6 +464,66 @@ final class StudySession: Identifiable {
         }
         out += (groups.last ?? []).shuffled().map { .card($0) }
         out += known.map { .card($0) }
+        return out
+    }
+
+    /// A stone's session, Duolingo's shape: each new word is met on its own card and asked
+    /// straight away, then comes back until it has come up `repsPerNew` times, never twice in
+    /// a row; the next word is met once the one before has come up again. The earlier words
+    /// (`known`) are spread evenly between as review. Which exercise each one gets is chosen
+    /// as it comes (see newWordLadder).
+    static func stoneOrder(fresh: [Card], known: [Card]) -> [Item] {
+        let n = fresh.count
+        let reps = repsPerNew(new: n, reviews: known.count)
+        let total = reps * n + known.count
+        var reviews = known
+        var done = Array(repeating: 0, count: n)       // times each new word has come up
+        var lastAt = Array(repeating: -1, count: n)    // where it last came up
+        var out: [Item] = []
+        var met = 0, placed = 0, reviewed = 0, sinceMeet = 0, lastRung = -1
+        var lastId = ""
+        func meetNext() {
+            out.append(.meet(cards: [fresh[met]], first: met == 0, left: n - met - 1))
+            out.append(.card(fresh[met]))
+            done[met] = 1
+            lastAt[met] = placed
+            placed += 1
+            lastId = fresh[met].id
+            lastRung = 0
+            sinceMeet = 1
+            met += 1
+        }
+        while done.contains(where: { $0 < reps }) {
+            if met < n && (met == 0 || sinceMeet >= 2) { meetNext(); continue }
+            var cands = (0..<met).filter { done[$0] < reps && fresh[$0].id != lastId }
+            let r = reviews.firstIndex { $0.id != lastId }
+            let reviewDue = (reviewed + 1) * total <= (placed + 1) * known.count
+            if let r, reviewDue || cands.isEmpty {
+                let c = reviews.remove(at: r)
+                out.append(.card(c))
+                lastId = c.id
+                lastRung = -1
+                reviewed += 1
+                placed += 1
+                continue
+            }
+            if cands.isEmpty {
+                if met < n { meetNext(); continue }
+                cands = (0..<met).filter { done[$0] < reps }  // only the last word is left
+            }
+            // the word that has come up least, preferring one on a different rung from the
+            // exercise before (so the kinds of exercise alternate), then the longest ago
+            func key(_ i: Int) -> (Int, Int, Int) { (done[i] == lastRung ? 1 : 0, done[i], lastAt[i]) }
+            guard let i = cands.min(by: { key($0) < key($1) }) else { break }
+            out.append(.card(fresh[i]))
+            lastRung = done[i]
+            done[i] += 1
+            lastAt[i] = placed
+            placed += 1
+            lastId = fresh[i].id
+            sinceMeet += 1
+        }
+        out += reviews.map { Item.card($0) }
         return out
     }
 
@@ -412,13 +550,41 @@ final class StudySession: Identifiable {
                 exercise = Exercise.make(card: c, dir: dir, scope: scope, progress: progress)
             }
             exercise?.isNew = Self.isNewCard(progress.srs[c.id])
+            dirsUsed[dir, default: 0] += 1
         }
+    }
+
+    /// A new word's exercises in its stone's session, easy to hard, one rung per right answer:
+    /// recognise it, hear it (or pick its tones), recall its characters or build a sentence
+    /// with it, then the harder kinds again. Each rung lists its kinds in order of preference.
+    static let newWordLadder: [[String]] = [
+        ["recognize", "listen"],
+        ["listen", "pinyin"],
+        ["recall", "sentence"],
+        ["sentence", "pinyin", "recall", "listen"],
+        ["recall", "listen", "pinyin", "recognize"],
+    ]
+
+    /// A new word's exercise from its ladder (nil: none of its rung's kinds are switched on).
+    /// Past the first rung it avoids the kind just asked and the word's own last kind, and
+    /// takes the kind asked least this session, so the session doesn't repeat itself.
+    private func ladderDir(_ c: Card, _ enabled: [String]) -> String? {
+        let rung = min(rightInSession[c.id] ?? 0, Self.newWordLadder.count - 1)
+        var on = Self.newWordLadder[rung].filter { enabled.contains($0) }
+        guard !on.isEmpty else { return nil }
+        if rung > 0 {
+            if let l = lastDir, on.count > 1 { on.removeAll { $0 == l } }
+            if let b = dirByCard[c.id], on.count > 1 { on.removeAll { $0 == b } }
+            let least = on.map { dirsUsed[$0] ?? 0 }.min() ?? 0
+            on = on.filter { (dirsUsed[$0] ?? 0) == least }
+        }
+        return on.first
     }
 
     /// Which exercise a card gets, climbing a ladder as the word gets stronger (web: pickDirection).
     private func pickDirection(_ c: Card) -> String {
         if isQuiz {
-            let mc = focuses.filter { !["write", "sentence", "speak"].contains($0) }
+            let mc = focuses.filter { !["write", "sentence", "speak"].contains($0) && (tonesTaught || $0 != "pinyin") }
             return mc.randomElement() ?? "recognize"
         }
         let s = progress.srs[c.id]
@@ -426,9 +592,17 @@ final class StudySession: Identifiable {
             dirByCard[c.id] = m.d; lastDir = m.d; return m.d
         }
         var enabled = Self.allDirs.filter { focuses.contains($0) }
+        // "Which pinyin?" asks about tones: not until they've been introduced
+        if !tonesTaught { enabled.removeAll { $0 == "pinyin" } }
         // a sentence only when all its other words have been met (see Course.sentences(for:met:))
         if course.sentences(for: c, met: isMet).isEmpty { enabled.removeAll { $0 == "sentence" } }
         if !StrokeData.shared.writable(c.word.hanzi) { enabled.removeAll { $0 == "write" } }
+        // a word new in a stone's session climbs its own ladder
+        if freshIds.contains(c.id), let d = ladderDir(c, enabled) {
+            dirByCard[c.id] = d
+            lastDir = d
+            return d
+        }
         if focuses.count > 1 {
             let reps = s?.reps ?? 0, interval = s?.interval ?? 0
             let level = reps >= 2 || interval >= 7 ? 2 : reps >= 1 ? 1 : 0
@@ -451,6 +625,7 @@ final class StudySession: Identifiable {
     private func missedDirPossible(_ c: Card, _ d: String) -> Bool {
         if d == "write" { return StrokeData.shared.writable(c.word.hanzi) }
         if d == "sentence" { return !course.sentences(for: c, met: isMet).isEmpty }
+        if d == "pinyin" { return tonesTaught }
         return Self.allDirs.contains(d)
     }
 
@@ -477,11 +652,15 @@ final class StudySession: Identifiable {
             progress.review(c.id, correct ? .good : .again)
             progress.recordReview()
         } else {
-            let r = progress.answer(c.id, correct: correct, dir: dir, sessionStart: start, mistakesMode: mode == .mistakes)
+            // a stone's extra practice on a word doesn't push its first review further out
+            let schedule = !stoneShaped || (rightInSession[c.id] ?? 0) < Self.scheduledPerSession
+            let r = progress.answer(c.id, correct: correct, dir: dir, sessionStart: start,
+                                    mistakesMode: mode == .mistakes, schedule: schedule)
             if r.mistake { mistakes += 1 }
             if r.fixed { fixedCount += 1 }
             progress.recordReview()
         }
+        if correct { rightInSession[c.id, default: 0] += 1 }
         // a mistake in a session of new words eats a bun, except on a word's first try
         // (it was only just met); a right answer in a review earns one back
         if !correct && onBuns && !wasNew { progress.eatBun(); bunsEaten += 1 }
