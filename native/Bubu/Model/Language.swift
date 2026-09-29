@@ -258,12 +258,12 @@ extension Course {
     }
 
     /// The words of a sentence the learner hasn't met yet, leaving out the card's own
-    /// word (the one new word allowed) and the little particles.
-    func unmetWords(in s: Sentence, for card: Card, met: (String) -> Bool) -> [String] {
+    /// word (the one new word allowed, unless `ownAllowed` is false) and the little particles.
+    func unmetWords(in s: Sentence, for card: Card, met: (String) -> Bool, ownAllowed: Bool = true) -> [String] {
         let own = card.word.hanzi.filter(Course.isHan)
         let all = s.words.map(\.hanzi).joined()
         var ownSpan: Range<Int>?
-        if !own.isEmpty, let r = all.range(of: own) {
+        if ownAllowed, !own.isEmpty, let r = all.range(of: own) {
             let lo = all.distance(from: all.startIndex, to: r.lowerBound)
             ownSpan = lo..<(lo + own.count)
         }
@@ -288,6 +288,19 @@ extension Course {
         if !short.isEmpty { return short }
         guard let least = ok.map(\.words.count).min() else { return [] }
         return ok.filter { $0.words.count == least }
+    }
+
+    /// A speaking exercise's sentence has at most this many words.
+    static let speakSentenceMax = 6
+
+    /// The sentences a card's speaking exercise may ask for instead of the word alone: short
+    /// (at most `speakSentenceMax` words), and every word in them met, the card's own word
+    /// included (no new word to say). Empty when none will do: then it's just the word.
+    func speakSentences(for card: Card, met: (String) -> Bool) -> [Sentence] {
+        sentences(for: card).filter {
+            $0.words.count <= Course.speakSentenceMax
+                && unmetWords(in: $0, for: card, met: met, ownAllowed: false).isEmpty
+        }
     }
 
     /// Up to n look-alike cards for a card, strongest first with a little shuffle (web: lookalikes).

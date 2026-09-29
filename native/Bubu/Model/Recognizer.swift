@@ -23,6 +23,9 @@ final class Recognizer {
     var onResult: ([String]) -> Void = { _ in }
     var onError: (Failure) -> Void = { _ in }
     var onEnd: () -> Void = {}
+    /// How loud the microphone is, 0…1, with every buffer heard (a few dozen times a second; the
+    /// speaking button's waveform).
+    var onLevel: (Float) -> Void = { _ in }
 
     var isAvailable: Bool { recognizer?.isAvailable ?? false }
 
@@ -58,7 +61,12 @@ final class Recognizer {
                 // no input yet (a call, or Bluetooth switching): installing a tap would throw
                 guard format.sampleRate > 0, format.channelCount > 0 else { onError(.unavailable); end(); return }
                 input.removeTap(onBus: 0)
-                input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak req] buf, _ in req?.append(buf) }
+                let report = onLevel
+                input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak req] buf, _ in
+                    req?.append(buf)
+                    let level = Recognizer.level(of: buf)
+                    DispatchQueue.main.async { report(level) }
+                }
                 engine.prepare()
                 try engine.start()
                 task = recognizer.recognitionTask(with: req) { [weak self] result, error in
@@ -108,6 +116,21 @@ final class Recognizer {
         end()
     }
 
+    /// A buffer's loudness, 0 (quiet room) to 1 (speaking up): its RMS in decibels,
+    /// -50 dB to -12 dB mapped onto 0…1.
+    nonisolated static func level(of buf: AVAudioPCMBuffer) -> Float {
+        guard let data = buf.floatChannelData else { return 0 }
+        let n = Int(buf.frameLength)
+        guard n > 0 else { return 0 }
+        let samples = data[0]
+        var sum: Float = 0
+        for i in 0..<n { sum += samples[i] * samples[i] }
+        let rms = (sum / Float(n)).squareRoot()
+        guard rms > 0 else { return 0 }
+        let db = 20 * log10(rms)
+        return min(1, max(0, (db + 50) / 38))
+    }
+
     /// Stop everything. Always runs exactly once per start.
     func end() {
         guard !finished else { return }
@@ -135,6 +158,90 @@ enum SpeechScore {
         let exp = clean(expected)
         guard !exp.isEmpty else { return false }
         return alts.contains { let t = clean($0); return !t.isEmpty && t.contains(exp) }
+    }
+
+    /// One character of the phrase asked for, and whether it was heard (nil: punctuation,
+    /// which isn't judged).
+    struct Mark: Equatable {
+        let char: Character
+        let heard: Bool?
+    }
+
+    /// Whether a character is said aloud (and so judged), not punctuation or a space.
+    static func isSpoken(_ ch: Character) -> Bool { !clean(String(ch)).isEmpty }
+
+    /// Two characters that sound the same apart from the tone: speaking is judged on the
+    /// words, not the tones, and the recogniser often writes a homophone (她 for 他).
+    static func sameSound(_ a: Character, _ b: Character) -> Bool {
+        if a == b { return true }
+        let chars = CharData.shared.chars
+        guard let pa = chars[String(a)]?.p, let pb = chars[String(b)]?.p, !pa.isEmpty else { return false }
+        return Pinyin.toneless(pa.lowercased()) == Pinyin.toneless(pb.lowercased())
+    }
+
+    /// Each character of `expected`, green if it was heard and red if it was missed: the
+    /// characters in order that the best guess shares with it (their longest common run,
+    /// gaps allowed), punctuation stripped from both.
+    static func marks(_ expected: String, _ alts: [String],
+                      same: (Character, Character) -> Bool = SpeechScore.sameSound) -> [Mark] {
+        let target = Array(expected)
+        let judged = target.indices.filter { isSpoken(target[$0]) }
+        let exp = judged.map { target[$0] }
+        var best = Set<Int>()
+        for a in alts {
+            let hits = commonHits(exp, Array(clean(a)), same)
+            if hits.count > best.count { best = hits }
+        }
+        var out: [Mark] = []
+        var k = 0
+        for (i, ch) in target.enumerated() {
+            if k < judged.count && judged[k] == i {
+                out.append(Mark(char: ch, heard: best.contains(k)))
+                k += 1
+            } else {
+                out.append(Mark(char: ch, heard: nil))
+            }
+        }
+        return out
+    }
+
+    /// The positions in `a` of a longest common subsequence of `a` and `b`.
+    static func commonHits(_ a: [Character], _ b: [Character], _ same: (Character, Character) -> Bool) -> Set<Int> {
+        let n = a.count, m = b.count
+        guard n > 0, m > 0 else { return [] }
+        var dp = Array(repeating: Array(repeating: 0, count: m + 1), count: n + 1)
+        for i in stride(from: n - 1, through: 0, by: -1) {
+            for j in stride(from: m - 1, through: 0, by: -1) {
+                dp[i][j] = same(a[i], b[j]) ? dp[i + 1][j + 1] + 1 : max(dp[i + 1][j], dp[i][j + 1])
+            }
+        }
+        var hits = Set<Int>()
+        var i = 0, j = 0
+        while i < n && j < m {
+            if same(a[i], b[j]) && dp[i][j] == dp[i + 1][j + 1] + 1 {
+                hits.insert(i); i += 1; j += 1
+            } else if dp[i + 1][j] >= dp[i][j + 1] {
+                i += 1
+            } else {
+                j += 1
+            }
+        }
+        return hits
+    }
+
+    /// The share of the judged characters that were heard (1 when nothing is judged).
+    static func heardShare(_ marks: [Mark]) -> Double {
+        let judged = marks.compactMap(\.heard)
+        guard !judged.isEmpty else { return 1 }
+        return Double(judged.filter { $0 }.count) / Double(judged.count)
+    }
+
+    /// Lenient: a pass when the old scoring says close enough (or the word practised was
+    /// heard), or when at least 70% of the characters were heard, homophones counting.
+    static func passes(_ expected: String, _ alts: [String], keyword: String?,
+                       same: (Character, Character) -> Bool = SpeechScore.sameSound) -> Bool {
+        if score(expected, alts, keyword: keyword).level != .no { return true }
+        return heardShare(marks(expected, alts, same: same)) >= 0.7
     }
 
     /// `keyword` is the word being practised: hearing it back is a pass even if the rest drifts.

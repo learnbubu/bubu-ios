@@ -63,6 +63,11 @@ final class StudySession: Identifiable {
     let tonesTaught: Bool
     /// the words new when the session started
     private let freshIds: Set<String>
+    /// the words with no record when the session started, in any kind of session: a word in
+    /// its very first session is never spoken
+    private let newAtStart: Set<String>
+    /// "Can't speak now", or no microphone: no more speaking this session
+    private var speakingOff = false
     /// right answers this session, per word: a new word's rung on its ladder
     private var rightInSession: [String: Int] = [:]
     /// how often each kind of exercise has been asked this session
@@ -176,6 +181,7 @@ final class StudySession: Identifiable {
         self.scope = scope ?? (practice ? Set(Course.shared.practiceScope(lessonId)) : mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId)))
         self.source = chosen
         self.freshIds = shaped ? Set(chosen.filter { progress.srs[$0.id] == nil }.map(\.id)) : []
+        self.newAtStart = Set(chosen.filter { progress.srs[$0.id] == nil }.map(\.id))
         // a practice stone meets no words: it's all exercises, in the order they were picked
         var items: [Item] = mode == .quiz || mode == .placement || practice ? chosen.map { .card($0) } : sessionOrder(chosen)
         // tap the pairs: twice in a practice stone, once near the end of a stone's session
@@ -542,6 +548,11 @@ final class StudySession: Identifiable {
     static func buildQueue(lessonId: String, progress: ProgressStore, focuses: Set<String>) -> [Card] {
         let course = Course.shared
         var cards = course.cards(in: lessonId)
+        // speaking only: the words already met (a word is never spoken before it's been met)
+        if focuses == ["speak"] {
+            let met = cards.filter { progress.srs[$0.id] != nil }
+            if !met.isEmpty { cards = met }
+        }
         if focuses == ["sentence"] {
             let withSentences = cards.filter { c in !course.sentences(for: c, met: { id in progress.srs[id] != nil }).isEmpty }
             if !withSentences.isEmpty { cards = withSentences }
@@ -756,6 +767,8 @@ final class StudySession: Identifiable {
         // a sentence only when all its other words have been met (see Course.sentences(for:met:))
         if course.sentences(for: c, met: isMet).isEmpty { enabled.removeAll { $0 == "sentence" } }
         if !StrokeData.shared.writable(c.word.hanzi) { enabled.removeAll { $0 == "write" } }
+        // no speaking a word in its very first session, or once speaking's been put off
+        if !maySpeak(c) { enabled.removeAll { $0 == "speak" } }
         // a word new in a stone's session climbs its own ladder
         if freshIds.contains(c.id), let d = ladderDir(c, enabled) {
             dirByCard[c.id] = d
@@ -785,7 +798,20 @@ final class StudySession: Identifiable {
         if d == "write" { return StrokeData.shared.writable(c.word.hanzi) }
         if d == "sentence" { return !course.sentences(for: c, met: isMet).isEmpty }
         if d == "pinyin" { return tonesTaught }
+        if d == "speak" { return maySpeak(c) }
         return Self.allDirs.contains(d)
+    }
+
+    /// Whether a word may be spoken now: not in its very first session (new when the session
+    /// began, or met on screen in it), and not once "Can't speak now" has been tapped.
+    func maySpeak(_ c: Card) -> Bool {
+        !speakingOff && !Self.inFirstSession(c.id, newAtStart: newAtStart, metInSession: metInSession)
+    }
+
+    /// A word's very first session: it had no record when the session began, or was met on
+    /// screen in it.
+    static func inFirstSession(_ cardId: String, newAtStart: Set<String>, metInSession: Set<String>) -> Bool {
+        newAtStart.contains(cardId) || metInSession.contains(cardId)
     }
 
     /// A word the learner has met: it has a record, or it was met on screen this session.
@@ -868,10 +894,12 @@ final class StudySession: Identifiable {
         return true
     }
 
-    /// "Can't speak now": the word comes back later, with no penalty and no XP.
+    /// "Can't speak now" (or no microphone): the word comes back later as another kind of
+    /// exercise, with no penalty and no XP, and there's no more speaking this session.
     func skip() {
         guard !answered, let c = card else { return }
         answered = true
+        speakingOff = true
         queue.append(.card(c))
     }
 
@@ -1073,7 +1101,7 @@ struct Exercise {
                      met: ((String) -> Bool)? = nil) -> Exercise? {
         switch dir {
         case "sentence": return sentence(c, met: met ?? { progress.srs[$0] != nil })
-        case "speak": return speak(c)
+        case "speak": return speak(c, met: met ?? { progress.srs[$0] != nil })
         case "write":
             // the help fades as the characters are written: the least-written one sets the prompt
             let times = c.word.hanzi.filter(Course.isHan).map { progress.timesWritten(String($0)) }
@@ -1136,12 +1164,12 @@ struct Exercise {
         return Exercise(kind: .choice, dir: dir, card: c, options: (distractors.prefix(3) + [answer]).shuffled(), answer: answer)
     }
 
-    /// Say it aloud: a short phrase with the word in it, since a lone syllable is too
-    /// easily misheard, else the word itself (web: the speak card).
-    static func speak(_ c: Card) -> Exercise {
-        let phrase = Course.shared.sentences(for: c)
-            .filter { (3...12).contains($0.hanzi.filter(Course.isHan).count) }
-            .min { $0.hanzi.filter(Course.isHan).count < $1.hanzi.filter(Course.isHan).count }
+    /// Say it aloud: the word itself, or now and then a short sentence with it in, but only
+    /// one whose every word has been met (see Course.speakSentences). `sentenceChance` is how
+    /// often a sentence is asked for when one will do.
+    static func speak(_ c: Card, met: (String) -> Bool, sentenceChance: Double = 0.5) -> Exercise {
+        let ok = Course.shared.speakSentences(for: c, met: met)
+        let phrase = !ok.isEmpty && Double.random(in: 0..<1) < sentenceChance ? ok.randomElement() : nil
         return Exercise(kind: .speak, dir: "speak", card: c, sentence: phrase)
     }
 
