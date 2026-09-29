@@ -102,9 +102,10 @@ enum Autoplay {
         return nil
     }
 
-    /// Once the answer is out, right or wrong: the right Chinese, once.
+    /// Once the answer is out: the right Chinese, but only if it wasn't already said as the
+    /// exercise appeared (then the right or wrong chime is enough: once is plenty).
     static func onAnswer(_ ex: Exercise, autoplay: Bool) -> String? {
-        guard autoplay else { return nil }
+        guard autoplay, onShow(ex, autoplay: autoplay) == nil else { return nil }
         if ex.kind == .choice { return ex.card.word.hanzi }
         if ex.kind == .sentence { return ex.sentence?.hanzi }
         return nil

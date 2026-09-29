@@ -81,7 +81,11 @@ struct SpeakView: View {
         }
         .frame(maxWidth: .infinity)
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: outcome)
-        .onAppear { checkAvailable() }
+        .onAppear {
+            checkAvailable()
+            // as Duolingo: say it first, so there's something to copy (the speaker says it again)
+            if !answered { Speech.shared.autoSpeak(ex.sayHanzi) }
+        }
         .onDisappear { recognizer.end() }
     }
 

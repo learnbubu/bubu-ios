@@ -131,10 +131,13 @@ final class BeginnerTests: XCTestCase {
         XCTAssertNil(Autoplay.onShow(choice("pinyin"), autoplay: true))                        // the tones are
         XCTAssertEqual(Autoplay.onShow(choice("listen"), autoplay: true), "你好")               // the sound is the question
         XCTAssertEqual(Autoplay.onShow(choice("listen"), autoplay: false), "你好")
-        // once answered: the right Chinese
-        for d in ["recognize", "recall", "pinyin", "listen"] {
+        // once answered: the right Chinese, only if it wasn't already said as it appeared
+        for d in ["recall", "pinyin"] {
             XCTAssertEqual(Autoplay.onAnswer(choice(d), autoplay: true), "你好", d)
             XCTAssertNil(Autoplay.onAnswer(choice(d), autoplay: false), d)
+        }
+        for d in ["recognize", "listen"] {
+            XCTAssertNil(Autoplay.onAnswer(choice(d), autoplay: true), "\(d): heard once already")
         }
         let s = Sentence(hanzi: "你好，我是大卫。", pinyin: "nǐ hǎo, wǒ shì Dàwèi.", en: "Hello, I'm David.",
                          words: [.init(hanzi: "你好", pinyin: "nǐ hǎo"), .init(hanzi: "我", pinyin: "wǒ"),
@@ -145,6 +148,7 @@ final class BeginnerTests: XCTestCase {
         let translate = Exercise(kind: .sentence, dir: "sentence", card: c, sentence: s, toChinese: false)
         XCTAssertEqual(Autoplay.onShow(translate, autoplay: true), s.hanzi)
         XCTAssertNil(Autoplay.onShow(translate, autoplay: false))
+        XCTAssertNil(Autoplay.onAnswer(translate, autoplay: true))                            // heard once already
         let speak = Exercise(kind: .speak, dir: "speak", card: c)
         XCTAssertNil(Autoplay.onShow(speak, autoplay: true))
         XCTAssertNil(Autoplay.onAnswer(speak, autoplay: true))
