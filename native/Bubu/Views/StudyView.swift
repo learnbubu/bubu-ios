@@ -27,7 +27,12 @@ struct StudyView: View {
     /// pinyin shows until the next one
     @State private var srsAtStart: [String: SRSRecord]?
     /// pinyin training wheels for this exercise
-    private var wheels: Wheels { Wheels(srs: srsAtStart ?? progress.srs, mode: progress.prefs.pinyin) }
+    private var wheels: Wheels {
+        var w = Wheels(srs: srsAtStart ?? progress.srs, mode: progress.prefs.pinyin)
+        let here = progress.currentLessonId ?? Course.shared.lessons.last?.id ?? ""
+        w.early = Course.shared.bookNumber(of: here) < TrainingWheels.fadeFromBook
+        return w
+    }
 
     struct Feedback { let correct: Bool; let chosen: String? }
 

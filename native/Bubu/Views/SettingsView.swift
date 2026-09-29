@@ -102,6 +102,19 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                 }
 
+                if Tester.isTestBuild {
+                    section {
+                        row("Unlimited buns", "Tester only: mistakes never cost a bun (as Plus would).") {
+                            Toggle("", isOn: Binding(get: { progress.isPlus }, set: { progress.setPlus($0) }))
+                                .labelsHidden().tint(.accent)
+                        }
+                        divider
+                        row("Start the stones again", "Tester only: clears every stone, word and streak so the course starts from stone 1. Settings stay.") {
+                            Button("Reset") { confirmReset = true }.font(.nunito(15, .bold)).foregroundStyle(Color.again)
+                        }
+                    }
+                }
+
                 section {
                     row("Back up progress", "Save everything to a file, in the same format as the website, so it restores in either. Progress lives only on this phone — \(progress.backupAge).") {
                         ExportButton()
@@ -265,4 +278,16 @@ struct Segments: View {
         .background(Color.bg, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
         .sensoryFeedback(.selection, trigger: value)
     }
+}
+
+/// TestFlight (and debug) builds: the tester switches in Settings. A TestFlight install's
+/// App Store receipt is the sandbox one.
+enum Tester {
+    static let isTestBuild: Bool = {
+        #if DEBUG
+        return true
+        #else
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #endif
+    }()
 }

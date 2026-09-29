@@ -200,6 +200,14 @@ final class Course {
 
     func cards(in lessonId: String) -> [Card] { cardsByLesson[lessonId] ?? [] }
 
+    /// Which book a stone is in, counting from 1 (起步 1 is book 1).
+    func bookNumber(of lessonId: String) -> Int {
+        guard let ci = chapterOf[lessonId] else { return 1 }
+        var books: [String] = []
+        for ch in chapters[0...ci] where books.last != ch.unit { books.append(ch.unit) }
+        return max(1, books.count)
+    }
+
     /// A practice stone's stones: those before it in its chapter that teach words (for the
     /// chapter review, the whole chapter). Empty for any other lesson.
     func practiceScope(_ lessonId: String) -> [String] {

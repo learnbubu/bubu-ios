@@ -33,6 +33,10 @@ enum TrainingWheels {
     /// …or its reviews are spaced at least this many days apart.
     static let strongDays = 3.0
 
+    /// On Auto, pinyin stays over every word through the first books; only from this book
+    /// on does it fade from the words you know (the owner: "more when we get to the 4th book").
+    static let fadeFromBook = 4
+
     /// Whether a word is strong enough to go without its pinyin (Auto).
     static func isStrong(_ s: SRSRecord?) -> Bool {
         guard let s else { return false }
@@ -46,11 +50,11 @@ enum TrainingWheels {
     }
 
     /// Whether pinyin shows over a word (where it doesn't, a tap on the word shows it).
-    static func shows(_ s: SRSRecord?, mode: PinyinMode, testing: Bool = false) -> Bool {
+    static func shows(_ s: SRSRecord?, mode: PinyinMode, testing: Bool = false, early: Bool = false) -> Bool {
         if testing { return false }
         switch mode {
         case .always: return true
-        case .auto: return !isStrong(s)
+        case .auto: return early || !isStrong(s)
         case .known: return StudySession.isNewCard(s)
         }
     }
@@ -61,6 +65,8 @@ enum TrainingWheels {
 struct Wheels {
     var srs: [String: SRSRecord] = [:]
     var mode: PinyinMode = .auto
+    /// The learner is still in the first books, where Auto keeps pinyin on everything.
+    var early = false
 
     /// A word's record: its own card's, the strongest if the course has it more than once.
     func record(hanzi: String) -> SRSRecord? {
@@ -70,11 +76,11 @@ struct Wheels {
     }
 
     func shows(card: Card, testing: Bool = false) -> Bool {
-        TrainingWheels.shows(srs[card.id], mode: mode, testing: testing)
+        TrainingWheels.shows(srs[card.id], mode: mode, testing: testing, early: early)
     }
 
     func shows(hanzi: String, testing: Bool = false) -> Bool {
-        TrainingWheels.shows(record(hanzi: hanzi), mode: mode, testing: testing)
+        TrainingWheels.shows(record(hanzi: hanzi), mode: mode, testing: testing, early: early)
     }
 }
 

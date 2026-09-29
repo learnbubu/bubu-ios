@@ -70,8 +70,14 @@ final class Speech {
     /// nil for nothing. Goes through `speak`, so the same audio session as everything else.
     func autoSpeak(_ text: String?) {
         guard let text, !text.isEmpty else { return }
+        // just heard (the new-word card said it, then its first exercise would again): once is enough
+        if text == lastText, Date().timeIntervalSince(lastAt) < Self.repeatGap { return }
         speak(text)
     }
+    /// An exercise doesn't say again by itself what was said this recently.
+    static let repeatGap: TimeInterval = 12
+    private var lastText = ""
+    private var lastAt = Date.distantPast
 
     /// Said once: there's no Chinese voice, or there's a far better one to download.
     private func voiceTips() {
@@ -98,6 +104,7 @@ final class Speech {
 
     func speak(_ text: String, slow: Bool = false) {
         voiceTips()
+        lastText = text; lastAt = Date()
         Sounds.shared.activate()
         let u = AVSpeechUtterance(string: text)
         u.voice = voice
