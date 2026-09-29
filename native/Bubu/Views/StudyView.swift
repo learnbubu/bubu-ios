@@ -147,7 +147,8 @@ struct StudyView: View {
     /// answer away (see Autoplay.onShow).
     private func playPrompt() {
         guard let ex = session.exercise, !session.answered else { return }
-        Speech.shared.autoSpeak(Autoplay.onShow(ex, autoplay: progress.prefs.playsAutomatically))
+        Speech.shared.autoSpeak(Autoplay.onShow(ex, autoplay: progress.prefs.playsAutomatically),
+                                always: ex.dir == "listen")
     }
 
     /// The right Chinese, said once as the feedback comes up (after the right/wrong chime).
