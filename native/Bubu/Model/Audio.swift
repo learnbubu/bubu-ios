@@ -98,8 +98,11 @@ final class Speech {
         clipQueue.async { [self] in
             clip?.stop()
             guard let p = try? AVAudioPlayer(contentsOf: url) else { return }
-            p.enableRate = true
-            p.rate = rate
+            // at its own speed it's played untouched: changing the rate stretches the sound
+            if abs(rate - 1) > 0.02 {
+                p.enableRate = true
+                p.rate = rate
+            }
             clip = p
             p.play()
         }
@@ -143,6 +146,9 @@ final class Speech {
     }
 
     func speak(_ text: String, slow: Bool = false, male: Bool = false) {
+        // asked for twice at once (two parts of a screen both saying it): said once, not
+        // cut off and started again
+        if !slow, text == lastText, Date().timeIntervalSince(lastAt) < 0.6 { return }
         lastText = text; lastAt = Date()
         Sounds.shared.activate()
         // a recorded clip when there is one; the phone's own voice otherwise

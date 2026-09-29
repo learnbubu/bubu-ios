@@ -9,7 +9,7 @@ and falls back to the phone's own voice when there isn't one. Clips already made
 """
 import hashlib, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import tts
+import tts, takes
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COURSE = os.path.join(ROOT, "native", "Bubu", "Resources", "Data", "course.json")
@@ -60,6 +60,22 @@ def plan(chapters):
     return uniq
 
 
+def pick(text, voice, tries=4):
+    """A take of the text. The voices read a little differently each time, so a short word
+    (up to three characters) is taken up to `tries` times until one measures right: as many
+    swells of sound as syllables, and no longer than a syllable should be."""
+    n = len(han(text))
+    data = takes.wav(text, voice)
+    if n == 0 or n > 3:
+        return data
+    for _ in range(tries - 1):
+        secs, humps, _, _ = takes.measure(data)
+        if humps <= n and 0.15 * n <= secs <= 0.5 * n:
+            return data
+        data = takes.wav(text, voice)
+    return data
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     chapters = [int(x) for x in sys.argv[2:]] or [1]
@@ -76,7 +92,10 @@ if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     size = 0
     for i, (v, t) in enumerate(new, 1):
-        size += tts.speak(t, VOICES[v], os.path.join(OUT, name(t, v) + ".mp3"))
+        path = os.path.join(OUT, name(t, v) + ".mp3")
+        best = pick(t, VOICES[v])
+        takes.mp3(best, path)
+        size += os.path.getsize(path)
         if i % 20 == 0:
             print(f"  {i}/{len(new)}")
     print(f"made {len(new)} clips, {size // 1024} KB")
