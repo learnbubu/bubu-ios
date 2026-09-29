@@ -29,6 +29,7 @@ struct Activity: Codable, Equatable {
     var buns: Buns?                          // nil means a full five
     var pocketDay: String?                   // the day the daily red pocket was given
     var plus = false                         // Bùbù Plus
+    var written: [String: Int]?              // character → times written to the end (writing guidance)
 
     /// n buns as of `at` (ms), one growing back every four hours; `t` is when
     /// they were last changed, so the newer record wins a merge.
@@ -55,6 +56,7 @@ struct Activity: Codable, Equatable {
         relightAsked = try? c.decode(String.self, forKey: .relightAsked)
         coinsIn = get(.coinsIn, [:]); coinsOut = get(.coinsOut, [:]); buns = try? c.decode(Buns.self, forKey: .buns)
         pocketDay = try? c.decode(String.self, forKey: .pocketDay); plus = get(.plus, false)
+        written = try? c.decode([String: Int].self, forKey: .written)
     }
 }
 
@@ -392,6 +394,19 @@ final class ProgressStore {
     }
 
     func setHook(_ ch: String, _ text: String?) { hooks[ch] = text; save() }
+
+    // MARK: writing guidance
+    /// How many times a character has been written to the end: the one source of truth
+    /// for how much help writing it gets (`WriteGuidance`).
+    func timesWritten(_ ch: String) -> Int { activity.written?[ch] ?? 0 }
+    func guidance(for ch: String) -> WriteGuidance { WriteGuidance(timesWritten: timesWritten(ch)) }
+    /// A character written to the end, once more.
+    func recordWritten(_ ch: String) {
+        var w = activity.written ?? [:]
+        w[ch, default: 0] += 1
+        activity.written = w
+        save()
+    }
 
     func markRead(_ storyId: String) -> Bool {
         let first = activity.readsDone[storyId] == nil

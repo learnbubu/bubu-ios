@@ -868,7 +868,7 @@ struct Exercise {
     var tiles: [Tile] = []
     /// a word not learned yet when the question was asked: shows the NEW WORD badge
     var isNew = false
-    /// writing help: 0 trace, 1 first part shown, 2 from memory
+    /// writing help, a `WriteGuidance` raw value: 0 full, 1 outline, 2 from memory
     var writeStage = 0
 
     struct Tile: Identifiable, Hashable { let id: Int; let text: String; let pinyin: String? }
@@ -882,7 +882,7 @@ struct Exercise {
         case "listen": return "What did you hear?"
         case "sentence": return toChinese ? "Build the Chinese" : "Translate this sentence"
         case "speak": return "Say it out loud"
-        case "write": return ["Trace, then write it", "Write it", "Write it from memory"][writeStage]
+        case "write": return (WriteGuidance(rawValue: writeStage) ?? .full).label
         default: return "What does this mean?"
         }
     }
@@ -894,10 +894,10 @@ struct Exercise {
         case "sentence": return sentence(c, met: met ?? { progress.srs[$0] != nil })
         case "speak": return speak(c)
         case "write":
-            let s = progress.srs[c.id]
-            // the help fades: new, learning, then from memory once spaced a week out
-            let stage = (s?.reps ?? 0) < 1 ? 0 : (s?.interval ?? 0) >= 7 ? 2 : 1
-            return Exercise(kind: .write, dir: "write", card: c, writeStage: stage)
+            // the help fades as the characters are written: the least-written one sets the prompt
+            let times = c.word.hanzi.filter(Course.isHan).map { progress.timesWritten(String($0)) }
+            let stage = WriteGuidance(timesWritten: times.min() ?? 0)
+            return Exercise(kind: .write, dir: "write", card: c, writeStage: stage.rawValue)
         default: return choice(c, dir: dir, scope: scope)
         }
     }

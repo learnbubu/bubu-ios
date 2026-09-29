@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// Writing practice, as the web's phone layout: one big box per character, the
-/// help fading as the word is learnt. New: the strokes play, then you trace.
-/// Learning: the first part is shown. Known: a blank box. A stroke only counts
-/// if it matches, in order; a hint flashes after a few misses.
+/// Writing practice, as the web's phone layout: one big box per character, the help
+/// fading as each character is written (`WriteGuidance`, from `ProgressStore.timesWritten`).
+/// The first time the strokes play, then you trace with the next stroke lit up; the second,
+/// the outline stays; from the third, a blank box. A stroke only counts if it matches, in
+/// order; the stroke is shown after a miss or two. "Show me" plays the strokes again.
 struct WriteView: View {
     let ex: Exercise
     let answered: Bool
@@ -11,21 +12,22 @@ struct WriteView: View {
 
     @State private var index = 0
     @State private var finishedChars = 0
+    @State private var replay = 0
+    /// Times each character had been written when the exercise opened: its help holds for
+    /// the whole exercise, though finishing a character counts straight away.
+    @State private var timesAtStart: [String: Int]? = nil
     @Environment(ProgressStore.self) private var progress
     private var chars: [String] { ex.card.word.hanzi.filter(Course.isHan).map(String.init) }
 
-    static let stageInfo: [(chip: String, note: String, hint: Int)] = [
-        ("New", "Watch the strokes, then trace over them.", 1),
-        ("Learning", "The first part is shown. Write the whole character.", 2),
-        ("From memory", "Write it from memory. A hint shows after a few misses.", 3),
-    ]
+    private func guidance(_ ch: String) -> WriteGuidance {
+        WriteGuidance(timesWritten: timesAtStart?[ch] ?? progress.timesWritten(ch))
+    }
 
     var body: some View {
         let w = ex.card.word, ch = chars[min(index, chars.count - 1)]
-        let stage = ex.writeStage
+        let level = guidance(ch)
         VStack(spacing: 10) {
             HStack(spacing: 12) {
-                if stage == 0 { GlyphAnimation(char: ch, size: 50, loops: 2).id(ch) } else { PeekBox(char: ch, size: 50) }
                 VStack(alignment: .leading, spacing: 1) {
                     PinyinText(pinyin: w.pinyin, size: 18.4)
                     Text(w.en + (chars.count > 1 ? "  ·  \(index + 1)/\(chars.count)" : ""))
@@ -36,7 +38,8 @@ struct WriteView: View {
             }
             GeometryReader { g in
                 let side = min(g.size.width - 8, 460)
-                WritingBox(char: ch, size: side, stage: stage, checking: progress.prefs.checkStrokes) {
+                WritingBox(char: ch, size: side, level: level, checking: progress.prefs.checkStrokes, replay: replay) {
+                    progress.recordWritten(ch)
                     finishedChars = index + 1
                     if index == chars.count - 1 { done() }
                 }
@@ -45,10 +48,28 @@ struct WriteView: View {
             }
             .aspectRatio(1, contentMode: .fit)
             .frame(maxWidth: 468)
-            Text(Self.stageInfo[stage].note).font(.nunito(13.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+            HStack(alignment: .center, spacing: 10) {
+                Text(level.note).font(.nunito(13.5)).foregroundStyle(Color.muted)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Button { replay += 1 } label: {
+                    Label("Show me", systemImage: "play.circle.fill")
+                        .font(.nunito(13.5, .bold)).foregroundStyle(Color.accent)
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                        .background(Color.accent.opacity(0.12), in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .fixedSize()
+            }
             if finishedChars > index && index < chars.count - 1 {
                 Button("Next character (\(index + 1)/\(chars.count)) →") { withAnimation { index += 1 } }
                     .buttonStyle(WideButton())
+            }
+        }
+        .onAppear {
+            if timesAtStart == nil {
+                var t: [String: Int] = [:]
+                for c in chars where t[c] == nil { t[c] = progress.timesWritten(c) }
+                timesAtStart = t
             }
         }
     }
@@ -74,47 +95,60 @@ struct GridSquare: View {
 
 /// One character to write, stroke by stroke, as the web's HanziWriter quiz: the pen draws
 /// on a UIKit surface (`InkCanvas`); a right stroke's ink fades as the real stroke draws in,
-/// a wrong one flashes red and goes; after a few misses the next stroke is traced as a hint;
-/// the finished character lights up once before the tick.
+/// a wrong one flashes red and goes; the help follows `WriteGuidance` (the strokes played
+/// first, the pale outline, the next stroke lit up, a trace after misses); the finished
+/// character lights up once before the tick.
 struct WritingBox: View {
     let char: String
     let size: CGFloat
-    let stage: Int
+    var checking = true
+    /// Bumped by "Show me": the strokes play again.
+    var replay = 0
     var complete: () -> Void
 
+    /// The help, fixed when the box appears (finishing the character counts at once).
+    @State private var level: WriteGuidance
     @State private var current = 0
+    /// Misses on the current stroke.
     @State private var misses = 0
-    @State private var hint = false
     @State private var intro: Bool
     @State private var finishing = false
     @State private var glow = false
     @State private var done = false
     @State private var drawn = 0
+    /// Free tracing: the brush outlines of every stroke, kept.
+    @State private var freeInk: [Path] = []
 
-    var checking = true
-    @State private var freeInk: [[CGPoint]] = []
-
-    /// The pen's width on screen, as the web keeps it (7 px whatever the box's size).
-    static let penWidth: CGFloat = 7
-
-    init(char: String, size: CGFloat, stage: Int, checking: Bool = true, animate: Bool = true, complete: @escaping () -> Void) {
-        self.char = char; self.size = size; self.stage = stage; self.checking = checking; self.complete = complete
-        _intro = State(initialValue: stage == 0 && animate)
+    init(char: String, size: CGFloat, level: WriteGuidance, checking: Bool = true, replay: Int = 0,
+         animate: Bool = true, complete: @escaping () -> Void) {
+        self.char = char
+        self.size = size
+        self.checking = checking
+        self.replay = replay
+        self.complete = complete
+        _level = State(initialValue: level)
+        _intro = State(initialValue: level.playsDemo && animate)
     }
 
     private var data: CharStrokes? { StrokeData.shared.chars[char] }
     private var space: GlyphSpace { GlyphSpace(size: size) }
+    /// Waiting for the current stroke (not playing the strokes, not finished).
+    private func waiting(_ d: CharStrokes) -> Bool { checking && !intro && !done && !finishing && current < d.count }
 
     var body: some View {
         ZStack {
             GridSquare()
             if let d = data {
-                // the help for this stage
-                if stage == 0 { strokes(d, Array(0..<d.count), Color.line) }
-                if stage == 1 { strokes(d, d.guideStrokes, Color.line.opacity(0.8)) }
-                if intro { GlyphAnimation(char: char, size: size, loops: 1) { withAnimation { intro = false } } }
+                // the whole character, pale, under the pen
+                if level.showsOutline { strokes(d, Array(0..<d.count), Color.line) }
+                // the next stroke lit up: a glow, a dot where it starts, an arrow its way
+                if waiting(d) && level.highlights(misses: misses) {
+                    guide(d, current)
+                        .id("guide-\(current)")
+                        .transition(.opacity)
+                }
                 // the hint: the next stroke traced along its centre line, again at each further miss
-                if hint && current < d.count {
+                if waiting(d) && level.traces(misses: misses) {
                     reveal(d, current, Color.accent.opacity(0.42), duration: 0.6)
                         .id("hint-\(current)-\(misses)")
                         .transition(.opacity)
@@ -127,12 +161,19 @@ struct WritingBox: View {
                 strokes(d, Array(0..<d.count), Color.good)
                     .opacity(glow ? 1 : 0)
                     .allowsHitTesting(false)
+                // the strokes played in order (the first time, and "Show me")
+                if intro {
+                    GlyphAnimation(char: char, size: size, loops: 1) {
+                        withAnimation(.easeOut(duration: 0.25)) { intro = false }
+                    }
+                    .transition(.opacity)
+                }
                 // free tracing: every stroke stays
-                Path { p in for s in freeInk { p.addPath(Path(InkGeometry.path(s))) } }
-                    .stroke(Color.accent, style: StrokeStyle(lineWidth: Self.penWidth, lineCap: .round, lineJoin: .round))
+                Path { p in for s in freeInk { p.addPath(s) } }
+                    .fill(Color.accent)
                     .allowsHitTesting(false)
                 // the pen
-                InkCanvas(enabled: !intro && !done && !finishing, lineWidth: Self.penWidth) { finishStroke($0) }
+                InkCanvas(enabled: !intro && !done && !finishing, brush: .forBox(size)) { finishStroke($0) }
                 if done {
                     Image(systemName: "checkmark.circle.fill").font(.system(size: 30)).foregroundStyle(Color.good)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing).padding(8)
@@ -147,6 +188,9 @@ struct WritingBox: View {
         .sensoryFeedback(.impact(weight: .light), trigger: drawn)
         .sensoryFeedback(.error, trigger: misses) { _, n in n > 0 }
         .sensoryFeedback(.success, trigger: done) { _, n in n }
+        .onChange(of: replay) { _, _ in
+            withAnimation(.easeOut(duration: 0.2)) { intro = true }
+        }
         .overlay(alignment: .bottomTrailing) {
             if !checking && !freeInk.isEmpty {
                 HStack(spacing: 6) {
@@ -180,30 +224,34 @@ struct WritingBox: View {
                             width: 200 * sp.s, color: color, duration: duration)
     }
 
+    /// Stroke `i` lit up, with where it starts and which way it goes.
+    private func guide(_ d: CharStrokes, _ i: Int) -> StrokeGuide {
+        let sp = space
+        let outline = Path { p in p.addPath(SVGPath.stroke(d.strokes[i]), transform: sp.transform) }
+        return StrokeGuide(outline: outline, median: d.median(i).map(sp.toView), size: size)
+    }
+
     /// A finished stroke from the pen, in view space. The answer says how its ink leaves.
-    private func finishStroke(_ points: [CGPoint]) -> InkCanvas.Verdict {
+    private func finishStroke(_ stroke: InkCanvas.Stroke) -> InkCanvas.Verdict {
         guard let d = data, !done, !finishing else { return .dropped }
+        let points = stroke.points
         if !checking {
             guard !points.isEmpty else { return .dropped }
-            freeInk.append(points)
+            freeInk.append(Path(stroke.outline))
             return .kept
         }
         guard current < d.count else { return .dropped }
         // a tap isn't a stroke, and isn't a miss (HanziWriter ignores one too)
         guard StrokeMatch.length(points) >= 2 else { return .dropped }
         let glyph = InkGeometry.thin(points, minDistance: 2).map(space.toGlyph)
-        if StrokeMatch.matches(glyph, char: d, stroke: current, leniency: StrokeMatch.leniency, outlineVisible: stage == 0) {
+        if StrokeMatch.matches(glyph, char: d, stroke: current, leniency: StrokeMatch.leniency, outlineVisible: level.showsOutline) {
             current += 1
-            misses = 0
-            if hint { withAnimation(.easeOut(duration: 0.2)) { hint = false } }
             drawn += 1
+            withAnimation(.easeOut(duration: 0.2)) { misses = 0 }
             if current == d.count { finish() }
             return .accepted
         }
-        misses += 1
-        if misses >= WriteView.stageInfo[stage].hint {
-            withAnimation(.easeInOut(duration: 0.3)) { hint = true }
-        }
+        withAnimation(.easeInOut(duration: 0.3)) { misses += 1 }
         return .rejected
     }
 
@@ -218,6 +266,61 @@ struct WritingBox: View {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) { done = true }
                 complete()
             }
+        }
+    }
+}
+
+/// The next stroke lit up for someone learning it: its outline tinted with a soft,
+/// breathing glow, a dot where it starts, and a short line from the dot along its centre
+/// line to an arrowhead, the way to draw it.
+struct StrokeGuide: View {
+    let outline: Path
+    /// The stroke's centre line in view space, from where it starts.
+    let median: [CGPoint]
+    let size: CGFloat
+    var color: Color = .accent
+    @State private var breathe = false
+
+    var body: some View {
+        let lengths = InkGeometry.arcLengths(median)
+        let total = lengths.last ?? 0
+        let reach = min(total * 0.45, max(size * 0.14, 14))
+        let arrow = InkGeometry.along(median, distance: reach)
+        let dot = max(7, size * 0.03)
+        let head = max(5, size * 0.03)
+        let line = max(1.5, size * 0.007)
+        ZStack {
+            outline.fill(color.opacity(0.4))
+                .blur(radius: max(2, size * 0.016))
+                .opacity(breathe ? 0.9 : 0.4)
+            outline.fill(color.opacity(0.18))
+            if let a = arrow, let s = median.first {
+                Path { p in
+                    p.move(to: s)
+                    for (q, l) in zip(median, lengths).dropFirst() where l < reach { p.addLine(to: q) }
+                    p.addLine(to: a.point)
+                }
+                .stroke(color.opacity(0.85), style: StrokeStyle(lineWidth: line, lineCap: .round, lineJoin: .round))
+                Path { p in
+                    let back = CGPoint(x: a.point.x - a.direction.x * head, y: a.point.y - a.direction.y * head)
+                    let nx = -a.direction.y * head * 0.7, ny = a.direction.x * head * 0.7
+                    p.move(to: CGPoint(x: back.x + nx, y: back.y + ny))
+                    p.addLine(to: a.point)
+                    p.addLine(to: CGPoint(x: back.x - nx, y: back.y - ny))
+                }
+                .stroke(color, style: StrokeStyle(lineWidth: line * 1.4, lineCap: .round, lineJoin: .round))
+            }
+            if let s = median.first {
+                Circle().fill(color)
+                    .overlay(Circle().strokeBorder(Color.white.opacity(0.9), lineWidth: 1.5))
+                    .frame(width: dot, height: dot)
+                    .position(s)
+            }
+        }
+        .frame(width: size, height: size)
+        .allowsHitTesting(false)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) { breathe = true }
         }
     }
 }
@@ -250,30 +353,38 @@ struct StrokeReveal: View {
     }
 }
 
-/// The strokes drawn one after another, in order, as HanziWriter animates them.
+/// The strokes drawn one after another, in order, as HanziWriter animates them, at a calm
+/// pace (half a second a stroke). The clock starts when the view is really on screen (a
+/// `task`, not the view's creation, and not an `onChange`, which never sees the first
+/// value), so the first playing isn't missed. Tap to play it again.
 struct GlyphAnimation: View {
     let char: String
     let size: CGFloat
     var loops = 1
     var finished: (() -> Void)? = nil
-    @State private var start = Date()
-    @State private var reported = false
+    @State private var start: Date? = nil
+    @State private var over = false
+    @State private var run = 0
 
-    private let perStroke = 0.55, gap = 0.12, pause = 0.6
+    static let perStroke = 0.5, gap = 0.15, pause = 0.6
+
+    /// Seconds for one playing of `n` strokes and the pause after them.
+    static func duration(strokes n: Int) -> Double { Double(n) * (perStroke + gap) + pause }
 
     var body: some View {
         let d = StrokeData.shared.chars[char]
         let sp = GlyphSpace(size: size)
-        TimelineView(.animation(paused: reported)) { tl in
-            let n = d?.count ?? 0
-            let one = Double(n) * (perStroke + gap) + pause
-            let raw = tl.date.timeIntervalSince(start)
-            let loop = min(Double(loops - 1), floor(raw / one))
-            let t = raw >= one * Double(loops) ? one : raw - loop * one
+        let n = d?.count ?? 0
+        let one = Self.duration(strokes: n)
+        let plays = max(1, loops)
+        TimelineView(.animation(paused: over || start == nil)) { tl in
+            let raw = start.map { tl.date.timeIntervalSince($0) } ?? 0
+            let loop = max(0, min(Double(plays - 1), floor(raw / one)))
+            let t = over || raw >= one * Double(plays) ? one : raw - loop * one
             ZStack {
                 if let d {
                     ForEach(0..<n, id: \.self) { i in
-                        let p = max(0, min(1, (t - Double(i) * (perStroke + gap)) / perStroke))
+                        let p = max(0, min(1, (t - Double(i) * (Self.perStroke + Self.gap)) / Self.perStroke))
                         Path { $0.addPath(SVGPath.stroke(d.strokes[i]), transform: sp.transform) }
                             .fill(Color.accent)
                             .mask(medianPath(d.median(i), sp).trim(from: 0, to: p)
@@ -281,14 +392,19 @@ struct GlyphAnimation: View {
                     }
                 }
             }
-            .onChange(of: raw >= one * Double(loops)) { _, over in
-                if over && !reported { reported = true; finished?() }
-            }
         }
         .frame(width: size, height: size)
         .background { if size < 100 { GridSquare() } }
         .contentShape(Rectangle())
-        .onTapGesture { start = Date(); reported = false }
+        .onTapGesture { run += 1 }
+        .task(id: run) {
+            over = false
+            start = Date()
+            try? await Task.sleep(nanoseconds: UInt64(one * Double(plays) * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            over = true
+            finished?()
+        }
     }
 
     private func medianPath(_ pts: [CGPoint], _ sp: GlyphSpace) -> Path {
@@ -297,30 +413,6 @@ struct GlyphAnimation: View {
             p.move(to: sp.toView(f))
             pts.dropFirst().forEach { p.addLine(to: sp.toView($0)) }
         }
-    }
-}
-
-/// Stage 1 and 2: a small box that shows the character's strokes for a moment.
-struct PeekBox: View {
-    let char: String
-    let size: CGFloat
-    @State private var open = false
-    var body: some View {
-        Button { open = true; DispatchQueue.main.asyncAfter(deadline: .now() + 3.2) { open = false } } label: {
-            ZStack {
-                if open { GlyphAnimation(char: char, size: size, loops: 1) }
-                else {
-                    VStack(spacing: 1) {
-                        Image(systemName: "eye").font(.system(size: 15))
-                        Text("Peek").font(.nunito(11, .bold))
-                    }
-                    .foregroundStyle(Color.muted)
-                    .frame(width: size, height: size)
-                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
-                }
-            }
-        }
-        .buttonStyle(.plain)
     }
 }
 
@@ -375,7 +467,7 @@ struct WritingSheetPage: View {
                             ForEach(0..<4, id: \.self) { r in
                                 HStack(spacing: 0) {
                                     ForEach(0..<4, id: \.self) { c in
-                                        WritingBox(char: ch, size: cell, stage: r == 0 ? 0 : 2, animate: r == 0 && c == 0) {}
+                                        WritingBox(char: ch, size: cell, level: r == 0 ? .full : .memory, animate: r == 0 && c == 0) {}
                                     }
                                 }
                             }

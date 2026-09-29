@@ -75,6 +75,8 @@ enum CloudMerge {
         act["chests"] = jsNum(chests); act["quests"] = quests; act["boostUntil"] = jsNum(boostUntil)
         act["levelSeen"] = jsNum(levelSeen); act["lit"] = lit; act["coinsIn"] = coinsIn; act["coinsOut"] = coinsOut
         act["buns"] = buns; act["pocketDay"] = pocketDay; act["plus"] = plus
+        // times each character has been written (the app's writing guidance): the most either side has
+        if aa["written"] != nil || ab["written"] != nil { act["written"] = perDay(aa["written"], ab["written"]) }
         // JSON.stringify drops keys whose value is undefined (no buns / no quests on either side)
         out[activityKey] = text(act)
 
