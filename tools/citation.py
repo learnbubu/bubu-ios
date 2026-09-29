@@ -23,6 +23,21 @@ MARKS = {"ā": 1, "á": 2, "ǎ": 3, "à": 4, "ē": 1, "é": 2, "ě": 3, "è": 4,
          "ō": 1, "ó": 2, "ǒ": 3, "ò": 4, "ū": 1, "ú": 2, "ǔ": 3, "ù": 4, "ǖ": 1, "ǘ": 2, "ǚ": 3, "ǜ": 4}
 
 
+REFS = os.path.join(HERE, "refs", "tones.json")     # the four tones chosen by ear (妈 麻 马 骂)
+
+
+def refs():
+    return json.load(open(REFS, encoding="utf-8")) if os.path.exists(REFS) else {}
+
+
+def distance(c, ref):
+    """How far a reading's pitch is from the reference for its tone, in semitones (root mean
+    square over the nine points), and whether it's long enough beside it."""
+    if len(c) != len(ref["contour"]):
+        return 99.0
+    return float(np.sqrt(np.mean((np.array(c) - np.array(ref["contour"])) ** 2)))
+
+
 def tone(pinyin):
     return next((MARKS[ch] for ch in pinyin if ch in MARKS), 5)
 
@@ -73,21 +88,28 @@ def path(word, n):
 def readings(word, pinyin):
     """Up to eight readings of a word, the ones whose pitch has the right shape first."""
     want = SHAPES[tone(pinyin)]
+    ref = refs().get(str(tone(pinyin)))
     found, seen = [], set()
     for rate in RATES:
         for car in CARRIERS:
             cutout = last_word(synth(car.format(word), rate))
             if cutout is None:
                 continue
-            c, secs = takes.contour(cutout)
-            if tuple(c) in seen:
+            c, secs = takes.contour(cutout, points=9)
+            if not c or tuple(c) in seen:
                 continue
             seen.add(tuple(c))
-            shape = takes.tone_shape(c)
-            found.append({"wav": cutout, "secs": secs, "shape": shape, "right": shape in want,
-                          "how": f"{car.format('…')} at {rate}×"})
-    found.sort(key=lambda f: (not f["right"], abs(f["secs"] - 0.45)))
-    return found[:8]
+            if ref:
+                # beside the tone chosen by ear: close in pitch, and not clipped short
+                d = distance(c, ref)
+                found.append({"wav": cutout, "secs": secs, "d": d, "right": d <= 1.2 and secs >= 0.7 * ref["secs"],
+                              "shape": f"{d:.1f} from your {ref['word']}", "how": f"{car.format('…')} at {rate}×"})
+            else:
+                shape = takes.tone_shape(takes.contour(cutout)[0])
+                found.append({"wav": cutout, "secs": secs, "d": 0.0, "right": shape in want, "shape": shape,
+                              "how": f"{car.format('…')} at {rate}×"})
+    found.sort(key=lambda f: (not f["right"], f["d"], abs(f["secs"] - 0.4)))
+    return found[:int(os.environ.get("READINGS", "8"))]
 
 
 if __name__ == "__main__":
@@ -110,7 +132,7 @@ if __name__ == "__main__":
         for n, f in enumerate(readings(word, py), 1):
             takes.mp3(f["wav"], path(word, n))
             rows.append({"id": f"cite-{voice.name(word)}-{n}", "voice": "Kore", "hanzi": word, "pinyin": py, "en": en,
-                         "kind": f"reading {n} · pitch {f['shape']}{'' if f['right'] else ' (not the shape expected)'} · {f['secs']:.2f}s",
+                         "kind": f"reading {n} · pitch {f['shape']}{'' if f['right'] else ' (not a close match)'} · {f['secs']:.2f}s",
                          "audio": base64.b64encode(open(path(word, n), "rb").read()).decode()})
             print(word, n, f["shape"], f"{f['secs']:.2f}s", f["how"])
     page = open(os.path.join(HERE, "board.html"), encoding="utf-8").read()

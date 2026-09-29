@@ -128,7 +128,7 @@ function results() {
   const good = LIST_TICKS ? CLIPS.filter(c => marks[c.id] && marks[c.id].v === "y") : [];
   return ["Bùbù sound board: " + TITLE, (CLIPS.length - todo) + " of " + CLIPS.length + " checked, " + bad.length + " crossed", ""]
     .concat(good.map(c => "✓ " + c.voice + " | " + c.hanzi + " | " + c.kind))
-    .concat(bad.map(c => "✗ " + c.voice + " | " + c.hanzi + " | " + c.pinyin + " | " + ((marks[c.id].why || []).join(", ") || "no reason given")))
+    .concat(bad.map(c => "✗ " + c.voice + " | " + c.hanzi + " | " + (LIST_TICKS ? c.kind : c.pinyin) + " | " + ((marks[c.id].why || []).join(", ") || "no reason given")))
     .concat(todo ? ["", todo + " not checked yet"] : []).join("\n");
 }
 document.getElementById("todo").onclick = e => {
