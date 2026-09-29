@@ -99,12 +99,18 @@ final class Speech {
     func speak(_ text: String, slow: Bool = false) {
         voiceTips()
         Sounds.shared.activate()
-        synth.stopSpeaking(at: .immediate)
         let u = AVSpeechUtterance(string: text)
         u.voice = voice
         u.rate = slow ? Self.slowRate(rate) : rate
         u.pitchMultiplier = 1
-        synth.speak(u)
+        // speaking straight after stopping can be dropped by the synthesiser, so a word
+        // cut short gets a moment to stop before the next one starts
+        if synth.isSpeaking || synth.isPaused {
+            synth.stopSpeaking(at: .immediate)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [synth] in synth.speak(u) }
+        } else {
+            synth.speak(u)
+        }
     }
 }
 
@@ -118,16 +124,28 @@ final class Sounds {
     private var active = false
     private var recording = false
 
-    private init() {}
+    private init() {
+        // iOS switches our audio off for a call, Siri, another app or the lock screen;
+        // forget that it was on, so the next sound switches it back on
+        let nc = NotificationCenter.default
+        for name in [AVAudioSession.interruptionNotification, AVAudioSession.mediaServicesWereResetNotification,
+                     UIApplication.willEnterForegroundNotification] {
+            nc.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in self?.active = false }
+        }
+    }
 
     var enabled: Bool { ProgressStore.current?.prefs.sound ?? true }
 
     /// One audio setup for speech and effects, so neither cuts the other off.
     func activate() {
         guard !active, !recording else { return }
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
-        try? AVAudioSession.sharedInstance().setActive(true)
-        active = true
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+            active = true
+        } catch {
+            active = false          // try again on the next sound
+        }
     }
 
     /// Switch to the microphone for speaking practice, and back.
