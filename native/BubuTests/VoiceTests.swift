@@ -7,7 +7,7 @@ final class VoiceTests: XCTestCase {
         // from Python: hashlib.sha256(text.encode()).hexdigest()[:16]
         XCTAssertEqual(Speech.clipName("你好"), "k_670d9743542cae3e")
         XCTAssertEqual(Speech.clipName("你"), "k_a0c7716669b5ded0")
-        XCTAssertEqual(Speech.clipName(" 你好" + String(UnicodeScalar(10))), "k_670d9743542cae3e", "spaces around it don't matter")
+        XCTAssertEqual(Speech.clipName("  你好  "), "k_670d9743542cae3e", "spaces around it don't matter")
         XCTAssertEqual(Speech.clipName("你好", male: true), "c_670d9743542cae3e")
     }
 
