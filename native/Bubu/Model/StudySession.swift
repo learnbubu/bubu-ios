@@ -68,6 +68,10 @@ final class StudySession: Identifiable {
     private let newAtStart: Set<String>
     /// "Can't speak now", or no microphone: no more speaking this session
     private var speakingOff = false
+    /// "Can't listen now": no more listening this session
+    private(set) var listeningOff = false
+    /// "Can't listen now" in a session of only listening: it ended there, not played through
+    private var endedEarly = false
     /// right answers this session, per word: a new word's rung on its ladder
     private var rightInSession: [String: Int] = [:]
     /// how often each kind of exercise has been asked this session
@@ -82,6 +86,12 @@ final class StudySession: Identifiable {
     private let progress: ProgressStore
 
     private(set) var queue: [Item] = []
+    /// The words missed this session, waiting for the end-of-lesson mistakes stretch: they
+    /// come back once the planned exercises (`queue`) are done.
+    private(set) var retries: [Card] = []
+    /// The exercise on screen is a word missed earlier this session, back in the mistakes
+    /// stretch: it's labelled "Previous mistake".
+    private(set) var previousMistake = false
     private(set) var current: Item?
     private(set) var dir: String = "recognize"
     private(set) var exercise: Exercise?
@@ -693,24 +703,33 @@ final class StudySession: Identifiable {
     // MARK: moving through it
 
     func next() {
+        let lastId = card?.id
         answered = false
         lastCorrect = nil
         exercise = nil
         matched = []
         matchAudio = false
+        previousMistake = false
         if queue.isEmpty, mode == .placement, !placeBlocks.isEmpty, let b = nextProbe() {
             placeProbe = b; probes += 1
             queue = Self.probeCards(placeBlocks[b]).map { .card($0) }
             sessionTotal = max(sessionTotal, stepsDone + Self.probeSize)
         }
-        guard !queue.isEmpty else { finish(); return }
-        let item = queue.removeFirst()
+        guard hasMore else { finish(); return }
+        // the planned exercises first, then the mistakes stretch
+        let item: Item
+        if queue.isEmpty, let i = Self.nextRetry(retries.map(\.id), after: lastId) {
+            item = .card(retries.remove(at: i))
+            previousMistake = true
+        } else {
+            item = queue.removeFirst()
+        }
         current = item
         if case .meet(let cards, _, _) = item { metInSession.formUnion(cards.map(\.id)) }
         // a match may pair sounds with characters once all its words are past their first
         // rung, and listening is switched on
         if case .match(let cards, let listen) = item {
-            matchAudio = listen && focuses.contains("listen") && cards.allSatisfy { pastFirstRung($0) }
+            matchAudio = listen && !listeningOff && focuses.contains("listen") && cards.allSatisfy { pastFirstRung($0) }
         }
         if case .card(let c) = item {
             dir = pickDirection(c)
@@ -722,6 +741,17 @@ final class StudySession: Identifiable {
             exercise?.isNew = Self.isNewCard(progress.srs[c.id])
             dirsUsed[dir, default: 0] += 1
         }
+    }
+
+    /// Whether anything is left to ask: planned exercises, or mistakes waiting to come back.
+    var hasMore: Bool { !queue.isEmpty || !retries.isEmpty }
+
+    /// Which of the mistakes waiting comes next (an index into `waiting`, their words' ids in
+    /// order; nil when none wait): the first that isn't the word just asked, so a missed word
+    /// is never the very next exercise unless it's the only thing left.
+    static func nextRetry(_ waiting: [String], after last: String?) -> Int? {
+        guard !waiting.isEmpty else { return nil }
+        return waiting.firstIndex { $0 != last } ?? 0
     }
 
     /// A new word's exercises in its stone's session, easy to hard, one rung per right answer:
@@ -754,7 +784,9 @@ final class StudySession: Identifiable {
     /// Which exercise a card gets, climbing a ladder as the word gets stronger (web: pickDirection).
     private func pickDirection(_ c: Card) -> String {
         if isQuiz {
-            let mc = focuses.filter { !["write", "sentence", "speak"].contains($0) && (tonesTaught || $0 != "pinyin") }
+            let mc = focuses.filter {
+                !["write", "sentence", "speak"].contains($0) && (tonesTaught || $0 != "pinyin") && (!listeningOff || $0 != "listen")
+            }
             return mc.randomElement() ?? "recognize"
         }
         let s = progress.srs[c.id]
@@ -769,6 +801,8 @@ final class StudySession: Identifiable {
         if !StrokeData.shared.writable(c.word.hanzi) { enabled.removeAll { $0 == "write" } }
         // no speaking a word in its very first session, or once speaking's been put off
         if !maySpeak(c) { enabled.removeAll { $0 == "speak" } }
+        // no listening once it's been put off ("Can't listen now")
+        if listeningOff { enabled.removeAll { $0 == "listen" } }
         // a word new in a stone's session climbs its own ladder
         if freshIds.contains(c.id), let d = ladderDir(c, enabled) {
             dirByCard[c.id] = d
@@ -799,6 +833,7 @@ final class StudySession: Identifiable {
         if d == "sentence" { return !course.sentences(for: c, met: isMet).isEmpty }
         if d == "pinyin" { return tonesTaught }
         if d == "speak" { return maySpeak(c) }
+        if d == "listen" { return !listeningOff }
         return Self.allDirs.contains(d)
     }
 
@@ -881,8 +916,9 @@ final class StudySession: Identifiable {
                 if wasNew { learnedCount += 1 }
             }
         } else {
+            // a missed word comes back after the planned exercises, in the mistakes stretch
             againCount += 1
-            queue.append(.card(c))
+            retries.append(c)
         }
         return xp
     }
@@ -890,21 +926,39 @@ final class StudySession: Identifiable {
     /// Shuffle what's left (web: #studyShuffle). New words keep their order until all are met.
     func shuffleRest() -> Bool {
         guard !hasMeetLeft else { return false }
-        if !answered, let c = card { queue.append(.card(c)) }
+        if !answered, let c = card {
+            if previousMistake { retries.append(c) } else { queue.append(.card(c)) }
+        }
         if !answered, let m = current, case .match = m { queue.append(m) }
         queue.shuffle()
         next()
         return true
     }
 
-    /// "Can't speak now" (or no microphone): the word comes back later as another kind of
-    /// exercise, with no penalty and no XP, and there's no more speaking this session.
+    /// "Can't speak now" (or no microphone) and "Can't listen now": the word comes back later
+    /// as another kind of exercise, with no penalty and no XP, and there's no more speaking
+    /// (or listening, when it's a listening exercise that's skipped) this session. A session
+    /// of only listening has nothing else to ask, so it ends there.
     func skip() {
         guard !answered, let c = card else { return }
         answered = true
-        speakingOff = true
-        queue.append(.card(c))
+        if dir == "listen" {
+            listeningOff = true
+            if focuses == ["listen"] {
+                endedEarly = true
+                queue = []
+                retries = []
+                return
+            }
+        } else {
+            speakingOff = true
+        }
+        if previousMistake { retries.append(c) } else { queue.append(.card(c)) }
     }
+
+    /// Nothing was answered and no match finished: a session that ended at "Can't listen now"
+    /// before it began. Nothing is earned for it.
+    var nothingAnswered: Bool { answeredCount == 0 && stepsDone == 0 }
 
     /// A match is one step: the bar creeps through it a pair at a time, and it's counted
     /// in `stepsDone` once every pair is found.
@@ -923,30 +977,35 @@ final class StudySession: Identifiable {
         progress.holdSaves(); defer { progress.releaseSaves() }
         if mode == .placement { return finishPlacement() }
         let lessonCards = mode == .lesson ? course.cards(in: lessonId) : []
-        // a practice stone is finished by playing it through
-        let cleared = isPractice || (!lessonCards.isEmpty && lessonCards.allSatisfy { (progress.srs[$0.id]?.reps ?? 0) >= 1 })
+        // a practice stone is finished by playing it through (not by ending it early)
+        let played = isPractice && !endedEarly
+        let cleared = played || (!lessonCards.isEmpty && lessonCards.allSatisfy { (progress.srs[$0.id]?.reps ?? 0) >= 1 })
         let justFinished = mode == .lesson && !progress.isDone(lessonId) && cleared
         if justFinished { progress.markDone(lessonId) }
         let perfect = againCount == 0 && answeredCount >= 5
         let mark = progress.xpCounter
-        progress.questEvent("session", correct: true, lesson: justFinished, perfect: perfect)
         var goal = false
-        let s = progress.earnXP(justFinished ? Self.xpLesson : Self.xpSession)
-        goal = goal || s.goalReached
-        if perfect { let p = progress.earnXP(Self.xpPerfect); goal = goal || p.goalReached }
+        // a session ended before anything was answered earns nothing: no XP, no fire
+        let idle = nothingAnswered && !justFinished
+        if !idle {
+            progress.questEvent("session", correct: true, lesson: justFinished, perfect: perfect)
+            let s = progress.earnXP(justFinished ? Self.xpLesson : Self.xpSession)
+            goal = goal || s.goalReached
+            if perfect { let p = progress.earnXP(Self.xpPerfect); goal = goal || p.goalReached }
+        }
         sessionXP += progress.xpCounter - mark
         if justFinished {
             progress.startBoost()
             redPocket()
             storyUnlocked()
         }
-        let fire = progress.lightFire()
+        let fire: ProgressStore.Fire? = idle ? nil : progress.lightFire()
         let left = justFinished ? 0 : lessonCards.filter { (progress.srs[$0.id]?.reps ?? 0) < 1 }.count
         // a lesson comes in steps (its batches of new words): one done, more to go
         let total = mode == .lesson ? Self.lessonSteps(lessonId, progress).total : 0
         let stepDone = left > 0 && stepAtStart > 0 && stepAtStart < total
         let title = mode == .quiz ? "Quiz complete" : mode == .mistakes ? "Mistakes practised" : [.review, .trouble].contains(mode) ? "Review complete"
-            : isPractice ? (self.title == "Chapter review" ? "Chapter review done!" : "Practice done!")
+            : played ? (self.title == "Chapter review" ? "Chapter review done!" : "Practice done!")
             : justFinished ? "Lesson complete!" : stepDone ? "Step \(stepAtStart) of \(total) done" : "Session complete"
         let seconds = Int(((progress.now() - start) / 1000).rounded())
         let accuracy = answeredCount == 0 ? 100 : Int((Double(answeredCount - againCount) / Double(answeredCount) * 100).rounded())
@@ -958,7 +1017,7 @@ final class StudySession: Identifiable {
         if stepDone { result?.step = stepAtStart; result?.steps = total }
         result?.learned = learnedWords
         if isPractice { result?.practised = practisedWords }
-        Coach.sessionFinished()
+        if !idle { Coach.sessionFinished() }
     }
 
     /// The words met this session, in the lesson's order (the done screen's "You learned").
@@ -1053,6 +1112,7 @@ final class StudySession: Identifiable {
     func debugFinish() {
         combo = 4; answeredCount = 8; againCount = 1; stepsDone = sessionTotal
         queue = []
+        retries = []
         next()
     }
     #endif

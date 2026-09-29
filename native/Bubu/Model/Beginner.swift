@@ -112,6 +112,70 @@ enum Autoplay {
     }
 }
 
+// MARK: pick, then check
+
+/// Multiple choice, Duolingo's way: a tap selects an option, another tap moves the selection,
+/// and only Check answers, so a slip of the thumb costs nothing. The selection lives on the
+/// screen; the session only hears of the option checked (`StudySession.answer`).
+struct ChoicePick: Equatable {
+    /// the option selected (nil: none yet)
+    private(set) var selected: String?
+
+    /// Whether Check can be pressed: once something is selected.
+    var canCheck: Bool { selected != nil }
+
+    /// An option tapped. False (and nothing changes) once the exercise is answered, or if
+    /// it isn't one of the exercise's options.
+    @discardableResult
+    mutating func select(_ option: String, in ex: Exercise, answered: Bool) -> Bool {
+        guard !answered, ex.kind == .choice, ex.options.contains(option) else { return false }
+        selected = option
+        return true
+    }
+
+    /// Check pressed: whether the option selected is the right one (nil: nothing to check).
+    func verdict(_ ex: Exercise) -> Bool? {
+        guard ex.kind == .choice, let selected else { return nil }
+        return selected == ex.answer
+    }
+}
+
+// MARK: tap to hear
+
+/// A Chinese option or sentence tile is said as it's tapped, except where hearing it would
+/// give the answer away: in a listening exercise the sound is the question, so nothing is
+/// said until it's answered. (This rests on one source in the Duolingo teardown: `enabled`
+/// switches it off everywhere.)
+enum TapToHear {
+    /// The one switch: false, and no option or tile speaks.
+    static let enabled = true
+
+    /// Whether the settings allow it: sound on, and audio playing by itself not switched off.
+    static func allowed(_ prefs: Prefs) -> Bool {
+        enabled && prefs.sound && prefs.playsAutomatically
+    }
+
+    /// What to say for a text tapped in an exercise (nil: nothing).
+    static func say(_ text: String, in ex: Exercise, answered: Bool, allowed: Bool) -> String? {
+        guard enabled, allowed else { return nil }
+        if ex.dir == "listen" && !answered { return nil }
+        guard text.contains(where: Course.isHan) else { return nil }
+        return text
+    }
+
+    /// A multiple-choice option selected.
+    static func option(_ option: String, in ex: Exercise, answered: Bool, allowed: Bool = true) -> String? {
+        guard ex.kind == .choice else { return nil }
+        return say(option, in: ex, answered: answered, allowed: allowed)
+    }
+
+    /// A sentence tile tapped into the answer.
+    static func tile(_ tile: Exercise.Tile, in ex: Exercise, answered: Bool, allowed: Bool = true) -> String? {
+        guard ex.kind == .sentence else { return nil }
+        return say(tile.text, in: ex, answered: answered, allowed: allowed)
+    }
+}
+
 // MARK: gentler corrections
 
 /// One short line saying what was different about a wrong answer (the right answer is

@@ -10,7 +10,10 @@ struct StudyView: View {
     @Environment(ProgressStore.self) private var progress
 
     // the current exercise's state
-    @State private var picked: String?
+    /// multiple choice: the option selected, which only counts once Check is pressed
+    @State private var pick = ChoicePick()
+    /// "Can't listen now" was tapped on this exercise: it shows no answer
+    @State private var skipped = false
     @State private var placed: [Exercise.Tile] = []
     @State private var feedback: Feedback?
     @State private var exerciseKey = UUID()
@@ -90,6 +93,9 @@ struct StudyView: View {
             guard let new else { return nil }
             return new ? .success : .error
         }
+        .sensoryFeedback(trigger: pick.selected) { _, new in
+            new == nil ? nil : .selection
+        }
     }
 
     private func restart(_ s: StudySession) {
@@ -135,7 +141,7 @@ struct StudyView: View {
     }
 
     private func resetExercise() {
-        picked = nil; placed = []; feedback = nil; exerciseKey = UUID()
+        pick = ChoicePick(); skipped = false; placed = []; feedback = nil; exerciseKey = UUID()
         srsAtStart = progress.srs
         if session.exercise != nil {
             let key = exerciseKey
@@ -216,6 +222,8 @@ struct StudyView: View {
 
     private var content: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // a word missed earlier this session, back in the end-of-lesson mistakes stretch
+            if session.previousMistake { PreviousMistakeTag() }
             Text(promptLabel).font(.nunitoXB(19.2)).tracking(-0.2).foregroundStyle(Color.ink)
                 .padding(.top, 4).padding(.bottom, 14)
             Group {
@@ -240,7 +248,8 @@ struct StudyView: View {
                                       settle: { correct in settle(correct) },
                                       skip: { session.skip() })
                         } else {
-                            ChoiceView(ex: ex, picked: picked, answered: session.answered, wheels: wheels) { choose($0) }
+                            ChoiceView(ex: ex, picked: pick.selected, answered: session.answered, wheels: wheels,
+                                       skipped: skipped, skip: { cantListen() }) { select($0) }
                         }
                     }
                 case nil:
@@ -264,11 +273,15 @@ struct StudyView: View {
 
     /// The reserved slot at the card's foot. Multiple choice keeps 216 points from the
     /// start with the feedback above the button; the sentence builder keeps 84 and its
-    /// feedback rises over the word bank.
+    /// feedback rises over the word bank. The one button is Check until the exercise is
+    /// answered (multiple choice: once an option is selected; a sentence: once a tile is
+    /// placed), then Continue, so it never moves.
     private var bottomSlot: some View {
         let ex = session.exercise
         let isSentence = ex?.kind == .sentence
-        let ready = session.answered || (isSentence && !placed.isEmpty)
+        let isChoice = ex?.kind == .choice
+        let checks = (isSentence || isChoice) && !session.answered
+        let ready = session.answered || (isSentence && !placed.isEmpty) || (isChoice && pick.canCheck)
         let fill = !ready ? Color.line : feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent
         let ink = !ready ? Color.muted.opacity(0.45) : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
         return ZStack(alignment: .bottom) {
@@ -282,9 +295,9 @@ struct StudyView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             Button {
-                if isSentence && !session.answered { checkSentence() } else { advance() }
+                if !checks { advance() } else if isSentence { checkSentence() } else { checkChoice() }
             } label: {
-                Text(isSentence && !session.answered ? "Check" : session.isQuiz ? "Next →" : "Continue")
+                Text(checks ? "Check" : session.isQuiz ? "Next →" : "Continue")
                     .font(.nunitoXB(16.8)).foregroundStyle(ink)
                     .frame(maxWidth: .infinity).padding(14)
                     .background(fill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -299,14 +312,32 @@ struct StudyView: View {
 
     // MARK: answering
 
-    private func choose(_ option: String) {
-        guard !session.answered, let ex = session.exercise else { return }
-        picked = option
-        let correct = option == ex.answer
+    /// An option tapped: it's selected, not answered (another tap moves the selection). A
+    /// Chinese option is said as it's selected, where that doesn't give the answer away.
+    private func select(_ option: String) {
+        guard let ex = session.exercise, pick.select(option, in: ex, answered: session.answered) else { return }
+        if let say = TapToHear.option(option, in: ex, answered: session.answered, allowed: TapToHear.allowed(progress.prefs)) {
+            Speech.shared.speak(say)
+        }
+    }
+
+    /// Check: the option selected is the answer.
+    private func checkChoice() {
+        guard !session.answered, let ex = session.exercise, let correct = pick.verdict(ex) else { return }
         session.answer(correct)
         Sounds.shared.play(correct ? "correct" : "wrong")
-        withAnimation { feedback = Feedback(correct: correct, chosen: option) }
+        withAnimation { feedback = Feedback(correct: correct, chosen: pick.selected) }
         playAnswer(ex)
+    }
+
+    /// "Can't listen now": the exercise is skipped with no penalty, and there's no more
+    /// listening this session (see StudySession.skip).
+    private func cantListen() {
+        guard !session.answered, session.exercise?.dir == "listen" else { return }
+        Speech.shared.stop()
+        session.skip()
+        pick = ChoicePick()
+        withAnimation { skipped = true }
     }
 
     private func checkSentence() {
@@ -327,8 +358,15 @@ struct StudyView: View {
     }
 
     private func advance() {
+        // "Can't listen now" before anything was answered, in a session of only listening:
+        // there's nothing to show for it, so it just closes
+        if session.answered && !session.hasMore && session.nothingAnswered {
+            Moments.shared.toast("No listening for now — come back when you can listen.")
+            close()
+            return
+        }
         // out of buns part-way through a lesson: more buns, a review, or the end
-        if session.onBuns && progress.buns < 1 && !session.queue.isEmpty {
+        if session.onBuns && progress.buns < 1 && session.hasMore {
             Moments.shared.show(.buns(.init(ctx: .mid, review: reviewHere, refilled: { advance() }, end: close)))
             return
         }
@@ -337,6 +375,17 @@ struct StudyView: View {
             resetExercise()
         }
         if let r = session.result, !r.goalReached { Sounds.shared.play("complete") }
+    }
+}
+
+// MARK: - previous mistake
+
+/// The small label over an exercise on a word missed earlier in the session.
+struct PreviousMistakeTag: View {
+    var body: some View {
+        Label("Previous mistake", systemImage: "arrow.counterclockwise")
+            .font(.nunito(12.5, .bold)).foregroundStyle(Color.again)
+            .padding(.top, 2)
     }
 }
 
@@ -646,6 +695,11 @@ struct ChoiceView: View {
     let answered: Bool
     /// pinyin training wheels: over the Chinese while the word is new, a tap away once it's strong
     var wheels = Wheels()
+    /// "Can't listen now" was tapped: the exercise is over with no answer shown
+    var skipped = false
+    /// "Can't listen now", under a listening exercise (nil: no such button)
+    var skip: (() -> Void)? = nil
+    /// an option tapped: it's selected (`picked`); the answer comes with Check
     var choose: (String) -> Void
     @Environment(ProgressStore.self) private var progress
     private let course = Course.shared
@@ -663,7 +717,7 @@ struct ChoiceView: View {
         let isNew = ex.isNew
         let big: CGFloat = w.hanzi.count > 3 ? 28.8 : 38.4
         VStack(spacing: 0) {
-            MascotPrompt(mood: answered ? (picked == ex.answer) : nil) {
+            MascotPrompt(mood: answered && !skipped ? (picked == ex.answer) : nil) {
                 if isNew { NewBadge() }
                 switch ex.dir {
                 case "recall":
@@ -723,6 +777,24 @@ struct ChoiceView: View {
                 ForEach(ex.options, id: \.self) { opt in option(opt) }
             }
             .padding(.top, 8)
+            if ex.dir == "listen", let skip {
+                // its place is kept once the exercise is answered, so nothing moves
+                ZStack {
+                    if skipped {
+                        Text("No problem — no more listening this session.")
+                            .font(.nunito(14, .semibold)).foregroundStyle(Color.muted)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Button("Can't listen now") { skip() }
+                            .font(.nunito(14, .bold)).foregroundStyle(Color.muted)
+                            .buttonStyle(.plain)
+                            .opacity(answered ? 0 : 1)
+                            .disabled(answered)
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 20)
+                .padding(.vertical, 8)
+            }
         }
         .sheet(isPresented: $tonesOpen) {
             NavigationStack {
@@ -747,7 +819,12 @@ struct ChoiceView: View {
 
     private func option(_ opt: String) -> some View {
         let isAnswer = opt == ex.answer
-        let state: Bool? = !answered ? nil : isAnswer ? true : opt == picked ? false : nil
+        // right and wrong show once it's answered (not when it was skipped)
+        let state: Bool? = !answered || skipped ? nil : isAnswer ? true : opt == picked ? false : nil
+        // before that, the option selected is highlighted
+        let selected = !answered && opt == picked
+        let fill: Color = state == true ? Color.goodSoft : state == false ? Color.againSoft : selected ? Color.accentSoft : Color.panel
+        let edge: Color = state == true ? Color.good : state == false ? Color.again : selected ? Color.accent : Color.line
         return Button { choose(opt) } label: {
             Group {
                 if ex.dir == "recall" {
@@ -764,14 +841,15 @@ struct ChoiceView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 14).padding(.vertical, 11)
-            .background(state == true ? Color.goodSoft : state == false ? Color.againSoft : Color.panel,
-                        in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(fill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(state == true ? Color.good : state == false ? Color.again : Color.line, lineWidth: 1))
+                .strokeBorder(edge, lineWidth: selected ? 2 : 1))
         }
         .buttonStyle(PressDown(depth: 1))
         .disabled(answered)
+        .accessibilityAddTraits(selected ? .isSelected : [])
         .animation(.easeOut(duration: 0.15), value: answered)
+        .animation(.easeOut(duration: 0.12), value: selected)
     }
 }
 
@@ -1071,6 +1149,9 @@ struct SentenceView: View {
                 tile(t, inAnswer: false) {
                     guard result == nil, !used else { return }
                     withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) { placed.append(t) }
+                    if let say = TapToHear.tile(t, in: ex, answered: result != nil, allowed: TapToHear.allowed(progress.prefs)) {
+                        Speech.shared.speak(say)
+                    }
                 }
                 .opacity(used ? 0 : 1)
                 .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.line.opacity(used ? 0.6 : 0)))
