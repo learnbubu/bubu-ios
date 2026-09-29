@@ -199,6 +199,8 @@ struct StudyView: View {
                 switch session.current {
                 case .meet(let cards, _, _):
                     MeetView(cards: cards) { advance() }
+                case .match(let cards, _):
+                    MatchView(session: session, cards: cards, audio: session.matchAudio) { advance() }
                 case .card:
                     if let ex = session.exercise {
                         if ex.kind == .sentence {
@@ -228,6 +230,7 @@ struct StudyView: View {
         if tonesIntro { return "Meet the tones" }
         if !tips.isEmpty { return "Before you start" }
         if case .meet = session.current { return "New word" }
+        if case .match = session.current { return session.matchAudio ? "Match what you hear" : "Tap the pairs" }
         return session.exercise?.label ?? ""
     }
 
@@ -426,6 +429,14 @@ struct MeetView: View {
                 PinyinText(pinyin: w.pinyin, size: 24, weight: .semibold)
                 Text(w.gloss).font(.nunitoXB(21)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
+                // one line to remember it by (see MemoryHook); the full breakdown is below
+                if let hook = MemoryHook.line(for: c) {
+                    Label { Text(hook) } icon: { Image(systemName: "lightbulb.fill").foregroundStyle(Color.gold) }
+                        .font(.nunito(14.5, .semibold)).foregroundStyle(Color.muted)
+                        .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
                 SpeakerButton(text: w.hanzi, size: 28).padding(.top, 2)
                 if !parts.isEmpty {
                     Button { withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { built.toggle() } } label: {
