@@ -411,11 +411,15 @@ struct PocketCard: View {
                         .opacity(open ? 0 : 1)
                     }
                     if amountIn {
-                        HStack(spacing: 8) {
-                            if red { CoinIcon(size: 36) }
-                            Text(red ? "+\(pocket.reward)" : "+\(pocket.reward) XP").monospacedDigit()
+                        // the amount with its label right under it, so they read as one
+                        VStack(spacing: 2) {
+                            HStack(spacing: 8) {
+                                if red { CoinIcon(size: 36) }
+                                Text(red ? "+\(pocket.reward)" : "+\(pocket.reward) XP").monospacedDigit()
+                            }
+                            .font(.nunito(38, .black)).foregroundStyle(red ? Color.gold : Color.accent)
+                            Text(red ? "coins" : "good luck!").font(.nunito(15, .heavy)).foregroundStyle(Color.muted)
                         }
-                        .font(.nunito(38, .black)).foregroundStyle(red ? Color.gold : Color.accent)
                         .transition(.scale(scale: 0.3).combined(with: .opacity))
                     }
                     if red && burst {
@@ -445,7 +449,8 @@ struct PocketCard: View {
             // not disabled once open: a disabled button fades its label, and the reward is in it
             .buttonStyle(.plain)
             .accessibilityLabel("Open the pocket")
-            Text(open ? (red ? "coins" : "good luck!") : "Tap to open").font(.nunito(13.6, .heavy)).foregroundStyle(Color.muted)
+            Text("Tap to open").font(.nunito(13.6, .heavy)).foregroundStyle(Color.muted)
+                .opacity(open ? 0 : 1)
             Button("Nice", action: close).buttonStyle(WideButton()).padding(.top, 10)
                 .opacity(open ? 1 : 0).disabled(!open)
         }
