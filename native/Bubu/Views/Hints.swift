@@ -101,7 +101,8 @@ struct HintChip<Label: View>: View {
     var body: some View {
         Button {
             open = true
-            if let h = hanzi { Speech.shared.speak(h) }
+            // said, unless it was only just heard (the speaker beside it says it again)
+            if let h = hanzi { Speech.shared.autoSpeak(h) }
             HintTip.used = true
             tapped?()
         } label: {
@@ -110,7 +111,8 @@ struct HintChip<Label: View>: View {
                 .background(open ? Color.accentSoft : highlight ?? .clear, in: RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
-        .popover(isPresented: $open) {
+        // always above the word (the arrow on the word's top edge), never beside it
+        .popover(isPresented: $open, attachmentAnchor: .rect(.bounds), arrowEdge: .top) {
             VStack(spacing: 3) {
                 if let h = hanzi {
                     let py = pinyin ?? Course.wordPy[h] ?? ""
