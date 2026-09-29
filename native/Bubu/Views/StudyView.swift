@@ -30,12 +30,7 @@ struct StudyView: View {
     /// pinyin shows until the next one
     @State private var srsAtStart: [String: SRSRecord]?
     /// pinyin training wheels for this exercise
-    private var wheels: Wheels {
-        var w = Wheels(srs: srsAtStart ?? progress.srs, mode: progress.prefs.pinyin)
-        let here = progress.currentLessonId ?? Course.shared.lessons.last?.id ?? ""
-        w.early = Course.shared.bookNumber(of: here) < TrainingWheels.fadeFromBook
-        return w
-    }
+    private var wheels: Wheels { Wheels.now(progress, srs: srsAtStart) }
 
     struct Feedback { let correct: Bool; let chosen: String? }
 
@@ -721,12 +716,14 @@ struct ChoiceView: View {
                 if isNew { NewBadge() }
                 switch ex.dir {
                 case "recall":
-                    if isNew {
-                        HintChip(hanzi: w.hanzi, pinyin: w.pinyin, reverse: true) {
-                            Text(w.gloss).font(.nunito(16.3)).foregroundStyle(Color.newInk).multilineTextAlignment(.center)
-                        }
-                    } else {
-                        Text(w.gloss).font(.nunito(16.3)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                    // the English can always be tapped for its characters and pinyin
+                    HintChip(hanzi: w.hanzi, pinyin: w.pinyin, reverse: true) {
+                        Text(w.gloss).font(.nunito(16.3)).foregroundStyle(isNew ? Color.newInk : Color.ink)
+                            .multilineTextAlignment(.center)
+                            .overlay(alignment: .bottom) {
+                                Line().stroke(Color.muted.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [1.5, 3]))
+                                    .frame(height: 2).offset(y: 3)
+                            }
                     }
                     SpeakerButton(text: w.hanzi, withSlow: true)
                 case "pinyin":

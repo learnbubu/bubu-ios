@@ -7,6 +7,7 @@ import SwiftUI
 /// nothing. The whole match is one step of the progress bar (see StudySession.matchPair).
 struct MatchView: View {
     let session: StudySession
+    @Environment(ProgressStore.self) private var progress
     let cards: [Card]
     let audio: Bool
     var done: () -> Void
@@ -100,8 +101,9 @@ struct MatchView: View {
             VStack(spacing: 2) {
                 Text(w.hanzi).font(.hanzi(w.hanzi.count > 3 ? 19 : 24, .medium)).foregroundStyle(Color.ink)
                     .lineLimit(1).minimumScaleFactor(0.6)
-                // the pinyin while the word is new (never under the answer to a sound)
-                if !audio && session.isStillNew(c.id) {
+                // the pinyin while the word is new, and over every word through the first
+                // books (never under the answer to a sound)
+                if !audio && (session.isStillNew(c.id) || Wheels.now(progress).shows(card: c)) {
                     PinyinText(pinyin: w.pinyin, size: 12.5).lineLimit(1).minimumScaleFactor(0.7)
                 }
             }

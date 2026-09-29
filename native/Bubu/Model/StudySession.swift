@@ -568,7 +568,14 @@ final class StudySession: Identifiable {
             if !withSentences.isEmpty { cards = withSentences }
         }
         let now = progress.now()
-        let due = cards.filter { progress.srs[$0.id] == nil || (progress.srs[$0.id]?.due ?? 0) <= now }
+        // a stone still open always asks its words not yet got right, due or not: a quick
+        // second go after leaving half-way must be able to finish the stone
+        let stillOpen = !progress.isDone(lessonId)
+        let due = cards.filter { c in
+            guard let r = progress.srs[c.id] else { return true }
+            if stillOpen && (r.reps ?? 0) < 1 { return true }
+            return (r.due ?? 0) <= now
+        }
         let fresh = due.filter { progress.srs[$0.id] == nil }
         if !fresh.isEmpty && focuses != ["write"] && focuses != ["speak"] {
             // even batches of at most 6: 15 new words go 5, 5, 5
@@ -702,6 +709,9 @@ final class StudySession: Identifiable {
 
     // MARK: moving through it
 
+    /// Words skipped ("Can't speak now") that wait among the mistakes: not labelled as one.
+    private var skippedBack: Set<String> = []
+
     func next() {
         let lastId = card?.id
         answered = false
@@ -717,10 +727,17 @@ final class StudySession: Identifiable {
         }
         guard hasMore else { finish(); return }
         // the planned exercises first, then the mistakes stretch
+        // (a word just asked, skipped back into the plan, waits behind whatever else is left)
+        if case .card(let first)? = queue.first, first.id == lastId {
+            if queue.count > 1 { queue.append(queue.removeFirst()) }
+            else if !retries.isEmpty { queue.removeFirst(); retries.append(first); skippedBack.insert(first.id) }
+        }
         let item: Item
         if queue.isEmpty, let i = Self.nextRetry(retries.map(\.id), after: lastId) {
-            item = .card(retries.remove(at: i))
-            previousMistake = true
+            let c = retries.remove(at: i)
+            item = .card(c)
+            // a skipped word waiting among the mistakes isn't one itself
+            previousMistake = skippedBack.remove(c.id) == nil
         } else {
             item = queue.removeFirst()
         }

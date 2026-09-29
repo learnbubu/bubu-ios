@@ -84,6 +84,17 @@ struct Wheels {
     }
 }
 
+extension Wheels {
+    /// The training wheels for a learner as things stand: their records (or the ones given),
+    /// their setting, and whether they're still in the first books (pinyin over everything).
+    static func now(_ p: ProgressStore, srs: [String: SRSRecord]? = nil) -> Wheels {
+        var w = Wheels(srs: srs ?? p.srs, mode: p.prefs.pinyin)
+        let here = p.currentLessonId ?? Course.shared.lessons.last?.id ?? ""
+        w.early = Course.shared.bookNumber(of: here) < TrainingWheels.fadeFromBook
+        return w
+    }
+}
+
 // MARK: hearing it
 
 /// What an exercise says aloud by itself, without giving the answer away.

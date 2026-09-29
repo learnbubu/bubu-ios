@@ -121,13 +121,14 @@ private struct MomentsHost: ViewModifier {
                 }
             }
             // toasts sit over moments too: the shop's "You need more coins" is said over it
-            .overlay(alignment: .bottom) {
+            // (in a lesson they come down from the top, clear of the feedback and the buttons)
+            .overlay(alignment: study ? .top : .bottom) {
                 if here, let t = moments.toastText {
                     Text(t).font(.nunito(15, .bold)).foregroundStyle(Color.bg).multilineTextAlignment(.center)
                         .padding(.horizontal, 18).padding(.vertical, 11)
                         .background(Color.ink.opacity(0.92), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .padding(.horizontal, 24).padding(.bottom, study ? 110 : 96)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .padding(.horizontal, 24).padding(study ? .top : .bottom, study ? 70 : 96)
+                        .transition(.move(edge: study ? .top : .bottom).combined(with: .opacity))
                         .allowsHitTesting(false)
                 }
             }
