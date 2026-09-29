@@ -37,6 +37,8 @@ targets:
         NSMicrophoneUsageDescription: Bùbù listens when you practise speaking, to check your pronunciation.
         NSSpeechRecognitionUsageDescription: Bùbù uses speech recognition to check the Chinese you say in speaking practice.
         ITSAppUsesNonExemptEncryption: false
+        # let the pen (and animations) run at 120 Hz on ProMotion iPhones
+        CADisableMinimumFrameDurationOnPhone: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.bubu

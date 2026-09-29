@@ -47,6 +47,14 @@ struct GlyphSpace {
     func toView(_ p: CGPoint) -> CGPoint { CGPoint(x: p.x * s, y: (900 - p.y) * s) }
     func toGlyph(_ p: CGPoint) -> CGPoint { CGPoint(x: p.x / s, y: 900 - p.y / s) }
     var transform: CGAffineTransform { CGAffineTransform(a: s, b: 0, c: 0, d: -s, tx: 0, ty: 900 * s) }
+    /// A line through glyph points, in view space (a stroke's median).
+    func polyline(_ pts: [CGPoint]) -> Path {
+        Path { p in
+            guard let f = pts.first else { return }
+            p.move(to: toView(f))
+            for q in pts.dropFirst() { p.addLine(to: toView(q)) }
+        }
+    }
 }
 
 enum SVGPath {
@@ -80,6 +88,9 @@ enum SVGPath {
 // MARK: checking a drawn stroke (HanziWriter's strokeMatches, ported)
 
 enum StrokeMatch {
+    /// How forgiving the check is: the web's `quiz({ leniency: 1.4 })`. The thresholds
+    /// below are HanziWriter 3.7's own, so the app and the website accept the same strokes.
+    static let leniency = 1.4
     static let avgDistThreshold = 350.0
     static let startEndThreshold = 250.0
     static let frechetThreshold = 0.4
@@ -237,5 +248,68 @@ enum StrokeMatch {
             prev = cur
         }
         return prev.last ?? .infinity
+    }
+}
+
+// MARK: the pen's ink (pure geometry, so it can be tested)
+
+/// Smooth ink from touch samples, as Notes-style pens draw it: a quadratic curve through
+/// the midpoints of successive samples, each sample its control point. The ink has no
+/// corners at the samples however fast the finger moves, and it never overshoots them.
+enum InkGeometry {
+    enum Segment: Equatable {
+        case move(CGPoint)
+        case line(CGPoint)
+        case quad(to: CGPoint, control: CGPoint)
+    }
+
+    static func midpoint(_ a: CGPoint, _ b: CGPoint) -> CGPoint {
+        CGPoint(x: (a.x + b.x) / 2, y: (a.y + b.y) / 2)
+    }
+
+    /// Straight to the first midpoint, curves from midpoint to midpoint, straight to the end.
+    /// One sample gives a zero-length line, which round caps draw as a dot.
+    static func segments(_ pts: [CGPoint]) -> [Segment] {
+        guard let first = pts.first else { return [] }
+        let last = pts[pts.count - 1]
+        guard pts.count > 2 else { return [.move(first), .line(last)] }
+        var out: [Segment] = [.move(first), .line(midpoint(pts[0], pts[1]))]
+        for i in 1..<(pts.count - 1) {
+            out.append(.quad(to: midpoint(pts[i], pts[i + 1]), control: pts[i]))
+        }
+        out.append(.line(last))
+        return out
+    }
+
+    static func path(_ pts: [CGPoint]) -> CGPath {
+        let path = CGMutablePath()
+        for seg in segments(pts) {
+            switch seg {
+            case .move(let a): path.move(to: a)
+            case .line(let a): path.addLine(to: a)
+            case .quad(let a, let c): path.addQuadCurve(to: a, control: c)
+            }
+        }
+        return path
+    }
+
+    /// Samples at least `minDistance` apart, keeping the first and the last. Coalesced
+    /// touches come every half point or so; the stroke check (like HanziWriter, which sees
+    /// one sample a frame) wants the shape, not the finger's tremor between samples.
+    static func thin(_ pts: [CGPoint], minDistance: CGFloat) -> [CGPoint] {
+        guard pts.count > 2 else { return pts }
+        var out: [CGPoint] = [pts[0]]
+        for p in pts.dropFirst().dropLast() {
+            let q = out[out.count - 1]
+            if hypot(p.x - q.x, p.y - q.y) >= minDistance { out.append(p) }
+        }
+        let last = pts[pts.count - 1]
+        // the true end, not a sample just short of it
+        if out.count > 1 {
+            let q = out[out.count - 1]
+            if hypot(last.x - q.x, last.y - q.y) < minDistance { out.removeLast() }
+        }
+        out.append(last)
+        return out
     }
 }
