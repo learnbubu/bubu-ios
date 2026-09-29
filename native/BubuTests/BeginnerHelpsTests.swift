@@ -3,7 +3,7 @@ import XCTest
 
 /// For total beginners: tap-the-pairs matches in stones and practice stones, the done
 /// screen's "You learned" recap, and the meet card's one-line memory hook.
-final class BeginnerTests: XCTestCase {
+final class BeginnerHelpsTests: XCTestCase {
     let course = Course.shared
 
     private func store() -> ProgressStore {
