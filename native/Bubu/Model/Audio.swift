@@ -1,4 +1,5 @@
 import AVFoundation
+import CryptoKit
 import UIKit
 
 /// Chinese read aloud, as the web's speak(): zh-CN, a little slower than normal,
@@ -64,7 +65,45 @@ final class Speech {
         return v
     }
 
-    func stop() { synth.stopSpeaking(at: .immediate) }
+    func stop() {
+        synth.stopSpeaking(at: .immediate)
+        clipQueue.async { [self] in clip?.stop() }
+    }
+
+    // MARK: recorded clips
+
+    /// The name of the recorded clip for a text (tools/voice.py makes them under the same
+    /// names): the voice, k for the usual one or c for the other speaker in a dialogue, then
+    /// the first 16 hex digits of the text's SHA-256.
+    static func clipName(_ text: String, male: Bool = false) -> String {
+        let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hash = SHA256.hash(data: Data(t.utf8)).prefix(8).map { String(format: "%02x", $0) }.joined()
+        return (male ? "c_" : "k_") + hash
+    }
+
+    /// The clip for a text, if the app has one: the other speaker's when asked for and there
+    /// is one, else the usual voice's.
+    static func clipURL(_ text: String, male: Bool = false) -> URL? {
+        if male, let u = Bundle.main.url(forResource: clipName(text, male: true), withExtension: "mp3") { return u }
+        return Bundle.main.url(forResource: clipName(text), withExtension: "mp3")
+    }
+
+    /// Slow is the same clip played at this rate (its pitch kept).
+    static let slowClipRate: Float = 0.7
+    private let clipQueue = DispatchQueue(label: "bubu.voice")
+    private var clip: AVAudioPlayer?
+
+    /// Plays a clip off the main thread (preparing a player waits on the audio hardware).
+    private func play(_ url: URL, rate: Float) {
+        clipQueue.async { [self] in
+            clip?.stop()
+            guard let p = try? AVAudioPlayer(contentsOf: url) else { return }
+            p.enableRate = true
+            p.rate = rate
+            clip = p
+            p.play()
+        }
+    }
 
     /// Said by itself (an exercise's prompt, the answer in the feedback): what `Autoplay` picked,
     /// nil for nothing. Goes through `speak`, so the same audio session as everything else.
@@ -103,10 +142,18 @@ final class Speech {
         max(AVSpeechUtteranceMinimumSpeechRate, normal * slowFactor)
     }
 
-    func speak(_ text: String, slow: Bool = false) {
-        voiceTips()
+    func speak(_ text: String, slow: Bool = false, male: Bool = false) {
         lastText = text; lastAt = Date()
         Sounds.shared.activate()
+        // a recorded clip when there is one; the phone's own voice otherwise
+        if let url = Self.clipURL(text, male: male) {
+            synth.stopSpeaking(at: .immediate)
+            let chosen = Float(ProgressStore.current?.prefs.rate ?? 0.85) / 0.85
+            play(url, rate: slow ? Self.slowClipRate : min(1.2, max(0.6, chosen)))
+            return
+        }
+        clipQueue.async { [self] in clip?.stop() }
+        voiceTips()
         let u = AVSpeechUtterance(string: text)
         u.voice = voice
         u.rate = slow ? Self.slowRate(rate) : rate

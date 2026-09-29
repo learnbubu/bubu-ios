@@ -169,7 +169,7 @@ struct ConversePage: View {
         if t.who == "you" && listenOnly { Speech.shared.speak(t.hanzi); return }
         guard t.who != "you" else { return }
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { shown.append(t) }
-        Speech.shared.speak(t.hanzi)
+        Speech.shared.speak(t.hanzi, male: true)       // the other speaker has their own voice
         turn += 1
         let r = run
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { if run == r { step() } }
