@@ -12,7 +12,10 @@ struct BubuApp: App {
     }()
 
     // reminder taps are handled from the first moment, even on a cold launch
-    init() { Reminders.shared.install() }
+    init() {
+        Reminders.shared.install()
+        Speech.loadVoices()          // off the main thread: listing voices can take seconds
+    }
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {

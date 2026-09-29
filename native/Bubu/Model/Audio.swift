@@ -15,11 +15,23 @@ final class Speech {
         return bestVoice
     }
 
-    /// Every Chinese voice on the phone, best first.
-    static var chineseVoices: [AVSpeechSynthesisVoice] {
-        AVSpeechSynthesisVoice.speechVoices()
-            .filter { $0.language.hasPrefix("zh") || $0.language.hasPrefix("cmn") }
-            .sorted { score($0) > score($1) }
+    /// Every Chinese voice on the phone, best first. Listing the voices can take many
+    /// seconds the first time (it loads the voice catalogue), so it's done off the main
+    /// thread at launch (`loadVoices`) and read from here; empty until it's loaded.
+    static var chineseVoices: [AVSpeechSynthesisVoice] { voicesLock.withLock { cachedVoices ?? [] } }
+    static var voicesLoaded: Bool { voicesLock.withLock { cachedVoices != nil } }
+    private static let voicesLock = NSLock()
+    private static var cachedVoices: [AVSpeechSynthesisVoice]?
+
+    /// Look the voices up in the background; again whenever the phone's voices change.
+    static func loadVoices() {
+        DispatchQueue.global(qos: .utility).async {
+            let list = AVSpeechSynthesisVoice.speechVoices()
+                .filter { $0.language.hasPrefix("zh") || $0.language.hasPrefix("cmn") }
+                .sorted { score($0) > score($1) }
+            voicesLock.withLock { cachedVoices = list }
+            DispatchQueue.main.async { shared.cachedBest = nil }
+        }
     }
 
     static func score(_ v: AVSpeechSynthesisVoice) -> Int {
@@ -35,16 +47,18 @@ final class Speech {
 
     /// The best Chinese voice installed, looked up again whenever the phone's voices
     /// change (a Premium or Enhanced voice downloaded in iOS Settings is used straight away).
-    private var cachedBest: AVSpeechSynthesisVoice??
+    fileprivate var cachedBest: AVSpeechSynthesisVoice??
     private var voicesObserver: NSObjectProtocol?
     var bestVoice: AVSpeechSynthesisVoice? {
         if voicesObserver == nil {
             voicesObserver = NotificationCenter.default.addObserver(
-                forName: AVSpeechSynthesizer.availableVoicesDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
-                self?.cachedBest = nil
+                forName: AVSpeechSynthesizer.availableVoicesDidChangeNotification, object: nil, queue: .main) { _ in
+                Speech.loadVoices()
             }
         }
         if let c = cachedBest { return c }
+        // until the list is loaded, the system's zh-CN voice (quick to get) stands in
+        guard Self.voicesLoaded else { return AVSpeechSynthesisVoice(language: "zh-CN") }
         let v = Self.chineseVoices.first ?? AVSpeechSynthesisVoice(language: "zh-CN")
         cachedBest = .some(v)
         return v
@@ -55,6 +69,7 @@ final class Speech {
     /// Said once: there's no Chinese voice, or there's a far better one to download.
     private func voiceTips() {
         let d = UserDefaults.standard
+        guard Self.voicesLoaded else { return }
         if Self.chineseVoices.isEmpty {
             guard !d.bool(forKey: "noVoiceTip") else { return }
             d.set(true, forKey: "noVoiceTip")
