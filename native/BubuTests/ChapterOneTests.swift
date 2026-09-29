@@ -71,7 +71,7 @@ final class ChapterOneTests: XCTestCase {
             if let c = s.card { XCTAssertTrue(words.contains(c.id), c.word.hanzi); s.answer(true); asked += 1 }
             s.next()
         }
-        // two of its steps are matches (see BeginnerTests), which the loop steps past
+        // two of its steps are matches (see BeginnerHelpsTests), which the loop steps past
         XCTAssertEqual(asked, StudySession.practiceLen - StudySession.practiceMatches)
         XCTAssertEqual(s.bunsEaten, 0)
         XCTAssertTrue(try XCTUnwrap(s.result).lessonFinished)

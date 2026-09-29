@@ -24,7 +24,7 @@ struct SpeakView: View {
             MascotPrompt(mood: mood) {
                 Text(ex.sayHanzi).font(.hanzi(ex.sayHanzi.count > 3 ? 28.8 : 38.4, .medium))
                     .foregroundStyle(Color.ink).multilineTextAlignment(.center)
-                SpeakerButton(text: ex.sayHanzi)
+                SpeakerButton(text: ex.sayHanzi, withSlow: true)
             }
             PinyinText(pinyin: ex.sayPinyin, size: 23.2).multilineTextAlignment(.center)
             Text(ex.sayEn).font(.nunito(16)).foregroundStyle(Color.muted).multilineTextAlignment(.center)

@@ -1,0 +1,165 @@
+import Foundation
+
+// Help for total beginners in the exercises: pinyin training wheels, what to play aloud
+// and when, and gentler, specific corrections. Pure rules, so they can be tested.
+
+// MARK: pinyin training wheels
+
+/// Settings → Pinyin: when pinyin shows over the Chinese in an exercise.
+enum PinyinMode: String, CaseIterable {
+    /// over a word until it's strong (see TrainingWheels.isStrong), then a tap away
+    case auto
+    /// over every word, always
+    case always
+    /// over a word only until it's been learned at all (answered right once), then a tap away
+    case known
+}
+
+extension Prefs {
+    /// The pinyin setting. Never chosen: Auto, unless the old "Show pinyin" switch was turned
+    /// off, which becomes the strictest, "Hide when known". Choosing one also sets
+    /// `showPinyin`, which the website reads.
+    var pinyin: PinyinMode {
+        get { pinyinMode.flatMap { PinyinMode(rawValue: $0) } ?? (showPinyin ? .auto : .known) }
+        set { pinyinMode = newValue.rawValue; showPinyin = newValue != .known }
+    }
+    /// Play an exercise's Chinese as it appears, and the right answer after it (default on).
+    var playsAutomatically: Bool { autoplay ?? true }
+}
+
+enum TrainingWheels {
+    /// A word is strong once it has been answered right this many times in its reviews…
+    static let strongReps = 3
+    /// …or its reviews are spaced at least this many days apart.
+    static let strongDays = 3.0
+
+    /// Whether a word is strong enough to go without its pinyin (Auto).
+    static func isStrong(_ s: SRSRecord?) -> Bool {
+        guard let s else { return false }
+        return (s.reps ?? 0) >= strongReps || (s.interval ?? 0) >= strongDays
+    }
+
+    /// Whether an exercise is testing the pinyin itself: "Which pinyin?", and listening until
+    /// it's answered. No pinyin is shown on its Chinese then, whatever the setting.
+    static func testsPinyin(dir: String, answered: Bool) -> Bool {
+        !answered && (dir == "pinyin" || dir == "listen")
+    }
+
+    /// Whether pinyin shows over a word (where it doesn't, a tap on the word shows it).
+    static func shows(_ s: SRSRecord?, mode: PinyinMode, testing: Bool = false) -> Bool {
+        if testing { return false }
+        switch mode {
+        case .always: return true
+        case .auto: return !isStrong(s)
+        case .known: return StudySession.isNewCard(s)
+        }
+    }
+}
+
+/// The training wheels for one exercise: the learner's records as the exercise appeared (so
+/// answering doesn't make the pinyin vanish mid-feedback) and the setting.
+struct Wheels {
+    var srs: [String: SRSRecord] = [:]
+    var mode: PinyinMode = .auto
+
+    /// A word's record: its own card's, the strongest if the course has it more than once.
+    func record(hanzi: String) -> SRSRecord? {
+        let cards = Course.shared.cardsByHanzi[hanzi.filter(Course.isHan)] ?? []
+        let recs = cards.compactMap { srs[$0.id] }
+        return recs.first(where: { TrainingWheels.isStrong($0) }) ?? recs.first
+    }
+
+    func shows(card: Card, testing: Bool = false) -> Bool {
+        TrainingWheels.shows(srs[card.id], mode: mode, testing: testing)
+    }
+
+    func shows(hanzi: String, testing: Bool = false) -> Bool {
+        TrainingWheels.shows(record(hanzi: hanzi), mode: mode, testing: testing)
+    }
+}
+
+// MARK: hearing it
+
+/// What an exercise says aloud by itself, without giving the answer away.
+enum Autoplay {
+    /// As the exercise appears: its Chinese prompt. Nothing where hearing it would be the
+    /// answer: recall (English → Chinese) and building the Chinese (the sound is the answer),
+    /// "Which pinyin?" (the tones are). Listening always plays, since the sound is the question;
+    /// the rest only with "Play audio automatically" on. Speaking and writing have their own.
+    static func onShow(_ ex: Exercise, autoplay: Bool) -> String? {
+        if ex.kind == .choice {
+            if ex.dir == "listen" { return ex.card.word.hanzi }
+            if ex.dir == "recognize" && autoplay { return ex.card.word.hanzi }
+            return nil
+        }
+        if ex.kind == .sentence, autoplay, !ex.toChinese, let s = ex.sentence { return s.hanzi }
+        return nil
+    }
+
+    /// Once the answer is out, right or wrong: the right Chinese, once.
+    static func onAnswer(_ ex: Exercise, autoplay: Bool) -> String? {
+        guard autoplay else { return nil }
+        if ex.kind == .choice { return ex.card.word.hanzi }
+        if ex.kind == .sentence { return ex.sentence?.hanzi }
+        return nil
+    }
+}
+
+// MARK: gentler corrections
+
+/// One short line saying what was different about a wrong answer (the right answer is
+/// shown under it). Look-alike characters are explained by the feedback's own diff.
+enum Correction {
+    /// "1st", "2nd", "3rd", "4th", or "neutral" (5), from toneOf.
+    static func ordinal(_ tone: Int) -> String {
+        switch tone {
+        case 1: return "1st"
+        case 2: return "2nd"
+        case 3: return "3rd"
+        case 4: return "4th"
+        default: return "neutral"
+        }
+    }
+
+    /// Same sounds, different tones: "Close! 好 is hǎo — 3rd tone (you chose hào — 4th)".
+    /// For a word where more than one syllable is off (or the characters don't line up with
+    /// the syllables), the whole word: "Close! 你好 is nǐ hǎo — 3rd + 3rd tones (you chose
+    /// ní hào — 2nd + 4th)". Nil when the letters differ too.
+    static func toneLine(hanzi: String, right: String, chosen: String) -> String? {
+        let r = Pinyin.syllables(right), c = Pinyin.syllables(chosen)
+        guard !r.isEmpty, r.count == c.count, right != chosen,
+              Pinyin.toneless(right).lowercased() == Pinyin.toneless(chosen).lowercased() else { return nil }
+        let differ = r.indices.filter { r[$0] != c[$0] }
+        guard !differ.isEmpty else { return nil }
+        let han = hanzi.filter(Course.isHan).map(String.init)
+        if differ.count == 1 && han.count == r.count {
+            let i = differ[0]
+            return "Close! \(han[i]) is \(r[i]) — \(ordinal(toneOf(r[i]))) tone (you chose \(c[i]) — \(ordinal(toneOf(c[i]))))"
+        }
+        let tones = { (s: [String]) in s.map { Correction.ordinal(toneOf($0)) }.joined(separator: " + ") }
+        return "Close! \(hanzi) is \(right) — \(tones(r)) \(r.count == 1 ? "tone" : "tones") (you chose \(chosen) — \(tones(c)))"
+    }
+
+    /// The wrong meaning: "你 means 'you'. (他 is 'he')".
+    static func meaningLine(_ right: Word, _ other: Word) -> String {
+        "\(right.hanzi) means '\(right.gloss)'. (\(other.hanzi) is '\(other.gloss)')"
+    }
+
+    /// The line for a wrong multiple-choice answer, if there's something specific to say.
+    static func line(_ ex: Exercise, chosen: String?, cards: [Card] = Course.shared.cards) -> String? {
+        guard ex.kind == .choice, let chosen, chosen != ex.answer else { return nil }
+        let w = ex.card.word
+        switch ex.dir {
+        case "pinyin":
+            return toneLine(hanzi: w.hanzi, right: w.pinyin, chosen: chosen)
+        case "recall":
+            guard let o = cards.first(where: { $0.word.hanzi == chosen })?.word, o.hanzi != w.hanzi else { return nil }
+            return meaningLine(w, o)
+        case "recognize", "listen":
+            guard let o = cards.first(where: { $0.word.gloss == chosen })?.word, o.hanzi != w.hanzi else { return nil }
+            return meaningLine(w, o)
+        default:
+            return nil
+        }
+    }
+}
