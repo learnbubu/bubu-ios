@@ -76,6 +76,20 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 - [ ] Friends: friend streaks, friend quests, following
 - [ ] Recorded native-speaker audio (we use the phone's text-to-speech; quality varies by voice, and tones matter)
 
+## Voices (started 29 Sep 2026)
+
+Recorded voices from Google Cloud Text-to-Speech (Chirp 3 HD), made once and kept in the app; the phone's own voice where there's no clip. Tools in `tools/`: `tts.py`, `voice.py`, `takes.py`, `citation.py`, `board.py`, `casting.py`.
+
+- [x] Chapter 1 in Kore's voice (0.1.7), played untouched at its own speed (0.1.8)
+- [x] The cast chosen by ear: `tools/cast.json` (Mark is Umbriel, Xiaoyu Sulafat, Chen Ming Puck, Bùbù the teacher Kore)
+- [x] The four reference tones chosen by ear: `tools/refs/` (妈 麻 马 骂 in Kore's voice)
+- [ ] Chapter 1's single characters re-read as a teacher says them (carrier sentence), matched to the reference tones, confirmed by ear
+- [ ] Each dialogue line in its speaker's voice: the speaker's name carried from the course source into `course.json`, clips made per speaker, the app playing a line in its speaker's voice
+- [ ] Machine listening (Speech-to-Text) as a check on every clip: needs the API switched on and added to the key
+- [ ] The whole course generated, every clip measured, the doubtful ones on sound boards
+- [ ] A report button for audio in the app, before other people test it
+- [ ] Slow audio: the same clip at 0.7 for now; separately made slow clips if that sounds poor
+
 ## Known limits
 
 - [ ] **Path header over the art** (visual check, 29 Sep 2026): after stone 1 the pagoda runs up under the status bar icons and over the "GUIDE" tag beside "起步 1 · CHAPTER 1". Needs fixing by someone who can see the screen (the Mac's Simulator): banners drawn after the front scenery, and/or a short top fade over the status bar.
