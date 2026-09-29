@@ -44,6 +44,7 @@ textarea{width:100%;min-height:140px;font:14px/1.4 ui-monospace,Consolas,monospa
 <div class="voices" id="voices"></div>
 
 <h2>The characters</h2>
+<p class="sub">Each character starts with a suggested voice, chosen from Google's description of the voice and its measured pitch, not by listening. Change any that don't suit.</p>
 <p class="sub">Most lines first. Characters with only a few lines (a waiter, a shop assistant) can share a voice, so there's no need to cast them all: anyone left without one gets a spare voice.</p>
 <div id="people"></div>
 <textarea id="out" hidden readonly></textarea>
@@ -51,7 +52,7 @@ textarea{width:100%;min-height:140px;font:14px/1.4 ui-monospace,Consolas,monospa
 <script>
 const VOICES = __VOICES__;
 const PEOPLE = __PEOPLE__;
-const KEY = "bubu-casting";
+const KEY = "bubu-casting-2";
 VOICES.sort((a, b) => (a.gender === b.gender ? a.name.localeCompare(b.name) : a.gender === "f" ? -1 : 1));
 let cast = {};
 try { cast = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
@@ -87,6 +88,11 @@ function paint() {
     d.querySelector(".zh").textContent = p.zh;
     d.querySelector(".en").textContent = p.en;
     d.querySelector(".about").textContent = p.about;
+    if (p.preset) {
+      const w = document.createElement("div"); w.className = "about";
+      w.textContent = "Suggested: " + p.preset + (p.why ? " (" + p.why + ")" : "") + (cast[p.zh] && cast[p.zh] !== p.preset ? ". You chose " + cast[p.zh] + "." : "");
+      d.firstChild.appendChild(w);
+    }
     d.querySelector(".n").textContent = (p.lines ? p.lines + " line" + (p.lines === 1 ? "" : "s") : "every word") + (sex(p.gender) ? " · " + sex(p.gender) : "");
     const sel = document.createElement("select");
     sel.setAttribute("aria-label", "Voice for " + (p.en || p.zh));
