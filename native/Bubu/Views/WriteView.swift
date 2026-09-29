@@ -72,7 +72,10 @@ struct GridSquare: View {
     }
 }
 
-/// One character to write, stroke by stroke.
+/// One character to write, stroke by stroke, as the web's HanziWriter quiz: the pen draws
+/// on a UIKit surface (`InkCanvas`); a right stroke's ink fades as the real stroke draws in,
+/// a wrong one flashes red and goes; after a few misses the next stroke is traced as a hint;
+/// the finished character lights up once before the tick.
 struct WritingBox: View {
     let char: String
     let size: CGFloat
@@ -80,17 +83,19 @@ struct WritingBox: View {
     var complete: () -> Void
 
     @State private var current = 0
-    @State private var ink: [CGPoint] = []
     @State private var misses = 0
-    @State private var inkMissed = false
     @State private var hint = false
     @State private var intro: Bool
+    @State private var finishing = false
+    @State private var glow = false
     @State private var done = false
     @State private var drawn = 0
 
     var checking = true
     @State private var freeInk: [[CGPoint]] = []
-    @State private var stroking = false
+
+    /// The pen's width on screen, as the web keeps it (7 px whatever the box's size).
+    static let penWidth: CGFloat = 7
 
     init(char: String, size: CGFloat, stage: Int, checking: Bool = true, animate: Bool = true, complete: @escaping () -> Void) {
         self.char = char; self.size = size; self.stage = stage; self.checking = checking; self.complete = complete
@@ -108,37 +113,37 @@ struct WritingBox: View {
                 if stage == 0 { strokes(d, Array(0..<d.count), Color.line) }
                 if stage == 1 { strokes(d, d.guideStrokes, Color.line.opacity(0.8)) }
                 if intro { GlyphAnimation(char: char, size: size, loops: 1) { withAnimation { intro = false } } }
-                // strokes written so far, and the hint
-                strokes(d, Array(0..<current), Color.accent)
+                // the hint: the next stroke traced along its centre line, again at each further miss
                 if hint && current < d.count {
-                    strokes(d, [current], Color.accent.opacity(0.45)).transition(.opacity)
+                    reveal(d, current, Color.accent.opacity(0.42), duration: 0.6)
+                        .id("hint-\(current)-\(misses)")
+                        .transition(.opacity)
                 }
+                // strokes written so far: each draws in as it's accepted
+                ForEach(0..<current, id: \.self) { i in
+                    reveal(d, i, Color.accent, duration: 0.3)
+                }
+                // the finish: the whole character lights up once
+                strokes(d, Array(0..<d.count), Color.good)
+                    .opacity(glow ? 1 : 0)
+                    .allowsHitTesting(false)
                 // free tracing: every stroke stays
-                Path { p in for s in freeInk { if let f = s.first { p.move(to: f); s.dropFirst().forEach { p.addLine(to: $0) } } } }
-                    .stroke(Color.accent, style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
+                Path { p in for s in freeInk { p.addPath(Path(InkGeometry.path(s))) } }
+                    .stroke(Color.accent, style: StrokeStyle(lineWidth: Self.penWidth, lineCap: .round, lineJoin: .round))
+                    .allowsHitTesting(false)
                 // the pen
-                Path { p in if let f = ink.first { p.move(to: f); ink.dropFirst().forEach { p.addLine(to: $0) } } }
-                    .stroke(inkMissed ? Color.again : Color.accent, style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
+                InkCanvas(enabled: !intro && !done && !finishing, lineWidth: Self.penWidth) { finishStroke($0) }
                 if done {
                     Image(systemName: "checkmark.circle.fill").font(.system(size: 30)).foregroundStyle(Color.good)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing).padding(8)
                         .transition(.scale.combined(with: .opacity))
+                        .allowsHitTesting(false)
                 }
             } else {
                 Text(char).font(.hanzi(size * 0.7))
             }
         }
         .frame(width: size, height: size)
-        .contentShape(Rectangle())
-        .gesture(DragGesture(minimumDistance: 0)
-            .onChanged { v in
-                guard !intro, !done, data != nil else { return }
-                if inkMissed { ink = []; inkMissed = false }
-                // a new stroke: whatever a cancelled one left behind goes
-                if !stroking { stroking = true; ink = [] }
-                ink.append(v.location)
-            }
-            .onEnded { _ in stroking = false; check() })
         .sensoryFeedback(.impact(weight: .light), trigger: drawn)
         .sensoryFeedback(.error, trigger: misses) { _, n in n > 0 }
         .sensoryFeedback(.success, trigger: done) { _, n in n }
@@ -167,27 +172,81 @@ struct WritingBox: View {
             .fill(color)
     }
 
-    private func check() {
-        if !checking { if !ink.isEmpty { freeInk.append(ink); ink = [] }; return }
-        guard let d = data, !done, !ink.isEmpty else { return }
-        let glyph = ink.map(space.toGlyph)
-        if StrokeMatch.matches(glyph, char: d, stroke: current, leniency: 1.4, outlineVisible: stage == 0) {
-            withAnimation(.easeOut(duration: 0.2)) {
-                current += 1; ink = []; hint = false; misses = 0
-            }
+    /// Stroke `i` drawn in along its median. The mask is as wide as HanziWriter's (200 units).
+    private func reveal(_ d: CharStrokes, _ i: Int, _ color: Color, duration: Double) -> StrokeReveal {
+        let sp = space
+        let outline = Path { p in p.addPath(SVGPath.stroke(d.strokes[i]), transform: sp.transform) }
+        return StrokeReveal(outline: outline, median: sp.polyline(d.median(i)),
+                            width: 200 * sp.s, color: color, duration: duration)
+    }
+
+    /// A finished stroke from the pen, in view space. The answer says how its ink leaves.
+    private func finishStroke(_ points: [CGPoint]) -> InkCanvas.Verdict {
+        guard let d = data, !done, !finishing else { return .dropped }
+        if !checking {
+            guard !points.isEmpty else { return .dropped }
+            freeInk.append(points)
+            return .kept
+        }
+        guard current < d.count else { return .dropped }
+        // a tap isn't a stroke, and isn't a miss (HanziWriter ignores one too)
+        guard StrokeMatch.length(points) >= 2 else { return .dropped }
+        let glyph = InkGeometry.thin(points, minDistance: 2).map(space.toGlyph)
+        if StrokeMatch.matches(glyph, char: d, stroke: current, leniency: StrokeMatch.leniency, outlineVisible: stage == 0) {
+            current += 1
+            misses = 0
+            if hint { withAnimation(.easeOut(duration: 0.2)) { hint = false } }
             drawn += 1
-            if current == d.count {
+            if current == d.count { finish() }
+            return .accepted
+        }
+        misses += 1
+        if misses >= WriteView.stageInfo[stage].hint {
+            withAnimation(.easeInOut(duration: 0.3)) { hint = true }
+        }
+        return .rejected
+    }
+
+    /// The last stroke draws in, the whole character lights up once (HanziWriter's
+    /// highlightOnComplete), then the tick and the success flow.
+    private func finish() {
+        finishing = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            withAnimation(.easeOut(duration: 0.18)) { glow = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+                withAnimation(.easeIn(duration: 0.35)) { glow = false }
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) { done = true }
                 complete()
             }
-        } else {
-            inkMissed = true
-            misses += 1
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { if inkMissed { withAnimation { ink = []; inkMissed = false } } }
-            if misses >= WriteView.stageInfo[stage].hint {
-                withAnimation(.easeInOut(duration: 0.3)) { hint = true }
-            }
         }
+    }
+}
+
+/// One stroke of a character drawn in along its centre line, as HanziWriter reveals a
+/// stroke; once in, it's the whole outline, unmasked.
+struct StrokeReveal: View {
+    let outline: Path
+    let median: Path
+    let width: CGFloat
+    let color: Color
+    var duration = 0.3
+    @State private var progress: CGFloat = 0
+    @State private var full = false
+
+    var body: some View {
+        outline.fill(color)
+            .mask {
+                if full {
+                    Rectangle()
+                } else {
+                    median.trim(from: 0, to: progress)
+                        .stroke(style: StrokeStyle(lineWidth: width, lineCap: .round, lineJoin: .round))
+                }
+            }
+            .allowsHitTesting(false)
+            .onAppear {
+                withAnimation(.easeOut(duration: duration)) { progress = 1 } completion: { full = true }
+            }
     }
 }
 
