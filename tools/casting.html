@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bùbù Casting</title>
+<style>
+:root{--bg:#faf7f1;--panel:#fff;--ink:#172530;--muted:#66768a;--line:#e8e6df;--accent:#2b776d;--accent-soft:#d9ece5;--on-accent:#fff;
+--bad:#d9695a;--gold:#b7822e;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0a1420;--panel:#122131;--ink:#e8eef4;--muted:#9aabbd;--line:#22364a;
+--accent:#6cc2b2;--accent-soft:#16332f;--on-accent:#06201c;--bad:#f08a7a;--gold:#e0b060;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 16px 120px}
+main{max-width:860px;margin:0 auto}
+h1{font-size:1.5rem;margin:0 0 4px}
+h2{font-size:1.1rem;margin:28px 0 4px}
+.sub{color:var(--muted);margin:0 0 12px;font-size:.95rem}
+button,select{font:inherit;cursor:pointer;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 12px;font-weight:700}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.voices{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.voice{display:flex;align-items:center;gap:8px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px 10px}
+.voice.playing,.person.playing{border-color:var(--accent);background:var(--accent-soft)}
+.voice b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.voice small{color:var(--muted);font-weight:700}
+.round{width:40px;height:40px;padding:0;border-radius:50%;flex:none}
+.person{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:12px;margin-bottom:8px}
+.person .zh{font-size:1.25rem;font-weight:800}
+.person .en{color:var(--gold);font-weight:700}
+.person .about{color:var(--muted);font-size:.88rem}
+.person .n{font-size:.75rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.clash{grid-column:1/-1;color:var(--bad);font-weight:700;font-size:.85rem}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+.count{font-weight:700;margin-right:auto;font-variant-numeric:tabular-nums}
+textarea{width:100%;min-height:140px;font:14px/1.4 ui-monospace,Consolas,monospace;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--ink);padding:10px;margin-top:10px}
+@media (max-width:520px){.person{grid-template-columns:1fr auto}.person>div:first-child{grid-column:1/-1}}
+</style></head><body><main>
+<h1>Bùbù casting</h1>
+<p class="sub">Every voice says the same line: <b>__LINE__</b> Choose one for each character. Your choices are saved in this browser.</p>
+<div class="bar">
+  <span class="count" id="count"></span>
+  <button id="copy" class="primary">Copy the cast</button>
+</div>
+
+<h2>The voices</h2>
+<p class="sub">Women first, then men. Tap one to hear it.</p>
+<div class="voices" id="voices"></div>
+
+<h2>The characters</h2>
+<p class="sub">Most lines first. Characters with only a few lines (a waiter, a shop assistant) can share a voice, so there's no need to cast them all: anyone left without one gets a spare voice.</p>
+<div id="people"></div>
+<textarea id="out" hidden readonly></textarea>
+</main>
+<script>
+const VOICES = __VOICES__;
+const PEOPLE = __PEOPLE__;
+const KEY = "bubu-casting";
+VOICES.sort((a, b) => (a.gender === b.gender ? a.name.localeCompare(b.name) : a.gender === "f" ? -1 : 1));
+let cast = {};
+try { cast = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+PEOPLE.forEach(p => { if (p.preset && !cast[p.zh]) cast[p.zh] = p.preset; });
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(cast)); } catch (e) {} };
+const audio = new Audio();
+let playing = null;
+audio.onended = () => { playing = null; paint(); };
+
+function play(name, who) {
+  const v = VOICES.find(x => x.name === name); if (!v) return;
+  playing = who || "v:" + name;
+  audio.src = "data:audio/mpeg;base64," + v.audio;
+  audio.play().catch(() => {});
+  paint();
+}
+function sex(g) { return g === "f" ? "woman" : g === "m" ? "man" : ""; }
+function paint() {
+  const vs = document.getElementById("voices"); vs.innerHTML = "";
+  VOICES.forEach(v => {
+    const used = PEOPLE.filter(p => cast[p.zh] === v.name).map(p => p.zh);
+    const d = document.createElement("div"); d.className = "voice" + (playing === "v:" + v.name ? " playing" : "");
+    d.innerHTML = '<button class="round" aria-label="Play">▶</button><b></b><small></small>';
+    d.querySelector("b").textContent = v.name;
+    d.querySelector("small").textContent = used.length ? used.join(" ") : sex(v.gender);
+    d.querySelector("button").onclick = () => play(v.name);
+    vs.appendChild(d);
+  });
+  const ps = document.getElementById("people"); ps.innerHTML = "";
+  PEOPLE.forEach(p => {
+    const d = document.createElement("div"); d.className = "person" + (playing === "p:" + p.zh ? " playing" : "");
+    d.innerHTML = '<div><div><span class="zh"></span> <span class="en"></span></div><div class="about"></div><div class="n"></div></div>';
+    d.querySelector(".zh").textContent = p.zh;
+    d.querySelector(".en").textContent = p.en;
+    d.querySelector(".about").textContent = p.about;
+    d.querySelector(".n").textContent = (p.lines ? p.lines + " line" + (p.lines === 1 ? "" : "s") : "every word") + (sex(p.gender) ? " · " + sex(p.gender) : "");
+    const sel = document.createElement("select");
+    sel.setAttribute("aria-label", "Voice for " + (p.en || p.zh));
+    sel.innerHTML = '<option value="">No voice chosen</option>';
+    // their own sex first, then the rest
+    const order = VOICES.filter(v => !p.gender || v.gender === p.gender).concat(VOICES.filter(v => p.gender && v.gender !== p.gender));
+    order.forEach(v => { const o = document.createElement("option"); o.value = v.name; o.textContent = v.name + " (" + sex(v.gender) + ")"; sel.appendChild(o); });
+    sel.value = cast[p.zh] || "";
+    sel.onchange = () => { if (sel.value) cast[p.zh] = sel.value; else delete cast[p.zh]; save(); if (sel.value) play(sel.value, "p:" + p.zh); else paint(); };
+    const b = document.createElement("button"); b.className = "round"; b.textContent = "▶"; b.setAttribute("aria-label", "Play their voice");
+    b.disabled = !cast[p.zh];
+    b.onclick = () => play(cast[p.zh], "p:" + p.zh);
+    d.appendChild(sel); d.appendChild(b);
+    const others = PEOPLE.filter(q => q.zh !== p.zh && cast[p.zh] && cast[q.zh] === cast[p.zh]).map(q => q.zh);
+    if (others.length) { const c = document.createElement("div"); c.className = "clash"; c.textContent = "Same voice as " + others.join(", "); d.appendChild(c); }
+    ps.appendChild(d);
+  });
+  document.getElementById("count").textContent = PEOPLE.filter(p => cast[p.zh]).length + " of " + PEOPLE.length + " cast";
+}
+document.getElementById("copy").onclick = e => {
+  const t = ["Bùbù casting", ""].concat(PEOPLE.filter(p => cast[p.zh]).map(p => p.zh + " | " + (p.en || "") + " | " + cast[p.zh]))
+    .concat(["", "Not cast: " + (PEOPLE.filter(p => !cast[p.zh]).map(p => p.zh).join(", ") || "nobody")]).join("\n");
+  const out = document.getElementById("out"); out.hidden = false; out.value = t;
+  const done = () => { e.target.textContent = "Copied"; setTimeout(() => e.target.textContent = "Copy the cast", 1500); };
+  const fallback = () => { out.focus(); out.select(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done).catch(fallback);
+  else fallback();
+};
+paint();
+</script></body></html>
