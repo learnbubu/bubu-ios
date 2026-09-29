@@ -156,7 +156,10 @@ struct StudyView: View {
     private func playAnswer(_ ex: Exercise) {
         guard let text = Autoplay.onAnswer(ex, autoplay: progress.prefs.playsAutomatically) else { return }
         let key = exerciseKey
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { if exerciseKey == key { Speech.shared.speak(text) } }
+        // not if it's the last thing that was said (the option just tapped said it): the chime is enough
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+            if exerciseKey == key { Speech.shared.autoSpeak(text, within: .infinity) }
+        }
     }
 
     // MARK: chrome

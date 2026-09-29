@@ -68,11 +68,11 @@ final class Speech {
 
     /// Said by itself (an exercise's prompt, the answer in the feedback): what `Autoplay` picked,
     /// nil for nothing. Goes through `speak`, so the same audio session as everything else.
-    func autoSpeak(_ text: String?, always: Bool = false) {
+    func autoSpeak(_ text: String?, always: Bool = false, within gap: TimeInterval = Speech.repeatGap) {
         guard let text, !text.isEmpty else { return }
         // just heard (the new-word card said it, then its first exercise would again): once is enough
         // (not for listening, where the sound is the question: that always plays)
-        if !always, text == lastText, Date().timeIntervalSince(lastAt) < Self.repeatGap { return }
+        if !always, text == lastText, Date().timeIntervalSince(lastAt) < gap { return }
         speak(text)
     }
     /// An exercise doesn't say again by itself what was said this recently.
