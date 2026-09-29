@@ -223,6 +223,15 @@ final class Course {
     /// the cards for each word, by its characters: to tell whether a sentence's words have been met
     private(set) lazy var cardsByHanzi: [String: [Card]] = Dictionary(grouping: cards) { $0.word.hanzi.filter(Course.isHan) }
     /// the cards whose word has each character in it
+    /// The course's names (people, places), longest first: never taught as words.
+    private(set) lazy var nameList: [String] = data.names.map { $0.filter(Course.isHan) }
+        .filter { !$0.isEmpty }.sorted { $0.count > $1.count }
+    /// Characters that only ever appear in names (陈, 玛, 艾 …), in no word of the course.
+    private(set) lazy var nameOnlyChars: Set<Character> = {
+        var out = Set<Character>()
+        for n in nameList { for ch in n where cardsByChar[ch] == nil { out.insert(ch) } }
+        return out
+    }()
     private(set) lazy var cardsByChar: [Character: [Card]] = {
         var out: [Character: [Card]] = [:]
         for c in cards { for ch in Set(c.word.hanzi.filter(Course.isHan)) { out[ch, default: []].append(c) } }

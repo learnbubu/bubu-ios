@@ -296,11 +296,21 @@ extension Course {
         for t in d.turns where t.who == "you" {
             let words = Sentence.segment(hanzi: t.hanzi, pinyin: t.pinyin)?.map(\.hanzi)
                 ?? t.hanzi.filter(Course.isHan).map { String($0) }
-            for w in words where !Course.trivialWords.contains(w) && !isMetWord(w, met: met) && !out.contains(w) {
+            for w in words where !Course.trivialWords.contains(w) && !isNameOrMet(w, met: met) && !out.contains(w) {
                 out.append(w)
             }
         }
         return out
+    }
+
+    /// A word of a dialogue that needs no learning: a name (陈静, 伦敦), or a met word, or a
+    /// name with a met word (陈老师). Names are never taught, so they never lock a dialogue.
+    func isNameOrMet(_ w: String, met: (String) -> Bool) -> Bool {
+        var han = w.filter(Course.isHan)
+        if han.isEmpty || nameList.contains(han) || isMetWord(han, met: met) { return true }
+        for n in nameList where han.contains(n) { han = han.replacingOccurrences(of: n, with: "") }
+        han = han.filter { !nameOnlyChars.contains($0) }
+        return han.isEmpty || isMetWord(han, met: met)
     }
 
     /// A dialogue is yours to say once you've met the words of your lines.
