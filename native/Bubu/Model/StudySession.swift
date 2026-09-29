@@ -838,7 +838,10 @@ final class StudySession: Identifiable {
             progress.recordReview()
         } else {
             // a stone's extra practice on a word doesn't push its first review further out
-            let schedule = !stoneShaped || (rightInSession[c.id] ?? 0) < Self.scheduledPerSession
+            // (a word not yet got right, or missed since, always counts: else a late mistake
+            // would leave it unlearnt and the stone could never complete)
+            let unlearnt = (progress.srs[c.id]?.reps ?? 0) < 1
+            let schedule = !stoneShaped || unlearnt || (rightInSession[c.id] ?? 0) < Self.scheduledPerSession
             let r = progress.answer(c.id, correct: correct, dir: dir, sessionStart: start,
                                     mistakesMode: mode == .mistakes, schedule: schedule)
             if r.mistake { mistakes += 1 }

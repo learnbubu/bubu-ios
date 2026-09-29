@@ -125,7 +125,7 @@ private struct MomentsHost: ViewModifier {
                 if here, let t = moments.toastText {
                     Text(t).font(.nunito(15, .bold)).foregroundStyle(Color.bg).multilineTextAlignment(.center)
                         .padding(.horizontal, 18).padding(.vertical, 11)
-                        .background(Color.ink.opacity(0.92), in: Capsule())
+                        .background(Color.ink.opacity(0.92), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                         .padding(.horizontal, 24).padding(.bottom, study ? 110 : 96)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                         .allowsHitTesting(false)
