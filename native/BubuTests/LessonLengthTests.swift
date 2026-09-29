@@ -12,7 +12,7 @@ final class LessonLengthTests: XCTestCase {
     }
     private var chapter1: [Lesson] { course.chapters[0].lessons.map { course.lessonById[$0]! } }
 
-    /// One step of a session played through: a word met, or an exercise on a word.
+    /// One step of a session played through: a word met, an exercise on a word, or a match.
     private struct Step { let meet: Bool; let id: String; let hanzi: String; let dir: String }
 
     /// Plays a session through, every answer right, and returns what came up.
@@ -22,6 +22,11 @@ final class LessonLengthTests: XCTestCase {
             n += 1
             if case .meet(let cards, _, _) = s.current {
                 for c in cards { steps.append(Step(meet: true, id: c.id, hanzi: c.word.hanzi, dir: "")) }
+            }
+            // tap the pairs: one step, every pair found
+            if case .match(let cards, _) = s.current {
+                steps.append(Step(meet: false, id: "match", hanzi: "match", dir: "match"))
+                for c in cards { XCTAssertTrue(s.matchPair(c.id, c.id)) }
             }
             if let c = s.card {
                 steps.append(Step(meet: false, id: c.id, hanzi: c.word.hanzi, dir: s.dir))
@@ -81,7 +86,7 @@ final class LessonLengthTests: XCTestCase {
         let s = StudySession(lessonId: stone.id, progress: p)
         XCTAssertTrue(s.stoneShaped)
         XCTAssertFalse(s.tonesTaught)
-        XCTAssertEqual(s.sessionTotal, 15)
+        XCTAssertEqual(s.sessionTotal, 15, "three words: too few for a match")
         let steps = play(s)
         let ex = steps.filter { !$0.meet }
         XCTAssertEqual(ex.count, s.sessionTotal, "the progress bar counts every exercise")
@@ -146,7 +151,8 @@ final class LessonLengthTests: XCTestCase {
         let ex = steps.filter { !$0.meet }
         XCTAssertEqual(ex.count, s.sessionTotal)
         checkNewWords(steps, fresh)
-        let reviews = ex.filter { st in !fresh.contains { $0.id == st.id } }
+        XCTAssertEqual(ex.filter { $0.dir == "match" }.count, 1, "one match")
+        let reviews = ex.filter { st in st.dir != "match" && !fresh.contains { $0.id == st.id } }
         XCTAssertEqual(reviews.count, StudySession.reviewsWanted(new: 3))
         let earlier = Set(course.lessons[..<i].flatMap { course.cards(in: $0.id) }.map(\.id))
         for r in reviews { XCTAssertTrue(earlier.contains(r.id), "\(r.hanzi) is an earlier word") }

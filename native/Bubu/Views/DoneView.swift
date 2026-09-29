@@ -72,10 +72,14 @@ struct DoneView: View {
     // MARK: stage 1: XP, time, accuracy
 
     private func stageOne(_ r: StudySession.Result) -> some View {
-        VStack(spacing: 0) {
+        // a stone's new words (or a practice stone's words) take the place of "This week",
+        // which the fire stage shows next anyway
+        let recap = r.learned.isEmpty ? r.practised : r.learned
+        return VStack(spacing: 0) {
             Spacer(minLength: 0)
             // the image has room around Bùbù, so it's drawn big enough to read as the hero
-            Image("done-panda").resizable().scaledToFit().frame(height: 230)
+            // (a little smaller beside a list of words)
+            Image("done-panda").resizable().scaledToFit().frame(height: recap.count > 2 ? 160 : recap.isEmpty ? 230 : 190)
             Text(r.title).font(.nunito(22, .black)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 .padding(.top, 2)
             if r.steps > 1 {
@@ -91,7 +95,7 @@ struct DoneView: View {
                 DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: "Time", bg: .accentSoft, ink: .accent, delay: 0.42)
                 DoneTile(value: r.accuracy, format: { "\($0)%" }, label: "Accuracy", bg: .goodSoft, ink: .good, delay: 0.64)
             }
-            .padding(.top, 22).padding(.bottom, 6)
+            .padding(.top, recap.isEmpty ? 22 : 16).padding(.bottom, 6)
             VStack(spacing: 6) {
                 if r.perfect { note("Perfect! No mistakes, +5 XP", fg: .gold, bg: .accentSoft) }
                 if r.lessonFinished { note("Lesson done: double XP for the next 15 minutes", fg: .accent, bg: .accentSoft) }
@@ -100,19 +104,24 @@ struct DoneView: View {
                 else if progress.boostActive && !r.lessonFinished { note("Double XP is on", fg: .accent, bg: .accentSoft) }
             }
             .padding(.top, 10)
-            // this week, so the streak is in view from the first screen
-            VStack(spacing: 10) {
-                HStack {
-                    Text("THIS WEEK").font(.nunitoXB(10.9)).tracking(1.1).foregroundStyle(Color.muted)
-                    Spacer()
-                    Label("\(progress.streak) day\(progress.streak == 1 ? "" : "s")", systemImage: "flame.fill")
-                        .font(.nunitoXB(12)).foregroundStyle(Color.gold)
+            if !recap.isEmpty {
+                WordRecap(title: r.learned.isEmpty ? "YOU PRACTISED" : "YOU LEARNED", cards: recap)
+                    .padding(.top, 14)
+            } else {
+                // this week, so the streak is in view from the first screen
+                VStack(spacing: 10) {
+                    HStack {
+                        Text("THIS WEEK").font(.nunitoXB(10.9)).tracking(1.1).foregroundStyle(Color.muted)
+                        Spacer()
+                        Label("\(progress.streak) day\(progress.streak == 1 ? "" : "s")", systemImage: "flame.fill")
+                            .font(.nunitoXB(12)).foregroundStyle(Color.gold)
+                    }
+                    WeekStrip()
                 }
-                WeekStrip()
+                .padding(.horizontal, 14).padding(.vertical, 12)
+                .background(Color.bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .padding(.top, 18)
             }
-            .padding(.horizontal, 14).padding(.vertical, 12)
-            .background(Color.bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .padding(.top, 18)
             Spacer(minLength: 0)
         }
     }
@@ -313,5 +322,45 @@ struct QuestRows: View {
                 .overlay(alignment: .top) { if i > 0 { Rectangle().fill(Color.line).frame(height: 1) } }
             }
         }
+    }
+}
+
+/// The done screen's recap of a stone's new words ("You learned") or a practice stone's
+/// words ("You practised"): characters, pinyin, a short meaning and a speaker each, two to
+/// a row so up to six fit without crowding the screen.
+struct WordRecap: View {
+    let title: String
+    let cards: [Card]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.nunitoXB(10.9)).tracking(1.1).foregroundStyle(Color.muted)
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
+                ForEach(cards, id: \.id) { c in cell(c) }
+            }
+        }
+        .padding(.horizontal, 12).padding(.vertical, 11)
+        .background(Color.bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func cell(_ c: Card) -> some View {
+        let w = c.word
+        return HStack(spacing: 4) {
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Text(w.hanzi).font(.hanzi(w.hanzi.count > 2 ? 16 : 19, .semibold)).foregroundStyle(Color.ink)
+                        .lineLimit(1).layoutPriority(1)
+                    PinyinText(pinyin: w.pinyin, size: 12).lineLimit(1).minimumScaleFactor(0.6)
+                }
+                Text(w.gloss).font(.nunito(12.5, .semibold)).foregroundStyle(Color.muted)
+                    .lineLimit(1).minimumScaleFactor(0.8)
+            }
+            Spacer(minLength: 0)
+            SpeakerButton(text: w.hanzi, size: 15)
+                .accessibilityLabel("Hear \(w.hanzi)")
+        }
+        .padding(.leading, 10).padding(.trailing, 4).padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.panel, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }

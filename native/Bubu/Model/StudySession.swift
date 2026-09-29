@@ -27,7 +27,17 @@ final class StudySession: Identifiable {
     enum Item {
         case meet(cards: [Card], first: Bool, left: Int)
         case card(Card)
+        /// Tap the pairs (see MatchView): 4–5 words already met, Chinese beside English, or
+        /// (`listen`, when every word is past its first rung) sounds beside characters.
+        case match(cards: [Card], listen: Bool)
     }
+
+    /// A match exercise's pairs: at most this many, and it needs at least `matchMin` words
+    /// known or just met (with different characters and meanings) to be asked at all.
+    static let matchMax = 5, matchMin = 4
+    /// How many matches a practice stone has: one half-way, one at the end. They take the
+    /// place of two of its exercises, so it stays `practiceLen` steps long.
+    static let practiceMatches = 2
 
     /// What the session is for. Only a lesson session can finish a lesson.
     enum Mode { case lesson, review, mistakes, trouble, listen, write, quiz, placement }
@@ -83,6 +93,9 @@ final class StudySession: Identifiable {
     private(set) var combo = 0
     private(set) var mistakes = 0
     private(set) var fixedCount = 0
+    /// The match on screen: the words paired so far, and whether it pairs sounds with characters.
+    private(set) var matched: Set<String> = []
+    private(set) var matchAudio = false
     let start: Double
     private var lastDir: String?
     private var dirByCard: [String: String] = [:]
@@ -115,6 +128,10 @@ final class StudySession: Identifiable {
         /// a lesson step finished that wasn't the last: "Step 1 of 2 done" (0 otherwise)
         var step = 0
         var steps = 0
+        /// the words met this session, for the done screen's "You learned" card
+        var learned: [Card] = []
+        /// a practice stone's words (up to 6), for its "You practised" card
+        var practised: [Card] = []
     }
 
     // the skip test's tally
@@ -151,14 +168,25 @@ final class StudySession: Identifiable {
         let shaped = mode == .lesson && !practice && fs != ["write"] && fs != ["speak"]
         self.stoneShaped = shaped
         self.tonesTaught = StudySession.tonesIntroduced(lessonId, mode: mode, progress)
-        let chosen = cards ?? (practice ? StudySession.practiceQueue(lessonId, progress)
+        // a practice stone's two matches, when it has enough words met (they replace two exercises)
+        let pMatches: [[Card]] = practice ? StudySession.practiceMatchWords(lessonId, progress) : []
+        let practiceCount = StudySession.practiceLen - pMatches.count
+        let chosen = cards ?? (practice ? StudySession.practiceQueue(lessonId, progress, count: practiceCount)
                                         : StudySession.buildQueue(lessonId: lessonId, progress: progress, focuses: self.focuses))
         self.scope = scope ?? (practice ? Set(Course.shared.practiceScope(lessonId)) : mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId)))
         self.source = chosen
         self.freshIds = shaped ? Set(chosen.filter { progress.srs[$0.id] == nil }.map(\.id)) : []
         // a practice stone meets no words: it's all exercises, in the order they were picked
-        self.queue = mode == .quiz || mode == .placement || practice ? chosen.map { .card($0) } : sessionOrder(chosen)
-        self.sessionTotal = queue.filter { if case .card = $0 { return true } else { return false } }.count
+        var items: [Item] = mode == .quiz || mode == .placement || practice ? chosen.map { .card($0) } : sessionOrder(chosen)
+        // tap the pairs: twice in a practice stone, once near the end of a stone's session
+        if practice && !pMatches.isEmpty {
+            items = StudySession.withPracticeMatches(items, pMatches)
+        } else if shaped {
+            items = StudySession.withStoneMatch(items, progress)
+        }
+        self.queue = items
+        // the progress bar's steps: each exercise, and each match as one (see progressFraction)
+        self.sessionTotal = items.filter { if case .meet = $0 { return false } else { return true } }.count
         self.onBuns = [.lesson, .listen, .write].contains(mode) && hasMeetLeft
         if mode == .lesson && !lessonId.isEmpty { stepAtStart = Self.lessonSteps(lessonId, progress).step }
         next()
@@ -209,17 +237,141 @@ final class StudySession: Identifiable {
 
     /// A practice stone's exercises: about fifteen on the words its chapter has taught so far,
     /// weakest first; with fewer words than that the weakest come again, never twice in a row.
-    static func practiceQueue(_ lessonId: String, _ p: ProgressStore) -> [Card] {
+    static func practiceQueue(_ lessonId: String, _ p: ProgressStore, count: Int = practiceLen) -> [Card] {
         let pool = Course.shared.practiceCards(lessonId).shuffled()
             .sorted { weakness(p.srs[$0.id]) > weakness(p.srs[$1.id]) }
-        guard !pool.isEmpty else { return [] }
-        var picked = Array(pool.prefix(practiceLen))
+        guard !pool.isEmpty, count > 0 else { return [] }
+        var picked = Array(pool.prefix(count))
         var i = 0
-        while picked.count < practiceLen { picked.append(pool[i % pool.count]); i += 1 }
+        while picked.count < count { picked.append(pool[i % pool.count]); i += 1 }
         var out = picked.shuffled()
         var tries = 0
         while tries < 50, out.indices.dropFirst().contains(where: { out[$0].id == out[$0 - 1].id }) { out.shuffle(); tries += 1 }
         return out
+    }
+
+    // MARK: tap the pairs
+
+    /// Up to `matchMax` words for a match, in the order given, each with its own characters and
+    /// its own meaning (so every tile has exactly one partner); none when fewer than `matchMin`.
+    static func matchWords(_ cards: [Card]) -> [Card] {
+        var hanzi = Set<String>()
+        var glosses = Set<String>()
+        var out: [Card] = []
+        for c in cards where out.count < matchMax {
+            let g = c.word.gloss.lowercased()
+            if hanzi.contains(c.word.hanzi) || glosses.contains(g) { continue }
+            hanzi.insert(c.word.hanzi)
+            glosses.insert(g)
+            out.append(c)
+        }
+        return out.count >= matchMin ? out : []
+    }
+
+    /// A practice stone's two matches, on its words already met, weakest first: the second
+    /// takes the words the first left out, then some of the first's again. Empty when there
+    /// are too few words met.
+    static func practiceMatchWords(_ lessonId: String, _ p: ProgressStore) -> [[Card]] {
+        let pool = Course.shared.practiceCards(lessonId).filter { p.srs[$0.id] != nil }.shuffled()
+            .sorted { weakness(p.srs[$0.id]) > weakness(p.srs[$1.id]) }
+        let first = matchWords(pool)
+        guard !first.isEmpty else { return [] }
+        let firstIds = Set(first.map(\.id))
+        let second = matchWords(pool.filter { !firstIds.contains($0.id) } + first.shuffled())
+        guard !second.isEmpty else { return [first] }
+        return [first, second]
+    }
+
+    /// A practice stone's exercises with its matches: the first half-way, the second at the
+    /// end (it may pair sounds with characters, see next()).
+    static func withPracticeMatches(_ items: [Item], _ matches: [[Card]]) -> [Item] {
+        var out = items
+        if matches.count >= 2 {
+            out.insert(.match(cards: matches[0], listen: false), at: out.count / 2)
+            out.append(.match(cards: matches[1], listen: true))
+        } else if let only = matches.first {
+            out.append(.match(cards: only, listen: false))
+        }
+        return out
+    }
+
+    /// A stone's session with one match about two-thirds of the way through, after the last
+    /// new word has been met and asked once, on the words known or met by then: the stone's
+    /// new words first, then the earlier ones it reviews, weakest first. Unchanged when there
+    /// are fewer than `matchMin` of them (the course's first stone).
+    static func withStoneMatch(_ items: [Item], _ p: ProgressStore) -> [Item] {
+        let isCard = { (it: Item) -> Bool in if case .card = it { return true } else { return false } }
+        let nCards = items.filter(isCard).count
+        guard nCards > 0 else { return items }
+        let lastMeet = items.lastIndex { if case .meet = $0 { return true } else { return false } } ?? -1
+        let target = (nCards * 2 + 2) / 3
+        var at = items.count, seen = 0
+        for (i, it) in items.enumerated() where isCard(it) {
+            seen += 1
+            if seen == target { at = i + 1; break }
+        }
+        at = min(items.count, max(at, lastMeet + 2))
+        // the words met by then: those met on a card before it, and those with a record
+        var metBefore = Set<String>()
+        for it in items[..<at] { if case .meet(let cs, _, _) = it { metBefore.formUnion(cs.map(\.id)) } }
+        var fresh: [Card] = [], known: [Card] = []
+        var ids = Set<String>()
+        for it in items {
+            guard case .card(let c) = it, ids.insert(c.id).inserted else { continue }
+            if p.srs[c.id] != nil { known.append(c) } else if metBefore.contains(c.id) { fresh.append(c) }
+        }
+        known = known.shuffled().sorted { weakness(p.srs[$0.id]) > weakness(p.srs[$1.id]) }
+        let words = matchWords(fresh + known)
+        guard !words.isEmpty else { return items }
+        var out = items
+        out.insert(.match(cards: words, listen: false), at: at)
+        return out
+    }
+
+    /// A word still new to the learner (the match shows its pinyin): met this session, or not
+    /// yet got right.
+    func isStillNew(_ cardId: String) -> Bool {
+        freshIds.contains(cardId) || metInSession.contains(cardId) || Self.isNewCard(progress.srs[cardId])
+    }
+
+    /// Whether a word is past its first rung: right once this session, or before it.
+    private func pastFirstRung(_ c: Card) -> Bool {
+        (rightInSession[c.id] ?? 0) >= 1 || (progress.srs[c.id]?.reps ?? 0) >= 1
+    }
+
+    /// The words of the match on screen.
+    var matchCards: [Card] { if case .match(let cs, _) = current { return cs } else { return [] } }
+    var matchFinished: Bool { !matchCards.isEmpty && matched.count >= matchCards.count }
+
+    /// A pair tapped in the match on screen: the word on the left and the word on the right.
+    /// A right pair counts as a right answer on that word for XP and the quest counters; only a
+    /// word's first `scheduledPerSession` right answers this session reschedule it (and a word
+    /// with a mistake waiting keeps it for a real exercise). A wrong pair costs nothing: no
+    /// bun, no XP, no mistake saved. Finishing the match is one step of the progress bar.
+    @discardableResult
+    func matchPair(_ leftId: String, _ rightId: String) -> Bool {
+        guard case .match(let cards, _) = current, !matched.contains(leftId), !matched.contains(rightId),
+              leftId == rightId, let c = cards.first(where: { $0.id == leftId }) else { return false }
+        progress.holdSaves()
+        defer { progress.releaseSaves() }
+        matched.insert(c.id)
+        let kind = matchAudio ? "listen" : "match"
+        if (rightInSession[c.id] ?? 0) < Self.scheduledPerSession && progress.srs[c.id]?.miss == nil {
+            _ = progress.answer(c.id, correct: true, dir: kind, sessionStart: start, mistakesMode: false, schedule: true)
+        }
+        progress.recordReview()
+        rightInSession[c.id, default: 0] += 1
+        combo += 1
+        if combo == Self.comboAt { DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { Sounds.shared.play("combo") } }
+        let mark = progress.xpCounter
+        progress.earnXP(combo >= Self.comboAt ? Self.xpCombo : Self.xpCorrect)
+        progress.questEvent(kind, correct: true)
+        sessionXP += progress.xpCounter - mark
+        if matched.count >= cards.count {
+            answered = true
+            stepsDone += 1
+        }
+        return true
     }
 
     /// A session with new words in it needs a bun to start: with none left the buns
@@ -533,6 +685,8 @@ final class StudySession: Identifiable {
         answered = false
         lastCorrect = nil
         exercise = nil
+        matched = []
+        matchAudio = false
         if queue.isEmpty, mode == .placement, !placeBlocks.isEmpty, let b = nextProbe() {
             placeProbe = b; probes += 1
             queue = Self.probeCards(placeBlocks[b]).map { .card($0) }
@@ -542,6 +696,11 @@ final class StudySession: Identifiable {
         let item = queue.removeFirst()
         current = item
         if case .meet(let cards, _, _) = item { metInSession.formUnion(cards.map(\.id)) }
+        // a match may pair sounds with characters once all its words are past their first
+        // rung, and listening is switched on
+        if case .match(let cards, let listen) = item {
+            matchAudio = listen && focuses.contains("listen") && cards.allSatisfy { pastFirstRung($0) }
+        }
         if case .card(let c) = item {
             dir = pickDirection(c)
             exercise = Exercise.make(card: c, dir: dir, scope: scope, progress: progress, met: self.isMet)
@@ -703,6 +862,7 @@ final class StudySession: Identifiable {
     func shuffleRest() -> Bool {
         guard !hasMeetLeft else { return false }
         if !answered, let c = card { queue.append(.card(c)) }
+        if !answered, let m = current, case .match = m { queue.append(m) }
         queue.shuffle()
         next()
         return true
@@ -715,7 +875,14 @@ final class StudySession: Identifiable {
         queue.append(.card(c))
     }
 
-    var progressFraction: Double { sessionTotal == 0 ? 0 : min(Double(stepsDone), Double(sessionTotal)) / Double(sessionTotal) }
+    /// A match is one step: the bar creeps through it a pair at a time, and it's counted
+    /// in `stepsDone` once every pair is found.
+    var progressFraction: Double {
+        guard sessionTotal > 0 else { return 0 }
+        let pairs = matchCards.count
+        let part = pairs == 0 || matchFinished ? 0 : Double(matched.count) / Double(pairs)
+        return min(Double(stepsDone) + part, Double(sessionTotal)) / Double(sessionTotal)
+    }
     var hasMeetLeft: Bool { queue.contains { if case .meet = $0 { return true } else { return false } } }
 
     // MARK: the end
@@ -758,7 +925,21 @@ final class StudySession: Identifiable {
                         nextLessonId: justFinished ? nextLesson(after: lessonId) : nil, wordsLeft: left,
                         fire: fire, mode: mode)
         if stepDone { result?.step = stepAtStart; result?.steps = total }
+        result?.learned = learnedWords
+        if isPractice { result?.practised = practisedWords }
         Coach.sessionFinished()
+    }
+
+    /// The words met this session, in the lesson's order (the done screen's "You learned").
+    var learnedWords: [Card] {
+        var seen = Set<String>()
+        return source.filter { metInSession.contains($0.id) && seen.insert($0.id).inserted }
+    }
+
+    /// A practice stone's words, up to six, in the order they came (its "You practised").
+    var practisedWords: [Card] {
+        var seen = Set<String>()
+        return Array(source.filter { seen.insert($0.id).inserted }.prefix(6))
     }
 
     /// The notes to show as a tip before this lesson starts: once per stone, then never again
