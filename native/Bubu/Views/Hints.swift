@@ -111,8 +111,9 @@ struct HintChip<Label: View>: View {
                 .background(open ? Color.accentSoft : highlight ?? .clear, in: RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
-        // always above the word (the arrow on the word's top edge), never beside it
-        .popover(isPresented: $open, attachmentAnchor: .rect(.bounds), arrowEdge: .top) {
+        // always above the word, never beside or under it. arrowEdge is the bubble's own edge
+        // that carries the arrow: .bottom puts the bubble above (.top put it underneath)
+        .popover(isPresented: $open, attachmentAnchor: .rect(.bounds), arrowEdge: .bottom) {
             VStack(spacing: 3) {
                 if let h = hanzi {
                     let py = pinyin ?? Course.wordPy[h] ?? ""
