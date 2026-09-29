@@ -96,3 +96,55 @@ def pcm16k(path):
     """A clip as 16 kHz mono WAV, for listening to."""
     return subprocess.run(["ffmpeg", "-loglevel", "error", "-i", path, "-f", "wav", "-ac", "1", "-ar", "16000", "pipe:1"],
                           capture_output=True, check=True).stdout
+
+
+# ---- pitch: the shape of a syllable's tone, to check a lone word's tone without ears
+
+def contour(data, points=5):
+    """The pitch of the voiced part of a clip at `points` moments along it, in semitones
+    relative to its own middle (so a rise reads +, a fall -), and its voiced length."""
+    w = wave.open(io.BytesIO(data))
+    sr = w.getframerate()
+    x = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float32)
+    frame, hop = int(sr * 0.04), int(sr * 0.01)
+    f0 = []
+    peak = np.abs(x).max() + 1e-9
+    for i in range(0, len(x) - frame, hop):
+        s = x[i:i + frame]
+        if np.sqrt((s ** 2).mean()) < 0.05 * peak:
+            f0.append(0.0); continue
+        s = s - s.mean()
+        ac = np.correlate(s, s, mode="full")[frame - 1:]
+        lo, hi = int(sr / 450), int(sr / 70)            # 70 to 450 Hz
+        if ac[0] <= 0:
+            f0.append(0.0); continue
+        k = lo + int(np.argmax(ac[lo:hi]))
+        f0.append(sr / k if ac[k] / ac[0] > 0.45 else 0.0)
+    f0 = np.array(f0)
+    voiced = np.where(f0 > 0)[0]
+    if len(voiced) < 6:
+        return [], 0.0
+    v = f0[voiced[0]:voiced[-1] + 1]
+    v = v[v > 0]
+    semis = 12 * np.log2(v / np.median(v))
+    idx = np.linspace(0, len(semis) - 1, points).astype(int)
+    # each point the median of its neighbours, to ride over a stray octave jump
+    out = [float(np.median(semis[max(0, i - 2):i + 3])) for i in idx]
+    return [round(o, 1) for o in out], len(v) / 100.0
+
+
+def tone_shape(c):
+    """A rough name for a contour: level, rising, falling, dipping (falls then rises) or low."""
+    if not c:
+        return "unclear"
+    start, low, end = c[0], min(c), c[-1]
+    span = max(c) - min(c)
+    if span < 2:
+        return "level"
+    if end - low >= 2 and start - low >= 1.5 and c.index(low) not in (0, len(c) - 1):
+        return "dipping"
+    if end - start >= 2:
+        return "rising"
+    if start - end >= 2:
+        return "falling"
+    return "uneven"
