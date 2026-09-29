@@ -21,6 +21,9 @@ struct Prefs: Codable, Equatable {
     var reminderMinutes: Int?   // its time, minutes after midnight (nil = 19:00)
     var streakNudge: Bool?      // the late "streak at risk" nudge (nil = on)
     var remindersAsked: Bool?   // the "Want a daily reminder?" card has been answered
+    // for beginners (see Beginner.swift); nil means never chosen
+    var pinyinMode: String?     // Settings → Pinyin: "auto", "always" or "known" (nil = Auto)
+    var autoplay: Bool?         // play exercises' Chinese automatically (nil = on)
 
     init() {}
     init(from decoder: Decoder) throws {
@@ -41,6 +44,8 @@ struct Prefs: Codable, Equatable {
         reminderMinutes = try? c.decode(Int.self, forKey: .reminderMinutes)
         streakNudge = try? c.decode(Bool.self, forKey: .streakNudge)
         remindersAsked = try? c.decode(Bool.self, forKey: .remindersAsked)
+        pinyinMode = try? c.decode(String.self, forKey: .pinyinMode)
+        autoplay = try? c.decode(Bool.self, forKey: .autoplay)
     }
 
     var colorScheme: ColorScheme? { theme == "light" ? .light : theme == "dark" ? .dark : nil }

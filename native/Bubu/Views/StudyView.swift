@@ -23,6 +23,11 @@ struct StudyView: View {
     @State private var tonesIntro = false
     /// Something shown before the session starts: the tones' intro or a tip.
     private var preStart: Bool { tonesIntro || !tips.isEmpty }
+    /// the learner's records as this exercise appeared, so answering it doesn't change which
+    /// pinyin shows until the next one
+    @State private var srsAtStart: [String: SRSRecord]?
+    /// pinyin training wheels for this exercise
+    private var wheels: Wheels { Wheels(srs: srsAtStart ?? progress.srs, mode: progress.prefs.pinyin) }
 
     struct Feedback { let correct: Bool; let chosen: String? }
 
@@ -69,7 +74,8 @@ struct StudyView: View {
         }
         .onAppear {
             loadTips()
-            if !preStart, let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
+            srsAtStart = progress.srs
+            if !preStart { playPrompt() }
             #if DEBUG
             // the buns screenshot: out of buns part-way through a lesson
             if Launch.screen == "buns" { DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { advance() } }
@@ -104,7 +110,7 @@ struct StudyView: View {
             tonesIntro = false
             if tips.isEmpty { exerciseKey = UUID() }
         }
-        if !preStart, let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
+        if !preStart { playPrompt() }
     }
 
     private func dismissTip() {
@@ -115,7 +121,7 @@ struct StudyView: View {
                 exerciseKey = UUID()
             }
         }
-        if !preStart, let ex = session.exercise, ex.dir == "listen" { Speech.shared.speak(ex.card.word.hanzi) }
+        if !preStart { playPrompt() }
     }
 
     /// Review in place of this session, from the buns sheet.
@@ -125,9 +131,25 @@ struct StudyView: View {
 
     private func resetExercise() {
         picked = nil; placed = []; feedback = nil; exerciseKey = UUID()
-        if let ex = session.exercise, ex.dir == "listen" {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) { Speech.shared.speak(ex.card.word.hanzi) }
+        srsAtStart = progress.srs
+        if session.exercise != nil {
+            let key = exerciseKey
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) { if exerciseKey == key && !preStart { playPrompt() } }
         }
+    }
+
+    /// The exercise's Chinese, said once as it appears, where hearing it doesn't give the
+    /// answer away (see Autoplay.onShow).
+    private func playPrompt() {
+        guard let ex = session.exercise, !session.answered else { return }
+        Speech.shared.autoSpeak(Autoplay.onShow(ex, autoplay: progress.prefs.playsAutomatically))
+    }
+
+    /// The right Chinese, said once as the feedback comes up (after the right/wrong chime).
+    private func playAnswer(_ ex: Exercise) {
+        guard let text = Autoplay.onAnswer(ex, autoplay: progress.prefs.playsAutomatically) else { return }
+        let key = exerciseKey
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { if exerciseKey == key { Speech.shared.speak(text) } }
     }
 
     // MARK: chrome
@@ -202,7 +224,7 @@ struct StudyView: View {
                 case .card:
                     if let ex = session.exercise {
                         if ex.kind == .sentence {
-                            SentenceView(ex: ex, placed: $placed, result: feedback?.correct)
+                            SentenceView(ex: ex, placed: $placed, result: feedback?.correct, wheels: wheels)
                         } else if ex.kind == .write {
                             WriteView(ex: ex, answered: session.answered) { settle(true) }
                         } else if ex.kind == .speak {
@@ -210,7 +232,7 @@ struct StudyView: View {
                                       settle: { correct in settle(correct) },
                                       skip: { session.skip() })
                         } else {
-                            ChoiceView(ex: ex, picked: picked, answered: session.answered) { choose($0) }
+                            ChoiceView(ex: ex, picked: picked, answered: session.answered, wheels: wheels) { choose($0) }
                         }
                     }
                 case nil:
@@ -244,7 +266,7 @@ struct StudyView: View {
             // a short slot, so four options fit a phone; the feedback rises over them
             Color.clear.frame(height: 84)
             if let fb = feedback, let ex, ex.kind != .speak, ex.kind != .write {
-                FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text))
+                FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text), wheels: wheels)
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
                         .shadow(color: Color.panel, radius: 12, y: -10))
                     .padding(.bottom, 79)
@@ -275,6 +297,7 @@ struct StudyView: View {
         session.answer(correct)
         Sounds.shared.play(correct ? "correct" : "wrong")
         withAnimation { feedback = Feedback(correct: correct, chosen: option) }
+        playAnswer(ex)
     }
 
     private func checkSentence() {
@@ -283,6 +306,7 @@ struct StudyView: View {
         session.answer(correct)
         Sounds.shared.play(correct ? "correct" : "wrong")
         withAnimation { feedback = Feedback(correct: correct, chosen: nil) }
+        playAnswer(ex)
     }
 
     /// A spoken answer, marked by what was heard.
@@ -380,12 +404,25 @@ struct SpeechBubbleBox<Content: View>: View {
 struct SpeakerButton: View {
     let text: String
     var size: CGFloat = 20
+    /// a 🐢 beside it, playing the same at about 0.6× (Speech.slowFactor): in the exercises
+    var withSlow = false
     var body: some View {
-        Button { Speech.shared.speak(text) } label: {
-            Image(systemName: "speaker.wave.2.fill").font(.system(size: size)).foregroundStyle(Color.accent)
-                .padding(4)
+        HStack(spacing: 2) {
+            Button { Speech.shared.speak(text) } label: {
+                Image(systemName: "speaker.wave.2.fill").font(.system(size: size)).foregroundStyle(Color.accent)
+                    .padding(4)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Play")
+            if withSlow {
+                Button { Speech.shared.speak(text, slow: true) } label: {
+                    Image(systemName: "tortoise.fill").font(.system(size: size * 0.9)).foregroundStyle(Color.accent)
+                        .padding(4)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Play slowly")
+            }
         }
-        .buttonStyle(.plain)
     }
 }
 
@@ -590,11 +627,19 @@ struct ChoiceView: View {
     let ex: Exercise
     let picked: String?
     let answered: Bool
+    /// pinyin training wheels: over the Chinese while the word is new, a tap away once it's strong
+    var wheels = Wheels()
     var choose: (String) -> Void
     @Environment(ProgressStore.self) private var progress
     private let course = Course.shared
-    private var showPinyin: Bool { progress.prefs.showPinyin }
     @State private var tonesOpen = false
+    /// the prompt's pinyin, shown with a tap where it's hidden
+    @State private var peek = false
+    /// Pinyin over the tested word, and over every option (one rule for all four options, so
+    /// which ones have pinyin never gives the answer away). Never where the pinyin is tested.
+    private var pinyinShown: Bool {
+        wheels.shows(card: ex.card, testing: TrainingWheels.testsPinyin(dir: ex.dir, answered: answered))
+    }
 
     var body: some View {
         let w = ex.card.word
@@ -612,7 +657,7 @@ struct ChoiceView: View {
                     } else {
                         Text(w.gloss).font(.nunito(16.3)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                     }
-                    SpeakerButton(text: w.hanzi)
+                    SpeakerButton(text: w.hanzi, withSlow: true)
                 case "pinyin":
                     Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(isNew ? Color.newInk : Color.ink)
                     Text(w.gloss).font(.nunito(16)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
@@ -622,22 +667,36 @@ struct ChoiceView: View {
                             .padding(6)
                     }
                     .buttonStyle(PressDown(depth: 1))
-                    SpeakerButton(text: w.hanzi)
+                    SpeakerButton(text: w.hanzi, withSlow: true)
                 default:
-                    Group {
+                    // the word with its pinyin above it while it's new; once it's strong the
+                    // pinyin's place stays, and a tap on the word (or the eye) shows it
+                    VStack(spacing: 2) {
+                        ZStack {
+                            PinyinText(pinyin: w.pinyin, size: 21).opacity(pinyinShown || peek ? 1 : 0)
+                            if !(pinyinShown || peek) {
+                                Button { reveal() } label: {
+                                    Image(systemName: "eye").font(.system(size: 13, weight: .semibold))
+                                        .foregroundStyle(Color.muted.opacity(0.7)).padding(4)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Show pinyin")
+                            }
+                        }
                         if isNew {
-                            HintChip(hanzi: w.hanzi, pinyin: w.pinyin) {
+                            HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { reveal() }) {
                                 Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(Color.newInk)
                                     .overlay(alignment: .bottom) { Line().stroke(Color.newInk, style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2) }
                             }
+                        } else {
+                            Button { reveal() } label: {
+                                ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: big, weight: .medium)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        else { ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: big, weight: .medium) }
                     }
-                    SpeakerButton(text: w.hanzi)
+                    SpeakerButton(text: w.hanzi, withSlow: true)
                 }
-            }
-            if ex.dir == "recognize" || (ex.dir == "recall" && !showPinyin) {
-                PinyinHint(pinyin: w.pinyin, shown: showPinyin).frame(minHeight: 44)
             }
             if ex.dir == "pinyin" && Coach.showTonesLink {
                 Button("What are tones?") { Coach.tonesLinkTapped(); tonesOpen = true }
@@ -665,6 +724,10 @@ struct ChoiceView: View {
         }
     }
 
+    private func reveal() {
+        withAnimation(.easeOut(duration: 0.15)) { peek = true }
+    }
+
     private func option(_ opt: String) -> some View {
         let isAnswer = opt == ex.answer
         let state: Bool? = !answered ? nil : isAnswer ? true : opt == picked ? false : nil
@@ -672,10 +735,10 @@ struct ChoiceView: View {
             Group {
                 if ex.dir == "recall" {
                     VStack(spacing: 2) {
-                        Text(opt).font(.hanzi(18.4, .semibold)).foregroundStyle(Color.ink)
-                        if showPinyin, let py = course.cards.first(where: { $0.word.hanzi == opt })?.word.pinyin {
+                        if pinyinShown, let py = Course.wordPy[opt] {
                             Text(py).font(.nunito(13.1)).foregroundStyle(Color.muted)
                         }
+                        Text(opt).font(.hanzi(18.4, .semibold)).foregroundStyle(Color.ink)
                     }
                 } else {
                     Text(opt).font(.nunito(18.4, .bold))
@@ -702,8 +765,14 @@ struct FeedbackBanner: View {
     let correct: Bool
     let chosen: String?
     var placed: [String] = []
+    /// pinyin training wheels, as on the exercise above
+    var wheels = Wheels()
     @State private var praise = ["Nice!", "Great job!", "Excellent!", "Spot on!", "太棒了!", "对了!"].randomElement()!
+    @State private var peek = false
     private let course = Course.shared
+    /// The answer's pinyin: always when it's what was asked or the answer was wrong (it's the
+    /// correction), else as the training wheels say.
+    private var pinyinShown: Bool { ex.dir == "pinyin" || !correct || peek || wheels.shows(card: ex.card) }
 
     var body: some View {
         let w = ex.card.word
@@ -716,13 +785,19 @@ struct FeedbackBanner: View {
             return c
         }()
         let diff = lookalike.flatMap { CharData.shared.difference(w.hanzi, $0.word.hanzi) }
+        // what was different about a wrong answer, in one short line: the tones, or the meaning
+        let note: String? = correct || diff != nil ? nil : Correction.line(ex, chosen: chosen)
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: correct ? "checkmark" : "xmark").font(.system(size: 20, weight: .heavy))
                 .frame(width: 24, height: 24).padding(.top, 1)
             VStack(alignment: .leading, spacing: 0) {
-                Text(ex.kind == .sentence ? (correct ? "Nicely done!" : "Correct solution:")
-                     : correct ? praise : diff != nil ? "Nearly! Those two look alike" : "Correct answer:")
-                    .font(.nunitoXB(18.4))
+                if let note {
+                    Text(note).font(.nunitoXB(15.5)).fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Text(ex.kind == .sentence ? (correct ? "Nicely done!" : "Correct solution:")
+                         : correct ? praise : diff != nil ? "So close: those two look alike!" : "Correct answer:")
+                        .font(.nunitoXB(18.4))
+                }
                 if ex.kind == .sentence, let sent = ex.sentence {
                     sentenceAnswer(sent)
                 } else {
@@ -730,7 +805,7 @@ struct FeedbackBanner: View {
                 }
                 if let diff, let other = lookalike {
                     diffBlock(diff, other: other)
-                } else if ex.kind != .sentence, Coach.sessions < 3, w.hanzi.contains(where: { CharData.shared.chars[String($0)] != nil }) {
+                } else if note == nil, ex.kind != .sentence, Coach.sessions < 3, w.hanzi.contains(where: { CharData.shared.chars[String($0)] != nil }) {
                     Text("Tap a character to see how it's built").font(.nunito(11.5, .bold)).opacity(0.75).padding(.top, 6)
                 }
             }
@@ -758,7 +833,16 @@ struct FeedbackBanner: View {
     private func piece(_ k: String, _ w: Word, big: Bool) -> some View {
         switch k {
         case "en": Text(w.gloss).font(.nunito(big ? 17.6 : 14.4)).foregroundStyle(big ? Color.ink : Color.gold)
-        case "py": PinyinText(pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .regular)
+        case "py":
+            if big || pinyinShown {
+                PinyinText(pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .regular)
+            } else {
+                // a strong word's pinyin, a tap away
+                Button { withAnimation(.easeOut(duration: 0.15)) { peek = true } } label: {
+                    Label("pinyin", systemImage: "eye").font(.nunito(13, .bold)).foregroundStyle(Color.muted)
+                }
+                .buttonStyle(.plain)
+            }
         default: TappableHanzi(text: w.hanzi, pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .medium)
         }
     }
@@ -819,8 +903,12 @@ struct SentenceView: View {
     let ex: Exercise
     @Binding var placed: [Exercise.Tile]
     let result: Bool?
+    /// pinyin training wheels: over each word while it's new, a tap away once it's strong
+    var wheels = Wheels()
     @Environment(ProgressStore.self) private var progress
     @State private var pinyinOpen = false
+    /// the words whose hidden pinyin has been shown with a tap
+    @State private var peeked: Set<Int> = []
     @State private var held: Exercise.Tile?
     // dragging a tile (web: the tile follows the finger and its place in the answer
     // follows it): the tile's slot stays in the answer, empty, while a copy is carried
@@ -868,13 +956,13 @@ struct SentenceView: View {
                 } else {
                     FlowLayout(spacing: 2, lineSpacing: 4) {
                         if anyNew { NewBadge() }
-                        SpeakerButton(text: sent.hanzi, size: 21.6)
-                        ForEach(Array(sent.words.enumerated()), id: \.offset) { _, w in
+                        SpeakerButton(text: sent.hanzi, size: 21.6, withSlow: true)
+                        ForEach(Array(sent.words.enumerated()), id: \.offset) { i, w in
                             let new = isNew(w.hanzi)
-                            HintChip(hanzi: w.hanzi, pinyin: w.pinyin) {
+                            HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { _ = peeked.insert(i) }) {
                             VStack(spacing: 1) {
                                 Text(w.pinyin).font(.nunito(12.5)).foregroundStyle(new ? Color.newInk : Color.muted)
-                                    .opacity(progress.prefs.showPinyin || pinyinOpen ? 1 : 0)
+                                    .opacity(wheels.shows(hanzi: w.hanzi) || pinyinOpen || peeked.contains(i) ? 1 : 0)
                                 Text(w.hanzi).font(.hanzi(24.8)).foregroundStyle(new ? Color.newInk : Color.ink)
                                     .padding(.bottom, 2)
                                     .background(new ? Color.newBg : .clear)
@@ -979,8 +1067,13 @@ struct SentenceView: View {
 
     private func tileFace(_ t: Exercise.Tile, tint: Color?) -> some View {
         VStack(spacing: 1) {
+            // pinyin over a Chinese tile while its word is new (its place kept, so the tiles
+            // stay one height); once strong, holding the tile shows it
+            if let py = t.pinyin {
+                Text(py).font(.nunito(11.5)).foregroundStyle(Color.muted)
+                    .opacity(wheels.shows(hanzi: t.text) ? 1 : 0)
+            }
             Text(t.text).font(ex.toChinese ? .hanzi(20.8, .medium) : .nunito(16.8, .semibold))
-            if let py = t.pinyin { Text(py).font(.nunito(11.5)).foregroundStyle(Color.muted) }
         }
         .foregroundStyle(tint ?? Color.ink)
         .padding(.horizontal, 12).padding(.vertical, 9)

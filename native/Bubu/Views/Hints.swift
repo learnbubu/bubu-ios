@@ -93,6 +93,8 @@ struct HintChip<Label: View>: View {
     var pinyin: String? = nil
     var reverse = false            // show the Chinese, for an English word
     var highlight: Color? = nil
+    /// also told of a tap (a word's pinyin, hidden once it's strong, shows on a tap)
+    var tapped: (() -> Void)? = nil
     @ViewBuilder var label: Label
     @State private var open = false
 
@@ -101,6 +103,7 @@ struct HintChip<Label: View>: View {
             open = true
             if let h = hanzi { Speech.shared.speak(h) }
             HintTip.used = true
+            tapped?()
         } label: {
             label
                 .padding(.horizontal, 2)

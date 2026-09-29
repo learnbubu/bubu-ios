@@ -66,6 +66,13 @@ final class Speech {
 
     func stop() { synth.stopSpeaking(at: .immediate) }
 
+    /// Said by itself (an exercise's prompt, the answer in the feedback): what `Autoplay` picked,
+    /// nil for nothing. Goes through `speak`, so the same audio session as everything else.
+    func autoSpeak(_ text: String?) {
+        guard let text, !text.isEmpty else { return }
+        speak(text)
+    }
+
     /// Said once: there's no Chinese voice, or there's a far better one to download.
     private func voiceTips() {
         let d = UserDefaults.standard
@@ -80,13 +87,22 @@ final class Speech {
         }
     }
 
+    /// The 🐢 plays at this fraction of the normal speed (the speed chosen in Settings).
+    static let slowFactor: Float = 0.6
+
+    /// The slow rate for a normal one: always slower than it (it used to be a fixed rate,
+    /// which was no slower at all for someone who had turned the speed down).
+    static func slowRate(_ normal: Float) -> Float {
+        max(AVSpeechUtteranceMinimumSpeechRate, normal * slowFactor)
+    }
+
     func speak(_ text: String, slow: Bool = false) {
         voiceTips()
         Sounds.shared.activate()
         synth.stopSpeaking(at: .immediate)
         let u = AVSpeechUtterance(string: text)
         u.voice = voice
-        u.rate = slow ? AVSpeechUtteranceDefaultSpeechRate * 0.5 : rate
+        u.rate = slow ? Self.slowRate(rate) : rate
         u.pitchMultiplier = 1
         synth.speak(u)
     }

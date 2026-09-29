@@ -47,6 +47,9 @@ struct SettingsView: View {
                         }
                     }
                     divider
+                    toggle("Play audio automatically", "Say each exercise's Chinese as it appears (unless hearing it would give the answer away), and the right answer after you answer.",
+                           Binding(get: { p.prefs.autoplay ?? true }, set: { p.prefs.autoplay = $0 }))
+                    divider
                     row("Chinese voice", "The voice that speaks the words. For the most natural sound, download an Enhanced or Premium Chinese voice in the iPhone's Settings → Accessibility → Spoken Content → Voices.", stack: true) {
                         HStack {
                             Picker("Voice", selection: Binding(get: { p.prefs.voiceURI ?? "" }, set: { p.prefs.voiceURI = $0.isEmpty ? nil : $0 })) {
@@ -69,7 +72,10 @@ struct SettingsView: View {
                     divider
                     toggle("Sound effects", "Chimes for right and wrong, and the end of a session.", $p.prefs.sound)
                     divider
-                    toggle("Show pinyin", "Show pinyin under characters as a reading aid (off = a tougher test).", $p.prefs.showPinyin)
+                    row("Pinyin", "Over the Chinese in exercises. Auto: over a word until you know it well, then a tap away. Hide when known: only until you've got a word right once.", stack: true) {
+                        Segments(options: [(PinyinMode.auto.rawValue, "Auto"), (PinyinMode.always.rawValue, "Always"), (PinyinMode.known.rawValue, "Hide when known")],
+                                 value: Binding(get: { p.prefs.pinyin.rawValue }, set: { p.prefs.pinyin = PinyinMode(rawValue: $0) ?? .auto }))
+                    }
                     divider
                     toggle("Tone colours", "Colour pinyin and characters by tone: 1st red, 2nd orange, 3rd green, 4th blue.", $p.prefs.toneColours)
                     divider
@@ -211,7 +217,7 @@ struct HelpPage: View {
                 h("Practice")
                 p("• **Fix your mistakes** asks each missed word the way you missed it.\n• **Review** brings back words that are due.\n• **Weak words** are the ones that keep slipping.\n• **Listening, Writing, Quiz, Tones, Reading and Speaking** each practise one thing.\n• **Vocabulary** lets you pick any words for flashcards, matching or a quiz.")
                 h("Buttons you'll see")
-                p("• The speaker plays a word; **½×** plays it slowly.\n• Tap a dotted word for its meaning, or a character to see how it's built.\n• The pencil opens a writing sheet.\n• The microphone checks what you say.")
+                p("• The speaker plays a word; the tortoise (or **½×**) plays it slowly.\n• Tap a dotted word for its meaning, or a character to see how it's built.\n• The pencil opens a writing sheet.\n• The microphone checks what you say.")
                 h("Streaks and XP")
                 p("Finish a session to light the day's fire. Miss a day and an ember can relight it; you earn embers at 3, 7, 14, 30, 60 and 100 days. Finish one session a day — a lesson, a review, practice or a story — to keep your streak. XP counts toward your level and your daily quests.")
             }
