@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bùbù Sound Board</title>
+<style>
+:root{--bg:#faf7f1;--panel:#fff;--ink:#172530;--muted:#66768a;--line:#e8e6df;--accent:#2b776d;--on-accent:#fff;
+--good:#1f8a6d;--good-soft:#daf1e3;--bad:#d9695a;--bad-soft:#fde7e5;--gold:#b7822e;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0a1420;--panel:#122131;--ink:#e8eef4;--muted:#9aabbd;--line:#22364a;
+--accent:#6cc2b2;--on-accent:#06201c;--good:#4fc79f;--good-soft:#12342a;--bad:#f08a7a;--bad-soft:#3a1d1a;--gold:#e0b060;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 16px 120px}
+main{max-width:760px;margin:0 auto}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 8px;font-size:.95rem}
+.keys{color:var(--muted);font-size:.85rem;margin:0 0 12px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line);margin-bottom:12px}
+.count{font-weight:700;margin-right:auto;font-variant-numeric:tabular-nums}
+button{font:inherit;cursor:pointer;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 12px;font-weight:700}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:12px;margin-bottom:8px}
+.row.ok{border-color:var(--good);background:var(--good-soft)}
+.row.bad{border-color:var(--bad);background:var(--bad-soft)}
+.row.now{outline:3px solid var(--accent);outline-offset:1px}
+.play{display:flex;gap:6px}
+.play button,.mark button{width:44px;height:44px;padding:0;font-size:1.15rem}
+.play button{border-radius:50%}
+.hz{font-size:1.6rem;font-weight:700;line-height:1.2;word-break:break-word}
+.py{color:var(--gold);font-weight:700}
+.en{color:var(--muted);font-size:.92rem}
+.tag{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mark{display:flex;gap:6px}
+.mark .y.on{background:var(--good);border-color:var(--good);color:var(--on-accent)}
+.mark .n.on{background:var(--bad);border-color:var(--bad);color:var(--on-accent)}
+.why{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
+.why button{padding:5px 10px;font-size:.85rem;font-weight:600}
+.why button.on{background:var(--bad);border-color:var(--bad);color:var(--on-accent)}
+textarea{width:100%;min-height:120px;font:14px/1.4 ui-monospace,Consolas,monospace;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--ink);padding:10px;margin-top:10px}
+@media (max-width:480px){.row{grid-template-columns:1fr auto}.play{grid-column:1/-1}}
+</style></head><body><main>
+<h1>Bùbù sound board</h1>
+<p class="sub">__TITLE__. Play each clip, then tick it or cross it. Your marks are saved in this browser.</p>
+<p class="keys">Keys: Space plays · S plays slowly · → or Y ticks · ← or N crosses · ↑ ↓ move</p>
+<div class="bar">
+  <span class="count" id="count"></span>
+  <button id="todo">Show unchecked only</button>
+  <button id="copy" class="primary">Copy results</button>
+</div>
+<div id="list"></div>
+<textarea id="out" hidden readonly></textarea>
+</main>
+<script>
+const CLIPS = __DATA__;
+const KEY = "bubu-board-__KEY__";
+const TITLE = "__TITLE__";
+const WHY = ["wrong tone", "wrong sound", "extra sound", "cut off", "unclear", "too fast", "other"];
+let marks = {};
+try { marks = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(marks)); } catch (e) {} };
+const audio = new Audio();
+let now = 0, onlyTodo = false;
+const list = document.getElementById("list");
+
+function play(i, slow) {
+  now = i; paint();
+  audio.src = "data:audio/mpeg;base64," + CLIPS[i].audio;
+  audio.playbackRate = slow ? 0.7 : 1;
+  audio.preservesPitch = true;
+  audio.play().catch(() => {});
+}
+function mark(i, v) {
+  const id = CLIPS[i].id, m = marks[id] || {};
+  now = i;
+  if (m.v === v) delete marks[id]; else marks[id] = { v: v, why: v === "n" ? (m.why || []) : [] };
+  save(); paint();
+  if (v === "y" && marks[id]) step(1, true);
+}
+function why(i, w) {
+  const m = marks[CLIPS[i].id]; if (!m) return;
+  m.why = m.why.includes(w) ? m.why.filter(x => x !== w) : m.why.concat(w);
+  save(); paint();
+}
+function step(d, thenPlay) {
+  let j = now;
+  for (let k = 0; k < CLIPS.length; k++) {
+    j = j + d; if (j < 0 || j >= CLIPS.length) return;
+    if (!onlyTodo || !marks[CLIPS[j].id]) break;
+  }
+  now = j; paint();
+  const el = document.getElementById("r" + j);
+  if (el) el.scrollIntoView({ block: "center", behavior: "smooth" });
+  if (thenPlay) play(j);
+}
+function paint() {
+  list.innerHTML = "";
+  CLIPS.forEach((c, i) => {
+    const m = marks[c.id];
+    if (onlyTodo && m && i !== now) return;
+    const r = document.createElement("div");
+    r.className = "row" + (m ? (m.v === "y" ? " ok" : " bad") : "") + (i === now ? " now" : "");
+    r.id = "r" + i;
+    r.innerHTML = '<div class="play"><button aria-label="Play" data-a="p">▶</button><button aria-label="Play slowly" data-a="s">🐢</button></div>' +
+      '<div><div class="tag"></div><div class="hz"></div><div class="py"></div><div class="en"></div></div>' +
+      '<div class="mark"><button class="y' + (m && m.v === "y" ? " on" : "") + '" aria-label="Sounds right" data-a="y">✓</button>' +
+      '<button class="n' + (m && m.v === "n" ? " on" : "") + '" aria-label="Sounds wrong" data-a="n">✗</button></div>';
+    r.querySelector(".tag").textContent = c.voice + " · " + c.kind;
+    r.querySelector(".hz").textContent = c.hanzi;
+    r.querySelector(".py").textContent = c.pinyin;
+    r.querySelector(".en").textContent = c.en;
+    if (m && m.v === "n") {
+      const w = document.createElement("div"); w.className = "why";
+      WHY.forEach(x => { const b = document.createElement("button"); b.textContent = x;
+        if (m.why.includes(x)) b.className = "on"; b.onclick = () => why(i, x); w.appendChild(b); });
+      r.appendChild(w);
+    }
+    r.querySelectorAll("[data-a]").forEach(b => b.onclick = () => {
+      const a = b.dataset.a;
+      if (a === "p") play(i); else if (a === "s") play(i, true); else mark(i, a);
+    });
+    list.appendChild(r);
+  });
+  const done = CLIPS.filter(c => marks[c.id]).length, bad = CLIPS.filter(c => marks[c.id] && marks[c.id].v === "n").length;
+  document.getElementById("count").textContent = done + " of " + CLIPS.length + " checked · " + bad + " crossed";
+}
+function results() {
+  const bad = CLIPS.filter(c => marks[c.id] && marks[c.id].v === "n");
+  const todo = CLIPS.filter(c => !marks[c.id]).length;
+  return ["Bùbù sound board: " + TITLE, (CLIPS.length - todo) + " of " + CLIPS.length + " checked, " + bad.length + " crossed", ""]
+    .concat(bad.map(c => "✗ " + c.voice + " | " + c.hanzi + " | " + c.pinyin + " | " + ((marks[c.id].why || []).join(", ") || "no reason given")))
+    .concat(todo ? ["", todo + " not checked yet"] : []).join("\n");
+}
+document.getElementById("todo").onclick = e => {
+  onlyTodo = !onlyTodo; e.target.textContent = onlyTodo ? "Show all" : "Show unchecked only"; paint();
+};
+document.getElementById("copy").onclick = e => {
+  const t = results(), out = document.getElementById("out");
+  out.hidden = false; out.value = t;
+  const done = () => { e.target.textContent = "Copied"; setTimeout(() => e.target.textContent = "Copy results", 1500); };
+  const fallback = () => { out.focus(); out.select(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done).catch(fallback);
+  else fallback();
+};
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "TEXTAREA") return;
+  const k = e.key.toLowerCase();
+  if (k === " ") { e.preventDefault(); play(now); }
+  else if (k === "s") play(now, true);
+  else if (k === "arrowright" || k === "y") mark(now, "y");
+  else if (k === "arrowleft" || k === "n") mark(now, "n");
+  else if (k === "arrowdown") { e.preventDefault(); step(1); }
+  else if (k === "arrowup") { e.preventDefault(); step(-1); }
+});
+paint();
+</script></body></html>

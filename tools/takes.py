@@ -59,3 +59,40 @@ if __name__ == "__main__":
         d = wav(text, voice)
         secs, humps, _, _ = measure(d)
         print(f"take {i + 1}: {secs:.2f} s voiced, {humps} hump(s)")
+
+
+# ---- machine listening: Google Speech-to-Text hears the clip, and what it heard is compared
+# with what was meant, by sound (pinyin without tones). It can't judge tones.
+
+def heard(wav_bytes, rate=24000):
+    """What Speech-to-Text makes of a clip ('' when it hears nothing); None when the service
+    isn't switched on for this key."""
+    import json, urllib.request, urllib.error
+    body = {"config": {"encoding": "LINEAR16", "sampleRateHertz": rate, "languageCode": "cmn-Hans-CN",
+                       "maxAlternatives": 3},
+            "audio": {"content": base64.b64encode(wav_bytes).decode()}}
+    req = urllib.request.Request("https://speech.googleapis.com/v1/speech:recognize", method="POST",
+                                 data=json.dumps(body).encode(),
+                                 headers={"X-Goog-Api-Key": tts.key(), "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            res = json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        if e.code in (400, 403):
+            return None
+        raise
+    alts = [a.get("transcript", "") for r_ in res.get("results", []) for a in r_.get("alternatives", [])]
+    return alts
+
+
+def sounds(text):
+    """The syllables of a text without their tones."""
+    from pypinyin import lazy_pinyin
+    han = "".join(ch for ch in text if "\u4e00" <= ch <= "\u9fff")
+    return [s.replace("ü", "v") for s in lazy_pinyin(han)]
+
+
+def pcm16k(path):
+    """A clip as 16 kHz mono WAV, for listening to."""
+    return subprocess.run(["ffmpeg", "-loglevel", "error", "-i", path, "-f", "wav", "-ac", "1", "-ar", "16000", "pipe:1"],
+                          capture_output=True, check=True).stdout
