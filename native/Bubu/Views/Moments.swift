@@ -110,6 +110,13 @@ private struct MomentsHost: ViewModifier {
     @State private var moments = Moments.shared
     @Environment(ProgressStore.self) private var progress
 
+    /// The status bar's height: this overlay runs to the very top of the screen, and a toast
+    /// mustn't sit behind the clock.
+    private static var topInset: CGFloat {
+        let scene = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first
+        return scene?.keyWindow?.safeAreaInsets.top ?? 47
+    }
+
     func body(content: Content) -> some View {
         let here = study == moments.studyUp
         content
@@ -128,7 +135,7 @@ private struct MomentsHost: ViewModifier {
                     Text(t).font(.nunito(15, .bold)).foregroundStyle(Color.bg).multilineTextAlignment(.center)
                         .padding(.horizontal, 18).padding(.vertical, 11)
                         .background(Color.ink.opacity(0.92), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .padding(.horizontal, 24).padding(study ? .top : .bottom, study ? 2 : 96)
+                        .padding(.horizontal, 24).padding(study ? .top : .bottom, study ? Self.topInset + 2 : 96)
                         .transition(.move(edge: study ? .top : .bottom).combined(with: .opacity))
                         .allowsHitTesting(false)
                 }
