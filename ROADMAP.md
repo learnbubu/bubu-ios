@@ -78,6 +78,8 @@ _Started 28 Sep 2026, after the buns, coins and red pockets release (web v288, a
 
 ## Known limits
 
+- [ ] **Path header over the art** (visual check, 29 Sep 2026): after stone 1 the pagoda runs up under the status bar icons and over the "GUIDE" tag beside "起步 1 · CHAPTER 1". Needs fixing by someone who can see the screen (the Mac's Simulator): banners drawn after the front scenery, and/or a short top fade over the status bar.
+- [ ] **Visual check unfinished** (29 Sep 2026): stopped to save usage. Stones 1–2 of chapter 1 were looked at; stones 3–8 weren't. Screenshots on the Mac in `build/visual/A/`.
 - [ ] Website: a very long sentence's word tiles spill over the Check button
 - [x] Permanent bundle ID: `com.bubu` (registered 28 Sep 2026)
 - [ ] Speaking practice checks the words, not the tones (Apple's recogniser), so a wrong tone can pass
