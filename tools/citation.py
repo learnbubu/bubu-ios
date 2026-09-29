@@ -15,8 +15,9 @@ import takes, tts, voice, board
 HERE = os.path.dirname(os.path.abspath(__file__))
 DIR = os.path.join(HERE, ".voices", "citation")
 KORE = voice.VOICES["k"]
-CARRIERS = ["这个字读：{}。", "跟我读：{}。", "请读：{}。", "这个字念：{}。"]
-RATES = [0.8, 0.9, 0.7]
+CARRIERS = ["这个字读：{}。", "跟我读：{}。", "请读：{}。", "这个字念：{}。", "这个字是：{}。", "读作：{}。",
+            "老师说：{}。", "请大声读：{}。", "下一个字：{}。", "听好了：{}。"]
+RATES = [0.8, 0.7, 0.9, 0.6, 0.75, 0.85]
 # what each tone should measure as (third: the full dip, or at least low and falling gently)
 SHAPES = {1: ["level"], 2: ["rising"], 3: ["dipping"], 4: ["falling"], 5: ["level", "falling", "uneven"]}
 MARKS = {"ā": 1, "á": 2, "ǎ": 3, "à": 4, "ē": 1, "é": 2, "ě": 3, "è": 4, "ī": 1, "í": 2, "ǐ": 3, "ì": 4,
@@ -102,13 +103,22 @@ def readings(word, pinyin):
             if ref:
                 # beside the tone chosen by ear: close in pitch, and not clipped short
                 d = distance(c, ref)
-                found.append({"wav": cutout, "secs": secs, "d": d, "right": d <= 1.2 and secs >= 0.7 * ref["secs"],
+                found.append({"wav": cutout, "secs": secs, "d": d,
+                              "right": d <= 1.2 and 0.7 * ref["secs"] <= secs <= 1.6 * ref["secs"],
                               "shape": f"{d:.1f} from your {ref['word']}", "how": f"{car.format('…')} at {rate}×"})
             else:
                 shape = takes.tone_shape(takes.contour(cutout)[0])
                 found.append({"wav": cutout, "secs": secs, "d": 0.0, "right": shape in want, "shape": shape,
                               "how": f"{car.format('…')} at {rate}×"})
+            # enough that pass: stop asking
+            if sum(f["right"] for f in found) >= int(os.environ.get("ENOUGH", "99")):
+                break
+        else:
+            continue
+        break
     found.sort(key=lambda f: (not f["right"], f["d"], abs(f["secs"] - 0.4)))
+    if os.environ.get("ONLY_RIGHT"):
+        found = [f for f in found if f["right"]]
     return found[:int(os.environ.get("READINGS", "8"))]
 
 
