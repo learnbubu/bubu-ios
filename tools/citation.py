@@ -99,7 +99,13 @@ if __name__ == "__main__":
     os.makedirs(DIR, exist_ok=True)
     info = board.details()
     rows = []
-    for word in sys.argv[1:]:
+    words = []
+    for arg in sys.argv[1:]:                      # 你, or 妈:mā where the course hasn't the word
+        word, _, given = arg.partition(":")
+        words.append(word)
+        if given:
+            info[word] = (given, info.get(word, ("", "", ""))[1], "word")
+    for word in words:
         py, en, _ = info.get(word, ("", "", ""))
         for n, f in enumerate(readings(word, py), 1):
             takes.mp3(f["wav"], path(word, n))
@@ -110,7 +116,7 @@ if __name__ == "__main__":
     page = open(os.path.join(HERE, "board.html"), encoding="utf-8").read()
     title = "Readings to choose between: tick every one that sounds right"
     html = (page.replace("__DATA__", json.dumps(rows, ensure_ascii=False)).replace("__TITLE__", title)
-                .replace("__KEY__", "citation-" + "-".join(voice.name(w) for w in sys.argv[1:])).replace("__TICKS__", "true"))
-    out = os.path.join(HERE, ".voices", "citation.html")
+                .replace("__KEY__", "citation-" + "-".join(voice.name(w) for w in words)).replace("__TICKS__", "true"))
+    out = os.path.join(HERE, ".voices", "citation-" + "".join(words)[:12] + ".html")
     open(out, "w", encoding="utf-8", newline="\n").write(html)
     print(out, len(rows), "readings")
