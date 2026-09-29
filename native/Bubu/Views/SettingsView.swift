@@ -50,7 +50,13 @@ struct SettingsView: View {
                     toggle("Play audio automatically", "Say each exercise's Chinese as it appears (unless hearing it would give the answer away), and the right answer after you answer.",
                            Binding(get: { p.prefs.autoplay ?? true }, set: { p.prefs.autoplay = $0 }))
                     divider
-                    row("Chinese voice", "The voice that speaks the words. For the most natural sound, download an Enhanced or Premium Chinese voice in the iPhone's Settings → Accessibility → Spoken Content → Voices.", stack: true) {
+                    // the recorded voice, which the choice below doesn't change
+                    row("Bùbù's voice", "Recorded, natural voices: Kore, and Charon for the other speaker in a conversation. Used wherever a word or sentence has a recording.") {
+                        Button("Hear it") { Speech.shared.speak("你好") }
+                            .font(.nunito(15, .bold)).foregroundStyle(Color.accent)
+                    }
+                    divider
+                    row("Phone voice", "Only for words that don't have a recording yet. For the most natural sound, download an Enhanced or Premium Chinese voice in the iPhone's Settings → Accessibility → Spoken Content → Voices.", stack: true) {
                         HStack {
                             Picker("Voice", selection: Binding(get: { p.prefs.voiceURI ?? "" }, set: { p.prefs.voiceURI = $0.isEmpty ? nil : $0 })) {
                                 Text("Best available").tag("")
@@ -60,7 +66,8 @@ struct SettingsView: View {
                             }
                             .tint(.ink)
                             Spacer()
-                            Button("Test") { Speech.shared.speak("你好，很高兴认识你") }
+                            // a sentence with no recording, so it's the phone's voice that's heard
+                            Button("Test") { Speech.shared.speak("这是手机的声音，你好") }
                                 .font(.nunito(15, .bold)).foregroundStyle(Color.accent)
                         }
                     }
