@@ -290,6 +290,24 @@ extension Course {
         return ok.filter { $0.words.count == least }
     }
 
+    /// The words of your lines in a dialogue you haven't met yet (little particles aside).
+    func unmetWords(in d: Dialogue, met: (String) -> Bool) -> [String] {
+        var out: [String] = []
+        for t in d.turns where t.who == "you" {
+            let words = Sentence.segment(hanzi: t.hanzi, pinyin: t.pinyin)?.map(\.hanzi)
+                ?? t.hanzi.filter(Course.isHan).map { String($0) }
+            for w in words where !Course.trivialWords.contains(w) && !isMetWord(w, met: met) && !out.contains(w) {
+                out.append(w)
+            }
+        }
+        return out
+    }
+
+    /// A dialogue is yours to say once you've met the words of your lines.
+    func dialogueUnlocked(_ d: Dialogue, met: (String) -> Bool) -> Bool {
+        unmetWords(in: d, met: met).isEmpty
+    }
+
     /// A speaking exercise's sentence has at most this many words.
     static let speakSentenceMax = 6
 

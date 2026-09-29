@@ -12,18 +12,25 @@ struct ConversePage: View {
     @State private var recognizer = Recognizer()
     @State private var canCheck = true
     @State private var run = 0          // bumped on every start, advance and exit: stale timers do nothing
+    @State private var listenOnly = false   // a dialogue whose words you haven't met: hear it, don't say it
+    @Environment(ProgressStore.self) private var progress
     private let course = Course.shared
+
+    private func unlocked(_ d: Dialogue) -> Bool {
+        course.dialogueUnlocked(d) { progress.srs[$0] != nil }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollViewReader { reader in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        ForEach(course.data.dialogues, id: \.id) { d in
-                            let on = dialogue?.id == d.id
+                        // the ones you can say first; the rest locked, to listen to
+                        ForEach(course.data.dialogues.filter { unlocked($0) } + course.data.dialogues.filter { !unlocked($0) }, id: \.id) { d in
+                            let on = dialogue?.id == d.id, open = unlocked(d)
                             Button { start(d) } label: {
-                                Text("\(d.title)  ·  \(d.lesson)").font(.nunito(13.5, .bold)).lineLimit(1)
-                                    .foregroundStyle(on ? Color.onAccent : Color.ink)
+                                Text("\(open ? "" : "🔒 ")\(d.title)  ·  \(d.lesson)").font(.nunito(13.5, .bold)).lineLimit(1)
+                                    .foregroundStyle(on ? Color.onAccent : open ? Color.ink : Color.muted)
                                     .padding(.horizontal, 12).padding(.vertical, 7)
                                     .background(on ? Color.accent : Color.panel, in: Capsule())
                                     .overlay(Capsule().strokeBorder(on ? Color.accent : Color.line))
@@ -41,7 +48,7 @@ struct ConversePage: View {
                 ScrollView {
                     VStack(spacing: 10) {
                         if dialogue == nil {
-                            Text("Pick a conversation to roleplay. Bùbù plays the other part; you say yours out loud.")
+                            Text("Pick a conversation to roleplay. Bùbù plays the other part; you say yours out loud. 🔒 ones use words you haven't learnt yet: you can listen to them.")
                                 .font(.nunito(15)).foregroundStyle(Color.muted).multilineTextAlignment(.center).padding(.top, 40)
                         }
                         ForEach(Array(shown.enumerated()), id: \.offset) { i, t in bubble(t).id(i) }
@@ -106,6 +113,11 @@ struct ConversePage: View {
     private func yourTurn(_ t: Turn) -> some View {
         let free = t.free ?? false
         return VStack(spacing: 8) {
+            if listenOnly {
+                Text("🔒 Listen only — you'll say this once you've learnt its words.")
+                    .font(.nunito(13, .semibold)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                Button("Next →") { advance(t) }.buttonStyle(WideButton())
+            } else {
             Text("YOUR TURN — SAY:").font(.nunito(11.5, .black)).tracking(1).foregroundStyle(Color.muted)
             PinyinText(pinyin: t.pinyin, size: 20).multilineTextAlignment(.center)
             Text(t.en).font(.nunito(14)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
@@ -128,6 +140,7 @@ struct ConversePage: View {
             Button(free ? "I said it →" : "Skip / I said it →") { advance(t) }
                 .buttonStyle(WideButton(ghost: canCheck && !free))
             message.map { $0.font(.nunito(14)).multilineTextAlignment(.center) }
+            }
         }
     }
 
@@ -144,6 +157,7 @@ struct ConversePage: View {
         recognizer.end()
         run += 1
         dialogue = d; turn = 0; shown = []; message = nil; showChars = false
+        listenOnly = !unlocked(d)
         step()
     }
 
@@ -151,6 +165,8 @@ struct ConversePage: View {
     private func step() {
         guard let d = dialogue, turn < d.turns.count else { return }
         let t = d.turns[turn]
+        // listening only: your lines are said for you too
+        if t.who == "you" && listenOnly { Speech.shared.speak(t.hanzi); return }
         guard t.who != "you" else { return }
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { shown.append(t) }
         Speech.shared.speak(t.hanzi)
