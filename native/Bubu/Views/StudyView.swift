@@ -752,6 +752,7 @@ struct ChoiceView: View {
                     HintChip(hanzi: w.hanzi, pinyin: w.pinyin, reverse: true) {
                         Text(w.gloss).font(.nunito(16.3)).foregroundStyle(isNew ? Color.newInk : Color.ink)
                             .multilineTextAlignment(.center)
+                            .lineLimit(3).fixedSize(horizontal: false, vertical: true)
                             .overlay(alignment: .bottom) {
                                 Line().stroke(Color.muted.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [1.5, 3]))
                                     .frame(height: 2).offset(y: 3)
@@ -928,7 +929,8 @@ struct FeedbackBanner: View {
                 }
                 if ex.kind == .sentence, let sent = ex.sentence {
                     sentenceAnswer(sent)
-                } else {
+                } else if diff == nil {
+                    // (with spot the difference, the right answer is in the box and in its green row)
                     wordAnswer(w)
                 }
                 if let diff, let other = lookalike {
