@@ -36,8 +36,8 @@ struct StudyView: View {
 
     /// the study card's height, to tell a phone where a multiple-choice exercise fits
     @State private var cardHeight: CGFloat = 0
-    /// A multiple-choice exercise stays still (no scrolling): it compacts once answered so the
-    /// answers, the feedback and Continue all fit. On a small phone (an SE) it scrolls instead.
+    /// A multiple-choice exercise stays still (no scrolling); the feedback slides up over its foot.
+    /// On a small phone (an SE) it scrolls instead.
     private var fixed: Bool {
         guard session.exercise?.kind == .choice, !preStart, case .card = session.current else { return false }
         return cardHeight >= 620
@@ -312,11 +312,15 @@ struct StudyView: View {
         let ready = session.answered || (isSentence && !placed.isEmpty) || (isChoice && pick.canCheck)
         let fill = !ready ? Color.accent.opacity(0.38) : feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent
         let ink = !ready ? Color.onAccent.opacity(0.7) : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
-        return VStack(spacing: 10) {
-            // the feedback sits above the button and pushes the exercise up (it scrolls), so it
-            // never covers an answer: the right and wrong rows stay in view
+        return ZStack(alignment: .bottom) {
+            // a short slot, so the exercise keeps its room; the feedback slides up over its foot
+            // (the owner's choice: nothing moves or shrinks when you answer)
+            Color.clear.frame(height: 84)
             if let fb = feedback, let ex, ex.kind != .speak, ex.kind != .write {
                 FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text), wheels: wheels)
+                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
+                        .shadow(color: Color.panel, radius: 12, y: -10))
+                    .padding(.bottom, 79)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             Button {
@@ -331,7 +335,6 @@ struct StudyView: View {
             .disabled(!ready)
             .padding(.bottom, 14)
         }
-        .frame(minHeight: 84, alignment: .bottom)
         .padding(.horizontal, 12)
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: feedback != nil)
     }
@@ -747,17 +750,17 @@ struct ChoiceView: View {
     var body: some View {
         let w = ex.card.word
         let isNew = ex.isNew
-        let big: CGFloat = answered ? (w.hanzi.count > 3 ? 26 : 32) : w.hanzi.count > 3 ? 32 : 44
+        let big: CGFloat = w.hanzi.count > 3 ? 32 : 44
         VStack(spacing: 0) {
-            MascotPrompt(mood: answered && !skipped ? (picked == ex.answer) : nil, compact: answered) {
-                if isNew && !answered { NewBadge() }
+            MascotPrompt(mood: answered && !skipped ? (picked == ex.answer) : nil) {
+                if isNew { NewBadge() }
                 switch ex.dir {
                 case "recall":
                     // the English can always be tapped for its characters and pinyin
                     HintChip(hanzi: w.hanzi, pinyin: w.pinyin, reverse: true) {
                         Text(w.gloss).font(.nunito(16.3)).foregroundStyle(isNew ? Color.newInk : Color.ink)
                             .multilineTextAlignment(.center)
-                            .lineLimit(answered ? 2 : 3).minimumScaleFactor(0.85).fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(3).minimumScaleFactor(0.85).fixedSize(horizontal: false, vertical: true)
                             .overlay(alignment: .bottom) {
                                 Line().stroke(Color.muted.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [1.5, 3]))
                                     .frame(height: 2).offset(y: 3)
@@ -881,7 +884,7 @@ struct ChoiceView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 14).padding(.vertical, (ex.dir == "recall" ? 10 : 13.5) - (answered ? 4 : 0))
+            .padding(.horizontal, 14).padding(.vertical, ex.dir == "recall" ? 10 : 13.5)
             .background(fill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .strokeBorder(edge, lineWidth: selected ? 2 : 1))
