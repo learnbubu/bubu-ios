@@ -15,6 +15,47 @@ import torch, torchaudio
 from cosyvoice.cli.cosyvoice import AutoModel
 
 MODEL = os.path.join(HOME, "pretrained_models", "Fun-CosyVoice3-0.5B")
+# Left to itself the model pauses anywhere from a fifth of a second to nearly two between
+# sentences, so a line of several is said a sentence at a time and joined with a steady pause.
+PAUSE = 0.45
+ENDS = "。！？!?"
+
+
+def sentences(line):
+    out, cur = [], ""
+    for ch in line:
+        cur += ch
+        if ch in ENDS:
+            out.append(cur); cur = ""
+    if cur.strip():
+        out.append(cur)
+    return [s for s in out if s.strip()]
+
+
+def trimmed(wav, sr, floor=0.06, least=0.06):
+    """The clip without its silence before and after (a few ms kept either side). A breath or
+    click in the silence (quiet, or shorter than `least` seconds) doesn't count as speech."""
+    hop = sr // 100
+    x = wav.squeeze(0)
+    n = len(x) // hop
+    rms = x[:n * hop].reshape(n, hop).pow(2).mean(dim=1).sqrt()
+    on = (rms > floor * rms.max()).tolist()
+    runs, i = [], 0
+    while i < n:
+        if on[i]:
+            j = i
+            while j < n and on[j]:
+                j += 1
+            if j - i >= least * 100:
+                runs.append((i, j))
+            i = j
+        else:
+            i += 1
+    if not runs:
+        return wav
+    a = max(0, runs[0][0] * hop - int(0.03 * sr))
+    b = min(wav.shape[1], runs[-1][1] * hop + int(0.08 * sr))
+    return wav[:, a:b]
 
 if __name__ == "__main__":
     prompt, prompt_text, out, lines = sys.argv[1:5]
@@ -26,7 +67,13 @@ if __name__ == "__main__":
     text = [l.strip() for l in open(lines, encoding="utf-8") if l.strip()]
     for n, line in enumerate(text, 1):
         t = time.time()
-        parts = [j["tts_speech"] for j in model.inference_zero_shot(
-            line, "You are a helpful assistant.<|endofprompt|>" + prompt_text, prompt, stream=False)]
-        torchaudio.save(os.path.join(out, f"{n:02d}.wav"), torch.cat(parts, dim=1), model.sample_rate)
+        sr = model.sample_rate
+        pieces = []
+        for s in sentences(line):
+            said = torch.cat([j["tts_speech"] for j in model.inference_zero_shot(
+                s, "You are a helpful assistant.<|endofprompt|>" + prompt_text, prompt, stream=False)], dim=1)
+            if pieces:
+                pieces.append(torch.zeros(1, int(PAUSE * sr)))
+            pieces.append(trimmed(said, sr) if len(sentences(line)) > 1 else said)
+        torchaudio.save(os.path.join(out, f"{n:02d}.wav"), torch.cat(pieces, dim=1), sr)
         print(f"{n:02d} {line} ({time.time() - t:.1f}s)", flush=True)
