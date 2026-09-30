@@ -128,7 +128,7 @@ final class SpeakTests: XCTestCase {
 
         // the next session, the words met are spoken
         let later = StudySession(lessonId: lesson, progress: p, focuses: ["speak"])
-        guardN = 0
+        var guardN = 0
         while later.card == nil && later.result == nil && guardN < 20 { guardN += 1; later.next() }
         XCTAssertEqual(later.exercise?.dir, "speak")
         XCTAssertEqual(later.exercise?.kind, .speak)

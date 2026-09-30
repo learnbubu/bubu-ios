@@ -840,7 +840,7 @@ final class StudySession: Identifiable {
         let usable = course.sentences(for: c, met: isMet)
         if usable.isEmpty { enabled.removeAll { Self.sentenceKinds.contains($0) } }
         // a gap needs the word standing as a word of its own in the sentence
-        if course.gapSentences(for: c, met: isMet).isEmpty { enabled.removeAll { $0 == "gap" } }
+        if course.gapSentences(for: c, among: usable).isEmpty { enabled.removeAll { $0 == "gap" } }
         if !StrokeData.shared.writable(c.word.hanzi) { enabled.removeAll { $0 == "write" } }
         // no speaking a word in its very first session, or once speaking's been put off
         if !maySpeak(c) { enabled.removeAll { $0 == "speak" } }
@@ -1342,12 +1342,18 @@ struct Exercise {
         // near this one)
         let inSentence = Set(sent.words.map(\.hanzi))
         let here = course.lessonOrder[c.lessonId] ?? 0
-        let pool = course.cards.filter { !$0.isSentence && !inSentence.contains($0.word.hanzi) && $0.word.hanzi != word }
-        let inScope = pool.filter { scope.contains($0.lessonId) }
-        let near = pool.filter { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby }
+        let fits: (Card) -> Bool = { !inSentence.contains($0.word.hanzi) && $0.word.hanzi != word && !$0.isSentence }
         var options: [String] = [], seen = Set<String>()
-        for x in inScope.shuffled() + near.shuffled() + pool.shuffled() where options.count < 3 {
-            if seen.insert(x.word.hanzi).inserted { options.append(x.word.hanzi) }
+        // (the whole course is only looked through if the stones nearby don't have three)
+        let groups: [(Card) -> Bool] = [
+            { scope.contains($0.lessonId) },
+            { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby },
+            { _ in true },
+        ]
+        for inGroup in groups where options.count < 3 {
+            for x in course.cards.filter({ inGroup($0) && fits($0) }).shuffled() where options.count < 3 {
+                if seen.insert(x.word.hanzi).inserted { options.append(x.word.hanzi) }
+            }
         }
         guard options.count == 3 else { return nil }
         return Exercise(kind: .choice, dir: "gap", card: c, options: (options + [word]).shuffled(), answer: word, sentence: sent)

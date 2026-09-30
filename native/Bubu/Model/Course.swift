@@ -237,6 +237,9 @@ final class Course {
     /// The course's names (people, places), longest first: never taught as words.
     private(set) lazy var nameList: [String] = data.names.map { $0.filter(Course.isHan) }
         .filter { !$0.isEmpty }.sorted { $0.count > $1.count }
+    /// The names as a set, and every character in one: quick checks before the list is walked.
+    private(set) lazy var nameSet: Set<String> = Set(nameList)
+    private(set) lazy var nameChars: Set<Character> = Set(nameList.joined())
     /// Characters that only ever appear in names (陈, 玛, 艾 …), in no word of the course.
     private(set) lazy var nameOnlyChars: Set<Character> = {
         var out = Set<Character>()

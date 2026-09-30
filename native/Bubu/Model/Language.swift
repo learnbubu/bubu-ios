@@ -343,7 +343,7 @@ extension Course {
     /// (a dialogue's line otherwise), the short ones when there are any, else the shortest.
     /// Empty when none will do, and another kind of exercise is asked instead.
     func sentences(for card: Card, met: (String) -> Bool) -> [Sentence] {
-        let readable = sentences(for: card).filter { unmetWords(in: $0, for: card, met: met).isEmpty }
+        let readable = sentences(for: card).filter { isReadable($0, for: card, met: met) }
         let drills = readable.filter { Course.drillTexts.contains($0.hanzi) }
         let ok = drills.isEmpty ? readable : drills
         let short = ok.filter { $0.words.count <= Course.shortSentence }
@@ -352,10 +352,36 @@ extension Course {
         return ok.filter { $0.words.count == least }
     }
 
+    /// Whether a sentence has no unmet word (as `unmetWords`, stopping at the first one: most
+    /// sentences a beginner's word is in fail on an early word).
+    func isReadable(_ s: Sentence, for card: Card, met: (String) -> Bool) -> Bool {
+        let own = card.word.hanzi.filter(Course.isHan)
+        var ownSpan: Range<Int>?
+        if !own.isEmpty {
+            let all = s.words.map(\.hanzi).joined()
+            if let r = all.range(of: own) {
+                let lo = all.distance(from: all.startIndex, to: r.lowerBound)
+                ownSpan = lo..<(lo + own.count)
+            }
+        }
+        var at = 0
+        for w in s.words {
+            let span = at..<(at + w.hanzi.count)
+            at += w.hanzi.count
+            if let o = ownSpan, span.lowerBound >= o.lowerBound, span.upperBound <= o.upperBound { continue }
+            if Course.trivialWords.contains(w.hanzi) || isNameOrMet(w.hanzi, met: met) { continue }
+            return false
+        }
+        return true
+    }
+
     /// The sentences a card's gap exercise may use: readable ones where the word stands once,
     /// as a word of its own (so the gap has one answer).
     func gapSentences(for card: Card, met: (String) -> Bool) -> [Sentence] {
-        sentences(for: card, met: met).filter { s in s.words.filter { $0.hanzi == card.word.hanzi }.count == 1 }
+        gapSentences(for: card, among: sentences(for: card, met: met))
+    }
+    func gapSentences(for card: Card, among usable: [Sentence]) -> [Sentence] {
+        usable.filter { s in s.words.filter { $0.hanzi == card.word.hanzi }.count == 1 }
     }
 
     /// The words of your lines in a dialogue you haven't met yet (little particles aside).
@@ -375,7 +401,9 @@ extension Course {
     /// name with a met word (陈老师). Names are never taught, so they never lock a dialogue.
     func isNameOrMet(_ w: String, met: (String) -> Bool) -> Bool {
         var han = w.filter(Course.isHan)
-        if han.isEmpty || nameList.contains(han) || isMetWord(han, met: met) { return true }
+        // (the quick answers first: this is asked of every word of every sentence a card could use)
+        if han.isEmpty || nameSet.contains(han) || isMetWord(han, met: met) { return true }
+        guard han.contains(where: { nameChars.contains($0) }) else { return false }
         for n in nameList where han.contains(n) { han = han.replacingOccurrences(of: n, with: "") }
         han = han.filter { !nameOnlyChars.contains($0) }
         return han.isEmpty || isMetWord(han, met: met)

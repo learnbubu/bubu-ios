@@ -181,6 +181,18 @@ final class LessonFlowTests: XCTestCase {
         XCTAssertNotNil(s.result)
     }
 
+    /// The quick check agrees with the full list of unmet words, for a learner part-way through.
+    func testReadableAgreesWithUnmetWords() {
+        let known = Set(course.lessons.prefix(30).flatMap { course.cards(in: $0.id) }.map(\.id))
+        let met: (String) -> Bool = { known.contains($0) }
+        for c in course.lessons.prefix(40).flatMap({ course.cards(in: $0.id) }) {
+            for s in course.sentences(for: c).prefix(40) {
+                XCTAssertEqual(course.isReadable(s, for: c, met: met), course.unmetWords(in: s, for: c, met: met).isEmpty,
+                               "\(c.word.hanzi) in \(s.hanzi)")
+            }
+        }
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {
