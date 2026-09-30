@@ -212,7 +212,12 @@ struct StudyView: View {
                 }
             }
             HStack(spacing: 8) {
-                Text(session.title).font(.nunito(13, .bold)).foregroundStyle(Color.muted)
+                // a quiz's name is the screen's title ("Quiz · 20 questions"); else a small label
+                if session.isQuiz {
+                    Text(session.title).font(.nunitoXB(15)).foregroundStyle(Color.ink).lineLimit(1)
+                } else {
+                    Text(session.title).font(.nunito(13, .bold)).foregroundStyle(Color.muted)
+                }
                 Spacer()
                 if session.combo >= 3 {
                     let hot = session.combo >= 5
@@ -237,7 +242,7 @@ struct StudyView: View {
                 }
             }
             .padding(.leading, 46)
-            .frame(height: 20)
+            .frame(height: session.isQuiz ? 22 : 20)
         }
         .padding(.leading, 10).padding(.trailing, 18).padding(.top, 2).padding(.bottom, 10)
         .animation(.spring(response: 0.3), value: session.combo)
@@ -946,23 +951,56 @@ struct FeedbackBanner: View {
         .background(correct ? Color.goodSoft : Color.againSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
+    /// The word's meaning, briefly enough for the panel: its short meaning when it has one,
+    /// else `en` without its asides ("to look (长 zhǎng: to grow) (…)" → "to look"), and
+    /// just the first sense if that's still long.
+    static func brief(_ w: Word) -> String {
+        if let s = w.short, !s.isEmpty { return s }
+        var out = "", depth = 0
+        for ch in w.en {
+            if ch == "(" { depth += 1 }
+            else if ch == ")" { depth = max(0, depth - 1) }
+            else if depth == 0 { out.append(ch) }
+        }
+        out = out.split(separator: " ").joined(separator: " ")
+            .replacingOccurrences(of: " ,", with: ",").replacingOccurrences(of: " ;", with: ";")
+            .trimmingCharacters(in: CharacterSet(charactersIn: " ,;"))
+        if out.isEmpty { return w.gloss }
+        if out.count > FeedbackBanner.longMeaning {
+            let first = MemoryHook.short(out)
+            if !first.isEmpty { return first }
+        }
+        return out
+    }
+
+    /// English longer than this goes on its own line, under the characters and pinyin.
+    static let longMeaning = 28
+
     @ViewBuilder
     private func wordAnswer(_ w: Word) -> some View {
         let first = ex.dir == "recognize" ? "en" : ex.dir == "pinyin" ? "py" : "hz"
+        let rest = ["hz", "py", "en"].filter { $0 != first }
+        // a long meaning gets a line of its own rather than a narrow column beside the pinyin
+        let apart = first != "en" && Self.brief(w).count > Self.longMeaning
+        let row = apart ? rest.filter { $0 != "en" } : rest
         piece(first, w, big: true).padding(.top, 4)
         HStack(spacing: 0) {
-            ForEach(Array(["hz", "py", "en"].filter { $0 != first }.enumerated()), id: \.offset) { i, k in
+            ForEach(Array(row.enumerated()), id: \.offset) { i, k in
                 if i > 0 { Text(" · ").foregroundStyle(Color.gold) }
                 piece(k, w, big: false)
             }
         }
         .font(.nunito(14.4)).padding(.top, 2)
+        if apart {
+            piece("en", w, big: false).padding(.top, 2)
+        }
     }
 
     @ViewBuilder
     private func piece(_ k: String, _ w: Word, big: Bool) -> some View {
         switch k {
-        case "en": Text(w.gloss).font(.nunito(big ? 17.6 : 14.4)).foregroundStyle(big ? Color.ink : Color.gold)
+        case "en": Text(Self.brief(w)).font(.nunito(big ? 17.6 : 14.4)).foregroundStyle(big ? Color.ink : Color.gold)
+            .fixedSize(horizontal: false, vertical: true)
         case "py":
             if big || pinyinShown {
                 PinyinText(pinyin: w.pinyin, size: big ? 17.6 : 14.4, weight: .regular)
@@ -1000,8 +1038,8 @@ struct FeedbackBanner: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("SPOT THE DIFFERENCE").font(.nunito(11.2, .black)).tracking(1.1).foregroundStyle(Color.again)
             HStack(spacing: 8) {
-                cell(ex.card.word.hanzi, mark: d.right, en: ex.card.word.gloss, good: true)
-                cell(other.word.hanzi, mark: d.wrong, en: other.word.gloss, good: false)
+                cell(ex.card.word.hanzi, mark: d.right, en: Self.brief(ex.card.word), good: true)
+                cell(other.word.hanzi, mark: d.wrong, en: Self.brief(other.word), good: false)
             }
             Text(d.note).font(.nunito(13.4)).foregroundStyle(Color.ink).fixedSize(horizontal: false, vertical: true)
         }

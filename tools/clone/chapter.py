@@ -6,6 +6,7 @@ to check before any reach the app. Short words get several takes to choose from.
     python tools/clone/chapter.py make 1 new        # only what the app hasn't a clip for (then: use 1 new …)
     python tools/clone/chapter.py use 1 你=2 我=1    # the chosen takes become the app's clips
     python tools/clone/chapter.py use 1 all         # take 1 of everything not named
+    python tools/clone/chapter.py make 2-5 new      # several chapters in one run, a board for each
 """
 import base64, json, os, shutil, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -47,8 +48,15 @@ def finish(data, path, clean=True):
 NEW = "new" in sys.argv[3:]
 
 
+def chapters_of(arg):
+    """"3" → [3]; "2-5" → [2, 3, 4, 5]."""
+    a, _, b = arg.partition("-")
+    return list(range(int(a), int(b or a) + 1))
+
+
 def texts(chapter):
-    out = [t for v, t in voice.plan([chapter]) if v == "k"]
+    chs = chapter if isinstance(chapter, list) else [chapter]
+    out = [t for v, t in voice.plan(chs) if v == "k"]
     if NEW:
         out = [t for t in out if not os.path.exists(os.path.join(voice.OUT, voice.name(t) + ".mp3"))]
     return out
@@ -61,7 +69,9 @@ def lines(chapter):
         if len(voice.han(t)) == 1:
             out += [(c.format(t), t, n) for n, c in enumerate(CARRIERS, 1)]
         else:
-            out += [(t, t, k) for k in range(1, (TAKES if NEW or len(voice.han(t)) <= 3 else 1) + 1)]
+            # several takes of a short word; of a sentence too for a one-chapter redo (a few lines)
+            many = len(voice.han(t)) <= 3 or (NEW and not isinstance(chapter, list))
+            out += [(t, t, k) for k in range(1, (TAKES if many else 1) + 1)]
     return out
 
 
@@ -75,8 +85,9 @@ def pinyin(t, info):
 
 
 if __name__ == "__main__":
-    cmd, chapter = sys.argv[1], int(sys.argv[2])
-    work = os.path.join(WORK, f"chapter{chapter}" + ("-new" if NEW else ""))
+    cmd, arg = sys.argv[1], sys.argv[2]
+    chapter = int(arg) if "-" not in arg else chapters_of(arg)
+    work = os.path.join(WORK, f"chapter{arg}" + ("-new" if NEW else ""))
     todo = lines(chapter)
     if cmd == "make":
         os.makedirs(work, exist_ok=True)
@@ -127,14 +138,26 @@ if __name__ == "__main__":
         order = {t: i for i, t in enumerate(texts(chapter))}
         rows.sort(key=lambda r: (order[r["hanzi"]], r["kind"]))
         page = open(os.path.join(TOOLS, "board.html"), encoding="utf-8").read()
-        title = f"Chapter {chapter} in her voice: {len(texts(chapter))} clips, short words in {TAKES} takes"
-        if compare:
-            title += ", each as made and cleaned"
-        html = (page.replace("__DATA__", json.dumps(rows, ensure_ascii=False)).replace("__TITLE__", title)
-                    .replace("__KEY__", f"clone-ch{chapter}" + ("-compare" if compare else "")).replace("__TICKS__", "true"))
-        out = os.path.join(work, "board-compare.html" if compare else "board.html")
-        open(out, "w", encoding="utf-8", newline="\n").write(html)
-        print(out, len(rows), "clips;", "empty, left off:" if empty else "", ", ".join(empty))
+        # a board a chapter: each text on the first of the chapters that uses it
+        chs = chapter if isinstance(chapter, list) else [chapter]
+        home = {}
+        for c in chs:
+            for t in texts(c):
+                home.setdefault(t, c)
+        for c in chs:
+            mine = [r for r in rows if home.get(r["hanzi"], chs[0]) == c]
+            title = f"Chapter {c} in her voice: {len({r['hanzi'] for r in mine})} clips, short words in {TAKES} takes"
+            if compare:
+                title += ", each as made and cleaned"
+            html = (page.replace("__DATA__", json.dumps(mine, ensure_ascii=False)).replace("__TITLE__", title)
+                        .replace("__KEY__", f"clone-ch{c}" + ("-new" if NEW else "") + ("-compare" if compare else ""))
+                        .replace("__TICKS__", "true"))
+            name = ("board-compare" if compare else "board") + (f"-ch{c}" if len(chs) > 1 else "") + ".html"
+            out = os.path.join(work, name)
+            open(out, "w", encoding="utf-8", newline="\n").write(html)
+            print(out, len(mine), "takes")
+        if empty:
+            print("empty, left off:", ", ".join(empty))
     elif cmd == "use":
         chosen = dict(a.split("=") for a in sys.argv[3:] if "=" in a)
         chosen_texts = texts(chapter)

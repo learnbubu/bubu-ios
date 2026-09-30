@@ -290,8 +290,8 @@ struct HomeView: View {
             }
             Spacer(minLength: 0)
             if n > 0 {
-                Text("\(n)").font(.nunito(10, .black)).foregroundStyle(.white)
-                    .padding(.horizontal, 5).frame(minWidth: 18, minHeight: 18)
+                Text("\(n)").font(.nunito(11.5, .black)).foregroundStyle(.white)
+                    .padding(.horizontal, 6).frame(minWidth: 22, minHeight: 22)
                     .background(ink, in: Capsule())
             }
         }
