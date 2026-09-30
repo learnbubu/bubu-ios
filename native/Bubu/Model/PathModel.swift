@@ -61,7 +61,28 @@ struct PathModel {
         }
         bannerMids = mids
         bannerRight = sides
-        // the scenery composed in the path editor, anchored to its stone
+        let (pieces, _) = Self.composed(course, items, xs, W)
+        // past the last composed stone, the path plants itself, as the JIC edition did. That
+        // doesn't depend on the current lesson, so it's planted once a width (it's the slow part);
+        // a current lesson that starts a chapter moves every stone after it down by its START
+        // bubble, and the planted pieces from there down move with them
+        let planted = Self.planted(course, W)
+        var shift: (from: CGFloat, by: CGFloat)?
+        if let cur = items.first(where: { $0.lesson.id == current }), cur.chapter != nil, cur.index < planted.ys.count {
+            let by = cur.y - planted.ys[cur.index]
+            if by != 0 { shift = (planted.ys[cur.index] - Self.gap / 2, by) }
+        }
+        self.pieces = pieces + planted.pieces.map { p in
+            guard let s = shift, p.y + p.h / 2 > s.from else { return p }
+            var q = Piece(id: p.id, art: p.art, x: p.x, y: p.y + s.by, w: p.w, h: p.h, flip: p.flip, behind: p.behind)
+            q.ground = p.ground
+            return q
+        }
+        pebbles = Self.trail(course, items, xs, mids, sides, W)
+    }
+
+    /// The scenery composed in the path editor, anchored to its stone, and the last stone it's on.
+    private static func composed(_ course: Course, _ items: [Item], _ xs: [CGFloat], _ W: CGFloat) -> ([Piece], Int) {
         let kx = W / 390
         let byId = Dictionary(uniqueKeysWithValues: items.map { ($0.lesson.id, $0) })
         var pieces: [Piece] = []
@@ -78,11 +99,38 @@ struct PathModel {
             let base = it.y + p.dy
             pieces.append(Piece(id: n, art: p.art, x: cx, y: base - h / 2, w: w, h: h, flip: p.flip, behind: p.behind))
         }
-        // past the last composed stone, the path plants itself, as the JIC edition did
-        self.pieces = pieces + Self.bands(course, items, xs, mids, sides, W, composed: pieces,
-                                          after: composedUntil, firstId: course.data.pathLayout.pieces.count)
-        pebbles = Self.trail(course, items, xs, mids, sides, W)
+        return (pieces, composedUntil)
     }
+
+    /// The planted scenery for a width, laid out with no current lesson, and the stones' y it
+    /// was planted against. Kept, one per width.
+    private static func planted(_ course: Course, _ W: CGFloat) -> (pieces: [Piece], ys: [CGFloat]) {
+        if let hit = plantedCache.get(W) { return hit }
+        let items = layout(course, current: nil)
+        let xs = (0..<items.count).map { nodeX($0, W, count: 64) }
+        var mids: [Int: CGFloat] = [:], sides: [Int: Bool] = [:]
+        for it in items where it.chapter != nil {
+            mids[it.index] = bannerMid(it, items: items, current: nil)
+            sides[it.index] = bannerOnRight(it, course: course, xs: xs, W: W)
+        }
+        let (pieces, until) = composed(course, items, xs, W)
+        let out = (pieces: bands(course, items, xs, mids, sides, W, composed: pieces, after: until,
+                                 firstId: course.data.pathLayout.pieces.count),
+                   ys: items.map(\.y))
+        plantedCache.set(W, out)
+        return out
+    }
+
+    /// Plants a width's scenery ahead of time (off the main thread, at launch).
+    static func warm(_ course: Course, width W: CGFloat) { _ = planted(course, W) }
+
+    private final class PlantedCache: @unchecked Sendable {
+        private var byWidth: [CGFloat: (pieces: [Piece], ys: [CGFloat])] = [:]
+        private let lock = NSLock()
+        func get(_ W: CGFloat) -> (pieces: [Piece], ys: [CGFloat])? { lock.lock(); defer { lock.unlock() }; return byWidth[W] }
+        func set(_ W: CGFloat, _ v: (pieces: [Piece], ys: [CGFloat])) { lock.lock(); byWidth[W] = v; lock.unlock() }
+    }
+    private static let plantedCache = PlantedCache()
 
     // MARK: geometry
 

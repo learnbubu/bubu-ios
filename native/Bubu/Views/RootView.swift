@@ -150,6 +150,10 @@ struct RootView: View {
         .onAppear {
             Moments.shared.launch = { router.start($0) }
             debugScreens()
+            // the path's planted scenery is the slow part of laying it out: planted in the
+            // background at launch, so Learn opens without a hitch
+            let w = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.bounds.width ?? 0
+            if w > 0 { DispatchQueue.global(qos: .utility).async { PathModel.warm(Course.shared, width: w) } }
         }
         .fullScreenCover(isPresented: Binding(get: { (!progress.onboarded && Launch.screen == nil) || showWelcome },
                                               set: { if !$0 { showWelcome = false } }),
