@@ -52,6 +52,7 @@ struct Note: Codable, Hashable {
 
 struct Turn: Codable, Hashable {
     let who: String            // "app" or "you"
+    let name: String?          // who says it in the story (马克, 小雨 …): whose voice it's in
     let hanzi: String
     let pinyin: String
     let en: String

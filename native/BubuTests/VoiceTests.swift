@@ -8,7 +8,9 @@ final class VoiceTests: XCTestCase {
         XCTAssertEqual(Speech.clipName("你好"), "k_670d9743542cae3e")
         XCTAssertEqual(Speech.clipName("你"), "k_a0c7716669b5ded0")
         XCTAssertEqual(Speech.clipName("  你好  "), "k_670d9743542cae3e", "spaces around it don't matter")
-        XCTAssertEqual(Speech.clipName("你好", male: true), "c_670d9743542cae3e")
+        XCTAssertEqual(Speech.clipName("你好", speaker: "朵朵"), "dd_670d9743542cae3e")
+        XCTAssertEqual(Speech.clipName("你好", speaker: "林小雨"), Speech.clipName("你好", speaker: "小雨"), "one person, one voice")
+        XCTAssertEqual(Speech.clipName("你好", speaker: "路人"), "k_670d9743542cae3e", "someone without a voice of their own gets Bùbù's")
     }
 
     func testEveryChapterOneWordHasAClip() {
@@ -20,7 +22,18 @@ final class VoiceTests: XCTestCase {
 
     func testAWordWithNoClipFallsBackToTheUsualVoice() {
         XCTAssertNil(Speech.clipURL("这句话没有录音，所以用手机的声音。"))
-        // the other speaker's clip is used when there is one, else the usual voice's
-        XCTAssertNotNil(Speech.clipURL("你好", male: true))
+        // no clip in the speaker's voice: Bùbù's
+        XCTAssertEqual(Speech.clipURL("你好", speaker: "陈爸爸")?.lastPathComponent, "k_670d9743542cae3e.mp3")
+    }
+
+    func testChapterOneDialogueLinesAreSpokenByWhoeverSaysThem() {
+        let lines = Course.shared.dialogues.filter { $0.lesson.hasPrefix("起步1 U1") }.flatMap(\.turns)
+        XCTAssertTrue(lines.allSatisfy { $0.name != nil }, "every line knows who says it")
+        let duoduo = lines.first { $0.name == "朵朵" }
+        XCTAssertNotNil(duoduo, "朵朵 speaks in chapter 1")
+        // until 朵朵 has a voice of her own, her lines are in Bùbù's
+        if let t = duoduo {
+            XCTAssertNotNil(Speech.clipURL(t.hanzi, speaker: t.name), "no clip for \(t.hanzi)")
+        }
     }
 }

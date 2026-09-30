@@ -3,6 +3,7 @@ to check before any reach the app. Short words get several takes to choose from.
 
     python tools/clone/chapter.py make 1            # C:/Users/domch/bubu-voice/chapter1/ + board.html
     python tools/clone/chapter.py board 1 compare   # the board again from what's made; compare: cleaned beside as made
+    python tools/clone/chapter.py make 1 new        # only what the app hasn't a clip for (then: use 1 new …)
     python tools/clone/chapter.py use 1 你=2 我=1    # the chosen takes become the app's clips
     python tools/clone/chapter.py use 1 all         # take 1 of everything not named
 """
@@ -41,8 +42,16 @@ def finish(data, path, clean=True):
     return bool(secs) and float(secs) > 0.1
 
 
+# "new": only what the app has no clip for yet, each in several takes, in its own folder, so the
+# clips already chosen stay as they are
+NEW = "new" in sys.argv[3:]
+
+
 def texts(chapter):
-    return [t for v, t in voice.plan([chapter]) if v == "k"]
+    out = [t for v, t in voice.plan([chapter]) if v == "k"]
+    if NEW:
+        out = [t for t in out if not os.path.exists(os.path.join(voice.OUT, voice.name(t) + ".mp3"))]
+    return out
 
 
 def lines(chapter):
@@ -52,7 +61,7 @@ def lines(chapter):
         if len(voice.han(t)) == 1:
             out += [(c.format(t), t, n) for n, c in enumerate(CARRIERS, 1)]
         else:
-            out += [(t, t, k) for k in range(1, (TAKES if len(voice.han(t)) <= 3 else 1) + 1)]
+            out += [(t, t, k) for k in range(1, (TAKES if NEW or len(voice.han(t)) <= 3 else 1) + 1)]
     return out
 
 
@@ -67,7 +76,7 @@ def pinyin(t, info):
 
 if __name__ == "__main__":
     cmd, chapter = sys.argv[1], int(sys.argv[2])
-    work = os.path.join(WORK, f"chapter{chapter}")
+    work = os.path.join(WORK, f"chapter{chapter}" + ("-new" if NEW else ""))
     todo = lines(chapter)
     if cmd == "make":
         os.makedirs(work, exist_ok=True)
@@ -128,7 +137,8 @@ if __name__ == "__main__":
         print(out, len(rows), "clips;", "empty, left off:" if empty else "", ", ".join(empty))
     elif cmd == "use":
         chosen = dict(a.split("=") for a in sys.argv[3:] if "=" in a)
-        for t in texts(chapter):
+        chosen_texts = texts(chapter)
+        for t in chosen_texts:
             k = int(chosen.get(t, 1))
             shutil.copyfile(os.path.join(work, "clean", f"{voice.name(t)}-{k}.mp3"), os.path.join(voice.OUT, voice.name(t) + ".mp3"))
-        print(len(texts(chapter)), "clips are her voice now")
+        print(len(chosen_texts), "clips are her voice now")

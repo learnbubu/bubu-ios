@@ -259,7 +259,7 @@ final class BeginnerHelpsTests: XCTestCase {
             "认识": "认识 = 认 recognise + 识 know → to know (someone)",
             "吗": "吗 = 口 mouth + 马 mǎ (sound) → a yes/no question",
             "也": nil,
-            "呢": "呢 = 口 mouth + 尼 ní (sound) → and you?",
+            "呢": "呢 = 口 mouth + 尼 ní (sound) → asks it back: 你呢？ and you?",
         ]
         let words = chapter1.flatMap(\.words).map(\.hanzi)
         XCTAssertEqual(words.count, 16)

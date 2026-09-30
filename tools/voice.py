@@ -1,7 +1,7 @@
 """Makes the course's spoken audio with Google Cloud Text-to-Speech (tools/tts.py) and puts it
-in the app: native/Bubu/Resources/Voice/<voice>_<hash>.mp3, where <voice> is k (Kore, the
-default voice) or c (Charon, the other speaker in a dialogue) and <hash> is the first 16 hex
-digits of the SHA-256 of the text. The app looks a clip up by the same name (Speech.clipName)
+in the app: native/Bubu/Resources/Voice/<voice>_<hash>.mp3, where <voice> is k (Bùbù's voice,
+which every character shares until they have their own: Speech.speakerCodes) and <hash> is the
+first 16 hex digits of the SHA-256 of the text. The app looks a clip up by the same name (Speech.clipName)
 and falls back to the phone's own voice when there isn't one. Clips already made are skipped.
 
     python tools/voice.py plan 1        # what chapter 1 needs, and how many characters
@@ -50,8 +50,6 @@ def plan(chapters):
             if rest and all(ch in known for ch in rest):
                 out.append(("k", t["hanzi"]))
                 out += [("k", n) for n in used]
-                if t["who"] != "you":
-                    out.append(("c", t["hanzi"]))      # the other speaker, in Converse
     seen, uniq = set(), []
     for v, t in out:
         t = t.strip()

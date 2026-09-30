@@ -166,10 +166,10 @@ struct ConversePage: View {
         guard let d = dialogue, turn < d.turns.count else { return }
         let t = d.turns[turn]
         // listening only: your lines are said for you too
-        if t.who == "you" && listenOnly { Speech.shared.speak(t.hanzi); return }
+        if t.who == "you" && listenOnly { Speech.shared.speak(t.hanzi, speaker: t.name); return }
         guard t.who != "you" else { return }
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { shown.append(t) }
-        Speech.shared.speak(t.hanzi, male: true)       // the other speaker has their own voice
+        Speech.shared.speak(t.hanzi, speaker: t.name)  // each character in their own voice
         turn += 1
         let r = run
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { if run == r { step() } }

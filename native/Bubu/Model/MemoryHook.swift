@@ -22,7 +22,7 @@ enum MemoryHook {
         "高兴": "高兴 = 高 high + 兴 spirits rising → happy",
         "认识": "认识 = 认 recognise + 识 know → to know (someone)",
         "吗": "吗 = 口 mouth + 马 mǎ (sound) → a yes/no question",
-        "呢": "呢 = 口 mouth + 尼 ní (sound) → and you?",
+        "呢": "呢 = 口 mouth + 尼 ní (sound) → asks it back: 你呢？ and you?",
     ]
     /// Chapter 1's words with no sensible hook: 什么 (neither half means "what" alone) and
     /// 也 (a single shape with no parts).

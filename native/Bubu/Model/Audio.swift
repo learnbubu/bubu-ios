@@ -72,19 +72,25 @@ final class Speech {
 
     // MARK: recorded clips
 
+    /// Each character in the story has their own voice, and their clips a code of their own
+    /// (tools/voice.py SPEAKERS uses the same codes). Bùbù, who says every word, is k.
+    static let speakerCodes = ["马克": "mk", "小雨": "xy", "林小雨": "xy", "陈明": "cm",
+                               "陈妈妈": "mm", "陈爸爸": "bb", "朵朵": "dd"]
+
     /// The name of the recorded clip for a text (tools/voice.py makes them under the same
-    /// names): the voice, k for the usual one or c for the other speaker in a dialogue, then
-    /// the first 16 hex digits of the text's SHA-256.
-    static func clipName(_ text: String, male: Bool = false) -> String {
+    /// names): the voice's code (k for Bùbù, or the speaker's), then the first 16 hex digits
+    /// of the text's SHA-256.
+    static func clipName(_ text: String, speaker: String? = nil) -> String {
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let hash = SHA256.hash(data: Data(t.utf8)).prefix(8).map { String(format: "%02x", $0) }.joined()
-        return (male ? "c_" : "k_") + hash
+        return (speaker.flatMap { speakerCodes[$0] } ?? "k") + "_" + hash
     }
 
-    /// The clip for a text, if the app has one: the other speaker's when asked for and there
-    /// is one, else the usual voice's.
-    static func clipURL(_ text: String, male: Bool = false) -> URL? {
-        if male, let u = Bundle.main.url(forResource: clipName(text, male: true), withExtension: "mp3") { return u }
+    /// The clip for a text, if the app has one: in the speaker's voice when there's one of
+    /// those, else in Bùbù's.
+    static func clipURL(_ text: String, speaker: String? = nil) -> URL? {
+        if speaker.flatMap({ speakerCodes[$0] }) != nil,
+           let u = Bundle.main.url(forResource: clipName(text, speaker: speaker), withExtension: "mp3") { return u }
         return Bundle.main.url(forResource: clipName(text), withExtension: "mp3")
     }
 
@@ -145,14 +151,16 @@ final class Speech {
         max(AVSpeechUtteranceMinimumSpeechRate, normal * slowFactor)
     }
 
-    func speak(_ text: String, slow: Bool = false, male: Bool = false) {
+    /// Says a text: a recorded clip in the speaker's voice (Bùbù's when no speaker is given, or
+    /// the speaker has none), else the phone's own voice.
+    func speak(_ text: String, slow: Bool = false, speaker: String? = nil) {
         // asked for twice at once (two parts of a screen both saying it): said once, not
         // cut off and started again
         if !slow, text == lastText, Date().timeIntervalSince(lastAt) < 0.6 { return }
         lastText = text; lastAt = Date()
         Sounds.shared.activate()
         // a recorded clip when there is one; the phone's own voice otherwise
-        if let url = Self.clipURL(text, male: male) {
+        if let url = Self.clipURL(text, speaker: speaker) {
             synth.stopSpeaking(at: .immediate)
             let chosen = Float(ProgressStore.current?.prefs.rate ?? 0.85) / 0.85
             play(url, rate: slow ? Self.slowClipRate : min(1.2, max(0.6, chosen)))
