@@ -2,6 +2,7 @@
 to check before any reach the app. Short words get several takes to choose from.
 
     python tools/clone/chapter.py make 1            # C:/Users/domch/bubu-voice/chapter1/ + board.html
+    python tools/clone/chapter.py board 1 compare   # the board again from what's made; compare: cleaned beside as made
     python tools/clone/chapter.py use 1 你=2 我=1    # the chosen takes become the app's clips
     python tools/clone/chapter.py use 1 all         # take 1 of everything not named
 """
@@ -19,6 +20,25 @@ TAKES = 3                                   # for words of up to three character
 # a lone character said alone comes out clipped; said at the end of one of these and cut out, it
 # gets its full tone (as with the Google voice: tools/citation.py)
 CARRIERS = citation.CARRIERS
+
+
+# the finish for a clip: silence trimmed, a low rumble and any clicks taken out, the hiss above
+# her voice's range rolled off, a short fade at each end so a cut never pops, the same loudness
+# for every clip, and a higher bitrate than the Google clips (compression adds its own crackle)
+TRIM = ("silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05,"
+        "areverse,silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.12,areverse")
+CLEAN = ("highpass=f=70,adeclick=w=20:o=75,lowpass=f=11000,"
+         "afade=t=in:d=0.012,areverse,afade=t=in:d=0.04,areverse,loudnorm=I=-18:TP=-2:LRA=7")
+
+
+def finish(data, path, clean=True):
+    """The clip as an MP3, or False when there's nothing in it."""
+    af = TRIM + ("," + CLEAN if clean else "")
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "wav", "-i", "pipe:0", "-af", af, "-ar", "24000",
+                    "-ac", "1", "-b:a", "96k" if clean else "48k", path], input=data, check=True)
+    secs = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path],
+                          capture_output=True, text=True).stdout.strip()
+    return bool(secs) and float(secs) > 0.1
 
 
 def texts(chapter):
@@ -56,8 +76,12 @@ if __name__ == "__main__":
         env = dict(os.environ, PYTHONIOENCODING="utf-8")
         subprocess.run([PYTHON, os.path.join(HERE, "say.py"), PROMPT, PROMPT_TEXT, os.path.join(work, "raw"),
                         os.path.join(work, "lines.txt")], check=True, env=env, stderr=subprocess.DEVNULL)
+        cmd = "board"
+    if cmd == "board":                              # board 1 [compare]: rebuilt from what's made, not made again
+        compare = "compare" in sys.argv[3:]
+        os.makedirs(os.path.join(work, "clean"), exist_ok=True)
         info = __import__("board").details()
-        rows, readings = [], {}
+        chosen, readings = [], {}
         for n, (say, t, k) in enumerate(todo, 1):
             data = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", os.path.join(work, "raw", f"{n:02d}.wav"),
                                    "-ac", "1", "-ar", "24000", "-f", "wav", "pipe:1"], capture_output=True, check=True).stdout
@@ -72,33 +96,39 @@ if __name__ == "__main__":
                 readings.setdefault(t, []).append((not ok, d, cut, f"{secs:.2f}s · {d:.1f} from your reference tone · "
                                                    f"from {say}"))
                 continue
-            mp3 = os.path.join(work, f"{voice.name(t)}-{k}.mp3")
-            takes.mp3(data, mp3)
-            py, en, _ = info.get(t, ("", "", ""))
-            rows.append({"id": f"ch{chapter}-{voice.name(t)}-{k}", "voice": "Her voice", "hanzi": t, "pinyin": py,
-                         "en": en, "kind": f"take {k}", "audio": base64.b64encode(open(mp3, "rb").read()).decode()})
+            chosen.append((t, k, data, f"take {k}"))
         for t, found in readings.items():
             found.sort(key=lambda f: (f[0], f[1]))
-            py, en, _ = info.get(t, ("", "", ""))
             for k, (bad, d, cut, note) in enumerate(found[:TAKES], 1):
-                mp3 = os.path.join(work, f"{voice.name(t)}-{k}.mp3")
-                takes.mp3(cut, mp3)
-                rows.append({"id": f"ch{chapter}-{voice.name(t)}-{k}", "voice": "Her voice", "hanzi": t,
-                             "pinyin": py or pinyin(t, info), "en": en,
-                             "kind": f"take {k} · " + ("measures right" if not bad else "doesn't measure right") + " · " + note,
+                chosen.append((t, k, cut, f"take {k} · " + ("measures right" if not bad else "doesn't measure right")
+                               + " · " + note))
+        rows, empty = [], []
+        for t, k, data, note in chosen:
+            py, en, _ = info.get(t, ("", "", ""))
+            versions = [("clean", True)] + ([("", False)] if compare else [])
+            for sub, clean in versions:
+                mp3 = os.path.join(work, sub, f"{voice.name(t)}-{k}.mp3")
+                if not finish(data, mp3, clean):
+                    empty.append(f"{t} take {k}")
+                    break
+                rows.append({"id": f"ch{chapter}-{voice.name(t)}-{k}" + ("" if clean else "-asmade"),
+                             "voice": "Cleaned" if clean else "As made", "hanzi": t, "pinyin": py or pinyin(t, info),
+                             "en": en, "kind": note + ("" if not compare else (" · cleaned" if clean else " · as made")),
                              "audio": base64.b64encode(open(mp3, "rb").read()).decode()})
         order = {t: i for i, t in enumerate(texts(chapter))}
         rows.sort(key=lambda r: (order[r["hanzi"]], r["kind"]))
         page = open(os.path.join(TOOLS, "board.html"), encoding="utf-8").read()
-        html = (page.replace("__DATA__", json.dumps(rows, ensure_ascii=False))
-                    .replace("__TITLE__", f"Chapter {chapter} in her voice: {len(texts(chapter))} clips, short words in {TAKES} takes")
-                    .replace("__KEY__", f"clone-ch{chapter}").replace("__TICKS__", "true"))
-        out = os.path.join(work, "board.html")
+        title = f"Chapter {chapter} in her voice: {len(texts(chapter))} clips, short words in {TAKES} takes"
+        if compare:
+            title += ", each as made and cleaned"
+        html = (page.replace("__DATA__", json.dumps(rows, ensure_ascii=False)).replace("__TITLE__", title)
+                    .replace("__KEY__", f"clone-ch{chapter}" + ("-compare" if compare else "")).replace("__TICKS__", "true"))
+        out = os.path.join(work, "board-compare.html" if compare else "board.html")
         open(out, "w", encoding="utf-8", newline="\n").write(html)
-        print(out, len(rows), "takes")
+        print(out, len(rows), "clips;", "empty, left off:" if empty else "", ", ".join(empty))
     elif cmd == "use":
         chosen = dict(a.split("=") for a in sys.argv[3:] if "=" in a)
         for t in texts(chapter):
             k = int(chosen.get(t, 1))
-            shutil.copyfile(os.path.join(work, f"{voice.name(t)}-{k}.mp3"), os.path.join(voice.OUT, voice.name(t) + ".mp3"))
+            shutil.copyfile(os.path.join(work, "clean", f"{voice.name(t)}-{k}.mp3"), os.path.join(voice.OUT, voice.name(t) + ".mp3"))
         print(len(texts(chapter)), "clips are her voice now")
