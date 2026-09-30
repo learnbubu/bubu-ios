@@ -17,10 +17,6 @@ struct HomeView: View {
                 HomeScenery(scroll: scroll, W: W, top: top)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        GeometryReader { g in
-                            Color.clear.preference(key: ScrollYKey.self, value: g.frame(in: .named("home")).minY)
-                        }
-                        .frame(height: 0)
                         header
                         streakCard.padding(.top, 14)
                         questCard.padding(.top, 8)
@@ -43,17 +39,26 @@ struct HomeView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.top, 10)
-                        Color.clear.frame(height: 150)
+                        // the foliage along the foot of the page, at its end (fixed to the screen,
+                        // it showed through the gaps between the practice tiles)
+                        Image("home-bottom").resizable()
+                            .frame(width: W * 1.5, height: W * 1.5 * 338 / 1200)
+                            .frame(width: W, height: max(150, W * 1.5 * 338 / 1200), alignment: .bottom)
+                            .clipped()
+                            .padding(.horizontal, -18)
+                            .allowsHitTesting(false)
                     }
                     .padding(.horizontal, 18)
+                    // the scenery drifts as the page scrolls: the offset goes to a box that only the
+                    // scenery reads, so scrolling redraws the scenery each frame, not all of Home.
+                    // (A preference from a GeometryReader never updated while scrolling, so the
+                    // scenery sat pinned.)
+                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("home")).minY } action: { y in
+                        let up = min(0, y)
+                        if scroll.up != up { scroll.up = up }
+                    }
                 }
                 .coordinateSpace(name: "home")
-                // the scenery drifts as the page scrolls: the offset goes to a box that only the
-                // scenery reads, so scrolling redraws the scenery each frame, not all of Home
-                .onPreferenceChange(ScrollYKey.self) { y in
-                    let up = min(0, y)
-                    if scroll.up != up { scroll.up = up }
-                }
                 .onAppear { progress.ensureQuests() }
                 .scrollIndicators(.hidden)
             }
@@ -357,24 +362,15 @@ private struct HomeScenery: View {
         let up = scroll.up
         ZStack(alignment: .topLeading) {
             Image("home-cloud-a").resizable().frame(width: W * 0.42, height: W * 0.42 * 0.3855)
-                .offset(x: W * 0.133, y: top - 36 + up * 0.1)
+                .offset(x: W * 0.133, y: top - 62 + up * 0.1)
             Image("home-temple").resizable().frame(width: W * 0.70, height: W * 0.70 * 0.5869)
                 .opacity(0.95)
                 .offset(x: W * 0.329, y: top - 24 + up * 0.28)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .overlay(alignment: .bottom) {
-            Image("home-bottom").resizable().frame(width: W * 1.5, height: W * 1.5 * 338 / 1200)
-                .offset(y: 14)
-        }
         .ignoresSafeArea(edges: .top)
         .allowsHitTesting(false)
     }
-}
-
-private struct ScrollYKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
 /// The streak card's speech bubble, tail pointing down at Bùbù; orange when it wants you.
