@@ -70,8 +70,14 @@ if __name__ == "__main__":
         sr = model.sample_rate
         pieces = []
         for s in sentences(line):
-            said = torch.cat([j["tts_speech"] for j in model.inference_zero_shot(
-                s, "You are a helpful assistant.<|endofprompt|>" + prompt_text, prompt, stream=False)], dim=1)
+            if os.environ.get("MODE") == "cross":
+                # the prompt is in another language (an English sample speaking Mandarin): no
+                # transcript, the voice only
+                said = torch.cat([j["tts_speech"] for j in model.inference_cross_lingual(
+                    "You are a helpful assistant.<|endofprompt|>" + s, prompt, stream=False)], dim=1)
+            else:
+                said = torch.cat([j["tts_speech"] for j in model.inference_zero_shot(
+                    s, "You are a helpful assistant.<|endofprompt|>" + prompt_text, prompt, stream=False)], dim=1)
             if pieces:
                 pieces.append(torch.zeros(1, int(PAUSE * sr)))
             pieces.append(trimmed(said, sr) if len(sentences(line)) > 1 else said)
