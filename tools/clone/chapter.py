@@ -161,7 +161,15 @@ if __name__ == "__main__":
     elif cmd == "use":
         chosen = dict(a.split("=") for a in sys.argv[3:] if "=" in a)
         chosen_texts = texts(chapter)
+        used, missing = 0, []
         for t in chosen_texts:
-            k = int(chosen.get(t, 1))
-            shutil.copyfile(os.path.join(work, "clean", f"{voice.name(t)}-{k}.mp3"), os.path.join(voice.OUT, voice.name(t) + ".mp3"))
-        print(len(chosen_texts), "clips are her voice now")
+            # the take chosen, else the first take there is (a take that came out silent is left off)
+            want = [int(chosen[t])] if t in chosen else [1, 2, 3]
+            src = next((p for k in want for p in [os.path.join(work, "clean", f"{voice.name(t)}-{k}.mp3")] if os.path.exists(p)), None)
+            if src is None:
+                missing.append(t); continue
+            shutil.copyfile(src, os.path.join(voice.OUT, voice.name(t) + ".mp3"))
+            used += 1
+        print(used, "clips are her voice now")
+        if missing:
+            print(len(missing), "with nothing made for them (make … new again):", " | ".join(missing[:20]))
