@@ -113,7 +113,7 @@ if __name__ == "__main__":
                     break
                 rows.append({"id": f"ch{chapter}-{voice.name(t)}-{k}" + ("" if clean else "-asmade"),
                              "voice": "Cleaned" if clean else "As made", "hanzi": t, "pinyin": py or pinyin(t, info),
-                             "en": en, "kind": note + ("" if not compare else (" · cleaned" if clean else " · as made")),
+                             "en": en, "kind": note,
                              "audio": base64.b64encode(open(mp3, "rb").read()).decode()})
         order = {t: i for i, t in enumerate(texts(chapter))}
         rows.sort(key=lambda r: (order[r["hanzi"]], r["kind"]))
