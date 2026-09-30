@@ -56,7 +56,14 @@ struct StudyView: View {
                             // the feedback takes room from the exercise: keep the answers in view
                             .onChange(of: feedback != nil) { _, shown in
                                 guard shown else { return }
-                                withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("exercise-end", anchor: .bottom) }
+                                // once the feedback has taken its room (it springs in), not before:
+                                // until then there's nothing to scroll
+                                for delay in [0.35, 0.7] {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                                        guard feedback != nil else { return }
+                                        withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("exercise-end", anchor: .bottom) }
+                                    }
+                                }
                             }
                         }
                         if !preStart, case .card = session.current { bottomSlot }
@@ -1065,9 +1072,9 @@ struct SentenceView: View {
                     // as JIC had it: the NEW WORD tag on top, the speaker at the sentence's left, and
                     // each word with its tone-coloured pinyin over it
                     if anyNew { NewBadge() }
-                    HStack(alignment: .center, spacing: 4) {
-                        SpeakerButton(text: sent.hanzi, size: 15, withSlow: true)
-                        FlowLayout(spacing: 2, lineSpacing: 4) {
+                    FlowLayout(spacing: 2, lineSpacing: 4) {
+                            // the speaker leads the sentence's first line, so the words get the bubble's width
+                            SpeakerButton(text: sent.hanzi, size: 15, withSlow: true)
                             ForEach(Array(sent.words.enumerated()), id: \.offset) { i, w in
                                 let new = isNew(w.hanzi)
                                 HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { _ = peeked.insert(i) }) {
@@ -1083,7 +1090,6 @@ struct SentenceView: View {
                                 }
                                 .padding(.horizontal, 3)
                             }
-                        }
                     }
                     .contentShape(Rectangle())
                     .onTapGesture { withAnimation { pinyinOpen.toggle() } }
