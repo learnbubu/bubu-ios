@@ -37,7 +37,7 @@ struct HomeView: View {
                                 let nL = progress.selectedLessons.count, nF = progress.selectedFocuses.count
                                 Text("\(nL == Course.shared.lessons.count ? "all lessons" : "\(nL) lesson\(nL == 1 ? "" : "s")"), \(nF) focus\(nF == 1 ? "" : "es")")
                                     .font(.nunito(13)).foregroundStyle(Color.muted)
-                                Image(systemName: "chevron.right").font(.system(size: 13, weight: .bold)).foregroundStyle(Color.muted)
+                                Image(systemName: "chevron.down").font(.system(size: 10, weight: .bold)).foregroundStyle(Color.muted)
                             }
                             .padding(.horizontal, 16).padding(.vertical, 15).panel(radius: 16)
                         }
@@ -290,8 +290,8 @@ struct HomeView: View {
             }
             Spacer(minLength: 0)
             if n > 0 {
-                Text("\(n)").font(.nunito(13, .black)).foregroundStyle(.white)
-                    .padding(.horizontal, 8).frame(minWidth: 26, minHeight: 26)
+                Text("\(n)").font(.nunito(10, .black)).foregroundStyle(.white)
+                    .padding(.horizontal, 5).frame(minWidth: 18, minHeight: 18)
                     .background(ink, in: Capsule())
             }
         }

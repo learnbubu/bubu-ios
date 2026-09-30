@@ -13,6 +13,8 @@ struct WriteView: View {
     @State private var index = 0
     @State private var finishedChars = 0
     @State private var replay = 0
+    /// Bumped by Clear: the current character starts again.
+    @State private var clears = 0
     /// Times each character had been written when the exercise opened: its help holds for
     /// the whole exercise, though finishing a character counts straight away.
     @State private var timesAtStart: [String: Int]? = nil
@@ -26,43 +28,76 @@ struct WriteView: View {
     var body: some View {
         let w = ex.card.word, ch = chars[min(index, chars.count - 1)]
         let level = guidance(ch)
+        let finished = finishedChars > index
         VStack(spacing: 10) {
-            HStack(spacing: 12) {
+            // the JIC edition's header: the character in a small box, the pinyin and meaning
+            // beside it, the speaker on the right
+            HStack(spacing: 10) {
+                Text(ch).font(.hanzi(22)).foregroundStyle(Color.ink)
+                    .frame(width: 36, height: 36)
+                    .overlay(RoundedRectangle(cornerRadius: 5, style: .continuous)
+                        .strokeBorder(Color.accent.opacity(0.55), lineWidth: 1))
                 VStack(alignment: .leading, spacing: 1) {
-                    PinyinText(pinyin: w.pinyin, size: 18.4)
-                    Text(w.en + (chars.count > 1 ? "  ·  \(index + 1)/\(chars.count)" : ""))
-                        .font(.nunito(14.4)).foregroundStyle(Color.muted).lineLimit(2)
+                    HStack(spacing: 7) {
+                        PinyinText(pinyin: w.pinyin, size: 16.8)
+                        if ex.isNew {
+                            Text("NEW").font(.nunito(9.6, .black)).tracking(0.9)
+                                .foregroundStyle(Color.accent)
+                                .padding(.horizontal, 8).padding(.vertical, 2)
+                                .background(Color.accentSoft, in: Capsule())
+                        }
+                    }
+                    Text(w.en + (chars.count > 1 ? " · \(index + 1)/\(chars.count)" : ""))
+                        .font(.nunito(13.5)).foregroundStyle(Color.muted).lineLimit(2)
                 }
                 Spacer(minLength: 0)
                 SpeakerButton(text: w.hanzi)
             }
+            .padding(.horizontal, 4)
             GeometryReader { g in
-                let side = min(g.size.width - 8, 460)
-                WritingBox(char: ch, size: side, level: level, checking: progress.prefs.checkStrokes, replay: replay) {
+                let side = min(g.size.width - 8, 304)
+                WritingBox(char: ch, size: side, level: level, checking: progress.prefs.checkStrokes, replay: replay,
+                           animate: clears == 0, ghost: Self.ghost, minimalGrid: true) {
                     progress.recordWritten(ch)
                     finishedChars = index + 1
                     if index == chars.count - 1 { done() }
                 }
-                .id("\(ch)-\(index)")
+                .id("\(ch)-\(index)-\(clears)")
                 .frame(maxWidth: .infinity)
             }
             .aspectRatio(1, contentMode: .fit)
-            .frame(maxWidth: 468)
-            HStack(alignment: .center, spacing: 10) {
-                Text(level.note).font(.nunito(13.5)).foregroundStyle(Color.muted)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: 312)
+            // the hint, one small centred line; "Show me" and Clear as bordered pills under it
+            Text(level.note).font(.nunito(12.5)).foregroundStyle(Color.muted)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 2)
+            HStack(spacing: 10) {
                 Button { replay += 1 } label: {
-                    Label("Show me", systemImage: "play.circle.fill")
-                        .font(.nunito(13.5, .bold)).foregroundStyle(Color.accent)
-                        .padding(.horizontal, 10).padding(.vertical, 6)
-                        .background(Color.accent.opacity(0.12), in: Capsule())
+                    pill(Label("Show me", systemImage: "play.fill"), ink: Color.accent)
                 }
-                .buttonStyle(.plain)
-                .fixedSize()
+                .buttonStyle(PressDown(depth: 1))
+                // start the character again (the strokes aren't played again)
+                Button { clears += 1 } label: {
+                    pill(Label("Clear", systemImage: "arrow.counterclockwise"), ink: Color.ink)
+                }
+                .buttonStyle(PressDown(depth: 1))
+                .disabled(finished || answered)
+                .opacity(finished || answered ? 0.45 : 1)
             }
-            if finishedChars > index && index < chars.count - 1 {
-                Button("Next character (\(index + 1)/\(chars.count)) →") { withAnimation { index += 1 } }
-                    .buttonStyle(WideButton())
+            .fixedSize()
+            if finished && index < chars.count - 1 {
+                Button { withAnimation { clears = 0; index += 1 } } label: {
+                    Text("Next character (\(index + 1)/\(chars.count)) →")
+                        .font(.nunitoXB(15.6)).lineLimit(1).minimumScaleFactor(0.8)
+                        .foregroundStyle(Color.onAccent)
+                        .padding(.horizontal, 22).padding(.vertical, 13)
+                        .frame(minWidth: 196)
+                        .background(Color.accent, in: Capsule())
+                }
+                .buttonStyle(PressDown(depth: 1))
+                .padding(.top, 8)
             }
         }
         .onAppear {
@@ -73,23 +108,45 @@ struct WriteView: View {
             }
         }
     }
+
+    /// The pale character under the pen, as the JIC edition's: near-white by night (white
+    /// at 85% on the panel), a soft stone grey by day.
+    static let ghost = Color(light: 0xD8D4CA, dark: 0xDBDEE0)
+
+    /// A small bordered pill, as the JIC edition's "↺ Clear".
+    private func pill<L: View>(_ label: L, ink: Color) -> some View {
+        label
+            .font(.nunito(14.4, .bold)).foregroundStyle(ink)
+            .padding(.horizontal, 16).padding(.vertical, 9)
+            .background(Color.panel, in: Capsule())
+            .overlay(Capsule().strokeBorder(Color.line, lineWidth: 1.5))
+            .contentShape(Capsule())
+    }
 }
 
-/// A 田字格 practice square: dashed centre lines and diagonals.
+/// A 田字格 practice square: dashed centre lines and diagonals. `minimal` is the JIC
+/// edition's writing grid: a faint centre cross only, in a thin rounded frame.
 struct GridSquare: View {
+    var minimal = false
+
     var body: some View {
+        let radius: CGFloat = minimal ? 8 : 12
         GeometryReader { g in
             let s = g.size.width
             Path { p in
                 p.move(to: .init(x: s / 2, y: 0)); p.addLine(to: .init(x: s / 2, y: s))
                 p.move(to: .init(x: 0, y: s / 2)); p.addLine(to: .init(x: s, y: s / 2))
-                p.move(to: .zero); p.addLine(to: .init(x: s, y: s))
-                p.move(to: .init(x: s, y: 0)); p.addLine(to: .init(x: 0, y: s))
+                if !minimal {
+                    p.move(to: .zero); p.addLine(to: .init(x: s, y: s))
+                    p.move(to: .init(x: s, y: 0)); p.addLine(to: .init(x: 0, y: s))
+                }
             }
-            .stroke(Color.line, style: StrokeStyle(lineWidth: 1, dash: [5, 5]))
+            .stroke(minimal ? Color.line.opacity(0.8) : Color.line,
+                    style: StrokeStyle(lineWidth: 1, dash: minimal ? [4, 4] : [5, 5]))
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
+        .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous)
+            .strokeBorder(Color.line, lineWidth: minimal ? 1 : 1.5))
     }
 }
 
@@ -104,6 +161,10 @@ struct WritingBox: View {
     var checking = true
     /// Bumped by "Show me": the strokes play again.
     var replay = 0
+    /// The pale whole character under the pen.
+    var ghost: Color = .line
+    /// The JIC edition's grid: a faint centre cross, no diagonals.
+    var minimalGrid = false
     var complete: () -> Void
 
     /// The help, fixed when the box appears (finishing the character counts at once).
@@ -120,11 +181,13 @@ struct WritingBox: View {
     @State private var freeInk: [Path] = []
 
     init(char: String, size: CGFloat, level: WriteGuidance, checking: Bool = true, replay: Int = 0,
-         animate: Bool = true, complete: @escaping () -> Void) {
+         animate: Bool = true, ghost: Color = .line, minimalGrid: Bool = false, complete: @escaping () -> Void) {
         self.char = char
         self.size = size
         self.checking = checking
         self.replay = replay
+        self.ghost = ghost
+        self.minimalGrid = minimalGrid
         self.complete = complete
         _level = State(initialValue: level)
         _intro = State(initialValue: level.playsDemo && animate)
@@ -137,10 +200,10 @@ struct WritingBox: View {
 
     var body: some View {
         ZStack {
-            GridSquare()
+            GridSquare(minimal: minimalGrid)
             if let d = data {
                 // the whole character, pale, under the pen
-                if level.showsOutline { strokes(d, Array(0..<d.count), Color.line) }
+                if level.showsOutline { strokes(d, Array(0..<d.count), ghost) }
                 // the next stroke lit up: a glow, a dot where it starts, an arrow its way
                 if waiting(d) && level.highlights(misses: misses) {
                     guide(d, current)

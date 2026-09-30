@@ -45,7 +45,7 @@ struct LessonSheet: View {
                                 practiceHead(done: done)
                             } else {
                             VStack(alignment: .leading, spacing: 0) {
-                                Text(lesson.code.uppercased()).font(.nunito(11)).tracking(0.5).foregroundStyle(Color.muted)
+                                Text(lesson.code.uppercased()).font(.nunito(11, .semibold)).tracking(1.2).foregroundStyle(Color.muted)
                                 Text(lesson.name).font(.nunito(16, .bold)).foregroundStyle(Color.ink).lineLimit(2)
                                 Bar(value: pct, height: 7, fill: .good).padding(.top, 3).padding(.bottom, 4)
                                 Text(studied ? "\(mastered) / \(cards.count) mastered\(due > 0 ? " · \(due) due" : "")" : "new lesson · \(cards.count) words")
@@ -96,6 +96,16 @@ struct LessonSheet: View {
                             .padding(.bottom, 8)
                         }
 
+                        // the one-skill chips below appear once any of the lesson's words is studied
+                        if !studied && !locked && !lesson.isPractice {
+                            HStack(spacing: 6) {
+                                Image(systemName: "lock.fill").font(.system(size: 10, weight: .semibold))
+                                Text("Start studying to unlock focused practice").font(.nunito(12, .medium))
+                            }
+                            .foregroundStyle(Color.muted)
+                            .padding(.top, 6).padding(.horizontal, 2)
+                        }
+
                         if studied && !lesson.isPractice {
                             Text("OR PRACTISE ONE SKILL").font(.nunito(11)).tracking(0.3).foregroundStyle(Color.muted)
                                 .padding(.top, 14).padding(.bottom, 8).padding(.horizontal, 2)
@@ -122,9 +132,13 @@ struct LessonSheet: View {
                     .ignoresSafeArea(edges: .bottom)
             }
             .overlay(alignment: .topTrailing) {
-                Image(pose).resizable().scaledToFit().frame(width: 108, height: 110, alignment: .bottom)
+                // about 72 pt of panda, its feet ~30 pt over the sheet's top edge (web: .sheet-bubu).
+                // The waving and done art carry empty margins; the idle art is cropped tight.
+                let padded = pose != "panda-idle"
+                Image(pose).resizable().scaledToFit()
+                    .frame(width: padded ? 100 : 72, height: padded ? 150 : 110, alignment: .bottom)
                     .shadow(color: .black.opacity(0.28), radius: 8, y: 6)
-                    .offset(x: -14, y: -84)
+                    .offset(x: -14, y: padded ? -90 : -80)
                     .scaleEffect(shown ? 1 : 0.9, anchor: .bottom)
                     .allowsHitTesting(false)
             }
@@ -155,6 +169,7 @@ struct LessonSheet: View {
                     Text("no new words · no buns needed").font(.nunito(11, .medium)).opacity(0.9)
                 } else {
                     Text(stepLabel(studied: studied)).font(.nunitoXB(16))
+                    Text("mixed skills · spaced repetition").font(.nunito(11, .medium)).opacity(0.9)
                 }
             }
             .foregroundStyle(Color.onAccent)
@@ -172,7 +187,7 @@ struct LessonSheet: View {
         let what = review ? "About \(StudySession.practiceLen) exercises on the chapter's \(n) words, weaker ones first"
                           : "About \(StudySession.practiceLen) exercises on the \(n) words so far, weaker ones first"
         return VStack(alignment: .leading, spacing: 2) {
-            Text(review ? "CHAPTER REVIEW" : "PRACTICE").font(.nunito(11)).tracking(0.5).foregroundStyle(Color.muted)
+            Text(review ? "CHAPTER REVIEW" : "PRACTICE").font(.nunito(11, .semibold)).tracking(1.2).foregroundStyle(Color.muted)
             Text(lesson.name).font(.nunito(16, .bold)).foregroundStyle(Color.ink).lineLimit(2)
             Text(done ? "Done · practise again any time" : what)
                 .font(.nunito(12)).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true)

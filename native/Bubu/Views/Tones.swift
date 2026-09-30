@@ -154,13 +154,17 @@ struct TonesPage: View {
                 .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 8)
             HStack(spacing: 14) {
                 Button { Speech.shared.speak(c.word.hanzi) } label: {
-                    Image(systemName: "speaker.wave.2.fill").font(.system(size: 30)).foregroundStyle(Color.onAccent)
+                    Image(systemName: "speaker.wave.2").font(.system(size: 30, weight: .semibold)).foregroundStyle(Color.onAccent)
                         .frame(width: 84, height: 84).background(Color.accent, in: Circle())
                 }
-                .buttonStyle(PressDown(depth: 2))
+                .buttonStyle(PressDown(depth: 4))
+                .background(Circle().fill(Color.accentDark).offset(y: 4))
+                .padding(.bottom, 4)
                 Button { Speech.shared.speak(c.word.hanzi, slow: true) } label: {
-                    Text("½×").font(.nunitoXB(17)).foregroundStyle(Color.accent)
-                        .frame(width: 52, height: 52).background(Color.accentSoft, in: Circle())
+                    Text("½×").font(.nunitoXB(15)).foregroundStyle(Color.ink)
+                        .frame(width: 50, height: 50)
+                        .background(Color.panel, in: Circle())
+                        .overlay(Circle().strokeBorder(Color.line, lineWidth: 1.5))
                 }
                 .buttonStyle(.plain)
             }
@@ -255,22 +259,36 @@ struct TonesPrimer: View {
                        ("3rd tone", "dips down low, then rises", "mǎ", "马", "horse"),
                        ("4th tone", "sharp and falling, like a command", "mà", "骂", "to scold")]
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Mandarin has four tones, plus a light neutral one. The same syllable in a different tone is a different word.")
-                .font(.nunito(14.5)).foregroundStyle(Color.muted)
-            ForEach(Array(Self.demo.enumerated()), id: \.offset) { i, t in
+        VStack(alignment: .leading, spacing: 0) {
+            (Text("Mandarin is ") + Text("tonal").bold()
+             + Text(": the same syllable said with a different pitch is a different word. The mark over the vowel tells you the tone — it matters as much as the letters. Tap the speaker to hear each."))
+                .font(.nunito(15)).foregroundStyle(Color.ink).lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.bottom, 10)
+            ForEach(Array(Self.demo.enumerated()), id: \.offset) { _, t in
                 HStack(spacing: 12) {
-                    Text(t.2).font(.nunitoXB(20)).foregroundStyle(Color.tones[i])
-                        .frame(width: 58, height: 46).background(Color.tones[i].opacity(0.14), in: RoundedRectangle(cornerRadius: 12))
-                    VStack(alignment: .leading, spacing: 1) {
+                    Text(t.2).font(.nunitoXB(24)).foregroundStyle(Color.accent)
+                        .frame(width: 44, alignment: .center)
+                    VStack(alignment: .leading, spacing: 2) {
                         (Text(t.0).bold() + Text(" — \(t.3) \(t.4)")).font(.nunito(15)).foregroundStyle(Color.ink)
                         Text(t.1).font(.nunito(13)).foregroundStyle(Color.muted)
                     }
                     Spacer(minLength: 0)
                     SpeakerButton(text: t.3)
                 }
+                .frame(minHeight: 60)
+                .overlay(alignment: .bottom) { Rectangle().fill(Color.line).frame(height: 1) }
             }
-            Text("The neutral tone is short and light, like the 吗 in 你好吗.").font(.nunito(13.5)).foregroundStyle(Color.muted)
+            (Text("Neutral tone").bold() + Text(" — no mark, said light and quick: ")
+             + Text("ma").bold() + Text(" 吗 (turns a sentence into a question)."))
+                .font(.nunito(15)).foregroundStyle(Color.ink).lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 14)
+            (Text("Same letters, different tone = different meaning: ") + Text("mǎi").bold() + Text(" 买 (buy) vs ")
+             + Text("mài").bold() + Text(" 卖 (sell)."))
+                .font(.nunito(13)).foregroundStyle(Color.muted).lineSpacing(2)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 12)
         }
     }
 }

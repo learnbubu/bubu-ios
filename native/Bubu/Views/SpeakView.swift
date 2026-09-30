@@ -31,8 +31,14 @@ struct SpeakView: View {
     @State private var blockedBySettings = false
     @State private var skipped = false
     @Environment(\.openURL) private var openURL
+    /// The height the exercise has in the card's scroll area, under the title: the content is
+    /// centred in it.
+    @State private var room: CGFloat = 0
     /// Retries allowed after the first go before it counts as wrong.
     static let maxRetries = 2
+    /// What StudyView puts above the exercise in the same scroll area: the title line and
+    /// its padding, and the scroll view's own top and bottom padding.
+    static let titleRoom: CGFloat = 76
 
     var body: some View {
         let w = ex.card.word
@@ -53,8 +59,10 @@ struct SpeakView: View {
                 blockedBox(blocked)
             } else {
                 if outcome != .pass && outcome != .fail && !skipped {
+                    // the JIC edition's "Tap and say it": a centred capsule, not a full-width slab
                     Button { tapMic() } label: { micLabel }
-                        .buttonStyle(ChunkyButton(face: Color.accent, base: Color.accentDark))
+                        .buttonStyle(ChunkyButton(face: Color.accent, base: Color.accentDark, depth: 3, height: 50,
+                                                  capsule: true, minWidth: 169))
                         .disabled(answered)
                         .accessibilityLabel(micName)
                         .padding(.top, 12)
@@ -66,20 +74,40 @@ struct SpeakView: View {
                     banner(outcome).transition(.move(edge: .bottom).combined(with: .opacity))
                 }
                 if !answered {
-                    Button("Can't speak now") {
+                    // a small bordered pill, as the JIC edition's
+                    Button {
                         guard !answered else { return }
                         recognizer.end()
                         note = "No problem — we'll come back to \(w.hanzi) (\(w.pinyin)) later."
                         skipped = true
                         skip()
+                    } label: {
+                        Text("Can't speak now")
+                            .font(.nunito(12.5, .bold)).foregroundStyle(Color.muted)
+                            .padding(.horizontal, 14).padding(.vertical, 6)
+                            .overlay(Capsule().strokeBorder(Color.line, lineWidth: 1))
+                            .contentShape(Capsule())
                     }
-                    .font(.nunito(14, .bold)).foregroundStyle(Color.muted)
                     .buttonStyle(.plain)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 10)
                 }
             }
         }
         .frame(maxWidth: .infinity)
+        // as the JIC edition: the panda and the bubble sit in the middle of the card when
+        // there's room; taller than the room (a banner, a long phrase), it scrolls as before
+        .frame(minHeight: room, alignment: .center)
+        .background {
+            Color.clear
+                .containerRelativeFrame(.vertical) { h, _ in max(0, h - Self.titleRoom) }
+                .background(GeometryReader { g in
+                    Color.clear
+                        .onAppear { room = g.size.height }
+                        .onChange(of: g.size.height) { _, h in room = h }
+                })
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: outcome)
         .onAppear {
             checkAvailable()
@@ -114,10 +142,10 @@ struct SpeakView: View {
                 Waveform(level: level)
                 Text("Listening…")
             }
-            .font(.nunitoXB(17.6)).foregroundStyle(Color.onAccent)
+            .font(.nunitoXB(16)).foregroundStyle(Color.onAccent)
         } else {
             Label(micName, systemImage: "mic.fill")
-                .font(.nunitoXB(17.6)).foregroundStyle(Color.onAccent)
+                .font(.nunitoXB(16)).foregroundStyle(Color.onAccent)
         }
     }
 
@@ -257,31 +285,32 @@ struct SpeakView: View {
     }
 }
 
-/// A wide, chunky button: the face sits on a darker base, both drawn together at the
-/// same size, and the face sinks onto the base while pressed.
+/// A chunky button: the face sits on a darker base, both drawn together at the same size,
+/// and the face sinks onto the base while pressed. Full width, or with `capsule` a centred
+/// capsule as wide as its label (at least `minWidth`), as the JIC edition's.
 struct ChunkyButton: ButtonStyle {
     var face: Color
     var base: Color
     var depth: CGFloat = 4
     var height: CGFloat = 58
+    var capsule = false
+    var minWidth: CGFloat = 0
 
     func makeBody(configuration: Configuration) -> some View {
         let down = configuration.isPressed
-        return ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: 16, style: .continuous).fill(base)
-                .frame(height: height)
-                .offset(y: depth)
-            configuration.label
-                .frame(maxWidth: .infinity)
-                .frame(height: height)
-                .background(face, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .offset(y: down ? depth : 0)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.bottom, depth)
-        .contentShape(Rectangle())
-        .animation(.spring(response: 0.18, dampingFraction: 0.7), value: down)
-        .sensoryFeedback(.impact(weight: .light), trigger: down)
+        let shape = RoundedRectangle(cornerRadius: capsule ? height / 2 : 16, style: .continuous)
+        return configuration.label
+            .padding(.horizontal, capsule ? 26 : 0)
+            .frame(minWidth: capsule ? minWidth : nil, maxWidth: capsule ? nil : CGFloat.infinity)
+            .frame(height: height)
+            .background(face, in: shape)
+            .offset(y: down ? depth : 0)
+            .background(shape.fill(base).offset(y: depth))
+            .frame(maxWidth: capsule ? nil : CGFloat.infinity)
+            .padding(.bottom, depth)
+            .contentShape(Rectangle())
+            .animation(.spring(response: 0.18, dampingFraction: 0.7), value: down)
+            .sensoryFeedback(.impact(weight: .light), trigger: down)
     }
 }
 

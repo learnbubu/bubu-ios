@@ -46,11 +46,19 @@ struct StudyView: View {
                 VStack(spacing: 0) {
                     topBar
                     VStack(spacing: 0) {
-                        ScrollView {
-                            content.padding(.horizontal, 12).padding(.top, 15).padding(.bottom, 12)
+                        ScrollViewReader { reader in
+                            ScrollView {
+                                content.padding(.horizontal, 12).padding(.top, 15).padding(.bottom, 12)
+                                Color.clear.frame(height: 1).id("exercise-end")
+                            }
+                            .scrollIndicators(.hidden)
+                            .scrollBounceBehavior(.basedOnSize)
+                            // the feedback takes room from the exercise: keep the answers in view
+                            .onChange(of: feedback != nil) { _, shown in
+                                guard shown else { return }
+                                withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("exercise-end", anchor: .bottom) }
+                            }
                         }
-                        .scrollIndicators(.hidden)
-                        .scrollBounceBehavior(.basedOnSize)
                         if !preStart, case .card = session.current { bottomSlot }
                     }
                     .frame(maxHeight: .infinity)
@@ -175,7 +183,7 @@ struct StudyView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Close")
-                ProgressBarShine(value: session.progressFraction, height: 12)
+                ProgressBarShine(value: session.progressFraction, height: 8)
                 // buns in a lesson, and in a review while they're being earned back
                 if session.onBuns || (session.earnsBuns && progress.buns < ProgressStore.bunsMax) {
                     BunRow(n: progress.isPlus ? ProgressStore.bunsMax : progress.bunState.n, plus: progress.isPlus, bump: session.bunsEarned)
@@ -280,16 +288,13 @@ struct StudyView: View {
         let isChoice = ex?.kind == .choice
         let checks = (isSentence || isChoice) && !session.answered
         let ready = session.answered || (isSentence && !placed.isEmpty) || (isChoice && pick.canCheck)
-        let fill = !ready ? Color.line : feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent
-        let ink = !ready ? Color.muted.opacity(0.45) : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
-        return ZStack(alignment: .bottom) {
-            // a short slot, so four options fit a phone; the feedback rises over them
-            Color.clear.frame(height: 84)
+        let fill = !ready ? Color.accent.opacity(0.38) : feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent
+        let ink = !ready ? Color.onAccent.opacity(0.7) : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
+        return VStack(spacing: 10) {
+            // the feedback sits above the button and pushes the exercise up (it scrolls), so it
+            // never covers an answer: the right and wrong rows stay in view
             if let fb = feedback, let ex, ex.kind != .speak, ex.kind != .write {
                 FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text), wheels: wheels)
-                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
-                        .shadow(color: Color.panel, radius: 12, y: -10))
-                    .padding(.bottom, 79)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             Button {
@@ -297,13 +302,14 @@ struct StudyView: View {
             } label: {
                 Text(checks ? "Check" : session.isQuiz ? "Next →" : "Continue")
                     .font(.nunitoXB(16.8)).foregroundStyle(ink)
-                    .frame(maxWidth: .infinity).padding(14)
-                    .background(fill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .frame(maxWidth: .infinity).padding(15)
+                    .background(fill, in: Capsule())
             }
             .buttonStyle(PressDown(depth: 1))
             .disabled(!ready)
             .padding(.bottom, 14)
         }
+        .frame(minHeight: 84, alignment: .bottom)
         .padding(.horizontal, 12)
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: feedback != nil)
     }
@@ -425,6 +431,9 @@ struct MascotPrompt<Content: View>: View {
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)
             SpeechBubbleBox(sentence: sentence) { content }
+                .frame(maxWidth: sentence ? .infinity : 200)
+                .padding(.trailing, sentence ? 0 : 10)
+            Spacer(minLength: 0)
         }
         .frame(minHeight: long ? 80 : 140)
         .onChange(of: mood) { _, new in
@@ -443,8 +452,8 @@ struct SpeechBubbleBox<Content: View>: View {
         VStack(spacing: 6) { content }
             .padding(.leading, sentence ? 10 : 13).padding(.trailing, sentence ? 14 : 13).padding(.vertical, 12)
             .frame(maxWidth: .infinity)
-            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.panel))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.line, lineWidth: 2))
+            .background(RoundedRectangle(cornerRadius: 15, style: .continuous).fill(Color.panel))
+            .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).strokeBorder(Color.line, lineWidth: 2))
             .overlay(alignment: .leading) {
                 Rectangle().fill(Color.panel).frame(width: 14, height: 14)
                     .overlay(alignment: .bottomLeading) {
@@ -465,14 +474,14 @@ struct SpeakerButton: View {
     var body: some View {
         HStack(spacing: 2) {
             Button { Speech.shared.speak(text) } label: {
-                Image(systemName: "speaker.wave.2.fill").font(.system(size: size)).foregroundStyle(Color.accent)
+                Image(systemName: "speaker.wave.2").font(.system(size: size, weight: .medium)).foregroundStyle(Color.accent)
                     .padding(4)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Play")
             if withSlow {
                 Button { Speech.shared.speak(text, slow: true) } label: {
-                    Image(systemName: "tortoise.fill").font(.system(size: size * 0.9)).foregroundStyle(Color.accent)
+                    Image(systemName: "tortoise").font(.system(size: size * 0.9, weight: .medium)).foregroundStyle(Color.accent)
                         .padding(4)
                 }
                 .buttonStyle(.plain)
@@ -713,7 +722,7 @@ struct ChoiceView: View {
     var body: some View {
         let w = ex.card.word
         let isNew = ex.isNew
-        let big: CGFloat = w.hanzi.count > 3 ? 28.8 : 38.4
+        let big: CGFloat = w.hanzi.count > 3 ? 32 : 44
         VStack(spacing: 0) {
             MascotPrompt(mood: answered && !skipped ? (picked == ex.answer) : nil) {
                 if isNew { NewBadge() }
@@ -728,32 +737,20 @@ struct ChoiceView: View {
                                     .frame(height: 2).offset(y: 3)
                             }
                     }
-                    SpeakerButton(text: w.hanzi, withSlow: true)
+                    SpeakerButton(text: w.hanzi, size: 15, withSlow: true)
                 case "pinyin":
                     Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(isNew ? Color.newInk : Color.ink)
                     Text(w.gloss).font(.nunito(16)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 case "listen":
                     Button { Speech.shared.speak(w.hanzi) } label: {
-                        Image(systemName: "headphones").font(.system(size: 54, weight: .light)).foregroundStyle(Color.accent)
+                        Image(systemName: "headphones").font(.system(size: 46, weight: .ultraLight)).foregroundStyle(Color.accent)
                             .padding(6)
                     }
                     .buttonStyle(PressDown(depth: 1))
-                    SpeakerButton(text: w.hanzi, withSlow: true)
+                    SpeakerButton(text: w.hanzi, size: 15, withSlow: true)
                 default:
-                    // the word with its pinyin above it while it's new; once it's strong the
-                    // pinyin's place stays, and a tap on the word (or the eye) shows it
+                    // the word; its pinyin is under the bubble (as JIC had it)
                     VStack(spacing: 2) {
-                        ZStack {
-                            PinyinText(pinyin: w.pinyin, size: 21).opacity(pinyinShown || peek ? 1 : 0)
-                            if !(pinyinShown || peek) {
-                                Button { reveal() } label: {
-                                    Image(systemName: "eye").font(.system(size: 13, weight: .semibold))
-                                        .foregroundStyle(Color.muted.opacity(0.7)).padding(4)
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("Show pinyin")
-                            }
-                        }
                         if isNew {
                             HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { reveal() }) {
                                 Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(Color.newInk)
@@ -766,17 +763,33 @@ struct ChoiceView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    SpeakerButton(text: w.hanzi, withSlow: true)
+                    SpeakerButton(text: w.hanzi, size: 15, withSlow: true)
                 }
+            }
+            // the word's pinyin, big and tone-coloured under the bubble while it's new; once it's
+            // strong its place stays, and a tap on the word (or the eye) shows it
+            if !["recall", "pinyin", "listen"].contains(ex.dir) {
+                ZStack {
+                    PinyinText(pinyin: w.pinyin, size: 22).opacity(pinyinShown || peek ? 1 : 0)
+                    if !(pinyinShown || peek) {
+                        Button { reveal() } label: {
+                            Image(systemName: "eye").font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Color.muted.opacity(0.7)).padding(4)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Show pinyin")
+                    }
+                }
+                .frame(maxWidth: .infinity).padding(.top, 10)
             }
             if ex.dir == "pinyin" && Coach.showTonesLink {
                 Button("What are tones?") { Coach.tonesLinkTapped(); tonesOpen = true }
                     .font(.nunito(14, .bold)).foregroundStyle(Color.accent).padding(.top, 8)
             }
-            VStack(spacing: 8) {
+            VStack(spacing: 9) {
                 ForEach(ex.options, id: \.self) { opt in option(opt) }
             }
-            .padding(.top, 8)
+            .padding(.top, 18)
             if ex.dir == "listen", let skip {
                 // its place is kept once the exercise is answered, so nothing moves
                 ZStack {
@@ -828,19 +841,19 @@ struct ChoiceView: View {
         return Button { choose(opt) } label: {
             Group {
                 if ex.dir == "recall" {
-                    VStack(spacing: 2) {
+                    VStack(spacing: 1) {
+                        Text(opt).font(.hanzi(20, .bold)).foregroundStyle(Color.ink)
                         if pinyinShown, let py = Course.wordPy[opt] {
-                            Text(py).font(.nunito(13.1)).foregroundStyle(Color.muted)
+                            PinyinText(pinyin: py, size: 13.5, weight: .bold)
                         }
-                        Text(opt).font(.hanzi(18.4, .semibold)).foregroundStyle(Color.ink)
                     }
                 } else {
-                    Text(opt).font(.nunito(18.4, .bold))
+                    Text(opt).font(.nunito(18.4, .black))
                         .foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 14).padding(.vertical, 11)
+            .padding(.horizontal, 14).padding(.vertical, ex.dir == "recall" ? 10 : 13.5)
             .background(fill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .strokeBorder(edge, lineWidth: selected ? 2 : 1))
@@ -970,9 +983,9 @@ struct FeedbackBanner: View {
             }
             Text(d.note).font(.nunito(13.4)).foregroundStyle(Color.ink).fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.horizontal, 11).padding(.vertical, 9)
+        .padding(.horizontal, 10).padding(.vertical, 7)
         .background(Color.panel, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .padding(.top, 8)
+        .padding(.top, 6)
     }
 
     private func cell(_ hanzi: String, mark: String, en: String, good: Bool) -> some View {
@@ -984,10 +997,10 @@ struct FeedbackBanner: View {
             s += a
         }
         return VStack(spacing: 2) {
-            Text(s).font(.hanzi(27, .bold))
-            Text(en).font(.nunito(11.8, .bold)).foregroundStyle(Color.muted).lineLimit(1)
+            Text(s).font(.hanzi(22, .bold))
+            Text(en).font(.nunito(11.5, .bold)).foregroundStyle(Color.muted).lineLimit(1)
         }
-        .frame(maxWidth: .infinity).padding(.vertical, 6).padding(.horizontal, 4)
+        .frame(maxWidth: .infinity).padding(.vertical, 4).padding(.horizontal, 4)
         .background(Color.bg, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
@@ -1034,7 +1047,7 @@ struct SentenceView: View {
         let anyNew = sent.words.contains { isNew($0.hanzi) }
         VStack(spacing: 16) {
             MascotPrompt(mood: result, sentence: !ex.toChinese,
-                         long: ex.toChinese ? sent.en.count > 48 : sent.words.map(\.hanzi).joined().count > 10) {
+                         long: ex.toChinese ? sent.en.count > 60 : sent.words.map(\.hanzi).joined().count > 14) {
                 if ex.toChinese {
                     if anyNew { NewBadge() }
                     FlowLayout(spacing: 4, lineSpacing: 4, center: true) {
@@ -1049,24 +1062,27 @@ struct SentenceView: View {
                         }
                     }
                 } else {
-                    FlowLayout(spacing: 2, lineSpacing: 4) {
-                        if anyNew { NewBadge() }
-                        SpeakerButton(text: sent.hanzi, size: 21.6, withSlow: true)
-                        ForEach(Array(sent.words.enumerated()), id: \.offset) { i, w in
-                            let new = isNew(w.hanzi)
-                            HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { _ = peeked.insert(i) }) {
-                            VStack(spacing: 1) {
-                                Text(w.pinyin).font(.nunito(12.5)).foregroundStyle(new ? Color.newInk : Color.muted)
-                                    .opacity(wheels.shows(hanzi: w.hanzi) || pinyinOpen || peeked.contains(i) ? 1 : 0)
-                                Text(w.hanzi).font(.hanzi(24.8)).foregroundStyle(new ? Color.newInk : Color.ink)
-                                    .padding(.bottom, 2)
-                                    .background(new ? Color.newBg : .clear)
-                                    .overlay(alignment: .bottom) {
-                                        Line().stroke(new ? Color.newInk : Color.muted, style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2)
-                                    }
+                    // as JIC had it: the NEW WORD tag on top, the speaker at the sentence's left, and
+                    // each word with its tone-coloured pinyin over it
+                    if anyNew { NewBadge() }
+                    HStack(alignment: .center, spacing: 4) {
+                        SpeakerButton(text: sent.hanzi, size: 15, withSlow: true)
+                        FlowLayout(spacing: 2, lineSpacing: 4) {
+                            ForEach(Array(sent.words.enumerated()), id: \.offset) { i, w in
+                                let new = isNew(w.hanzi)
+                                HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { _ = peeked.insert(i) }) {
+                                VStack(spacing: 1) {
+                                    PinyinText(pinyin: w.pinyin, size: 12.5, weight: .semibold)
+                                        .opacity(wheels.shows(hanzi: w.hanzi) || pinyinOpen || peeked.contains(i) ? 1 : 0)
+                                    Text(w.hanzi).font(.hanzi(24.8)).foregroundStyle(new ? Color.newInk : Color.ink)
+                                        .padding(.bottom, 2)
+                                        .overlay(alignment: .bottom) {
+                                            Line().stroke(new ? Color.newInk : Color.muted, style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2)
+                                        }
+                                }
+                                }
+                                .padding(.horizontal, 3)
                             }
-                            }
-                            .padding(.horizontal, 3)
                         }
                     }
                     .contentShape(Rectangle())
