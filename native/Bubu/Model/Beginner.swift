@@ -102,7 +102,8 @@ enum Autoplay {
     /// As the exercise appears: its Chinese prompt. Nothing where hearing it would be the
     /// answer: recall (English → Chinese) and building the Chinese (the sound is the answer),
     /// "Which pinyin?" (the tones are). Listening always plays, since the sound is the question;
-    /// the rest only with "Play audio automatically" on. Speaking and writing have their own.
+    /// the rest only with "Play audio automatically" on, writing too (hearing a word doesn't
+    /// say how to write it). Speaking has its own.
     static func onShow(_ ex: Exercise, autoplay: Bool) -> String? {
         if ex.kind == .choice {
             if ex.dir == "listen" { return ex.card.word.hanzi }
@@ -110,6 +111,7 @@ enum Autoplay {
             return nil
         }
         if ex.kind == .sentence, autoplay, !ex.toChinese, let s = ex.sentence { return s.hanzi }
+        if ex.kind == .write, autoplay { return ex.card.word.hanzi }
         return nil
     }
 

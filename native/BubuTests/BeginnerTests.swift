@@ -149,6 +149,10 @@ final class BeginnerTests: XCTestCase {
         XCTAssertEqual(Autoplay.onShow(translate, autoplay: true), s.hanzi)
         XCTAssertNil(Autoplay.onShow(translate, autoplay: false))
         XCTAssertNil(Autoplay.onAnswer(translate, autoplay: true))                            // heard once already
+        let write = Exercise(kind: .write, dir: "write", card: c)
+        XCTAssertEqual(Autoplay.onShow(write, autoplay: true), c.word.hanzi)                  // the word read out first
+        XCTAssertNil(Autoplay.onShow(write, autoplay: false))
+        XCTAssertNil(Autoplay.onAnswer(write, autoplay: true))
         let speak = Exercise(kind: .speak, dir: "speak", card: c)
         XCTAssertNil(Autoplay.onShow(speak, autoplay: true))
         XCTAssertNil(Autoplay.onAnswer(speak, autoplay: true))
