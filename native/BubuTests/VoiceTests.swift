@@ -27,7 +27,7 @@ final class VoiceTests: XCTestCase {
     }
 
     func testChapterOneDialogueLinesAreSpokenByWhoeverSaysThem() {
-        let lines = Course.shared.dialogues.filter { $0.lesson.hasPrefix("起步1 U1") }.flatMap(\.turns)
+        let lines = Course.shared.data.dialogues.filter { $0.lesson.hasPrefix("起步1 U1") }.flatMap { $0.turns }
         XCTAssertTrue(lines.allSatisfy { $0.name != nil }, "every line knows who says it")
         let duoduo = lines.first { $0.name == "朵朵" }
         XCTAssertNotNil(duoduo, "朵朵 speaks in chapter 1")
