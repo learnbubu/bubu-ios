@@ -174,7 +174,7 @@ struct StudyView: View {
     private func playPrompt() {
         guard let ex = session.exercise, !session.answered else { return }
         Speech.shared.autoSpeak(Autoplay.onShow(ex, autoplay: progress.prefs.playsAutomatically),
-                                always: ex.dir == "listen")
+                                always: ex.dir == "listen" || ex.hearOnly)
     }
 
     /// The right Chinese, said once as the feedback comes up (after the right/wrong chime).
@@ -268,7 +268,8 @@ struct StudyView: View {
                 case .card:
                     if let ex = session.exercise {
                         if ex.kind == .sentence {
-                            SentenceView(ex: ex, placed: $placed, result: feedback?.correct, wheels: wheels)
+                            SentenceView(ex: ex, placed: $placed, result: feedback?.correct, wheels: wheels,
+                                         skipped: skipped, skip: { cantListen() })
                         } else if ex.kind == .write {
                             WriteView(ex: ex, answered: session.answered) { settle(true) }
                         } else if ex.kind == .speak {
@@ -365,10 +366,10 @@ struct StudyView: View {
     /// "Can't listen now": the exercise is skipped with no penalty, and there's no more
     /// listening this session (see StudySession.skip).
     private func cantListen() {
-        guard !session.answered, session.exercise?.dir == "listen" else { return }
+        guard !session.answered, ["listen", "hear"].contains(session.exercise?.dir ?? "") else { return }
         Speech.shared.stop()
         session.skip()
-        pick = ChoicePick()
+        pick = ChoicePick(); placed = []
         withAnimation { skipped = true }
     }
 
@@ -755,9 +756,12 @@ struct ChoiceView: View {
         let isNew = ex.isNew
         let big: CGFloat = w.hanzi.count > 3 ? 32 : 44
         VStack(spacing: 0) {
-            MascotPrompt(mood: answered && !skipped ? (picked == ex.answer) : nil) {
+            MascotPrompt(mood: answered && !skipped ? (picked == ex.answer) : nil, sentence: ex.dir == "gap",
+                         long: ex.dir == "gap" && (ex.sentence?.words.map(\.hanzi).joined().count ?? 0) > 9) {
                 if isNew { NewBadge() }
                 switch ex.dir {
+                case "gap":
+                    if let sent = ex.sentence { gapPrompt(sent) }
                 case "recall":
                     // the English can always be tapped for its characters and pinyin
                     HintChip(hanzi: w.hanzi, pinyin: w.pinyin, reverse: true) {
@@ -800,7 +804,7 @@ struct ChoiceView: View {
             }
             // the word's pinyin, big and tone-coloured under the bubble while it's new; once it's
             // strong its place stays, and a tap on the word (or the eye) shows it
-            if !["recall", "pinyin", "listen"].contains(ex.dir) {
+            if !["recall", "pinyin", "listen", "gap"].contains(ex.dir) {
                 ZStack {
                     PinyinText(pinyin: w.pinyin, size: 22).opacity(pinyinShown || peek ? 1 : 0)
                     if !(pinyinShown || peek) {
@@ -862,6 +866,34 @@ struct ChoiceView: View {
         withAnimation(.easeOut(duration: 0.15)) { peek = true }
     }
 
+    /// Fill the gap: the sentence with the word's place left empty (the word goes in, green,
+    /// once it's answered), and what the whole sentence means under it.
+    @ViewBuilder
+    private func gapPrompt(_ sent: Sentence) -> some View {
+        let filled = answered && !skipped
+        FlowLayout(spacing: 2, lineSpacing: 4, center: true) {
+            ForEach(Array(sent.words.enumerated()), id: \.offset) { _, word in
+                let gap = word.hanzi == ex.answer
+                VStack(spacing: 1) {
+                    PinyinText(pinyin: word.pinyin, size: 12.5, weight: .semibold)
+                        .opacity(gap ? (filled ? 1 : 0) : wheels.shows(hanzi: word.hanzi) || peek ? 1 : 0)
+                    Text(word.hanzi).font(.hanzi(24.8)).foregroundStyle(gap ? Color.good : Color.ink)
+                        .opacity(gap && !filled ? 0 : 1)
+                        .padding(.bottom, 2)
+                        .overlay(alignment: .bottom) {
+                            Rectangle().fill(gap ? (filled ? Color.good : Color.accent) : Color.clear).frame(height: 2)
+                        }
+                }
+                .frame(minWidth: gap ? 46 : nil)
+                .padding(.horizontal, 3)
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { reveal() }
+        Text(sent.en).font(.nunito(14.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+            .lineLimit(3).minimumScaleFactor(0.85).fixedSize(horizontal: false, vertical: true)
+    }
+
     private func option(_ opt: String) -> some View {
         let isAnswer = opt == ex.answer
         // right and wrong show once it's answered (not when it was skipped)
@@ -872,7 +904,7 @@ struct ChoiceView: View {
         let edge: Color = state == true ? Color.good : state == false ? Color.again : selected ? Color.accent : Color.line
         return Button { choose(opt) } label: {
             Group {
-                if ex.dir == "recall" {
+                if ex.dir == "recall" || ex.dir == "gap" {
                     VStack(spacing: 1) {
                         Text(opt).font(.hanzi(20, .bold)).foregroundStyle(Color.ink)
                         if pinyinShown, let py = Course.wordPy[opt] {
@@ -887,7 +919,7 @@ struct ChoiceView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 14).padding(.vertical, ex.dir == "recall" ? 10 : 13.5)
+            .padding(.horizontal, 14).padding(.vertical, ex.dir == "recall" || ex.dir == "gap" ? 10 : 13.5)
             .background(fill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .strokeBorder(edge, lineWidth: selected ? 2 : 1))
@@ -921,7 +953,7 @@ struct FeedbackBanner: View {
         let tint = correct ? Color.good : Color.again
         let lookalike: Card? = {
             guard !correct, let chosen else { return nil }
-            let c = ex.dir == "recall" ? course.cards.first { $0.word.hanzi == chosen }
+            let c = ex.dir == "recall" || ex.dir == "gap" ? course.cards.first { $0.word.hanzi == chosen }
                 : ex.dir == "recognize" || ex.dir == "listen" ? course.cards.first { $0.word.gloss == chosen } : nil
             guard let c, CharData.shared.wordSim(w.hanzi, c.word.hanzi) >= 1.5 else { return nil }
             return c
@@ -1031,6 +1063,8 @@ struct FeedbackBanner: View {
             Text(ex.toChinese ? sent.hanzi : sent.en).font(ex.toChinese ? .hanzi(17.6) : .nunito(17.6)).foregroundStyle(Color.ink).padding(.top, 4)
             if ex.toChinese { Text(sent.pinyin).font(.nunito(14.4)).foregroundStyle(Color.gold).padding(.top, 2) }
         }
+        // what was heard means this (it was never on the screen)
+        if ex.hearOnly { Text(sent.en).font(.nunito(14.4)).foregroundStyle(Color.ink).padding(.top, 2) }
         // the other orders that would also have been right
         let others = !ex.toChinese ? [] : correct ? orders.filter { $0 != placed } : Array(orders.dropFirst())
         if !others.isEmpty {
@@ -1081,6 +1115,10 @@ struct SentenceView: View {
     let result: Bool?
     /// pinyin training wheels: over each word while it's new, a tap away once it's strong
     var wheels = Wheels()
+    /// "Can't listen now" was tapped (tap what you hear): the exercise is over, nothing shown
+    var skipped = false
+    /// "Can't listen now", under "tap what you hear" (nil: no such button)
+    var skip: (() -> Void)? = nil
     @Environment(ProgressStore.self) private var progress
     @State private var pinyinOpen = false
     /// the words whose hidden pinyin has been shown with a tap
@@ -1115,8 +1153,16 @@ struct SentenceView: View {
         let anyNew = sent.words.contains { isNew($0.hanzi) }
         VStack(spacing: 16) {
             MascotPrompt(mood: result, sentence: !ex.toChinese,
-                         long: ex.toChinese ? sent.en.count > 60 : sent.words.map(\.hanzi).joined().count > 14) {
-                if ex.toChinese {
+                         long: ex.hearOnly ? false : ex.toChinese ? sent.en.count > 60 : sent.words.map(\.hanzi).joined().count > 14) {
+                if ex.hearOnly {
+                    // tap what you hear: only the sound, again at a tap, and slowly
+                    Button { Speech.shared.speak(sent.hanzi) } label: {
+                        Image(systemName: "headphones").font(.system(size: 46, weight: .ultraLight)).foregroundStyle(Color.accent)
+                            .padding(6)
+                    }
+                    .buttonStyle(PressDown(depth: 1))
+                    SpeakerButton(text: sent.hanzi, size: 15, withSlow: true)
+                } else if ex.toChinese {
                     if anyNew { NewBadge() }
                     FlowLayout(spacing: 4, lineSpacing: 4, center: true) {
                         ForEach(Array(Hints.english(sent.en, sent.words).enumerated()), id: \.offset) { _, t in
@@ -1156,9 +1202,26 @@ struct SentenceView: View {
                     .onTapGesture { withAnimation { pinyinOpen.toggle() } }
                 }
             }
-            if !HintTip.used { Text("Tap a word for its meaning, or hold a tile").font(.nunito(12.5)).foregroundStyle(Color.muted) }
-            answerArea
-            bank
+            if !HintTip.used && !ex.hearOnly { Text("Tap a word for its meaning, or hold a tile").font(.nunito(12.5)).foregroundStyle(Color.muted) }
+            answerArea.allowsHitTesting(!skipped)
+            bank.allowsHitTesting(!skipped)
+            if ex.hearOnly, let skip {
+                // its place is kept once the exercise is answered, so nothing moves
+                ZStack {
+                    if skipped {
+                        Text("No problem — no more listening this session.")
+                            .font(.nunito(14, .semibold)).foregroundStyle(Color.muted)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        Button("Can't listen now") { skip() }
+                            .font(.nunito(14, .bold)).foregroundStyle(Color.muted)
+                            .buttonStyle(.plain)
+                            .opacity(result != nil ? 0 : 1)
+                            .disabled(result != nil)
+                    }
+                }
+                .frame(maxWidth: .infinity, minHeight: 20)
+            }
         }
         .coordinateSpace(.named("sentence"))
         .onPreferenceChange(TileFrames.self) { frames = $0 }

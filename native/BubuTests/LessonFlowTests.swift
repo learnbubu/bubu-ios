@@ -47,6 +47,140 @@ final class LessonFlowTests: XCTestCase {
         }
     }
 
+    // MARK: the stones' practice sentences (Duolingo's shape)
+
+    /// Each stone of the first book has sentences of its own, made only of words taught by then
+    /// (names aside), so a lesson is sentences from its second stone on, not one word from four.
+    func testEveryDrillReadsWithTheWordsTaughtByItsStone() throws {
+        let drills = try XCTUnwrap(course.data.drills)
+        XCTAssertGreaterThanOrEqual(drills.count, 170)
+        let order = course.lessonOrder
+        for d in drills {
+            let at = try XCTUnwrap(order[d.lesson], d.lesson)
+            guard let words = Sentence.segment(hanzi: d.hanzi, pinyin: d.pinyin) else { continue }   // one word: 你好！
+            let taught: (String) -> Bool = { id in
+                self.course.cards.first { $0.id == id }.map { (order[$0.lessonId] ?? .max) <= at } ?? false
+            }
+            let s = Sentence(hanzi: d.hanzi, pinyin: d.pinyin, en: d.en, words: words)
+            for c in course.cards(in: d.lesson) where d.hanzi.contains(c.word.hanzi) {
+                XCTAssertEqual(course.unmetWords(in: s, for: c, met: taught), [], d.hanzi)
+            }
+            XCTAssertTrue(course.sentences.contains { $0.hanzi == d.hanzi }, d.hanzi)
+        }
+    }
+
+    /// Fill the gap: the word is left out of a sentence it stands in, and chosen from four
+    /// words (never a whole sentence among them).
+    func testAGapLeavesOutTheWordAndOffersFourWords() throws {
+        let shi = card("是")
+        let met: (String) -> Bool = { _ in true }
+        XCTAssertFalse(course.gapSentences(for: shi, met: met).isEmpty)
+        for _ in 0..<20 {
+            let ex = try XCTUnwrap(Exercise.make(card: shi, dir: "gap", scope: [shi.lessonId], progress: store(), met: met))
+            XCTAssertEqual(ex.kind, .choice)
+            XCTAssertEqual(ex.dir, "gap")
+            XCTAssertEqual(ex.answer, "是")
+            XCTAssertEqual(ex.options.count, 4)
+            XCTAssertEqual(Set(ex.options).count, 4)
+            XCTAssertTrue(ex.options.contains("是"))
+            let sent = try XCTUnwrap(ex.sentence)
+            XCTAssertEqual(sent.words.filter { $0.hanzi == "是" }.count, 1, sent.hanzi)
+            for o in ex.options where o != "是" {
+                XCTAssertFalse(sent.words.contains { $0.hanzi == o }, "\(o) is in \(sent.hanzi)")
+                XCTAssertFalse(card(o).isSentence, o)
+            }
+            XCTAssertEqual(ex.label, "Fill the gap")
+            XCTAssertEqual(ChoicePick().verdict(ex), nil)
+        }
+        // a word that only stands inside another (你 in 你好，马克！) has no gap to fill
+        let hello = Sentence(hanzi: "你好，马克！", pinyin: "nǐhǎo, Mǎkè!", en: "Hello, Mark!",
+                             words: [.init(hanzi: "你好", pinyin: "nǐhǎo"), .init(hanzi: "马克", pinyin: "Mǎkè")])
+        XCTAssertEqual(hello.words.filter { $0.hanzi == "你" }.count, 0)
+        XCTAssertNil(Exercise.make(card: card("你"), dir: "gap", scope: [], progress: store(), met: { _ in false }))
+    }
+
+    /// A stone's own practice sentence is asked before a dialogue's line.
+    func testPracticeSentencesComeBeforeDialogueLines() {
+        let shi = card("是")
+        let chosen = course.sentences(for: shi, met: { _ in true })
+        XCTAssertFalse(chosen.isEmpty)
+        XCTAssertTrue(chosen.allSatisfy { Course.drillTexts.contains($0.hanzi) }, "\(chosen.map(\.hanzi))")
+    }
+
+    /// Tap what you hear: the sentence is only said, and built from Chinese tiles.
+    func testTapWhatYouHearIsBuiltFromChineseTiles() throws {
+        let shi = card("是")
+        let ex = try XCTUnwrap(Exercise.make(card: shi, dir: "hear", scope: [], progress: store(), met: { _ in true }))
+        XCTAssertEqual(ex.kind, .sentence)
+        XCTAssertEqual(ex.dir, "hear")
+        XCTAssertTrue(ex.hearOnly)
+        XCTAssertTrue(ex.toChinese)
+        XCTAssertEqual(ex.label, "Tap what you hear")
+        let sent = try XCTUnwrap(ex.sentence)
+        XCTAssertTrue(Set(sent.words.map(\.hanzi)).isSubset(of: Set(ex.tiles.map(\.text))))
+        // it's said as it appears whatever the autoplay setting, and its tiles keep quiet until it's answered
+        XCTAssertEqual(Autoplay.onShow(ex, autoplay: false), sent.hanzi)
+        XCTAssertNil(TapToHear.tile(ex.tiles[0], in: ex, answered: false))
+        XCTAssertNotNil(TapToHear.tile(ex.tiles.first { $0.text.contains(where: Course.isHan) }!, in: ex, answered: true))
+        // an ordinary sentence exercise isn't one
+        let plain = try XCTUnwrap(Exercise.make(card: shi, dir: "sentence", scope: [], progress: store(), met: { _ in true }))
+        XCTAssertFalse(plain.hearOnly)
+        XCTAssertEqual(plain.dir, "sentence")
+    }
+
+    /// The second stone (我 · 是) has sentences in it: 我是马克。 built, heard, a gap filled.
+    /// (Which kinds come up depends on the earlier words' reviews, so five lessons are played.)
+    func testTheSecondStoneHasSentences() {
+        var all: [String] = []
+        for _ in 0..<5 {
+            let p = store()
+            _ = play(StudySession(lessonId: course.lessons[0].id, progress: p))
+            let s = StudySession(lessonId: course.lessons[1].id, progress: p)
+            let fresh = Set(course.cards(in: course.lessons[1].id).map(\.id))
+            var dirs: [String] = [], n = 0
+            while s.result == nil && n < 300 {
+                n += 1
+                if let c = s.card, let ex = s.exercise {
+                    if fresh.contains(c.id) { dirs.append(ex.dir) }
+                    if let sent = ex.sentence, ex.kind != .speak {
+                        XCTAssertEqual(course.unmetWords(in: sent, for: c, met: s.isMet), [], sent.hanzi)
+                    }
+                    s.answer(true)
+                }
+                s.next()
+            }
+            XCTAssertGreaterThanOrEqual(dirs.filter { StudySession.sentenceKinds.contains($0) }.count, 1, "\(dirs)")
+            XCTAssertLessThanOrEqual(dirs.filter { $0 == "write" }.count, 1, "\(dirs)")
+            XCTAssertLessThanOrEqual(dirs.filter { $0 == "speak" }.count, 1, "\(dirs)")
+            all += dirs
+        }
+        XCTAssertGreaterThanOrEqual(all.filter { StudySession.sentenceKinds.contains($0) }.count, 10, "\(all)")
+        XCTAssertTrue(all.contains("gap") || all.contains("hear"), "\(all)")
+    }
+
+    /// "Can't listen now" on a sentence that's only heard puts off listening, like the word kind.
+    func testCantListenNowAlsoStopsTapWhatYouHear() {
+        let p = store()
+        _ = play(StudySession(lessonId: course.lessons[0].id, progress: p))
+        let s = StudySession(lessonId: course.lessons[1].id, progress: p)
+        var n = 0, skipped = false
+        while s.result == nil && n < 300 {
+            n += 1
+            if s.card != nil, let ex = s.exercise {
+                if skipped { XCTAssertFalse(["listen", "hear"].contains(ex.dir), ex.dir) }
+                if !skipped, ex.dir == "hear" || ex.dir == "listen" {
+                    s.skip()
+                    skipped = true
+                    XCTAssertTrue(s.listeningOff)
+                } else {
+                    s.answer(true)
+                }
+            }
+            s.next()
+        }
+        XCTAssertNotNil(s.result)
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

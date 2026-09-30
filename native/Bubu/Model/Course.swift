@@ -112,8 +112,18 @@ struct CourseData: Codable {
     let notes: [String: [Note]]
     let dialogues: [Dialogue]
     let readings: [Reading]
+    /// each stone's practice sentences, of words taught by that stone (bubu-course/drills.py)
+    var drills: [Drill]? = nil
     let pathLayout: PathLayout
     let art: [String: ArtSize]
+}
+
+/// A practice sentence for a stone: the sentence exercises' material.
+struct Drill: Codable, Hashable {
+    let lesson: String
+    let hanzi: String
+    let pinyin: String
+    let en: String
 }
 
 /// One flashcard per unique word. Ids match the web app: the id the course data gives the

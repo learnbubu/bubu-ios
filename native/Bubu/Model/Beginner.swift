@@ -110,6 +110,8 @@ enum Autoplay {
             if ex.dir == "recognize" && autoplay { return ex.card.word.hanzi }
             return nil
         }
+        // "tap what you hear" always plays: the sound is the question
+        if ex.kind == .sentence, ex.hearOnly, let s = ex.sentence { return s.hanzi }
         if ex.kind == .sentence, autoplay, !ex.toChinese, let s = ex.sentence { return s.hanzi }
         if ex.kind == .write, autoplay { return ex.card.word.hanzi }
         return nil
@@ -119,6 +121,7 @@ enum Autoplay {
     /// exercise appeared (then the right or wrong chime is enough: once is plenty).
     static func onAnswer(_ ex: Exercise, autoplay: Bool) -> String? {
         guard autoplay, onShow(ex, autoplay: autoplay) == nil else { return nil }
+        if ex.dir == "gap" { return ex.sentence?.hanzi }           // the whole sentence, the gap filled
         if ex.kind == .choice { return ex.card.word.hanzi }
         if ex.kind == .sentence { return ex.sentence?.hanzi }
         return nil
@@ -171,7 +174,7 @@ enum TapToHear {
     /// What to say for a text tapped in an exercise (nil: nothing).
     static func say(_ text: String, in ex: Exercise, answered: Bool, allowed: Bool) -> String? {
         guard enabled, allowed else { return nil }
-        if ex.dir == "listen" && !answered { return nil }
+        if (ex.dir == "listen" || ex.dir == "hear") && !answered { return nil }
         guard text.contains(where: Course.isHan) else { return nil }
         return text
     }
@@ -236,7 +239,7 @@ enum Correction {
         switch ex.dir {
         case "pinyin":
             return toneLine(hanzi: w.hanzi, right: w.pinyin, chosen: chosen)
-        case "recall":
+        case "recall", "gap":
             guard let o = cards.first(where: { $0.word.hanzi == chosen })?.word, o.hanzi != w.hanzi else { return nil }
             return meaningLine(w, o)
         case "recognize", "listen":

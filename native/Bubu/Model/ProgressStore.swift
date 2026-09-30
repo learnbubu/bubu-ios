@@ -683,7 +683,9 @@ final class ProgressStore {
         } else {
             c["combo"] = correct ? (c["combo"] ?? 0) + 1 : 0
             c["comboMax"] = max(c["comboMax"] ?? 0, c["combo"] ?? 0)
-            if correct && ["listen", "write", "speak", "sentence"].contains(kind) { c[kind, default: 0] += 1 }
+            // "tap what you hear" is listening, and a gap is a sentence, for the quests
+            let counted = kind == "hear" ? "listen" : kind == "gap" ? "sentence" : kind
+            if correct && ["listen", "write", "speak", "sentence"].contains(counted) { c[counted, default: 0] += 1 }
         }
         activity.qc = [today: c]                          // yesterday's counters are no longer needed
         save()

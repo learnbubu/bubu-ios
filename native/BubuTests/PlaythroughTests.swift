@@ -226,11 +226,11 @@ private final class Player {
             XCTAssertTrue(seen.tones, seen.why("\(word): the tones haven't been introduced"))
         }
         if dir == "speak" {
-            let firstSession = !seen.hadRecord.contains(c.id) || seen.shown.contains(c.id)
-            XCTAssertFalse(firstSession, seen.why("\(word): spoken in the word's first session"))
+            // (in its first session a word is said only after a couple of right answers)
+            XCTAssertTrue(s.maySpeak(c), seen.why("\(word): spoken too soon in the word's first session"))
             XCTAssertFalse(seen.noSpeaking, seen.why("\(word): speaking, after \"Can't speak now\""))
         }
-        if dir == "listen" {
+        if dir == "listen" || dir == "hear" {
             XCTAssertFalse(seen.noListening, seen.why("\(word): listening, after \"Can't listen now\""))
         }
         if seen.lastAsked == c.id { checkNotTwiceRunning(s, c, seen, word) }
@@ -264,7 +264,7 @@ private final class Player {
     private func respond(_ s: StudySession, _ c: Card, _ seen: inout Seen) {
         let dir = s.exercise?.dir ?? s.dir
         seen.lastAsked = c.id
-        if (dir == "speak" || dir == "listen") && chance(learner.skips) {
+        if (dir == "speak" || dir == "listen" || dir == "hear") && chance(learner.skips) {
             skip(s, c, dir, &seen)
             return
         }
@@ -299,7 +299,7 @@ private final class Player {
         s.skip()
         seen.note("\(dir) \(c.word.hanzi) skipped")
         seen.skipped.insert(c.id)
-        if dir == "listen" { seen.noListening = true } else { seen.noSpeaking = true }
+        if dir == "listen" || dir == "hear" { seen.noListening = true } else { seen.noSpeaking = true }
         guard strict else { return }
         XCTAssertEqual(p.srs[c.id], record, seen.why("a skip changed the word's record"))
         XCTAssertEqual(p.buns, buns, seen.why("a skip cost a bun"))

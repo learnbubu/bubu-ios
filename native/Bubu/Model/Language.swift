@@ -276,16 +276,29 @@ final class CharData {
 }
 
 extension Course {
-    /// Every dialogue line that splits cleanly into words.
+    /// Every practice sentence and dialogue line that splits cleanly into words.
     var sentences: [Sentence] { Course.sentencePool }
 
-    static let sentencePool: [Sentence] = Course.shared.data.dialogues.flatMap { d in
-        d.turns.compactMap { t in
-            Sentence.segment(hanzi: t.hanzi, pinyin: t.pinyin).map { Sentence(hanzi: t.hanzi, pinyin: t.pinyin, en: t.en, words: $0) }
+    static let sentencePool: [Sentence] = {
+        let data = Course.shared.data
+        // the stones' own practice sentences first (short, and only of words taught by then)
+        let drills = (data.drills ?? []).compactMap { d in
+            Sentence.segment(hanzi: d.hanzi, pinyin: d.pinyin).map { Sentence(hanzi: d.hanzi, pinyin: d.pinyin, en: d.en, words: $0) }
         }
-    }
+        let lines = data.dialogues.flatMap { d in
+            d.turns.compactMap { t in
+                Sentence.segment(hanzi: t.hanzi, pinyin: t.pinyin).map { Sentence(hanzi: t.hanzi, pinyin: t.pinyin, en: t.en, words: $0) }
+            }
+        }
+        var seen = Set<String>()
+        return (drills + lines).filter { seen.insert($0.hanzi).inserted }
+    }()
 
     func sentences(for card: Card) -> [Sentence] { sentences.filter { $0.hanzi.contains(card.word.hanzi) } }
+
+    /// The practice sentences' texts: written for the words of their stones, so they're asked
+    /// before a dialogue's line is.
+    static let drillTexts: Set<String> = Set((Course.shared.data.drills ?? []).map(\.hanzi))
 
     /// Little particles that barely count as words: a sentence may have these unmet.
     static let trivialWords: Set<String> = ["了", "吗", "呢", "吧", "啊", "哇", "呀", "嘛", "啦", "哦"]
@@ -318,21 +331,31 @@ extension Course {
             at += w.hanzi.count
             // a piece of the card's own word (不客气 can split as 不 + 客气)
             if let o = ownSpan, span.lowerBound >= o.lowerBound, span.upperBound <= o.upperBound { continue }
-            if Course.trivialWords.contains(w.hanzi) || isMetWord(w.hanzi, met: met) { continue }
+            // (a name isn't a word to have met: 我是马克。)
+            if Course.trivialWords.contains(w.hanzi) || isNameOrMet(w.hanzi, met: met) { continue }
             out.append(w.hanzi)
         }
         return out
     }
 
     /// The sentences a card's sentence exercise may use: every word met apart from the
-    /// card's own and the little particles, the short ones when there are any, else the
-    /// shortest. Empty when none will do, and another kind of exercise is asked instead.
+    /// card's own and the little particles; the stones' practice sentences when there are any
+    /// (a dialogue's line otherwise), the short ones when there are any, else the shortest.
+    /// Empty when none will do, and another kind of exercise is asked instead.
     func sentences(for card: Card, met: (String) -> Bool) -> [Sentence] {
-        let ok = sentences(for: card).filter { unmetWords(in: $0, for: card, met: met).isEmpty }
+        let readable = sentences(for: card).filter { unmetWords(in: $0, for: card, met: met).isEmpty }
+        let drills = readable.filter { Course.drillTexts.contains($0.hanzi) }
+        let ok = drills.isEmpty ? readable : drills
         let short = ok.filter { $0.words.count <= Course.shortSentence }
         if !short.isEmpty { return short }
         guard let least = ok.map(\.words.count).min() else { return [] }
         return ok.filter { $0.words.count == least }
+    }
+
+    /// The sentences a card's gap exercise may use: readable ones where the word stands once,
+    /// as a word of its own (so the gap has one answer).
+    func gapSentences(for card: Card, met: (String) -> Bool) -> [Sentence] {
+        sentences(for: card, met: met).filter { s in s.words.filter { $0.hanzi == card.word.hanzi }.count == 1 }
     }
 
     /// The words of your lines in a dialogue you haven't met yet (little particles aside).

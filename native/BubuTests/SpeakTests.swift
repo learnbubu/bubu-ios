@@ -94,38 +94,36 @@ final class SpeakTests: XCTestCase {
 
     // MARK: when
 
-    func testNoSpeakingInAWordsFirstSession() {
+    /// (The owner, 1 Oct 2026: a little speaking and writing inside a lesson.) A word just met
+    /// is said aloud only once it's been got right a couple of times, and a lesson asks for
+    /// one word aloud, no more.
+    func testALittleSpeakingInAWordsFirstSession() {
         XCTAssertTrue(StudySession.inFirstSession("a", newAtStart: ["a"], metInSession: []))
         XCTAssertTrue(StudySession.inFirstSession("a", newAtStart: [], metInSession: ["a"]))
         XCTAssertFalse(StudySession.inFirstSession("a", newAtStart: ["b"], metInSession: ["b"]))
 
         let p = store()
         let lesson = course.lessons[0].id
-        let s = StudySession(lessonId: lesson, progress: p, focuses: Set(StudySession.allDirs))
-        var spoken: [String] = [], guardN = 0
-        while s.result == nil && guardN < 300 {
-            guardN += 1
-            if let c = s.card {
-                XCTAssertFalse(s.maySpeak(c), c.word.hanzi)
-                if s.exercise?.dir == "speak" { spoken.append(c.word.hanzi) }
-                s.answer(true)
+        for focuses in [Set(StudySession.allDirs), ["speak"]] {
+            let fresh = focuses.count == 1 ? store() : p
+            let s = StudySession(lessonId: lesson, progress: fresh, focuses: focuses)
+            var spoken: [String] = [], right: [String: Int] = [:], guardN = 0
+            while s.result == nil && guardN < 300 {
+                guardN += 1
+                if let c = s.card {
+                    XCTAssertEqual(s.maySpeak(c), right[c.id, default: 0] >= StudySession.rightBeforeSpeaking, c.word.hanzi)
+                    if s.exercise?.dir == "speak" {
+                        XCTAssertGreaterThanOrEqual(right[c.id, default: 0], StudySession.rightBeforeSpeaking, c.word.hanzi)
+                        spoken.append(c.word.hanzi)
+                    }
+                    s.answer(true)
+                    right[c.id, default: 0] += 1
+                }
+                s.next()
             }
-            s.next()
-        }
-        XCTAssertNotNil(s.result)
-        XCTAssertEqual(spoken, [], "no word is spoken in the session it's first met")
-
-        // a speaking-only session on words never met doesn't ask for them aloud either
-        let fresh = store()
-        let only = StudySession(lessonId: lesson, progress: fresh, focuses: ["speak"])
-        guardN = 0
-        while only.result == nil && guardN < 300 {
-            guardN += 1
-            if only.card != nil {
-                XCTAssertNotEqual(only.exercise?.dir, "speak")
-                only.answer(true)
-            }
-            only.next()
+            XCTAssertNotNil(s.result)
+            // (a session of only speaking has nothing else to ask once a word may be said)
+            if focuses.count > 1 { XCTAssertLessThanOrEqual(spoken.count, 1, "a little: \(spoken)") }
         }
 
         // the next session, the words met are spoken

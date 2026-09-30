@@ -76,8 +76,8 @@ final class LessonLengthTests: XCTestCase {
     // MARK: stone 1, the showcase
 
     /// The very first stone (你 · 好 · 你好) has no earlier words: its own words come up five
-    /// times each, recognise → listen → recall, the kinds alternating. This is the exact
-    /// sequence to compare with the phone.
+    /// times each, recognise first, then a mix: listening, sentences (你好，马克！), recalling,
+    /// and one word written and one said.
     func testTheFirstStoneIsFifteenVariedExercises() {
         let p = store()
         let stone = chapter1[0]
@@ -92,16 +92,21 @@ final class LessonLengthTests: XCTestCase {
         XCTAssertEqual(ex.count, s.sessionTotal, "the progress bar counts every exercise")
         checkNewWords(steps, fresh)
         for c in fresh { XCTAssertEqual(ex.filter { $0.id == c.id }.count, 5, c.word.hanzi) }
-        XCTAssertTrue(ex.allSatisfy { ["recognize", "listen", "recall"].contains($0.dir) }, "\(ex.map(\.dir))")
+        // no tones yet, so no "Which pinyin?"
+        XCTAssertTrue(ex.allSatisfy { ["recognize", "listen", "recall", "sentence", "gap", "hear", "write", "speak"].contains($0.dir) },
+                      "\(ex.map(\.dir))")
         let got = steps.map { $0.meet ? "meet \($0.hanzi)" : "\($0.dir) \($0.hanzi)" }
-        XCTAssertEqual(got, [
+        XCTAssertEqual(Array(got.prefix(7)), [
             "meet 你", "recognize 你",
             "meet 好", "recognize 好",
             "listen 你",
             "meet 你好", "recognize 你好",
-            "listen 好", "recall 你", "listen 你好", "recall 好", "listen 你", "recall 你好",
-            "listen 好", "recall 你", "listen 你好", "recognize 好", "recall 你好",
-        ])
+        ], "\(got)")
+        // it isn't one word from four options all the way (the owner's report)
+        let kinds = Set(ex.map(\.dir))
+        XCTAssertGreaterThanOrEqual(kinds.count, 5, "\(got)")
+        XCTAssertGreaterThanOrEqual(ex.filter { StudySession.sentenceKinds.contains($0.dir) }.count, 2, "\(got)")
+        for once in StudySession.ladderOnce { XCTAssertLessThanOrEqual(ex.filter { $0.dir == once }.count, 1, "\(got)") }
         // after its meet card, a word's first exercise is the easy one
         for (i, st) in steps.enumerated() where st.meet {
             XCTAssertEqual(steps[i + 1].id, st.id)

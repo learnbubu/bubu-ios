@@ -36,6 +36,8 @@ const course = {
   lessons: W.VOCAB.lessons, chapters: CHAPTERS,
   notes: Object.fromEntries(Object.entries(NOTES).map(([k, v]) => [k, Array.isArray(v) ? v : [v]])),
   dialogues: W.DIALOGUES, readings: W.READINGS,
+  // each stone's practice sentences (bubu-course/drills.py): the sentence exercises' material
+  drills: W.DRILLS || [],
   pathLayout: PATH_LAYOUT, art: ART,
 };
 fs.writeFileSync(path.join(DATA, "course.json"), JSON.stringify(course));

@@ -50,6 +50,9 @@ def plan(chapters):
             if rest and all(ch in known for ch in rest):
                 out.append(("k", t["hanzi"]))
                 out += [("k", n) for n in used]
+    # the stones' practice sentences (bubu-course/drills.py), for the chapters asked
+    chapter_of = {lid: ci for ci, ch in enumerate(d["chapters"], start=1) for lid in ch["lessons"]}
+    out += [("k", x["hanzi"]) for x in d.get("drills", []) if chapter_of.get(x["lesson"]) in chapters]
     seen, uniq = set(), []
     for v, t in out:
         t = t.strip()

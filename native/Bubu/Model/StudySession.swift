@@ -775,13 +775,24 @@ final class StudySession: Identifiable {
     /// A new word's exercises in its stone's session, easy to hard, one rung per right answer:
     /// recognise it, hear it (or pick its tones), recall its characters or build a sentence
     /// with it, then the harder kinds again. Each rung lists its kinds in order of preference.
+    /// (1 Oct 2026, the owner: "follow the structure of duolingo lessons": fewer single words with
+    /// four options, more sentences.) After its first recognition a word is met in sentences:
+    /// translated with tiles, a gap filled, heard and built; and, a little (`ladderOnce`),
+    /// written or said.
     static let newWordLadder: [[String]] = [
         ["recognize", "listen"],
-        ["listen", "pinyin"],
-        ["recall", "sentence"],
-        ["sentence", "pinyin", "recall", "listen"],
-        ["recall", "listen", "pinyin", "recognize"],
+        ["sentence", "gap", "listen", "pinyin"],
+        ["hear", "gap", "recall", "sentence", "write", "speak"],
+        ["gap", "sentence", "hear", "write", "speak", "pinyin", "recall"],
+        ["speak", "write", "hear", "sentence", "recall", "listen"],
     ]
+    /// A stone's new words are written once and said once in its session, no more ("a little").
+    static let ladderOnce: Set<String> = ["write", "speak"]
+    /// A new word may be written or said once it's been got right this often in the session.
+    static let rightBeforeSpeaking = 2
+
+    /// The kinds that need a sentence the learner can read (see Course.sentences(for:met:)).
+    static let sentenceKinds: Set<String> = ["sentence", "gap", "hear"]
 
     /// A new word's exercise from its ladder (nil: none of its rung's kinds are switched on).
     /// Past the first rung it avoids the kind just asked and the word's own last kind, and
@@ -789,6 +800,9 @@ final class StudySession: Identifiable {
     private func ladderDir(_ c: Card, _ enabled: [String]) -> String? {
         let rung = min(rightInSession[c.id] ?? 0, Self.newWordLadder.count - 1)
         var on = Self.newWordLadder[rung].filter { enabled.contains($0) }
+        if on.contains(where: { !Self.ladderOnce.contains($0) }) {
+            on.removeAll { Self.ladderOnce.contains($0) && (dirsUsed[$0] ?? 0) >= 1 }
+        }
         guard !on.isEmpty else { return nil }
         if rung > 0 {
             if let l = lastDir, on.count > 1 { on.removeAll { $0 == l } }
@@ -817,15 +831,21 @@ final class StudySession: Identifiable {
             dirByCard[c.id] = m.d; lastDir = m.d; return m.d
         }
         var enabled = Self.allDirs.filter { focuses.contains($0) }
+        // filling a gap goes with building sentences, and "tap what you hear" with those and listening
+        if focuses.contains("sentence") { enabled.append("gap") }
+        if focuses.contains("sentence") && focuses.contains("listen") { enabled.append("hear") }
         // "Which pinyin?" asks about tones: not until they've been introduced
         if !tonesTaught { enabled.removeAll { $0 == "pinyin" } }
         // a sentence only when all its other words have been met (see Course.sentences(for:met:))
-        if course.sentences(for: c, met: isMet).isEmpty { enabled.removeAll { $0 == "sentence" } }
+        let usable = course.sentences(for: c, met: isMet)
+        if usable.isEmpty { enabled.removeAll { Self.sentenceKinds.contains($0) } }
+        // a gap needs the word standing as a word of its own in the sentence
+        if course.gapSentences(for: c, met: isMet).isEmpty { enabled.removeAll { $0 == "gap" } }
         if !StrokeData.shared.writable(c.word.hanzi) { enabled.removeAll { $0 == "write" } }
         // no speaking a word in its very first session, or once speaking's been put off
         if !maySpeak(c) { enabled.removeAll { $0 == "speak" } }
         // no listening once it's been put off ("Can't listen now")
-        if listeningOff { enabled.removeAll { $0 == "listen" } }
+        if listeningOff { enabled.removeAll { $0 == "listen" || $0 == "hear" } }
         // a word new in a stone's session climbs its own ladder
         if freshIds.contains(c.id), let d = ladderDir(c, enabled) {
             dirByCard[c.id] = d
@@ -835,7 +855,7 @@ final class StudySession: Identifiable {
         if focuses.count > 1 {
             let reps = s?.reps ?? 0, interval = s?.interval ?? 0
             let level = reps >= 2 || interval >= 7 ? 2 : reps >= 1 ? 1 : 0
-            let rung: [String]? = level == 0 ? ["recognize", "listen"] : level == 1 ? ["recall", "pinyin", "sentence", "listen"] : nil
+            let rung: [String]? = level == 0 ? ["recognize", "listen"] : level == 1 ? ["recall", "pinyin", "sentence", "listen", "gap", "hear"] : nil
             if let rung {
                 var on = enabled.filter { rung.contains($0) }
                 if let before = dirByCard[c.id], on.count > 1 { on.removeAll { $0 == before } }
@@ -853,17 +873,22 @@ final class StudySession: Identifiable {
 
     private func missedDirPossible(_ c: Card, _ d: String) -> Bool {
         if d == "write" { return StrokeData.shared.writable(c.word.hanzi) }
-        if d == "sentence" { return (c.isSentence && c.ownSentence != nil) || !course.sentences(for: c, met: isMet).isEmpty }
+        if d == "gap" { return !course.gapSentences(for: c, met: isMet).isEmpty }
+        if Self.sentenceKinds.contains(d) { return (c.isSentence && c.ownSentence != nil) || !course.sentences(for: c, met: isMet).isEmpty }
         if d == "pinyin" { return tonesTaught }
         if d == "speak" { return maySpeak(c) }
         if d == "listen" { return !listeningOff }
         return Self.allDirs.contains(d)
     }
 
-    /// Whether a word may be spoken now: not in its very first session (new when the session
-    /// began, or met on screen in it), and not once "Can't speak now" has been tapped.
+    /// Whether a word may be spoken now: in its very first session (new when the session began,
+    /// or met on screen in it) only after a couple of right answers, and not once "Can't speak
+    /// now" has been tapped.
     func maySpeak(_ c: Card) -> Bool {
-        !speakingOff && !Self.inFirstSession(c.id, newAtStart: newAtStart, metInSession: metInSession)
+        guard !speakingOff else { return false }
+        // in a word's first session, not until it's been got right a couple of times
+        return !Self.inFirstSession(c.id, newAtStart: newAtStart, metInSession: metInSession)
+            || (rightInSession[c.id] ?? 0) >= Self.rightBeforeSpeaking
     }
 
     /// A word's very first session: it had no record when the session began, or was met on
@@ -965,7 +990,7 @@ final class StudySession: Identifiable {
     func skip() {
         guard !answered, let c = card else { return }
         answered = true
-        if dir == "listen" {
+        if dir == "listen" || dir == "hear" {
             listeningOff = true
             if focuses == ["listen"] {
                 endedEarly = true
@@ -1125,7 +1150,8 @@ final class StudySession: Identifiable {
     /// For screenshots: skip ahead to a given exercise on a word that suits it.
     func debugShow(dir: String) {
         let cards = course.cards(in: lessonId)
-        let c = dir == "sentence" ? (course.cards.first { !course.sentences(for: $0).isEmpty } ?? cards[0]) : cards[0]
+        let c = dir == "sentence" ? (course.cards.first { !course.sentences(for: $0).isEmpty } ?? cards[0])
+            : dir == "gap" || dir == "hear" ? (course.cards.first { $0.word.hanzi == "是" } ?? cards[0]) : cards[0]
         current = .card(c)
         self.dir = dir
         // every word counts as met here, so the screenshot always has a sentence
@@ -1161,6 +1187,8 @@ struct Exercise {
     var sentence: Sentence?
     var toChinese = true
     var tiles: [Tile] = []
+    /// "Tap what you hear": the sentence is only said, and built from Chinese tiles
+    var hearOnly = false
     /// a word not learned yet when the question was asked: shows the NEW WORD badge
     var isNew = false
     /// writing help, a `WriteGuidance` raw value: 0 full, 1 outline, 2 from memory
@@ -1176,6 +1204,8 @@ struct Exercise {
         case "pinyin": return "Which pinyin is correct?"
         case "listen": return "What did you hear?"
         case "sentence": return toChinese ? "Build the Chinese" : "Translate this sentence"
+        case "hear": return "Tap what you hear"
+        case "gap": return "Fill the gap"
         case "speak": return "Say it out loud"
         case "write": return (WriteGuidance(rawValue: writeStage) ?? .full).label
         default: return "What does this mean?"
@@ -1187,6 +1217,8 @@ struct Exercise {
                      met: ((String) -> Bool)? = nil) -> Exercise? {
         switch dir {
         case "sentence": return sentence(c, met: met ?? { progress.srs[$0] != nil })
+        case "hear": return sentence(c, met: met ?? { progress.srs[$0] != nil }, hear: true)
+        case "gap": return gap(c, scope: scope, met: met ?? { progress.srs[$0] != nil })
         case "speak": return speak(c, met: met ?? { progress.srs[$0] != nil })
         case "write":
             // the help fades as the characters are written: the least-written one sets the prompt
@@ -1267,13 +1299,13 @@ struct Exercise {
     var sayEn: String { sentence?.en ?? card.word.gloss }
 
     /// Word tiles to put in order (web: buildSentenceExercise).
-    static func sentence(_ c: Card, met: (String) -> Bool) -> Exercise? {
+    static func sentence(_ c: Card, met: (String) -> Bool, hear: Bool = false) -> Exercise? {
         let course = Course.shared
         // a sentence card is its own sentence, always Chinese to English
-        let own = c.isSentence ? c.ownSentence : nil
+        let own = c.isSentence && !hear ? c.ownSentence : nil
         guard let sent = own ?? course.sentences(for: c, met: met).randomElement() else { return nil }
         let enWords = Sentence.enWords(sent.en)
-        let toChinese = own == nil && (enWords.count < 2 || Bool.random())
+        let toChinese = hear || (own == nil && (enWords.count < 2 || Bool.random()))
         let long = sent.words.count > 6 || enWords.count > 7
         let nDistract = long ? 2 : 3
         var tiles: [Tile] = []
@@ -1296,7 +1328,29 @@ struct Exercise {
             let words = enWords + pool.shuffled().prefix(nDistract)
             tiles = words.enumerated().map { Tile(id: $0.offset, text: $0.element, pinyin: nil) }
         }
-        return Exercise(kind: .sentence, dir: "sentence", card: c, sentence: sent, toChinese: toChinese, tiles: tiles.shuffled())
+        return Exercise(kind: .sentence, dir: hear ? "hear" : "sentence", card: c, sentence: sent, toChinese: toChinese,
+                        tiles: tiles.shuffled(), hearOnly: hear)
+    }
+
+    /// Fill the gap: a sentence with the card's word missing, and four words to choose from
+    /// (nil when no readable sentence has the word standing by itself).
+    static func gap(_ c: Card, scope: Set<String>, met: (String) -> Bool) -> Exercise? {
+        let course = Course.shared
+        let word = c.word.hanzi
+        guard let sent = course.gapSentences(for: c, met: met).randomElement() else { return nil }
+        // the other options: words that aren't in the sentence, from the stones in scope (or
+        // near this one)
+        let inSentence = Set(sent.words.map(\.hanzi))
+        let here = course.lessonOrder[c.lessonId] ?? 0
+        let pool = course.cards.filter { !$0.isSentence && !inSentence.contains($0.word.hanzi) && $0.word.hanzi != word }
+        let inScope = pool.filter { scope.contains($0.lessonId) }
+        let near = pool.filter { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby }
+        var options: [String] = [], seen = Set<String>()
+        for x in inScope.shuffled() + near.shuffled() + pool.shuffled() where options.count < 3 {
+            if seen.insert(x.word.hanzi).inserted { options.append(x.word.hanzi) }
+        }
+        guard options.count == 3 else { return nil }
+        return Exercise(kind: .choice, dir: "gap", card: c, options: (options + [word]).shuffled(), answer: word, sentence: sent)
     }
 
     /// Whether the tiles placed, in order, make the sentence.
