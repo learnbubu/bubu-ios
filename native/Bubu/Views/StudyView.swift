@@ -757,7 +757,7 @@ struct ChoiceView: View {
                     HintChip(hanzi: w.hanzi, pinyin: w.pinyin, reverse: true) {
                         Text(w.gloss).font(.nunito(16.3)).foregroundStyle(isNew ? Color.newInk : Color.ink)
                             .multilineTextAlignment(.center)
-                            .lineLimit(3).fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(answered ? 2 : 3).minimumScaleFactor(0.85).fixedSize(horizontal: false, vertical: true)
                             .overlay(alignment: .bottom) {
                                 Line().stroke(Color.muted.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [1.5, 3]))
                                     .frame(height: 2).offset(y: 3)
@@ -876,6 +876,8 @@ struct ChoiceView: View {
                 } else {
                     Text(opt).font(.nunito(18.4, .black))
                         .foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                        // a long meaning keeps its two lines once answered, a touch smaller, not cut off
+                        .lineLimit(2).minimumScaleFactor(0.8)
                 }
             }
             .frame(maxWidth: .infinity)
