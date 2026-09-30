@@ -568,10 +568,10 @@ struct MeetView: View {
             Button(action: done) {
                 Text("Continue").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
                     .frame(maxWidth: .infinity).padding(14)
-                    .background(Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(Color.accent, in: Capsule())
             }
             .buttonStyle(PressDown(depth: 3))
-            .background(Color.accentDark, in: RoundedRectangle(cornerRadius: 16, style: .continuous).offset(y: 3))
+            .background(Color.accentDark, in: Capsule().offset(y: 3))
             .padding(.top, 18)
         }
         .frame(maxWidth: .infinity)
@@ -632,10 +632,10 @@ struct TipCard: View {
             Button(action: done) {
                 Text(more > 0 ? "Next tip" : "Got it").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
                     .frame(maxWidth: .infinity).padding(14)
-                    .background(Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(Color.accent, in: Capsule())
             }
             .buttonStyle(PressDown(depth: 3))
-            .background(Color.accentDark, in: RoundedRectangle(cornerRadius: 16, style: .continuous).offset(y: 3))
+            .background(Color.accentDark, in: Capsule().offset(y: 3))
             .padding(.top, 6)
         }
     }
@@ -656,10 +656,10 @@ struct TonesIntroCard: View {
             Button(action: done) {
                 Text("Got it").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
                     .frame(maxWidth: .infinity).padding(14)
-                    .background(Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(Color.accent, in: Capsule())
             }
             .buttonStyle(PressDown(depth: 3))
-            .background(Color.accentDark, in: RoundedRectangle(cornerRadius: 16, style: .continuous).offset(y: 3))
+            .background(Color.accentDark, in: Capsule().offset(y: 3))
             .padding(.top, 6)
         }
     }
