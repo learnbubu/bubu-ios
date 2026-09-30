@@ -29,6 +29,16 @@ if __name__ == "__main__":
         for word, n in zip(args[::2], args[1::2]):
             shutil.copyfile(os.path.join(WORK, f"{voice.name(word)}-{n}.mp3"), os.path.join(voice.OUT, voice.name(word) + ".mp3"))
             print(word, "take", n, "is the app's clip now")
+        # a sentence clip says the word too, the old way: every one in the app is listed, to be made again
+        course = json.load(open(voice.COURSE, encoding="utf-8"))
+        texts = {t["hanzi"].strip() for d in course["dialogues"] for t in d["turns"]}
+        words = set(args[::2])
+        stale = sorted(t for t in texts if t not in words and any(w in t for w in words)
+                       and os.path.exists(os.path.join(voice.OUT, voice.name(t) + ".mp3")))
+        if stale:
+            print("\nTHESE SENTENCE CLIPS STILL SAY IT THE OLD WAY; make them again (chapter.py make N new, after removing them):")
+            for t in stale:
+                print(" ", voice.name(t), t)
         sys.exit()
     words, phrases, args = [], {}, sys.argv[1:]
     i = 0
