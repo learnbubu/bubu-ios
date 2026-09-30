@@ -4,7 +4,8 @@
 
 prompt.wav is 5 to 15 seconds of the voice to copy, and the second argument is exactly what is
 said in it. Each line of lines.txt becomes out_dir/NN.wav. "rl" uses the model tuned for fewer
-pronunciation mistakes (llm.rl.pt) in place of llm.pt.
+pronunciation mistakes (llm.rl.pt) in place of llm.pt. SPEED=0.85 says it slower; MODE=cross
+takes the voice from a sample in another language (no transcript needed).
 """
 import os, sys, time
 
@@ -70,14 +71,22 @@ if __name__ == "__main__":
         sr = model.sample_rate
         pieces = []
         for s in sentences(line):
-            if os.environ.get("MODE") == "cross":
+            if os.environ.get("MODE") == "instruct":
+                # the voice from the sample, and how to say it from INSTRUCT (in Chinese, e.g.
+                # 请说得清楚一点，慢一点。)
+                said = torch.cat([j["tts_speech"] for j in model.inference_instruct2(
+                    s, "You are a helpful assistant. " + os.environ.get("INSTRUCT", "") + "<|endofprompt|>", prompt,
+                    stream=False, speed=float(os.environ.get("SPEED", "1")))], dim=1)
+            elif os.environ.get("MODE") == "cross":
                 # the prompt is in another language (an English sample speaking Mandarin): no
                 # transcript, the voice only
                 said = torch.cat([j["tts_speech"] for j in model.inference_cross_lingual(
-                    "You are a helpful assistant.<|endofprompt|>" + s, prompt, stream=False)], dim=1)
+                    "You are a helpful assistant.<|endofprompt|>" + s, prompt, stream=False,
+                    speed=float(os.environ.get("SPEED", "1")))], dim=1)
             else:
                 said = torch.cat([j["tts_speech"] for j in model.inference_zero_shot(
-                    s, "You are a helpful assistant.<|endofprompt|>" + prompt_text, prompt, stream=False)], dim=1)
+                    s, "You are a helpful assistant.<|endofprompt|>" + prompt_text, prompt, stream=False,
+                    speed=float(os.environ.get("SPEED", "1")))], dim=1)
             if pieces:
                 pieces.append(torch.zeros(1, int(PAUSE * sr)))
             pieces.append(trimmed(said, sr) if len(sentences(line)) > 1 else said)
