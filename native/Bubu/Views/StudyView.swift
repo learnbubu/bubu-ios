@@ -34,6 +34,15 @@ struct StudyView: View {
 
     struct Feedback { let correct: Bool; let chosen: String? }
 
+    /// the study card's height, to tell a phone where a multiple-choice exercise fits
+    @State private var cardHeight: CGFloat = 0
+    /// A multiple-choice exercise stays still (no scrolling): it compacts once answered so the
+    /// answers, the feedback and Continue all fit. On a small phone (an SE) it scrolls instead.
+    private var fixed: Bool {
+        guard session.exercise?.kind == .choice, !preStart, case .card = session.current else { return false }
+        return cardHeight >= 620
+    }
+
     var body: some View {
         ZStack {
             Color.bg.ignoresSafeArea()
@@ -47,7 +56,7 @@ struct StudyView: View {
                     topBar
                     VStack(spacing: 0) {
                         ScrollViewReader { reader in
-                            ScrollView {
+                            ScrollView(fixed ? [] : .vertical) {
                                 content.padding(.horizontal, 12).padding(.top, 15).padding(.bottom, 12)
                                 Color.clear.frame(height: 1).id("exercise-end")
                             }
@@ -55,7 +64,7 @@ struct StudyView: View {
                             .scrollBounceBehavior(.basedOnSize)
                             // the feedback takes room from the exercise: keep the answers in view
                             .onChange(of: feedback != nil) { _, shown in
-                                guard shown else { return }
+                                guard shown, !fixed else { return }
                                 // once the feedback has taken its room (it springs in), not before:
                                 // until then there's nothing to scroll
                                 for delay in [0.35, 0.7] {
@@ -69,6 +78,7 @@ struct StudyView: View {
                         if !preStart, case .card = session.current { bottomSlot }
                     }
                     .frame(maxHeight: .infinity)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { cardHeight = $0 }
                     .background(Color.panel, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
                     .padding(.horizontal, 18)
@@ -427,6 +437,8 @@ struct MascotPrompt<Content: View>: View {
     var mood: Bool?          // nil: asking; true: pleased; false: sad
     var sentence = false
     var long = false         // a long sentence: a smaller Bùbù, so the bubble gets the width
+    /// answered: Bùbù and the bubble shrink, so the answers and the feedback fit without scrolling
+    var compact = false
     @ViewBuilder var content: Content
     @State private var pop = false
 
@@ -434,7 +446,7 @@ struct MascotPrompt<Content: View>: View {
         HStack(alignment: .center, spacing: 10) {
             Image(mood == nil ? "panda-teacher" : mood! ? "panda-celebrate" : "panda-sad")
                 .resizable().scaledToFit()
-                .frame(width: long ? 64 : 122, height: long ? 80 : 148, alignment: .bottom)
+                .frame(width: long || compact ? 64 : 122, height: long || compact ? 78 : 148, alignment: .bottom)
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)
             SpeechBubbleBox(sentence: sentence) { content }
@@ -442,7 +454,8 @@ struct MascotPrompt<Content: View>: View {
                 .padding(.trailing, sentence ? 0 : 10)
             Spacer(minLength: 0)
         }
-        .frame(minHeight: long ? 80 : 140)
+        .frame(minHeight: long || compact ? 78 : 140)
+        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: compact)
         .onChange(of: mood) { _, new in
             guard new != nil else { return }
             withAnimation(.easeOut(duration: 0.17)) { pop = true }
@@ -729,10 +742,10 @@ struct ChoiceView: View {
     var body: some View {
         let w = ex.card.word
         let isNew = ex.isNew
-        let big: CGFloat = w.hanzi.count > 3 ? 32 : 44
+        let big: CGFloat = answered ? (w.hanzi.count > 3 ? 26 : 32) : w.hanzi.count > 3 ? 32 : 44
         VStack(spacing: 0) {
-            MascotPrompt(mood: answered && !skipped ? (picked == ex.answer) : nil) {
-                if isNew { NewBadge() }
+            MascotPrompt(mood: answered && !skipped ? (picked == ex.answer) : nil, compact: answered) {
+                if isNew && !answered { NewBadge() }
                 switch ex.dir {
                 case "recall":
                     // the English can always be tapped for its characters and pinyin
@@ -860,7 +873,7 @@ struct ChoiceView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 14).padding(.vertical, ex.dir == "recall" ? 10 : 13.5)
+            .padding(.horizontal, 14).padding(.vertical, (ex.dir == "recall" ? 10 : 13.5) - (answered ? 4 : 0))
             .background(fill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .strokeBorder(edge, lineWidth: selected ? 2 : 1))
