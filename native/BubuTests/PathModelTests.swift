@@ -22,6 +22,30 @@ final class PathModelTests: XCTestCase {
         XCTAssertGreaterThan(m.height, m.items.last!.y)
     }
 
+    /// The layout the JIC edition had: pandas and landmarks whole on the screen, and the temple
+    /// beside the first stones, not up under chapter 1's title (docs/reference/jic).
+    func testSceneryKeepsClearOfTheEdgesAndTheFirstTitle() {
+        for width in [375, 393, 402, 430] as [CGFloat] {
+            let m = PathModel(course: course, width: width, current: course.lessons[0].id)
+            for p in m.pieces where course.data.art[p.art]?.side == "any" {
+                XCTAssertGreaterThanOrEqual(p.x - p.w / 2, -0.5, "\(p.art) off the left at \(width)")
+                XCTAssertLessThanOrEqual(p.x + p.w / 2, width + 0.5, "\(p.art) off the right at \(width)")
+            }
+            let temple = try! XCTUnwrap(m.pieces.first { $0.art == "cluster-right-temple" })
+            let titleBottom = m.bannerMids[0]! + PathModel.bannerH / 2
+            XCTAssertGreaterThan(temple.y - temple.h / 2, titleBottom - 30, "the temple reaches up over chapter 1's title at \(width)")
+        }
+    }
+
+    /// A header and the pebble trail agree on its side, so no pebbles run through its text.
+    func testHeadersKeepTheirSideForTheTrailToo() {
+        let m = PathModel(course: course, width: W, current: nil)
+        XCTAssertEqual(m.bannerRight.count, course.chapters.count)
+        for it in m.items where it.chapter != nil {
+            XCTAssertEqual(m.bannerRight[it.index], PathModel.bannerOnRight(it, course: course, xs: m.xs, W: W))
+        }
+    }
+
     func testTheWaveMatchesTheOldFormula() {
         // the old per-call loop over one period, kept here as the reference
         func old(_ i: Int) -> CGFloat {

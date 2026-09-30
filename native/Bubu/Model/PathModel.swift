@@ -34,6 +34,9 @@ struct PathModel {
     let xs: [CGFloat]
     /// where each chapter header is centred, by the index of its first stone
     let bannerMids: [Int: CGFloat]
+    /// which side each chapter header sits on, by the index of its first stone: the banner
+    /// and the pebble trail (which keeps clear of it) must agree
+    let bannerRight: [Int: Bool]
     let pieces: [Piece]
     let pebbles: [PebbleGroup]
     let height: CGFloat
@@ -50,8 +53,13 @@ struct PathModel {
         height = (items.last?.y ?? 0) + Self.pad
         currentY = items.first { $0.lesson.id == current }?.y ?? 0
         var mids: [Int: CGFloat] = [:]
-        for it in items where it.chapter != nil { mids[it.index] = Self.bannerMid(it, items: items, current: current) }
+        var sides: [Int: Bool] = [:]
+        for it in items where it.chapter != nil {
+            mids[it.index] = Self.bannerMid(it, items: items, current: current)
+            sides[it.index] = Self.bannerOnRight(it, course: course, xs: xs, W: W)
+        }
         bannerMids = mids
+        bannerRight = sides
         // the scenery composed in the path editor, anchored to its stone
         let kx = W / 390
         let byId = Dictionary(uniqueKeysWithValues: items.map { ($0.lesson.id, $0) })
@@ -59,11 +67,16 @@ struct PathModel {
         for (n, p) in course.data.pathLayout.pieces.enumerated() {
             guard let it = byId[p.stone], let a = course.data.art[p.art] else { continue }
             let w = W * p.w / 100, h = w * a.ar
-            let cx = xs[it.index] + p.dx * kx, base = it.y + p.dy
+            var cx = xs[it.index] + p.dx * kx
+            // a panda or a landmark stands whole on the screen; only the side clusters, drawn
+            // to run off their edge, may (a stone nearer the middle than the one it was
+            // composed beside would otherwise push it off)
+            if a.side == "any" { cx = max(w / 2, min(W - w / 2, cx)) }
+            let base = it.y + p.dy
             pieces.append(Piece(id: n, art: p.art, x: cx, y: base - h / 2, w: w, h: h, flip: p.flip, behind: p.behind))
         }
         self.pieces = pieces
-        pebbles = Self.trail(course, items, xs, mids, W)
+        pebbles = Self.trail(course, items, xs, mids, sides, W)
     }
 
     // MARK: geometry
@@ -109,6 +122,13 @@ struct PathModel {
         return (prev + top) / 2
     }
 
+    /// A chapter header's side: as composed in the path editor, else across from the stones
+    /// around it (right when they lean left).
+    static func bannerOnRight(_ it: Item, course: Course, xs: [CGFloat], W: CGFloat) -> Bool {
+        if let s = course.data.pathLayout.headers[it.lesson.id] { return s == "right" }
+        return it.index > 0 && (xs[it.index - 1] + xs[it.index]) / 2 < W / 2
+    }
+
     /// The web app's hash noise, -1…1.
     private static func noise(_ n: Double) -> CGFloat {
         let v = sin(n * 12.9898) * 43758.5453
@@ -119,7 +139,7 @@ struct PathModel {
     /// smooth walk through the stones, wandering either side, and dropped wherever
     /// it would land on a stone or under a chapter header. Grouped one stretch
     /// between two stones at a time, so no single canvas is the height of the course.
-    private static func trail(_ course: Course, _ items: [Item], _ x: [CGFloat], _ mids: [Int: CGFloat], _ W: CGFloat) -> [PebbleGroup] {
+    private static func trail(_ course: Course, _ items: [Item], _ x: [CGFloat], _ mids: [Int: CGFloat], _ sides: [Int: Bool], _ W: CGFloat) -> [PebbleGroup] {
         guard items.count > 1 else { return [] }
         let ys = items.map(\.y)
         let unit = size / 74
@@ -133,8 +153,7 @@ struct PathModel {
         var headers: [Int: CGRect] = [:]
         for it in items where it.chapter != nil {
             let mid = mids[it.index] ?? 0
-            let right = course.data.pathLayout.headers[it.lesson.id].map { $0 == "right" }
-                ?? (it.index > 0 && (x[it.index - 1] + x[it.index]) / 2 < W / 2)
+            let right = sides[it.index] ?? false
             headers[it.index] = CGRect(x: right ? W * 0.38 : 0, y: mid - bannerH / 2, width: W * 0.62, height: bannerH)
         }
         let halfW = size * stoneRatio / 2 + pebClear * unit, halfH = size / 2 + pebClear * unit

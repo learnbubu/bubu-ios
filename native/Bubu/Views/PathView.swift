@@ -35,10 +35,13 @@ struct PathView: View {
                         scenery(model, win, behind: true)
                         pebbles(model, win)
                         ForEach(model.items(in: win), id: \.lesson.id) { it in
-                            if let ci = it.chapter { banner(ci, model: model, it: it, W: W) }
                             stone(it, W: W, current: current)
                         }
                         scenery(model, win, behind: false)
+                        // the chapter banners go over the art, so their text always reads
+                        ForEach(model.items(in: win).filter { $0.chapter != nil }, id: \.lesson.id) { it in
+                            banner(it.chapter!, model: model, it: it, W: W)
+                        }
                         // a marker at the current stone, for the scroll to land on: positioned
                         // views all report the full canvas as their frame, so they can't be targets
                         VStack(spacing: 0) {
@@ -69,6 +72,14 @@ struct PathView: View {
                 LinearGradient(stops: [.init(color: .bg, location: 0), .init(color: .bg, location: 0.09),
                                        .init(color: .bg.opacity(0), location: 1)], startPoint: .bottom, endPoint: .top)
                     .frame(height: 76).allowsHitTesting(false)
+            }
+            .overlay(alignment: .top) {
+                // the status bar: the path fades out under it, so no art or stone sits behind the clock
+                LinearGradient(stops: [.init(color: .bg, location: 0), .init(color: .bg, location: 0.7),
+                                       .init(color: .bg.opacity(0), location: 1)], startPoint: .top, endPoint: .bottom)
+                    .frame(height: geo.safeAreaInsets.top + 14)
+                    .offset(y: -geo.safeAreaInsets.top)
+                    .allowsHitTesting(false)
             }
             .overlay(alignment: .top) { HUD() }
             .overlay(alignment: .bottom) { ReviewButton() }
@@ -119,7 +130,7 @@ struct PathView: View {
     @ViewBuilder
     private func banner(_ ci: Int, model: PathModel, it: Item, W: CGFloat) -> some View {
         let (d, t) = progress.chapterProgress(ci)
-        let right = course.data.pathLayout.headers[it.lesson.id] == "right"
+        let right = model.bannerRight[it.index] ?? false
         let mid = model.bannerMids[it.index] ?? it.y
         VStack(alignment: right ? .trailing : .leading, spacing: 0) {
             HStack(spacing: 8) {

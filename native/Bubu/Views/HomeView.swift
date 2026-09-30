@@ -57,6 +57,14 @@ struct HomeView: View {
                 .onAppear { progress.ensureQuests() }
                 .scrollIndicators(.hidden)
             }
+            .overlay(alignment: .top) {
+                // the status bar: the cards fade out under it, so nothing sits behind the clock
+                LinearGradient(stops: [.init(color: .bg, location: 0), .init(color: .bg, location: 0.7),
+                                       .init(color: .bg.opacity(0), location: 1)], startPoint: .top, endPoint: .bottom)
+                    .frame(height: top + 14)
+                    .offset(y: -top)
+                    .allowsHitTesting(false)
+            }
         }
     }
 
