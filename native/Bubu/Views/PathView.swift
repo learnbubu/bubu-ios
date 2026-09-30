@@ -32,6 +32,7 @@ struct PathView: View {
                     ZStack(alignment: .topLeading) {
                         Color.clear.frame(width: W, height: model.height)
                         grounds(model, win)
+                        pandaGrounds(model, win)
                         scenery(model, win, behind: true)
                         pebbles(model, win)
                         ForEach(model.items(in: win), id: \.lesson.id) { it in
@@ -175,6 +176,18 @@ struct PathView: View {
             GroundPatch(shape: it.index % 4)
                 .frame(width: w, height: w * PathModel.patchSquash)
                 .position(x: model.xs[it.index], y: it.y + size * 0.14)
+                .allowsHitTesting(false)
+        }
+    }
+
+    /// A little patch of the same ground under each panda the path planted itself (the web's
+    /// .pground g2), so it stands on the earth rather than floating.
+    private func pandaGrounds(_ model: PathModel, _ win: ClosedRange<CGFloat>) -> some View {
+        ForEach(model.pieces(in: win, behind: false).filter(\.ground), id: \.id) { p in
+            let gw = p.w * 0.82, gh = gw * 0.38
+            GroundPatch(shape: 2)
+                .frame(width: gw, height: gh)
+                .position(x: p.x, y: p.y + p.h / 2 - gh * 0.12)
                 .allowsHitTesting(false)
         }
     }

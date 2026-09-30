@@ -17,7 +17,10 @@ final class PathModelTests: XCTestCase {
         for (a, b) in zip(m.items, m.items.dropFirst()) { XCTAssertLessThan(a.y, b.y) }
         XCTAssertEqual(m.currentY, m.items[3].y)
         XCTAssertEqual(m.bannerMids.count, course.chapters.count)
-        XCTAssertEqual(m.pieces.count, course.data.pathLayout.pieces.count)
+        // every composed piece, then the scenery the path planted itself after them
+        let composed = course.data.pathLayout.pieces.count
+        XCTAssertEqual(m.pieces.filter { $0.id < composed }.count, composed)
+        XCTAssertGreaterThanOrEqual(m.pieces.count, composed)
         XCTAssertFalse(m.pebbles.isEmpty)
         XCTAssertGreaterThan(m.height, m.items.last!.y)
     }
@@ -99,6 +102,40 @@ final class PathModelTests: XCTestCase {
         let drawn = m.items(in: win).count + m.pebbles(in: win).count + m.pieces(in: win, behind: true).count
             + m.pieces(in: win, behind: false).count
         print("PERF path pieces drawn near the current stone: \(drawn) of \(everything)")
+    }
+
+    /// Past the last hand-composed piece the path plants itself, a band per five stones, as the
+    /// JIC edition did: real art only, landmarks and pandas whole on the screen, the same every build.
+    func testThePathPlantsItselfPastTheComposedPieces() {
+        let layout = course.data.pathLayout
+        for width in [375, 393, 402, 430] as [CGFloat] {
+            let m = PathModel(course: course, width: width, current: course.lessons[0].id)
+            let stones = Set(layout.pieces.map(\.stone))
+            let composedUntil = m.items.last { stones.contains($0.lesson.id) }?.index ?? -1
+            let firstBand = composedUntil < 0 ? 0 : (composedUntil / PathModel.bandLessons + 1) * PathModel.bandLessons
+            guard firstBand < m.items.count else { continue }
+            let generated = m.pieces.filter { $0.id >= layout.pieces.count }
+            XCTAssertGreaterThan(generated.count, (m.items.count - firstBand) / PathModel.bandLessons, "too little scenery at \(width)")
+            XCTAssertTrue(generated.contains { $0.ground }, "no pandas planted at \(width)")
+            XCTAssertEqual(Set(m.pieces.map(\.id)).count, m.pieces.count, "piece ids must be unique")
+            // the generated scenery comes after the composed, and reaches the end of the path
+            let startY = m.items[firstBand].y - 844
+            for p in generated {
+                let a = try! XCTUnwrap(course.data.art[p.art], "\(p.art) isn't in the art table")
+                XCTAssertGreaterThan(p.y + p.h / 2, startY, "\(p.art) planted up among the composed pieces at \(width)")
+                XCTAssertLessThanOrEqual(p.y + p.h / 2, m.items.last!.y + PathModel.size * 0.9 + 0.5, "\(p.art) below the last stone")
+                if a.side == "any" {
+                    XCTAssertGreaterThanOrEqual(p.x - p.w / 2, -0.5, "\(p.art) off the left at \(width)")
+                    XCTAssertLessThanOrEqual(p.x + p.w / 2, width + 0.5, "\(p.art) off the right at \(width)")
+                }
+            }
+            XCTAssertGreaterThan(generated.map(\.y).max() ?? 0, m.items[max(0, m.items.count - 2 * PathModel.bandLessons)].y - 844)
+            // stable between launches
+            let again = PathModel(course: course, width: width, current: course.lessons[0].id)
+            XCTAssertEqual(again.pieces.map(\.art), m.pieces.map(\.art))
+            XCTAssertEqual(again.pieces.map(\.x), m.pieces.map(\.x))
+            XCTAssertEqual(again.pieces.map(\.y), m.pieces.map(\.y))
+        }
     }
 
     func testScenerySpanningTheScreenIsDrawn() {
