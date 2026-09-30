@@ -92,10 +92,10 @@ struct PathModel {
             composedUntil = max(composedUntil, it.index)
             let w = W * p.w / 100, h = w * a.ar
             var cx = xs[it.index] + p.dx * kx
-            // a panda or a landmark stands whole on the screen; only the side clusters, drawn
-            // to run off their edge, may (a stone nearer the middle than the one it was
-            // composed beside would otherwise push it off)
-            if a.side == "any" { cx = max(w / 2, min(W - w / 2, cx)) }
+            // a panda stands whole on the screen (a stone nearer the middle than the one it was
+            // composed beside would otherwise push it off); landmarks and clusters may run off
+            // their edge, as they were drawn to
+            if p.art.hasPrefix("panda") { cx = max(w / 2, min(W - w / 2, cx)) }
             let base = it.y + p.dy
             pieces.append(Piece(id: n, art: p.art, x: cx, y: base - h / 2, w: w, h: h, flip: p.flip, behind: p.behind))
         }
@@ -473,7 +473,7 @@ struct PathModel {
                 // through its family, the two foliage slots out of step
                 let name = b == 0 ? slot.art : slot.family[(b * 5 + k * 7) % slot.family.count]
                 guard let a = art[name] else { continue }
-                let aw = CGFloat(a.w), ar = CGFloat(a.ar), standsWhole = a.side == "any"
+                let aw = CGFloat(a.w), ar = CGFloat(a.ar), standsWhole = name.hasPrefix("panda")
                 let slotRight = slot.x > 50
                 var cw: CGFloat = 0, ch: CGFloat = 0, cx: CGFloat = 0, flipped = false
                 var y: CGFloat?

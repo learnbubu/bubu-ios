@@ -51,18 +51,16 @@ struct PathView: View {
                         }
                         .allowsHitTesting(false)
                     }
-                    .background {
-                        GeometryReader { g in
-                            Color.clear.preference(key: PathOffsetKey.self, value: -g.frame(in: .named("path")).minY)
-                        }
+                    // how far it's scrolled, for which stretch to draw. (A preference read from a
+                    // background GeometryReader never updated while scrolling: the band stayed at
+                    // the landing one, and the path went blank ~2.5 screens down.)
+                    .onGeometryChange(for: CGFloat.self) { -$0.frame(in: .named("path")).minY } action: { y in
+                        let b = PathModel.band(for: y)
+                        if b != band { band = b }
                     }
                 }
                 .coordinateSpace(name: "path")
                 .scrollIndicators(.hidden)
-                .onPreferenceChange(PathOffsetKey.self) { y in
-                    let b = PathModel.band(for: y)
-                    if b != band { band = b }
-                }
                 // land on the current lesson the first time, and again when it moves on;
                 // not on every visit to the tab, which would throw away where you'd scrolled
                 .onAppear { land(reader, current) }
@@ -208,11 +206,6 @@ struct PathView: View {
             .allowsHitTesting(false)
         }
     }
-}
-
-private struct PathOffsetKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
 /// "Read the story" under a finished chapter. Its own view, so the read/unread

@@ -314,15 +314,18 @@ struct StudyView: View {
         let ink = !ready ? Color.onAccent.opacity(0.7) : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
         return ZStack(alignment: .bottom) {
             // a short slot, so the exercise keeps its room; the feedback slides up over its foot
-            // (the owner's choice: nothing moves or shrinks when you answer)
+            // as an overlay, taking no room (the owner's choice: nothing moves or shrinks)
             Color.clear.frame(height: 84)
-            if let fb = feedback, let ex, ex.kind != .speak, ex.kind != .write {
-                FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text), wheels: wheels)
-                    .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
-                        .shadow(color: Color.panel, radius: 12, y: -10))
-                    .padding(.bottom, 79)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
+                .overlay(alignment: .bottom) {
+                    if let fb = feedback, let ex, ex.kind != .speak, ex.kind != .write {
+                        FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text), wheels: wheels)
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
+                                .shadow(color: Color.panel, radius: 12, y: -10))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.bottom, 79)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
             Button {
                 if !checks { advance() } else if isSentence { checkSentence() } else { checkChoice() }
             } label: {
