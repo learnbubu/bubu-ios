@@ -29,11 +29,12 @@ final class LessonFlowTests: XCTestCase {
 
     func testOnlyTheCardsOwnWordMayBeNew() {
         let bye = card("再见"), thanks = card("谢谢")
-        // 谢谢！再见！ for 再见: fine once 谢谢 has been met, not before
-        let met = course.sentences(for: bye, met: { $0 == thanks.id })
-        XCTAssertTrue(met.contains { $0.hanzi == "谢谢！再见！" })
-        let none = course.sentences(for: bye, met: { _ in false })
-        XCTAssertFalse(none.contains { $0.hanzi == "谢谢！再见！" })
+        // 谢谢！再见！ for 再见: fine once 谢谢 has been met, not before (its own sentence, so a
+        // rewrite of the course's dialogues can't take it away)
+        let s = Sentence(hanzi: "谢谢！再见！", pinyin: "xièxie! zàijiàn!", en: "Thanks! Bye!",
+                         words: [.init(hanzi: "谢谢", pinyin: "xièxie"), .init(hanzi: "再见", pinyin: "zàijiàn")])
+        XCTAssertEqual(course.unmetWords(in: s, for: bye, met: { $0 == thanks.id }).count, 0)
+        XCTAssertEqual(course.unmetWords(in: s, for: bye, met: { _ in false }).count, 1)
     }
 
     func testParticlesDontCountAsNewWords() {
