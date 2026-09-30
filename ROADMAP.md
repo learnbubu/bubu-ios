@@ -84,6 +84,9 @@ Recorded voices from Google Cloud Text-to-Speech (Chirp 3 HD), made once and kep
 - [x] The cast chosen by ear: `tools/cast.json` (Mark is Umbriel, Xiaoyu Sulafat, Chen Ming Puck, Bùbù the teacher Kore)
 - [x] The four reference tones chosen by ear: `tools/refs/` (妈 麻 马 骂 in Kore's voice)
 - [ ] Chapter 1's single characters re-read as a teacher says them (carrier sentence), matched to the reference tones, confirmed by ear
+- [x] **Bùbù in a native speaker's voice** (30 Sep 2026, 0.1.10): the owner's partner recorded two short samples; CosyVoice 3 (free, Apache 2.0, on the owner's PC: `tools/clone/`) copies her voice from the cleaned teaching take. Chapter 1's 32 Bùbù clips remade in it and approved by ear: sentences said one at a time with a steady 0.45 s pause, single characters cut from carrier sentences, every clip cleaned (clicks, rumble and hiss out, faded ends, even loudness, 96k). The other speaker in a dialogue is still Google's Charon.
+- [ ] Her own recordings of the 546 single-character syllables (`tools/record/`: script, brief, splitter), replacing the copied single characters; lines 1–10 first as a sound test
+- [ ] A sentence script for her (the course's own lines, 10–30 minutes) to train a closer copy of her voice (GPT-SoVITS or CosyVoice fine-tuning)
 - [ ] Each dialogue line in its speaker's voice: the speaker's name carried from the course source into `course.json`, clips made per speaker, the app playing a line in its speaker's voice
 - [ ] Machine listening (Speech-to-Text) as a check on every clip: needs the API switched on and added to the key
 - [ ] The whole course generated, every clip measured, the doubtful ones on sound boards
