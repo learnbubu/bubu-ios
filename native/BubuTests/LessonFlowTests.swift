@@ -14,6 +14,39 @@ final class LessonFlowTests: XCTestCase {
         course.cards.first { $0.word.hanzi == hanzi }!
     }
 
+    // MARK: whole sentences taught as one item
+
+    /// The owner: a sentence (请再说一遍, 这个用中文怎么说？) is never a multiple-choice question
+    /// or option; it's read, and its English built from tiles.
+    func testWholeSentencesAreOnlyEverBuiltFromTiles() {
+        for s in ["请再说一遍", "请说慢一点儿", "我不懂"] { XCTAssertTrue(card(s).isSentence, s) }
+        for w in ["不客气", "对不起", "你好", "什么时候", "你呢", "大床房", "问得好"] { XCTAssertFalse(card(w).isSentence, w) }
+        // its own text is the sentence, split into its words, Chinese to English
+        let slow = card("请说慢一点儿")
+        let own = try! XCTUnwrap(slow.ownSentence)
+        XCTAssertEqual(own.words.map(\.hanzi).joined(), "请说慢一点儿")
+        XCTAssertEqual(own.hanzi, slow.word.hanzi)
+        let p = store()
+        let ex = try! XCTUnwrap(Exercise.make(card: slow, dir: "sentence", scope: [], progress: p))
+        XCTAssertEqual(ex.kind, .sentence)
+        XCTAssertFalse(ex.toChinese)
+        XCTAssertEqual(ex.sentence?.hanzi, "请说慢一点儿")
+        XCTAssertTrue(Set(Sentence.enWords(own.en)).isSubset(of: Set(ex.tiles.map(\.text))))
+        // and none is ever an option beside a word
+        let sentences = course.cards.filter(\.isSentence)
+        let banned = Set(sentences.map(\.word.hanzi) + sentences.map(\.word.gloss))
+        let chapter2 = course.chapters[1].lessons.flatMap { course.cards(in: $0) }.filter { !$0.isSentence }
+        let scope = Set(course.chapters[0].lessons + course.chapters[1].lessons)
+        for c in chapter2 {
+            for dir in ["recognize", "recall", "listen"] {
+                for _ in 0..<5 {
+                    let options = Exercise.choice(c, dir: dir, scope: scope).options
+                    XCTAssertTrue(banned.isDisjoint(with: options), "\(c.word.hanzi) \(dir): \(options)")
+                }
+            }
+        }
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

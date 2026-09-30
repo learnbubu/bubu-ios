@@ -58,6 +58,51 @@ enum Pinyin {
 
 struct SentenceWord: Hashable { let hanzi: String; let pinyin: String }
 
+extension Card {
+    /// A whole sentence (or a long set phrase) taught as one item: 请再说一遍, 我不懂,
+    /// 这个用中文怎么说？, 百闻不如一见. Five characters or more, or a shorter one of three words
+    /// or more that starts with its subject (我不懂, 你又来了; not 大床房 or 问得好, which are words).
+    /// It is never a multiple-choice question or option (the owner: "that should only be for
+    /// choosing the words, so we see the Chinese and select the English to create a sentence").
+    var isSentence: Bool {
+        let han = word.hanzi.filter(Course.isHan)
+        if han.count >= 5 { return true }
+        return (word.parts?.count ?? 0) >= 3 && han.first.map { "我你他她这那".contains($0) } == true
+    }
+
+    /// The meaning to build from tiles: the gloss without its bracketed notes and second
+    /// senses ("you can see it and touch it; tangible" → "you can see it and touch it").
+    private var plainMeaning: String {
+        var s = word.gloss
+        while let a = s.firstIndex(of: "("), let b = s[a...].firstIndex(of: ")") { s.removeSubrange(a...b) }
+        for cut in [";", ":"] { if let i = s.firstIndex(of: Character(cut)) { s = String(s[..<i]) } }
+        return s.trimmingCharacters(in: .whitespaces)
+    }
+
+    /// The card's own text as a sentence of its words (its parts, else its characters), for
+    /// the tile exercise; nil when its English is a single word (nothing to build).
+    var ownSentence: Sentence? {
+        let en = plainMeaning
+        // nothing to build from one word, or from a pattern with a gap in it ("not … at all")
+        guard Sentence.enWords(en).count >= 2, !en.contains("…") else { return nil }
+        let han = word.hanzi.filter(Course.isHan).map(String.init)
+        var pieces = word.parts ?? han
+        if pieces.joined() != han.joined() { pieces = han }
+        let punct = CharacterSet(charactersIn: ",.!?;:，。！？…")
+        let tokens = word.pinyin.split(whereSeparator: \.isWhitespace)
+            .map { String($0.unicodeScalars.filter { !punct.contains($0) }) }.filter { !$0.isEmpty }
+        // a syllable a character (一点儿 is yī diǎn r): otherwise the pinyin can't be shared out
+        guard tokens.count == han.count else { return nil }
+        var words: [SentenceWord] = [], i = 0
+        for p in pieces {
+            let n = p.count
+            words.append(SentenceWord(hanzi: p, pinyin: tokens[i..<(i + n)].joined()))
+            i += n
+        }
+        return Sentence(hanzi: word.hanzi, pinyin: words.map(\.pinyin).joined(separator: " "), en: en, words: words)
+    }
+}
+
 struct Sentence: Hashable {
     let hanzi: String
     let pinyin: String

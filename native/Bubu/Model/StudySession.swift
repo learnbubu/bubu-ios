@@ -274,7 +274,7 @@ final class StudySession: Identifiable {
         var hanzi = Set<String>()
         var glosses = Set<String>()
         var out: [Card] = []
-        for c in cards where out.count < matchMax {
+        for c in cards where out.count < matchMax && !c.isSentence {
             let g = c.word.gloss.lowercased()
             if hanzi.contains(c.word.hanzi) || glosses.contains(g) { continue }
             hanzi.insert(c.word.hanzi)
@@ -443,6 +443,7 @@ final class StudySession: Identifiable {
     /// A quiz on some words: up to 20, multiple choice only (web: startQuiz).
     static func quiz(_ p: ProgressStore, cards: [Card], focuses: Set<String>? = nil, scope: Set<String>? = nil,
                      tooFew: String = "Pick more lessons — a quiz needs at least 3 words.") -> StudySession? {
+        let cards = cards.filter { !$0.isSentence }
         guard cards.count >= 3 else { Moments.shared.toast(tooFew); return nil }
         let items = Array(cards.shuffled().prefix(20))
         return StudySession(lessonId: "", progress: p, focuses: focuses, cards: items, mode: .quiz, title: "Quiz · \(items.count) questions", scope: scope)
@@ -470,7 +471,7 @@ final class StudySession: Identifiable {
             return s
         }
         let perLesson = max(2, min(5, 20 / range.count))
-        let items = range.flatMap { lid in Course.shared.cards(in: lid).shuffled().prefix(perLesson) }.shuffled()
+        let items = range.flatMap { lid in Course.shared.cards(in: lid).filter { !$0.isSentence }.shuffled().prefix(perLesson) }.shuffled()
         let s = StudySession(lessonId: "", progress: p, focuses: ["recognize", "recall"], cards: items, mode: .placement,
                              title: "\(label) · \(items.count) question\(items.count == 1 ? "" : "s")")
         s.placeRange = Array(range); s.placeTarget = target
@@ -480,7 +481,7 @@ final class StudySession: Identifiable {
 
     /// A probe's questions: spread across the chapter's lessons, one word from each in turn.
     private static func probeCards(_ block: [String]) -> [Card] {
-        var pools = block.map { Course.shared.cards(in: $0).shuffled() }.filter { !$0.isEmpty }.shuffled()
+        var pools = block.map { Course.shared.cards(in: $0).filter { !$0.isSentence }.shuffled() }.filter { !$0.isEmpty }.shuffled()
         var out: [Card] = []
         while out.count < probeSize, pools.contains(where: { !$0.isEmpty }) {
             for i in pools.indices where !pools[i].isEmpty && out.count < probeSize { out.append(pools[i].removeFirst()) }
@@ -800,6 +801,11 @@ final class StudySession: Identifiable {
 
     /// Which exercise a card gets, climbing a ladder as the word gets stronger (web: pickDirection).
     private func pickDirection(_ c: Card) -> String {
+        // a whole sentence is read and its English built from tiles: never multiple choice
+        if c.isSentence, c.ownSentence != nil {
+            dirByCard[c.id] = "sentence"; lastDir = "sentence"
+            return "sentence"
+        }
         if isQuiz {
             let mc = focuses.filter {
                 !["write", "sentence", "speak"].contains($0) && (tonesTaught || $0 != "pinyin") && (!listeningOff || $0 != "listen")
@@ -847,7 +853,7 @@ final class StudySession: Identifiable {
 
     private func missedDirPossible(_ c: Card, _ d: String) -> Bool {
         if d == "write" { return StrokeData.shared.writable(c.word.hanzi) }
-        if d == "sentence" { return !course.sentences(for: c, met: isMet).isEmpty }
+        if d == "sentence" { return (c.isSentence && c.ownSentence != nil) || !course.sentences(for: c, met: isMet).isEmpty }
         if d == "pinyin" { return tonesTaught }
         if d == "speak" { return maySpeak(c) }
         if d == "listen" { return !listeningOff }
@@ -1202,8 +1208,10 @@ struct Exercise {
     /// One answer and three distractors (web: buildChoiceExercise).
     static func choice(_ c: Card, dir: String, scope: Set<String>) -> Exercise {
         let course = Course.shared
-        let inScope = course.cards.filter { scope.contains($0.lessonId) }
-        let cards = inScope.isEmpty ? course.cards : inScope
+        // whole sentences are never options (see Card.isSentence)
+        let words = course.cards.filter { !$0.isSentence }
+        let inScope = words.filter { scope.contains($0.lessonId) }
+        let cards = inScope.isEmpty ? words : inScope
         let answer = field(c.word, dir)
         var distractors: [String] = []
         let others = { (exclude: [String]) -> [String] in
@@ -1225,7 +1233,7 @@ struct Exercise {
             var near: [String] = []
             // look-alikes the learner has reached, or nearly (not one from a later book)
             let here = course.lessonOrder[c.lessonId] ?? 0
-            let reached = course.lookalikes(c, 8).filter { (course.lessonOrder[$0.lessonId] ?? 0) <= here + Exercise.nearby }
+            let reached = course.lookalikes(c, 8).filter { !$0.isSentence && (course.lessonOrder[$0.lessonId] ?? 0) <= here + Exercise.nearby }
             for x in reached.prefix(2) { let v = field(x.word, dir); if v != answer && !near.contains(v) { near.append(v) } }
             distractors = near + others(near).prefix(3 - near.count)
         }
@@ -1234,7 +1242,7 @@ struct Exercise {
         if distractors.count < 3 {
             var seen = Set(distractors + [answer])
             let here = course.lessonOrder[c.lessonId] ?? 0
-            let nearest = course.cards.sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
+            let nearest = words.sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
             for x in nearest.prefix(40).filter({ abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby }).shuffled() + nearest.shuffled()
                 where distractors.count < 3 {
                 let v = field(x.word, dir)
@@ -1261,9 +1269,11 @@ struct Exercise {
     /// Word tiles to put in order (web: buildSentenceExercise).
     static func sentence(_ c: Card, met: (String) -> Bool) -> Exercise? {
         let course = Course.shared
-        guard let sent = course.sentences(for: c, met: met).randomElement() else { return nil }
+        // a sentence card is its own sentence, always Chinese to English
+        let own = c.isSentence ? c.ownSentence : nil
+        guard let sent = own ?? course.sentences(for: c, met: met).randomElement() else { return nil }
         let enWords = Sentence.enWords(sent.en)
-        let toChinese = enWords.count < 2 || Bool.random()
+        let toChinese = own == nil && (enWords.count < 2 || Bool.random())
         let long = sent.words.count > 6 || enWords.count > 7
         let nDistract = long ? 2 : 3
         var tiles: [Tile] = []
