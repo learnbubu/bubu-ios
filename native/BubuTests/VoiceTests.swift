@@ -20,6 +20,13 @@ final class VoiceTests: XCTestCase {
         for w in words { XCTAssertNotNil(Speech.clipURL(w), "no clip for \(w)") }
     }
 
+    /// "Tap what you hear" is only as good as its sound: every practice sentence has a clip.
+    func testEveryPracticeSentenceHasAClip() {
+        let drills = Course.shared.data.drills ?? []
+        XCTAssertFalse(drills.isEmpty)
+        for d in drills { XCTAssertNotNil(Speech.clipURL(d.hanzi), "no clip for \(d.hanzi)") }
+    }
+
     func testAWordWithNoClipFallsBackToTheUsualVoice() {
         XCTAssertNil(Speech.clipURL("这句话没有录音，所以用手机的声音。"))
         // no clip in the speaker's voice: Bùbù's
