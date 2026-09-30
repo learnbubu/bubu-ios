@@ -260,9 +260,10 @@ final class BeginnerHelpsTests: XCTestCase {
             "吗": "吗 = 口 mouth + 马 mǎ (sound) → a yes/no question",
             "也": nil,
             "呢": "呢 = 口 mouth + 尼 ní (sound) → asks it back: 你呢？ and you?",
+            "你呢": "你呢 = 你 you + 呢 asks it back → and you?",
         ]
         let words = chapter1.flatMap(\.words).map(\.hanzi)
-        XCTAssertEqual(words.count, 16)
+        XCTAssertEqual(words.count, 17)
         XCTAssertEqual(Set(words), Set(want.keys))
         for stone in chapter1 {
             for c in course.cards(in: stone.id) {

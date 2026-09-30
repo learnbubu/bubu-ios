@@ -7,7 +7,7 @@ import Foundation
 /// Where there's no sensible hook there's none; the full breakdown stays behind
 /// "How it's built".
 enum MemoryHook {
-    /// Chapter 1's sixteen words, by hand.
+    /// Chapter 1's seventeen words, by hand.
     static let chapterOne: [String: String] = [
         "你": "你 = 亻 person + 尔 you",
         "好": "好 = 女 woman + 子 child → good",
@@ -23,6 +23,7 @@ enum MemoryHook {
         "认识": "认识 = 认 recognise + 识 know → to know (someone)",
         "吗": "吗 = 口 mouth + 马 mǎ (sound) → a yes/no question",
         "呢": "呢 = 口 mouth + 尼 ní (sound) → asks it back: 你呢？ and you?",
+        "你呢": "你呢 = 你 you + 呢 asks it back → and you?",
     ]
     /// Chapter 1's words with no sensible hook: 什么 (neither half means "what" alone) and
     /// 也 (a single shape with no parts).

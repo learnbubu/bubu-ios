@@ -16,7 +16,7 @@ final class ChapterOneTests: XCTestCase {
 
     func testChapterOneMatchesThePlan() {
         let plan: [[String]?] = [["你", "好", "你好"], ["我", "是"], ["谢谢", "再见"], nil,
-                                 ["叫", "什么", "名字"], ["很", "高兴", "认识"], ["吗", "也", "呢"], nil]
+                                 ["叫", "什么", "名字"], ["很", "高兴", "认识"], ["吗", "也", "呢", "你呢"], nil]
         XCTAssertEqual(chapter1.count, plan.count)
         for (l, items) in zip(chapter1, plan) {
             if let items {
