@@ -212,6 +212,21 @@ final class LessonFlowTests: XCTestCase {
         }
     }
 
+    /// The owner's report: "Sure!" over 好啊 hinted 啊. A meaning's Chinese example doesn't
+    /// count, a particle is never an English word's hint, and a one-word English is the whole.
+    func testEnglishHintsDontComeFromExamplesOrParticles() {
+        let words = [SentenceWord(hanzi: "好", pinyin: "hǎo"), SentenceWord(hanzi: "啊", pinyin: "a")]
+        let sure = Hints.english("Sure!", words)
+        XCTAssertEqual(sure.first?.word?.hanzi, "好啊")
+        let mixed = Hints.english("Yes! Can you speak Chinese?", [SentenceWord(hanzi: "会", pinyin: "huì"), SentenceWord(hanzi: "你", pinyin: "nǐ"),
+                                                                   SentenceWord(hanzi: "会", pinyin: "huì"), SentenceWord(hanzi: "说", pinyin: "shuō"),
+                                                                   SentenceWord(hanzi: "中文", pinyin: "zhōngwén"), SentenceWord(hanzi: "吗", pinyin: "ma")])
+        XCTAssertNil(mixed.first?.word, "Yes isn't 吗")
+        let lets = Hints.english("Let's go together!", [SentenceWord(hanzi: "我们", pinyin: "wǒmen"), SentenceWord(hanzi: "一起", pinyin: "yīqǐ"),
+                                                         SentenceWord(hanzi: "去", pinyin: "qù"), SentenceWord(hanzi: "吧", pinyin: "ba")])
+        XCTAssertEqual(lets.first?.word?.hanzi, "吧", "吧 is let's")
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

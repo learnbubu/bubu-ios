@@ -52,11 +52,18 @@ enum Hints {
 
     struct Token: Hashable { let text: String; let word: SentenceWord?; let none: Bool }
 
+    /// Particles whose meanings say what they do, not what they mean ("(yes/no question)",
+    /// "softens a reply"): no English word is ever theirs. (吧 is "let's …", so it stays.)
+    static let unhinted: Set<String> = ["了", "吗", "呢", "啊", "哇", "呀", "嘛", "啦", "哦"]
+
     /// Each English word matched to the Chinese word whose meaning contains it; filler
-    /// words match nothing, so a hint is never a guess (web: englishHints).
+    /// words match nothing, so a hint is never a guess (web: englishHints). A meaning's
+    /// Chinese examples don't count ("softens a reply: 好啊 sure!" gave Sure → 啊, the owner's
+    /// report), and a one-word English (Sure!) that matches nothing is the whole sentence.
     static func english(_ en: String, _ words: [SentenceWord]) -> [Token] {
-        let pools: [(w: SentenceWord, stems: Set<String>)] = words.map { w in
+        let pools: [(w: SentenceWord, stems: Set<String>)] = words.filter { !unhinted.contains($0.hanzi) }.map { w in
             let m = (Course.wordEn[w.hanzi] ?? meaning(w.hanzi)).replacingOccurrences(of: "\\([^)]*\\)", with: " ", options: .regularExpression)
+                .replacingOccurrences(of: "\\p{Han}+[^,;]*", with: " ", options: .regularExpression)
             let stems = m.components(separatedBy: CharacterSet.letters.union(CharacterSet(charactersIn: "'")).inverted)
                 .map(stem).filter { !$0.isEmpty && !filler.contains($0) }
             return (w, Set(stems))
@@ -77,12 +84,18 @@ enum Hints {
             }
             return nil
         }
-        return en.split(separator: " ", omittingEmptySubsequences: true).map { raw in
+        var out = en.split(separator: " ", omittingEmptySubsequences: true).map { raw in
             let tok = String(raw), st = stem(tok)
             guard !st.isEmpty else { return Token(text: tok, word: nil, none: false) }
             let hit = filler.contains(st) && alias[st] == nil ? nil : find(keys(st))
             return hit.map { Token(text: tok, word: $0, none: false) } ?? Token(text: tok, word: nil, none: true)
         }
+        let content = out.indices.filter { !stem(out[$0].text).isEmpty && !filler.contains(stem(out[$0].text)) }
+        if content.count == 1, let i = content.first, out[i].word == nil, words.count > 1 {
+            let whole = SentenceWord(hanzi: words.map(\.hanzi).joined(), pinyin: words.map(\.pinyin).joined(separator: " "))
+            out[i] = Token(text: out[i].text, word: whole, none: false)
+        }
+        return out
     }
 }
 
