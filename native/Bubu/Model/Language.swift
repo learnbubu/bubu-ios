@@ -55,7 +55,7 @@ enum Pinyin {
         let han = hanzi.filter(Course.isHan).map { String($0) }
         let want = Pinyin.syllables(pinyin), got = Pinyin.syllables(option)
         guard want.count == han.count, got.count == han.count,
-              want.map(toneless).map { $0.lowercased() } == got.map(toneless).map { $0.lowercased() } else { return false }
+              want.map(toneless).map({ $0.lowercased() }) == got.map(toneless).map({ $0.lowercased() }) else { return false }
         let tones = want.map(toneOf)
         for i in han.indices {
             let t = toneOf(got[i]), right = tones[i]
