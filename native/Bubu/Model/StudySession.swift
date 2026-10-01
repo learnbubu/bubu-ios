@@ -1253,7 +1253,9 @@ struct Exercise {
         }
         switch dir {
         case "pinyin":
-            distractors = Pinyin.variants(answer, 3)
+            // (never a "wrong" option that is also a right way to say it: Fà guó for 法国)
+            distractors = Array(Pinyin.variants(answer, 8)
+                .filter { !Pinyin.isAlsoRight($0, hanzi: c.word.hanzi, pinyin: answer) }.prefix(3))
             if distractors.count < 3 { distractors += others(distractors).prefix(3 - distractors.count) }
         case "listen":
             let bare = Pinyin.toneless(c.word.pinyin)

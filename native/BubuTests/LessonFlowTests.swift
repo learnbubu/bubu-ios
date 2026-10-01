@@ -193,6 +193,25 @@ final class LessonFlowTests: XCTestCase {
         }
     }
 
+    /// "Which pinyin?" never offers as wrong a reading that is also right (the owner: Fà guó).
+    func testNoWrongPinyinOptionThatIsAlsoRight() {
+        XCTAssertTrue(Pinyin.isAlsoRight("Fà guó", hanzi: "法国", pinyin: "Fǎ guó"))
+        XCTAssertFalse(Pinyin.isAlsoRight("Fǎ guō", hanzi: "法国", pinyin: "Fǎ guó"))
+        XCTAssertTrue(Pinyin.isAlsoRight("ní hǎo", hanzi: "你好", pinyin: "nǐ hǎo"))
+        XCTAssertFalse(Pinyin.isAlsoRight("nǐ háo", hanzi: "你好", pinyin: "nǐ hǎo"))
+        XCTAssertTrue(Pinyin.isAlsoRight("bú shì", hanzi: "不是", pinyin: "bù shì"))
+        XCTAssertTrue(Pinyin.isAlsoRight("yì diǎn r", hanzi: "一点儿", pinyin: "yī diǎn r"))
+        XCTAssertFalse(Pinyin.isAlsoRight("Fǎ guó", hanzi: "法国", pinyin: "Fǎ guó"), "the answer itself isn't a wrong option")
+        if let france = course.cards.first(where: { $0.word.hanzi == "法国" }) {
+            for _ in 0..<30 {
+                let ex = Exercise.choice(france, dir: "pinyin", scope: [france.lessonId])
+                for o in ex.options where o != ex.answer {
+                    XCTAssertFalse(Pinyin.isAlsoRight(o, hanzi: "法国", pinyin: ex.answer), o)
+                }
+            }
+        }
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

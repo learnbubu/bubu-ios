@@ -42,6 +42,36 @@ enum Pinyin {
 
     static let vowels = Set("aeiouüāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ")
 
+    /// Readings heard as often as the dictionary's, by syllable: 法国 is Fǎguó in the
+    /// dictionary and Fàguó in Taiwan (and much of the mainland), 星期 xīngqī and xīngqí.
+    static let alsoSaid: [String: (index: Int, tone: Int)] = ["法国": (0, 4), "法语": (0, 4), "法文": (0, 4), "星期": (1, 2)]
+
+    /// Whether another tone marking of a word is also a right way to say it (the owner, 1 Oct
+    /// 2026: Fà guó for 法国): the tone changes of 一 and 不, a 3rd tone said as a 2nd before
+    /// another 3rd (你好 ní hǎo), and the readings in `alsoSaid`. Only when the syllables line up
+    /// with the characters; never the word's own pinyin.
+    static func isAlsoRight(_ option: String, hanzi: String, pinyin: String) -> Bool {
+        guard option != pinyin else { return false }
+        let han = hanzi.filter(Course.isHan).map { String($0) }
+        let want = Pinyin.syllables(pinyin), got = Pinyin.syllables(option)
+        guard want.count == han.count, got.count == han.count,
+              want.map(toneless).map { $0.lowercased() } == got.map(toneless).map { $0.lowercased() } else { return false }
+        let tones = want.map(toneOf)
+        for i in han.indices {
+            let t = toneOf(got[i]), right = tones[i]
+            if t == right { continue }
+            if han[i] == "一" && [1, 2, 4].contains(t) { continue }
+            if han[i] == "不" && [2, 4].contains(t) { continue }
+            if right == 3 && t == 2 && i + 1 < tones.count && tones[i + 1] == 3 { continue }
+            if alsoSaid.contains(where: { key, v in
+                guard let r = hanzi.range(of: key) else { return false }
+                return hanzi.distance(from: hanzi.startIndex, to: r.lowerBound) + v.index == i && v.tone == t
+            }) { continue }
+            return false
+        }
+        return true
+    }
+
     /// Vowel groups in a pinyin token: how many syllables it spells.
     static func syllableCount(_ token: String) -> Int {
         var n = 0, inVowel = false

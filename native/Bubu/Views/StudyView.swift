@@ -523,6 +523,53 @@ struct SpeakerButton: View {
     }
 }
 
+/// The sound of what's in a bubble, at its left as Duolingo has it: the speaker, and the
+/// tortoise under it for slowly.
+struct BubbleSound: View {
+    let text: String
+    var body: some View {
+        VStack(spacing: 2) {
+            Button { Speech.shared.speak(text) } label: {
+                Image(systemName: "speaker.wave.2.fill").font(.system(size: 19, weight: .medium)).foregroundStyle(Color.accent)
+                    .frame(width: 34, height: 30)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Play")
+            Button { Speech.shared.speak(text, slow: true) } label: {
+                Image(systemName: "tortoise.fill").font(.system(size: 14, weight: .medium)).foregroundStyle(Color.accent.opacity(0.8))
+                    .frame(width: 34, height: 24)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Play slowly")
+        }
+    }
+}
+
+/// A listening exercise's sound, as Duolingo has it: a big speaker button and a smaller
+/// tortoise button beside it.
+struct ListenButtons: View {
+    let text: String
+    var body: some View {
+        HStack(spacing: 12) {
+            Button { Speech.shared.speak(text) } label: {
+                Image(systemName: "speaker.wave.2.fill").font(.system(size: 30, weight: .semibold)).foregroundStyle(Color.onAccent)
+                    .frame(width: 74, height: 64)
+                    .background(Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .buttonStyle(PressDown(depth: 1))
+            .accessibilityLabel("Play")
+            Button { Speech.shared.speak(text, slow: true) } label: {
+                Image(systemName: "tortoise.fill").font(.system(size: 20, weight: .semibold)).foregroundStyle(Color.onAccent)
+                    .frame(width: 52, height: 46)
+                    .background(Color.accent.opacity(0.75), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+            }
+            .buttonStyle(PressDown(depth: 1))
+            .accessibilityLabel("Play slowly")
+        }
+        .padding(.vertical, 4)
+    }
+}
+
 struct NewBadge: View {
     var body: some View {
         Text("NEW WORD").font(.nunito(10.2, .black)).tracking(1.0)
@@ -778,14 +825,11 @@ struct ChoiceView: View {
                     Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(isNew ? Color.newInk : Color.ink)
                     Text(w.gloss).font(.nunito(16)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 case "listen":
-                    Button { Speech.shared.speak(w.hanzi) } label: {
-                        Image(systemName: "headphones").font(.system(size: 46, weight: .ultraLight)).foregroundStyle(Color.accent)
-                            .padding(6)
-                    }
-                    .buttonStyle(PressDown(depth: 1))
-                    SpeakerButton(text: w.hanzi, size: 15, withSlow: true)
+                    ListenButtons(text: w.hanzi)
                 default:
-                    // the word; its pinyin is under the bubble (as JIC had it)
+                    // the word, the sound at its left (as Duolingo has it); its pinyin is under the bubble
+                    HStack(alignment: .center, spacing: 8) {
+                    BubbleSound(text: w.hanzi)
                     VStack(spacing: 2) {
                         if isNew {
                             HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { reveal() }) {
@@ -799,7 +843,7 @@ struct ChoiceView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    SpeakerButton(text: w.hanzi, size: 15, withSlow: true)
+                    }
                 }
             }
             // the word's pinyin, big and tone-coloured under the bubble while it's new; once it's
@@ -866,6 +910,22 @@ struct ChoiceView: View {
         withAnimation(.easeOut(duration: 0.15)) { peek = true }
     }
 
+    /// The gap, as Duolingo draws it: a box you can't miss, dashed while empty, holding the
+    /// option picked (blue) until Check, then the answer (green, or red for a wrong pick).
+    private func gapSlot(_ answer: String, filled: Bool) -> some View {
+        let shown = filled ? answer : picked
+        let tint: Color = filled ? (picked == answer ? Color.good : Color.again) : Color.accent
+        return Text(shown ?? "　")
+            .font(.hanzi(24.8)).foregroundStyle(filled ? Color.good : Color.accent)
+            .padding(.horizontal, 8).padding(.vertical, 2)
+            .frame(minWidth: 56)
+            .background(RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(filled ? Color.goodSoft : shown == nil ? Color.accentSoft.opacity(0.6) : Color.accentSoft))
+            .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .strokeBorder(tint, style: StrokeStyle(lineWidth: 2, dash: shown == nil ? [5, 4] : [])))
+            .animation(.easeOut(duration: 0.15), value: shown)
+    }
+
     /// Fill the gap: the sentence with the word's place left empty (the word goes in, green,
     /// once it's answered), and what the whole sentence means under it.
     @ViewBuilder
@@ -877,14 +937,12 @@ struct ChoiceView: View {
                 VStack(spacing: 1) {
                     PinyinText(pinyin: word.pinyin, size: 12.5, weight: .semibold)
                         .opacity(gap ? (filled ? 1 : 0) : wheels.shows(hanzi: word.hanzi) || peek ? 1 : 0)
-                    Text(word.hanzi).font(.hanzi(24.8)).foregroundStyle(gap ? Color.good : Color.ink)
-                        .opacity(gap && !filled ? 0 : 1)
-                        .padding(.bottom, 2)
-                        .overlay(alignment: .bottom) {
-                            Rectangle().fill(gap ? (filled ? Color.good : Color.accent) : Color.clear).frame(height: 2)
-                        }
+                    if gap {
+                        gapSlot(word.hanzi, filled: filled)
+                    } else {
+                        Text(word.hanzi).font(.hanzi(24.8)).foregroundStyle(Color.ink).padding(.bottom, 2)
+                    }
                 }
-                .frame(minWidth: gap ? 46 : nil)
                 .padding(.horizontal, 3)
             }
         }
@@ -1156,12 +1214,7 @@ struct SentenceView: View {
                          long: ex.hearOnly ? false : ex.toChinese ? sent.en.count > 60 : sent.words.map(\.hanzi).joined().count > 14) {
                 if ex.hearOnly {
                     // tap what you hear: only the sound, again at a tap, and slowly
-                    Button { Speech.shared.speak(sent.hanzi) } label: {
-                        Image(systemName: "headphones").font(.system(size: 46, weight: .ultraLight)).foregroundStyle(Color.accent)
-                            .padding(6)
-                    }
-                    .buttonStyle(PressDown(depth: 1))
-                    SpeakerButton(text: sent.hanzi, size: 15, withSlow: true)
+                    ListenButtons(text: sent.hanzi)
                 } else if ex.toChinese {
                     if anyNew { NewBadge() }
                     FlowLayout(spacing: 4, lineSpacing: 4, center: true) {
@@ -1179,9 +1232,10 @@ struct SentenceView: View {
                     // as JIC had it: the NEW WORD tag on top, the speaker at the sentence's left, and
                     // each word with its tone-coloured pinyin over it
                     if anyNew { NewBadge() }
+                    // as Duolingo has it: the sound at the bubble's left, the words beside it
+                    HStack(alignment: .center, spacing: 6) {
+                    BubbleSound(text: sent.hanzi)
                     FlowLayout(spacing: 2, lineSpacing: 4) {
-                            // the speaker leads the sentence's first line, so the words get the bubble's width
-                            SpeakerButton(text: sent.hanzi, size: 15, withSlow: true)
                             ForEach(Array(sent.words.enumerated()), id: \.offset) { i, w in
                                 let new = isNew(w.hanzi)
                                 HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { _ = peeked.insert(i) }) {
@@ -1200,6 +1254,7 @@ struct SentenceView: View {
                     }
                     .contentShape(Rectangle())
                     .onTapGesture { withAnimation { pinyinOpen.toggle() } }
+                    }
                 }
             }
             if !HintTip.used && !ex.hearOnly { Text("Tap a word for its meaning, or hold a tile").font(.nunito(12.5)).foregroundStyle(Color.muted) }
