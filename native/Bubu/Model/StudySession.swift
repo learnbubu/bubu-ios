@@ -1312,7 +1312,7 @@ struct Exercise {
         let nDistract = long ? 2 : 3
         var tiles: [Tile] = []
         // the extra tiles: words already met, as Duolingo has it (the owner, 2 Oct 2026: 快 可 能 in
-        // the first lessons); words from the stones up to this one, then any, only if those run short
+        // the first lessons), then words from the stones up to this one; never a word from further on
         let here = course.lessonOrder[c.lessonId] ?? 0
         let known = course.cards.filter { !$0.isSentence && met($0.id) }
         let reached = course.cards.filter { !$0.isSentence && (course.lessonOrder[$0.lessonId] ?? .max) <= here }
@@ -1324,9 +1324,7 @@ struct Exercise {
                     pool.append(SentenceWord(hanzi: x.word.hanzi, pinyin: Course.wordPy[x.word.hanzi] ?? x.word.pinyin))
                 }
             }
-            for s in course.sentences.shuffled().prefix(200) where s.hanzi != sent.hanzi && pool.count < nDistract {
-                for w in s.words where !target.contains(w.hanzi) && seen.insert(w.hanzi).inserted { pool.append(w) }
-            }
+            // (fewer extra tiles rather than a word not met yet: the first stones have few words)
             let words = sent.words + pool.prefix(nDistract)
             tiles = words.enumerated().map { Tile(id: $0.offset, text: $0.element.hanzi, pinyin: $0.element.pinyin) }
         } else {
