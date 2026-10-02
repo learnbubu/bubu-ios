@@ -5,6 +5,9 @@ model tuned for fewer mistakes (llm.rl.pt), each take heard back and its tones m
     python tools/clone/spelltake.py make 1-5      # the takes (an hour or so on the GPU)
     python tools/clone/spelltake.py score 1-5     # finish them and score them, with the present clips
     python tools/clone/spelltake.py choose 1-5    # pick, list, and with `apply` put them in the app + a board
+    ROUND=2 python tools/clone/spelltake.py make 1-5 对不起 学校 …   # more takes of some words
+    python tools/clone/spelltake.py choose 1-5 all apply   # every word to its best passing take (the
+                                                           # owner, 2 Oct 2026: "after is way better")
 
 The 1 Oct 2026 pilot: of words said plainly 1 take in 24 passed both checks; spelled in pinyin,
 8 in 23. Sentences spelled in pinyin came out worse, so only words (up to four characters) are
@@ -31,15 +34,22 @@ def words(chs):
     return [t for t in ts if 1 <= len(judge.han(t)) <= 4 and not any(p in t for p in "，。！？,.!?")]
 
 
-def lines(chs):
+ROUND = os.environ.get("ROUND", "1")
+SUFFIX = "" if ROUND == "1" else f"-r{ROUND}"
+
+
+def lines(chs, only=None):
     out = []
     for t in words(chs):
+        if only and t not in only:
+            continue
         sp = spelled(t, pinyin(t))
         if not sp:
             continue
-        out += [(sp, t, f"alone-{k}") for k in range(1, ALONE + 1)]
+        n = ALONE if not only else 2 * ALONE
+        out += [(sp, t, f"alone{SUFFIX}-{k}") for k in range(1, n + 1)]
         if len(judge.han(t)) == 1:
-            out += [(c.format(sp), t, f"carried-{k}") for k, c in enumerate(CARRIERS, 1)]
+            out += [(c.format(sp), t, f"carried{SUFFIX}-{k}") for k, c in enumerate(CARRIERS, 1)]
     return out
 
 
@@ -62,19 +72,26 @@ if __name__ == "__main__":
     cmd, arg = sys.argv[1], sys.argv[2]
     chs = chapter.chapters_of(arg)
     os.makedirs(os.path.join(WORK, "clean"), exist_ok=True)
-    todo = lines(chs)
+    only = [a for a in sys.argv[3:] if a not in ("all", "apply")]
+    rounds = sorted(f[5:-5] for f in os.listdir(WORK) if f.startswith("lines") and f.endswith(".json"))   # "", "-r2", …
+
+    def round_lines():
+        for sfx in rounds:
+            for n, x in enumerate(json.load(open(os.path.join(WORK, f"lines{sfx}.json"), encoding="utf-8")), 1):
+                yield sfx, n, tuple(x)
+
     if cmd == "make":
-        open(os.path.join(WORK, "lines.txt"), "w", encoding="utf-8").write("\n".join(s for s, _, _ in todo) + "\n")
-        json.dump(todo, open(os.path.join(WORK, "lines.json"), "w", encoding="utf-8"), ensure_ascii=False)
+        todo = lines(chs, only or None)
+        open(os.path.join(WORK, f"lines{SUFFIX}.txt"), "w", encoding="utf-8").write("\n".join(s for s, _, _ in todo) + "\n")
+        json.dump(todo, open(os.path.join(WORK, f"lines{SUFFIX}.json"), "w", encoding="utf-8"), ensure_ascii=False)
         env = dict(os.environ, PYTHONIOENCODING="utf-8")
-        subprocess.run([VENV, os.path.join(HERE, "say.py"), chapter.PROMPT, chapter.PROMPT_TEXT, os.path.join(WORK, "raw"),
-                        os.path.join(WORK, "lines.txt"), "rl"], check=True, env=env, stderr=subprocess.DEVNULL)
+        subprocess.run([VENV, os.path.join(HERE, "say.py"), chapter.PROMPT, chapter.PROMPT_TEXT, os.path.join(WORK, f"raw{SUFFIX}"),
+                        os.path.join(WORK, f"lines{SUFFIX}.txt"), "rl"], check=True, env=env, stderr=subprocess.DEVNULL)
         print(len(todo), "takes made")
     elif cmd == "score":
-        todo = [tuple(x) for x in json.load(open(os.path.join(WORK, "lines.json"), encoding="utf-8"))]
         items = []
-        for n, (say, t, kind) in enumerate(todo, 1):
-            wav = os.path.join(WORK, "raw", f"{n:02d}.wav")
+        for sfx, n, (say, t, kind) in round_lines():
+            wav = os.path.join(WORK, f"raw{sfx}", f"{n:02d}.wav")
             out = path(t, kind)
             if os.path.exists(wav) and not os.path.exists(out):
                 data = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", wav, "-ac", "1", "-ar", "24000", "-f", "wav", "pipe:1"],
@@ -92,15 +109,19 @@ if __name__ == "__main__":
                        check=True, env=dict(os.environ, PYTHONIOENCODING="utf-8"))
     elif cmd == "choose":
         sc = json.load(open(os.path.join(WORK, "scores.json"), encoding="utf-8"))
-        owners = set(words([1]))
-        todo = [tuple(x) for x in json.load(open(os.path.join(WORK, "lines.json"), encoding="utf-8"))]
+        every = "all" in sys.argv[3:]
+        owners = set() if every else set(words([1]))
         kinds = {}
-        for _, t, kind in todo:
+        for _, _, (_, t, kind) in round_lines():
             kinds.setdefault(t, []).append(kind)
         changed, kept, failing, listed = [], 0, [], []
         for t in words(chs):
             now = sc.get(os.path.join(voice.OUT, voice.name(t) + ".mp3"))
-            if passes(t, now):
+            # (a clip already replaced from these takes is one of them: nothing to do)
+            if os.path.exists(os.path.join(WORK, "before", voice.name(t) + ".mp3")) and every and passes(t, now):
+                kept += 1
+                continue
+            if passes(t, now) and not every:
                 kept += 1
                 continue
             cands = [(k, sc.get(path(t, k))) for k in kinds.get(t, [])]
