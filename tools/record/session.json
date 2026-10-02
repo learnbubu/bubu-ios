@@ -1,0 +1,3590 @@
+[
+ {
+  "n": 1,
+  "part": "sentences",
+  "hanzi": "你好！",
+  "pinyin": "nǐhǎo!",
+  "en": "Hello!",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 2,
+  "part": "sentences",
+  "hanzi": "你好，马克！",
+  "pinyin": "nǐhǎo, Mǎkè!",
+  "en": "Hello, Mark!",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 3,
+  "part": "sentences",
+  "hanzi": "你好，小雨！",
+  "pinyin": "nǐhǎo, Xiǎoyǔ!",
+  "en": "Hello, Xiaoyu!",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 4,
+  "part": "sentences",
+  "hanzi": "你好，朵朵！",
+  "pinyin": "nǐhǎo, Duǒduo!",
+  "en": "Hello, Duoduo!",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 5,
+  "part": "sentences",
+  "hanzi": "我是马克。",
+  "pinyin": "wǒ shì Mǎkè.",
+  "en": "I am Mark.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 6,
+  "part": "sentences",
+  "hanzi": "我是小雨。",
+  "pinyin": "wǒ shì Xiǎoyǔ.",
+  "en": "I am Xiaoyu.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 7,
+  "part": "sentences",
+  "hanzi": "你是马克。",
+  "pinyin": "nǐ shì Mǎkè.",
+  "en": "You are Mark.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 8,
+  "part": "sentences",
+  "hanzi": "你好，我是朵朵。",
+  "pinyin": "nǐhǎo, wǒ shì Duǒduo.",
+  "en": "Hello, I am Duoduo.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 9,
+  "part": "sentences",
+  "hanzi": "你是小雨。",
+  "pinyin": "nǐ shì Xiǎoyǔ.",
+  "en": "You are Xiaoyu.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 10,
+  "part": "sentences",
+  "hanzi": "谢谢你！",
+  "pinyin": "xièxie nǐ!",
+  "en": "Thank you!",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 11,
+  "part": "sentences",
+  "hanzi": "谢谢，小雨！",
+  "pinyin": "xièxie, Xiǎoyǔ!",
+  "en": "Thanks, Xiaoyu!",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 12,
+  "part": "sentences",
+  "hanzi": "再见，马克！",
+  "pinyin": "zàijiàn, Mǎkè!",
+  "en": "Goodbye, Mark!",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 13,
+  "part": "sentences",
+  "hanzi": "谢谢！再见！",
+  "pinyin": "xièxie! zàijiàn!",
+  "en": "Thanks! Goodbye!",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 14,
+  "part": "sentences",
+  "hanzi": "你好，再见！",
+  "pinyin": "nǐhǎo, zàijiàn!",
+  "en": "Hello, goodbye!",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 15,
+  "part": "sentences",
+  "hanzi": "我叫马克。",
+  "pinyin": "wǒ jiào Mǎkè.",
+  "en": "My name is Mark.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 16,
+  "part": "sentences",
+  "hanzi": "你叫什么？",
+  "pinyin": "nǐ jiào shénme?",
+  "en": "What are you called?",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 17,
+  "part": "sentences",
+  "hanzi": "你叫什么名字？",
+  "pinyin": "nǐ jiào shénme míngzi?",
+  "en": "What is your name?",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 18,
+  "part": "sentences",
+  "hanzi": "我叫林小雨。",
+  "pinyin": "wǒ jiào Línxiǎoyǔ.",
+  "en": "My name is Lin Xiaoyu.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 19,
+  "part": "sentences",
+  "hanzi": "你好，我叫朵朵。",
+  "pinyin": "nǐhǎo, wǒ jiào Duǒduo.",
+  "en": "Hello, my name is Duoduo.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 20,
+  "part": "sentences",
+  "hanzi": "我很高兴。",
+  "pinyin": "wǒ hěn gāoxìng.",
+  "en": "I am very happy.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 21,
+  "part": "sentences",
+  "hanzi": "很高兴认识你。",
+  "pinyin": "hěn gāoxìng rènshi nǐ.",
+  "en": "Nice to meet you.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 22,
+  "part": "sentences",
+  "hanzi": "我很高兴认识你。",
+  "pinyin": "wǒ hěn gāoxìng rènshi nǐ.",
+  "en": "I am very happy to meet you.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 23,
+  "part": "sentences",
+  "hanzi": "我认识马克。",
+  "pinyin": "wǒ rènshi Mǎkè.",
+  "en": "I know Mark.",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 24,
+  "part": "sentences",
+  "hanzi": "你好，很高兴认识你！",
+  "pinyin": "nǐhǎo, hěn gāoxìng rènshi nǐ!",
+  "en": "Hello, nice to meet you!",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 25,
+  "part": "sentences",
+  "hanzi": "你是马克吗？",
+  "pinyin": "nǐ shì Mǎkè ma?",
+  "en": "Are you Mark?",
+  "kind": "practice",
+  "batch": "s01"
+ },
+ {
+  "n": 26,
+  "part": "sentences",
+  "hanzi": "我也很高兴。",
+  "pinyin": "wǒ yě hěn gāoxìng.",
+  "en": "I am very happy too.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 27,
+  "part": "sentences",
+  "hanzi": "我叫小雨，你呢？",
+  "pinyin": "wǒ jiào Xiǎoyǔ, nǐ ne?",
+  "en": "My name is Xiaoyu, and you?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 28,
+  "part": "sentences",
+  "hanzi": "你好吗？",
+  "pinyin": "nǐhǎo ma?",
+  "en": "How are you?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 29,
+  "part": "sentences",
+  "hanzi": "我很好，你呢？",
+  "pinyin": "wǒ hěn hǎo, nǐ ne?",
+  "en": "I am very well, and you?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 30,
+  "part": "sentences",
+  "hanzi": "你也认识小雨吗？",
+  "pinyin": "nǐ yě rènshi Xiǎoyǔ ma?",
+  "en": "Do you know Xiaoyu too?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 31,
+  "part": "sentences",
+  "hanzi": "我不是马克。",
+  "pinyin": "wǒ bù shì Mǎkè.",
+  "en": "I am not Mark.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 32,
+  "part": "sentences",
+  "hanzi": "对不起，我不认识你。",
+  "pinyin": "duìbuqǐ, wǒ bù rènshi nǐ.",
+  "en": "Sorry, I don't know you.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 33,
+  "part": "sentences",
+  "hanzi": "你不认识我吗？",
+  "pinyin": "nǐ bù rènshi wǒ ma?",
+  "en": "Don't you know me?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 34,
+  "part": "sentences",
+  "hanzi": "我不高兴。",
+  "pinyin": "wǒ bù gāoxìng.",
+  "en": "I am not happy.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 35,
+  "part": "sentences",
+  "hanzi": "对不起！没关系。",
+  "pinyin": "duìbuqǐ! méiguānxi.",
+  "en": "Sorry! That's OK.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 36,
+  "part": "sentences",
+  "hanzi": "请叫我马克。",
+  "pinyin": "qǐng jiào wǒ Mǎkè.",
+  "en": "Please call me Mark.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 37,
+  "part": "sentences",
+  "hanzi": "你很客气！",
+  "pinyin": "nǐ hěn kèqi!",
+  "en": "You are very polite!",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 38,
+  "part": "sentences",
+  "hanzi": "你懂吗？",
+  "pinyin": "nǐ dǒng ma?",
+  "en": "Do you understand?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 39,
+  "part": "sentences",
+  "hanzi": "这个是什么？",
+  "pinyin": "zhège shì shénme?",
+  "en": "What is this?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 40,
+  "part": "sentences",
+  "hanzi": "对不起，我不懂这个。",
+  "pinyin": "duìbuqǐ, wǒ bù dǒng zhège.",
+  "en": "Sorry, I don't understand this.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 41,
+  "part": "sentences",
+  "hanzi": "我也不懂。",
+  "pinyin": "wǒ yě bù dǒng.",
+  "en": "I don't understand either.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 42,
+  "part": "sentences",
+  "hanzi": "这个很好。",
+  "pinyin": "zhège hěn hǎo.",
+  "en": "This one is very good.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 43,
+  "part": "sentences",
+  "hanzi": "谢谢你！不客气。",
+  "pinyin": "xièxie nǐ! bùkèqi.",
+  "en": "Thank you! You're welcome.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 44,
+  "part": "sentences",
+  "hanzi": "这个很慢。",
+  "pinyin": "zhège hěn màn.",
+  "en": "This one is very slow.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 45,
+  "part": "sentences",
+  "hanzi": "这个怎么用？",
+  "pinyin": "zhège zěnme yòng?",
+  "en": "How do you use this?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 46,
+  "part": "sentences",
+  "hanzi": "你懂这个吗？",
+  "pinyin": "nǐ dǒng zhège ma?",
+  "en": "Do you understand this?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 47,
+  "part": "sentences",
+  "hanzi": "我不懂，你呢？",
+  "pinyin": "wǒbùdǒng, nǐ ne?",
+  "en": "I don't understand, and you?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 48,
+  "part": "sentences",
+  "hanzi": "你用这个吗？",
+  "pinyin": "nǐ yòng zhège ma?",
+  "en": "Do you use this?",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 49,
+  "part": "sentences",
+  "hanzi": "我用这个。",
+  "pinyin": "wǒ yòng zhège.",
+  "en": "I use this.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 50,
+  "part": "sentences",
+  "hanzi": "我是英国人。",
+  "pinyin": "wǒ shì yīngguó rén.",
+  "en": "I am British.",
+  "kind": "practice",
+  "batch": "s02"
+ },
+ {
+  "n": 51,
+  "part": "sentences",
+  "hanzi": "你是哪国人？",
+  "pinyin": "nǐ shì nǎ guó rén?",
+  "en": "What nationality are you?",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 52,
+  "part": "sentences",
+  "hanzi": "我住在伦敦。",
+  "pinyin": "wǒ zhù zài Lúndūn.",
+  "en": "I live in London.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 53,
+  "part": "sentences",
+  "hanzi": "你也住在伦敦吗？",
+  "pinyin": "nǐ yě zhù zài Lúndūn ma?",
+  "en": "Do you live in London too?",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 54,
+  "part": "sentences",
+  "hanzi": "马克是英国人。",
+  "pinyin": "Mǎkè shì yīngguó rén.",
+  "en": "Mark is British.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 55,
+  "part": "sentences",
+  "hanzi": "我从中国来。",
+  "pinyin": "wǒ cóng zhōngguó lái.",
+  "en": "I come from China.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 56,
+  "part": "sentences",
+  "hanzi": "你从哪里来？",
+  "pinyin": "nǐ cóng nǎlǐ lái?",
+  "en": "Where do you come from?",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 57,
+  "part": "sentences",
+  "hanzi": "小雨是成都人。",
+  "pinyin": "Xiǎoyǔ shì Chéngdū rén.",
+  "en": "Xiaoyu is from Chengdu.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 58,
+  "part": "sentences",
+  "hanzi": "你是哪里人？",
+  "pinyin": "nǐ shì nǎlǐ rén?",
+  "en": "Where are you from?",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 59,
+  "part": "sentences",
+  "hanzi": "我从伦敦来，你呢？",
+  "pinyin": "wǒ cóng Lúndūn lái, nǐ ne?",
+  "en": "I come from London, and you?",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 60,
+  "part": "sentences",
+  "hanzi": "我会说中文。",
+  "pinyin": "wǒ huì shuō zhōngwén.",
+  "en": "I can speak Chinese.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 61,
+  "part": "sentences",
+  "hanzi": "你会说中文吗？",
+  "pinyin": "nǐ huì shuō zhōngwén ma?",
+  "en": "Can you speak Chinese?",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 62,
+  "part": "sentences",
+  "hanzi": "陈明是北京人。",
+  "pinyin": "Chénmíng shì Běijīng rén.",
+  "en": "Chen Ming is from Beijing.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 63,
+  "part": "sentences",
+  "hanzi": "我不会说中文。",
+  "pinyin": "wǒ bù huì shuō zhōngwén.",
+  "en": "I can't speak Chinese.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 64,
+  "part": "sentences",
+  "hanzi": "我不是美国人。",
+  "pinyin": "wǒ bù shì měiguó rén.",
+  "en": "I am not American.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 65,
+  "part": "sentences",
+  "hanzi": "我会说一点儿汉语。",
+  "pinyin": "wǒ huì shuō yīdiǎnr hànyǔ.",
+  "en": "I can speak a little Chinese.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 66,
+  "part": "sentences",
+  "hanzi": "你是法国人吗？",
+  "pinyin": "nǐ shì fǎguó rén ma?",
+  "en": "Are you French?",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 67,
+  "part": "sentences",
+  "hanzi": "对不起，请再说一遍。",
+  "pinyin": "duìbuqǐ, qǐngzàishuōyībiàn.",
+  "en": "Sorry, please say it again.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 68,
+  "part": "sentences",
+  "hanzi": "小雨会说汉语。",
+  "pinyin": "Xiǎoyǔ huì shuō hànyǔ.",
+  "en": "Xiaoyu can speak Chinese.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 69,
+  "part": "sentences",
+  "hanzi": "我不会说汉语。",
+  "pinyin": "wǒ bù huì shuō hànyǔ.",
+  "en": "I can't speak Chinese.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 70,
+  "part": "sentences",
+  "hanzi": "我会说英语和法语。",
+  "pinyin": "wǒ huì shuō yīngyǔ hé fǎyǔ.",
+  "en": "I can speak English and French.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 71,
+  "part": "sentences",
+  "hanzi": "你会说法语吗？",
+  "pinyin": "nǐ huì shuō fǎyǔ ma?",
+  "en": "Can you speak French?",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 72,
+  "part": "sentences",
+  "hanzi": "我会说中文和英语。",
+  "pinyin": "wǒ huì shuō zhōngwén hé yīngyǔ.",
+  "en": "I can speak Chinese and English.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 73,
+  "part": "sentences",
+  "hanzi": "小雨会说英语。",
+  "pinyin": "Xiǎoyǔ huì shuō yīngyǔ.",
+  "en": "Xiaoyu can speak English.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 74,
+  "part": "sentences",
+  "hanzi": "马克不会说法语。",
+  "pinyin": "Mǎkè bù huì shuō fǎyǔ.",
+  "en": "Mark can't speak French.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 75,
+  "part": "sentences",
+  "hanzi": "我会说一点儿日语。",
+  "pinyin": "wǒ huì shuō yīdiǎnr rìyǔ.",
+  "en": "I can speak a little Japanese.",
+  "kind": "practice",
+  "batch": "s03"
+ },
+ {
+  "n": 76,
+  "part": "sentences",
+  "hanzi": "你是日本人吗？",
+  "pinyin": "nǐ shì rìběn rén ma?",
+  "en": "Are you Japanese?",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 77,
+  "part": "sentences",
+  "hanzi": "我从澳大利亚来。",
+  "pinyin": "wǒ cóng àodàlìyà lái.",
+  "en": "I come from Australia.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 78,
+  "part": "sentences",
+  "hanzi": "小雨会说一点儿日语。",
+  "pinyin": "Xiǎoyǔ huì shuō yīdiǎnr rìyǔ.",
+  "en": "Xiaoyu can speak a little Japanese.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 79,
+  "part": "sentences",
+  "hanzi": "你住在日本吗？",
+  "pinyin": "nǐ zhù zài rìběn ma?",
+  "en": "Do you live in Japan?",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 80,
+  "part": "sentences",
+  "hanzi": "我只会说英语。",
+  "pinyin": "wǒ zhǐ huì shuō yīngyǔ.",
+  "en": "I can only speak English.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 81,
+  "part": "sentences",
+  "hanzi": "我们一起学中文！",
+  "pinyin": "wǒmen yīqǐ xué zhōngwén!",
+  "en": "We learn Chinese together!",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 82,
+  "part": "sentences",
+  "hanzi": "我只会说一点儿中文。",
+  "pinyin": "wǒ zhǐ huì shuō yīdiǎnr zhōngwén.",
+  "en": "I can only speak a little Chinese.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 83,
+  "part": "sentences",
+  "hanzi": "我们也住在伦敦。",
+  "pinyin": "wǒmen yě zhù zài Lúndūn.",
+  "en": "We live in London too.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 84,
+  "part": "sentences",
+  "hanzi": "你学中文吗？",
+  "pinyin": "nǐ xué zhōngwén ma?",
+  "en": "Do you study Chinese?",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 85,
+  "part": "sentences",
+  "hanzi": "请问，你是马克吗？",
+  "pinyin": "qǐngwèn, nǐ shì Mǎkè ma?",
+  "en": "Excuse me, are you Mark?",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 86,
+  "part": "sentences",
+  "hanzi": "你姓什么？",
+  "pinyin": "nǐ xìng shénme?",
+  "en": "What is your surname?",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 87,
+  "part": "sentences",
+  "hanzi": "我姓林。",
+  "pinyin": "wǒ xìng Lín.",
+  "en": "My surname is Lin.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 88,
+  "part": "sentences",
+  "hanzi": "这是我朋友。",
+  "pinyin": "zhè shì wǒ péngyou.",
+  "en": "This is my friend.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 89,
+  "part": "sentences",
+  "hanzi": "对，我是马克。",
+  "pinyin": "duì, wǒ shì Mǎkè.",
+  "en": "Yes, I am Mark.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 90,
+  "part": "sentences",
+  "hanzi": "你是学生吗？",
+  "pinyin": "nǐ shì xuésheng ma?",
+  "en": "Are you a student?",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 91,
+  "part": "sentences",
+  "hanzi": "我不是学生。",
+  "pinyin": "wǒ bù shì xuésheng.",
+  "en": "I am not a student.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 92,
+  "part": "sentences",
+  "hanzi": "你喝咖啡吗？",
+  "pinyin": "nǐ hē kāfēi ma?",
+  "en": "Do you drink coffee?",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 93,
+  "part": "sentences",
+  "hanzi": "我喝茶。",
+  "pinyin": "wǒ hē chá.",
+  "en": "I drink tea.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 94,
+  "part": "sentences",
+  "hanzi": "他也喝茶。",
+  "pinyin": "tā yě hē chá.",
+  "en": "He drinks tea too.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 95,
+  "part": "sentences",
+  "hanzi": "他是我朋友。",
+  "pinyin": "tā shì wǒ péngyou.",
+  "en": "He is my friend.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 96,
+  "part": "sentences",
+  "hanzi": "她是老师。",
+  "pinyin": "tā shì lǎoshī.",
+  "en": "She is a teacher.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 97,
+  "part": "sentences",
+  "hanzi": "我喝水。",
+  "pinyin": "wǒ hē shuǐ.",
+  "en": "I drink water.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 98,
+  "part": "sentences",
+  "hanzi": "你做什么工作？",
+  "pinyin": "nǐ zuò shénme gōngzuò?",
+  "en": "What work do you do?",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 99,
+  "part": "sentences",
+  "hanzi": "她不是学生。",
+  "pinyin": "tā bù shì xuésheng.",
+  "en": "She is not a student.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 100,
+  "part": "sentences",
+  "hanzi": "他在伦敦工作。",
+  "pinyin": "tā zài Lúndūn gōngzuò.",
+  "en": "He works in London.",
+  "kind": "practice",
+  "batch": "s04"
+ },
+ {
+  "n": 101,
+  "part": "sentences",
+  "hanzi": "我是设计师。",
+  "pinyin": "wǒ shì shèjìshī.",
+  "en": "I am a designer.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 102,
+  "part": "sentences",
+  "hanzi": "她在大学学设计。",
+  "pinyin": "tā zài dàxué xué shèjì.",
+  "en": "She studies design at university.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 103,
+  "part": "sentences",
+  "hanzi": "你是大学生吗？",
+  "pinyin": "nǐ shì dàxuéshēng ma?",
+  "en": "Are you a university student?",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 104,
+  "part": "sentences",
+  "hanzi": "太好了！我也是设计师。",
+  "pinyin": "tàihǎole! wǒ yě shì shèjìshī.",
+  "en": "Great! I am a designer too.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 105,
+  "part": "sentences",
+  "hanzi": "马克是设计师。",
+  "pinyin": "Mǎkè shì shèjìshī.",
+  "en": "Mark is a designer.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 106,
+  "part": "sentences",
+  "hanzi": "你在哪儿工作？",
+  "pinyin": "nǐ zài nǎr gōngzuò?",
+  "en": "Where do you work?",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 107,
+  "part": "sentences",
+  "hanzi": "我在设计公司工作。",
+  "pinyin": "wǒ zài shèjì gōngsī gōngzuò.",
+  "en": "I work at a design company.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 108,
+  "part": "sentences",
+  "hanzi": "她是医生，在医院工作。",
+  "pinyin": "tā shì yīshēng, zài yīyuàn gōngzuò.",
+  "en": "She is a doctor and works at a hospital.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 109,
+  "part": "sentences",
+  "hanzi": "你住在哪儿？",
+  "pinyin": "nǐ zhù zài nǎr?",
+  "en": "Where do you live?",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 110,
+  "part": "sentences",
+  "hanzi": "他在公司工作。",
+  "pinyin": "tā zài gōngsī gōngzuò.",
+  "en": "He works at a company.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 111,
+  "part": "sentences",
+  "hanzi": "这是我表哥。",
+  "pinyin": "zhè shì wǒ biǎogē.",
+  "en": "This is my cousin.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 112,
+  "part": "sentences",
+  "hanzi": "他是厨师。",
+  "pinyin": "tā shì chúshī.",
+  "en": "He is a chef.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 113,
+  "part": "sentences",
+  "hanzi": "老师在学校工作。",
+  "pinyin": "lǎoshī zài xuéxiào gōngzuò.",
+  "en": "The teacher works at a school.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 114,
+  "part": "sentences",
+  "hanzi": "那是什么？",
+  "pinyin": "nà shì shénme?",
+  "en": "What is that?",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 115,
+  "part": "sentences",
+  "hanzi": "我表哥住在北京。",
+  "pinyin": "wǒ biǎogē zhù zài Běijīng.",
+  "en": "My cousin lives in Beijing.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 116,
+  "part": "sentences",
+  "hanzi": "那是我的饭馆。",
+  "pinyin": "nà shì wǒ de fànguǎn.",
+  "en": "That is my restaurant.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 117,
+  "part": "sentences",
+  "hanzi": "这是我的家。",
+  "pinyin": "zhè shì wǒ de jiā.",
+  "en": "This is my home.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 118,
+  "part": "sentences",
+  "hanzi": "真的吗？",
+  "pinyin": "zhēnde ma?",
+  "en": "Really?",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 119,
+  "part": "sentences",
+  "hanzi": "这是你的茶吗？",
+  "pinyin": "zhè shì nǐ de chá ma?",
+  "en": "Is this your tea?",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 120,
+  "part": "sentences",
+  "hanzi": "他的饭馆叫什么名字？",
+  "pinyin": "tā de fànguǎn jiào shénme míngzi?",
+  "en": "What is his restaurant called?",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 121,
+  "part": "sentences",
+  "hanzi": "这是谁的手机？",
+  "pinyin": "zhè shì shéi de shǒujī?",
+  "en": "Whose phone is this?",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 122,
+  "part": "sentences",
+  "hanzi": "陈明的饺子很好吃。",
+  "pinyin": "Chénmíng de jiǎozi hěn hǎochī.",
+  "en": "Chen Ming's dumplings are delicious.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 123,
+  "part": "sentences",
+  "hanzi": "他是谁？",
+  "pinyin": "tā shì shéi?",
+  "en": "Who is he?",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 124,
+  "part": "sentences",
+  "hanzi": "这是我的手机。",
+  "pinyin": "zhè shì wǒ de shǒujī.",
+  "en": "This is my phone.",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 125,
+  "part": "sentences",
+  "hanzi": "饺子好吃吗？",
+  "pinyin": "jiǎozi hǎochī ma?",
+  "en": "Are the dumplings tasty?",
+  "kind": "practice",
+  "batch": "s05"
+ },
+ {
+  "n": 126,
+  "part": "sentences",
+  "hanzi": "三个学生。",
+  "pinyin": "sān gè xuésheng.",
+  "en": "Three students.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 127,
+  "part": "sentences",
+  "hanzi": "二十个饺子。",
+  "pinyin": "èr shí gè jiǎozi.",
+  "en": "Twenty dumplings.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 128,
+  "part": "sentences",
+  "hanzi": "一百个人。",
+  "pinyin": "yī bǎi gè rén.",
+  "en": "One hundred people.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 129,
+  "part": "sentences",
+  "hanzi": "五加五是十。",
+  "pinyin": "wǔ jiā wǔ shì shí.",
+  "en": "Five plus five is ten.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 130,
+  "part": "sentences",
+  "hanzi": "我认识十个老师。",
+  "pinyin": "wǒ rènshi shí gè lǎoshī.",
+  "en": "I know ten teachers.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 131,
+  "part": "sentences",
+  "hanzi": "四个老师。",
+  "pinyin": "sì gè lǎoshī.",
+  "en": "Four teachers.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 132,
+  "part": "sentences",
+  "hanzi": "五个朋友。",
+  "pinyin": "wǔ gè péngyou.",
+  "en": "Five friends.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 133,
+  "part": "sentences",
+  "hanzi": "一千个人。",
+  "pinyin": "yī qiān gè rén.",
+  "en": "A thousand people.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 134,
+  "part": "sentences",
+  "hanzi": "六加二是八。",
+  "pinyin": "liù jiā èr shì bā.",
+  "en": "Six plus two is eight.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 135,
+  "part": "sentences",
+  "hanzi": "我们加个微信吧！",
+  "pinyin": "wǒmen jiā gè wēixìn ba!",
+  "en": "Let's add each other on WeChat!",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 136,
+  "part": "sentences",
+  "hanzi": "好，我们加个微信吧！",
+  "pinyin": "hǎo, wǒmen jiā gè wēixìn ba!",
+  "en": "OK, let's add each other on WeChat!",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 137,
+  "part": "sentences",
+  "hanzi": "你扫我的二维码吧。",
+  "pinyin": "nǐ sǎo wǒ de èrwéimǎ ba.",
+  "en": "Scan my QR code.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 138,
+  "part": "sentences",
+  "hanzi": "这是我的微信。",
+  "pinyin": "zhè shì wǒ de wēixìn.",
+  "en": "This is my WeChat.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 139,
+  "part": "sentences",
+  "hanzi": "我们一起学中文吧！",
+  "pinyin": "wǒmen yīqǐ xué zhōngwén ba!",
+  "en": "Let's learn Chinese together!",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 140,
+  "part": "sentences",
+  "hanzi": "这是我的电话号码。",
+  "pinyin": "zhè shì wǒ de diànhuà hàomǎ.",
+  "en": "This is my phone number.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 141,
+  "part": "sentences",
+  "hanzi": "他的公司很大。",
+  "pinyin": "tā de gōngsī hěn dà.",
+  "en": "His company is very big.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 142,
+  "part": "sentences",
+  "hanzi": "这是谁的电话？",
+  "pinyin": "zhè shì shéi de diànhuà?",
+  "en": "Whose telephone is this?",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 143,
+  "part": "sentences",
+  "hanzi": "你的饭馆很大。",
+  "pinyin": "nǐ de fànguǎn hěn dà.",
+  "en": "Your restaurant is very big.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 144,
+  "part": "sentences",
+  "hanzi": "你几岁？",
+  "pinyin": "nǐ jǐ suì?",
+  "en": "How old are you?",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 145,
+  "part": "sentences",
+  "hanzi": "我八岁。",
+  "pinyin": "wǒ bā suì.",
+  "en": "I am eight years old.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 146,
+  "part": "sentences",
+  "hanzi": "我有两个朋友。",
+  "pinyin": "wǒ yǒu liǎng gè péngyou.",
+  "en": "I have two friends.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 147,
+  "part": "sentences",
+  "hanzi": "饭馆有几个服务员？",
+  "pinyin": "fànguǎn yǒu jǐ gè fúwùyuán?",
+  "en": "How many waiters does the restaurant have?",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 148,
+  "part": "sentences",
+  "hanzi": "她三十岁。",
+  "pinyin": "tā sān shí suì.",
+  "en": "She is thirty years old.",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 149,
+  "part": "sentences",
+  "hanzi": "你们好！",
+  "pinyin": "nǐmen hǎo!",
+  "en": "Hello, everyone!",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 150,
+  "part": "sentences",
+  "hanzi": "你们是学生吗？",
+  "pinyin": "nǐmen shì xuésheng ma?",
+  "en": "Are you students?",
+  "kind": "practice",
+  "batch": "s06"
+ },
+ {
+  "n": 151,
+  "part": "sentences",
+  "hanzi": "你们住在哪儿？",
+  "pinyin": "nǐmen zhù zài nǎr?",
+  "en": "Where do you live?",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 152,
+  "part": "sentences",
+  "hanzi": "你们有几个老师？",
+  "pinyin": "nǐmen yǒu jǐ gè lǎoshī?",
+  "en": "How many teachers do you have?",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 153,
+  "part": "sentences",
+  "hanzi": "你多大？",
+  "pinyin": "nǐ duōdà?",
+  "en": "How old are you?",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 154,
+  "part": "sentences",
+  "hanzi": "你的电话号码是多少？",
+  "pinyin": "nǐ de diànhuà hàomǎ shì duōshǎo?",
+  "en": "What is your phone number?",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 155,
+  "part": "sentences",
+  "hanzi": "他有两个孩子。",
+  "pinyin": "tā yǒu liǎng gè háizi.",
+  "en": "He has two children.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 156,
+  "part": "sentences",
+  "hanzi": "你们公司有多少人？",
+  "pinyin": "nǐmen gōngsī yǒu duōshǎo rén?",
+  "en": "How many people does your company have?",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 157,
+  "part": "sentences",
+  "hanzi": "差不多一百个人。",
+  "pinyin": "chàbuduō yī bǎi gè rén.",
+  "en": "About a hundred people.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 158,
+  "part": "sentences",
+  "hanzi": "你在干什么？",
+  "pinyin": "nǐ zài gàn shénme?",
+  "en": "What are you doing?",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 159,
+  "part": "sentences",
+  "hanzi": "我在听音乐。",
+  "pinyin": "wǒ zài tīng yīnyuè.",
+  "en": "I am listening to music.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 160,
+  "part": "sentences",
+  "hanzi": "你现在在哪儿？",
+  "pinyin": "nǐ xiànzài zài nǎr?",
+  "en": "Where are you now?",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 161,
+  "part": "sentences",
+  "hanzi": "她在学中文。",
+  "pinyin": "tā zài xué zhōngwén.",
+  "en": "She is studying Chinese.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 162,
+  "part": "sentences",
+  "hanzi": "他现在在工作。",
+  "pinyin": "tā xiànzài zài gōngzuò.",
+  "en": "He is working now.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 163,
+  "part": "sentences",
+  "hanzi": "我在看书。",
+  "pinyin": "wǒ zài kàn shū.",
+  "en": "I am reading a book.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 164,
+  "part": "sentences",
+  "hanzi": "他在做饭。",
+  "pinyin": "tā zài zuòfàn.",
+  "en": "He is cooking.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 165,
+  "part": "sentences",
+  "hanzi": "你看电视吗？",
+  "pinyin": "nǐ kàn diànshì ma?",
+  "en": "Do you watch TV?",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 166,
+  "part": "sentences",
+  "hanzi": "她在家看电视。",
+  "pinyin": "tā zài jiā kàn diànshì.",
+  "en": "She is watching TV at home.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 167,
+  "part": "sentences",
+  "hanzi": "我表哥在饭馆做饭。",
+  "pinyin": "wǒ biǎogē zài fànguǎn zuòfàn.",
+  "en": "My cousin cooks at the restaurant.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 168,
+  "part": "sentences",
+  "hanzi": "他在睡觉。",
+  "pinyin": "tā zài shuìjiào.",
+  "en": "He is sleeping.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 169,
+  "part": "sentences",
+  "hanzi": "我没在看电视。",
+  "pinyin": "wǒ méi zài kàn diànshì.",
+  "en": "I am not watching TV.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 170,
+  "part": "sentences",
+  "hanzi": "明天你工作吗？",
+  "pinyin": "míngtiān nǐ gōngzuò ma?",
+  "en": "Do you work tomorrow?",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 171,
+  "part": "sentences",
+  "hanzi": "我明天跑步。",
+  "pinyin": "wǒ míngtiān pǎobù.",
+  "en": "I go running tomorrow.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 172,
+  "part": "sentences",
+  "hanzi": "她没在睡觉，她在看书。",
+  "pinyin": "tā méi zài shuìjiào, tā zài kàn shū.",
+  "en": "She is not sleeping, she is reading.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 173,
+  "part": "sentences",
+  "hanzi": "我想看电影。",
+  "pinyin": "wǒ xiǎng kàn diànyǐng.",
+  "en": "I would like to see a film.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 174,
+  "part": "sentences",
+  "hanzi": "今天晚上你想做什么？",
+  "pinyin": "jīntiān wǎnshang nǐ xiǎng zuò shénme?",
+  "en": "What do you want to do this evening?",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 175,
+  "part": "sentences",
+  "hanzi": "我不想看电视。",
+  "pinyin": "wǒ bù xiǎng kàn diànshì.",
+  "en": "I don't want to watch TV.",
+  "kind": "practice",
+  "batch": "s07"
+ },
+ {
+  "n": 176,
+  "part": "sentences",
+  "hanzi": "你想喝茶吗？",
+  "pinyin": "nǐ xiǎng hē chá ma?",
+  "en": "Would you like some tea?",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 177,
+  "part": "sentences",
+  "hanzi": "明天晚上我想听音乐。",
+  "pinyin": "míngtiān wǎnshang wǒ xiǎng tīng yīnyuè.",
+  "en": "Tomorrow evening I want to listen to music.",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 178,
+  "part": "sentences",
+  "hanzi": "我要去饭馆吃饺子。",
+  "pinyin": "wǒ yào qù fànguǎn chī jiǎozi.",
+  "en": "I am going to the restaurant to eat dumplings.",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 179,
+  "part": "sentences",
+  "hanzi": "你想去吗？",
+  "pinyin": "nǐ xiǎng qù ma?",
+  "en": "Do you want to go?",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 180,
+  "part": "sentences",
+  "hanzi": "我们一起去吧！",
+  "pinyin": "wǒmen yīqǐ qù ba!",
+  "en": "Let's go together!",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 181,
+  "part": "sentences",
+  "hanzi": "明天我要去公司工作。",
+  "pinyin": "míngtiān wǒ yào qù gōngsī gōngzuò.",
+  "en": "Tomorrow I am going to the office to work.",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 182,
+  "part": "sentences",
+  "hanzi": "你想吃什么？",
+  "pinyin": "nǐ xiǎng chī shénme?",
+  "en": "What do you want to eat?",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 183,
+  "part": "sentences",
+  "hanzi": "明天见！",
+  "pinyin": "míngtiān jiàn!",
+  "en": "See you tomorrow!",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 184,
+  "part": "sentences",
+  "hanzi": "饭馆有很多人。",
+  "pinyin": "fànguǎn yǒu hěnduō rén.",
+  "en": "The restaurant has a lot of people.",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 185,
+  "part": "sentences",
+  "hanzi": "我想问老师。",
+  "pinyin": "wǒ xiǎng wèn lǎoshī.",
+  "en": "I want to ask the teacher.",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 186,
+  "part": "sentences",
+  "hanzi": "她有很多朋友。",
+  "pinyin": "tā yǒu hěnduō péngyou.",
+  "en": "She has a lot of friends.",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 187,
+  "part": "sentences",
+  "hanzi": "我们明天晚上见！",
+  "pinyin": "wǒmen míngtiān wǎnshang jiàn!",
+  "en": "See you tomorrow evening!",
+  "kind": "practice",
+  "batch": "s08"
+ },
+ {
+  "n": 188,
+  "part": "sentences",
+  "hanzi": "马克，你是哪国人？",
+  "pinyin": "Mǎkè, nǐ shì nǎ guó rén?",
+  "en": "Mark, what nationality are you?",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 189,
+  "part": "sentences",
+  "hanzi": "很高兴认识你，马克！",
+  "pinyin": "hěn gāoxìng rènshi nǐ, Mǎkè!",
+  "en": "Nice to meet you, Mark!",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 190,
+  "part": "sentences",
+  "hanzi": "马克，你每天几点起床？",
+  "pinyin": "Mǎkè, nǐ měitiān jǐ diǎn qǐchuáng?",
+  "en": "Mark, what time do you get up every day?",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 191,
+  "part": "sentences",
+  "hanzi": "马克，这是我表哥，陈明。",
+  "pinyin": "Mǎkè, zhè shì wǒ biǎogē, Chénmíng.",
+  "en": "Mark, this is my cousin, Chen Ming.",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 192,
+  "part": "sentences",
+  "hanzi": "小雨，你今年多大？",
+  "pinyin": "Xiǎoyǔ, nǐ jīnnián duōdà?",
+  "en": "Xiaoyu, how old are you this year?",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 193,
+  "part": "sentences",
+  "hanzi": "很少下雪，可是常常下雨。都是小雨！",
+  "pinyin": "hěn shǎo xiàxuě, kěshì chángcháng xiàyǔ. dōu shì Xiǎoyǔ!",
+  "en": "Hardly ever, but it rains a lot. Always light rain, xiǎoyǔ!",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 194,
+  "part": "sentences",
+  "hanzi": "小雨，我们加个微信吧！",
+  "pinyin": "Xiǎoyǔ, wǒmen jiā gè wēixìn ba!",
+  "en": "Xiaoyu, let's add each other on WeChat!",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 195,
+  "part": "sentences",
+  "hanzi": "别告诉小雨！",
+  "pinyin": "bié gàosu Xiǎoyǔ!",
+  "en": "Don't tell Xiaoyu!",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 196,
+  "part": "sentences",
+  "hanzi": "陈明，你的饭馆有几个厨师？",
+  "pinyin": "Chénmíng, nǐ de fànguǎn yǒu jǐ gè chúshī?",
+  "en": "Chen Ming, how many chefs are there at your restaurant?",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 197,
+  "part": "sentences",
+  "hanzi": "六块五。陈明感冒了？他就是太累了！",
+  "pinyin": "liù kuài wǔ. Chénmíng gǎnmào le? tā jiù shì tài lèi le!",
+  "en": "Six fifty. Chen Ming's got a cold? He's just worn out!",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 198,
+  "part": "sentences",
+  "hanzi": "陈明，你怎么了？哪儿不舒服？",
+  "pinyin": "Chénmíng, nǐ zěnmele? nǎr bù shūfu?",
+  "en": "Chen Ming, what's the matter? Are you not well?",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 199,
+  "part": "sentences",
+  "hanzi": "朵朵，这是我朋友。",
+  "pinyin": "Duǒduo, zhè shì wǒ péngyou.",
+  "en": "Duoduo, this is my friend.",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 200,
+  "part": "sentences",
+  "hanzi": "我和朵朵在家做了几个北京菜，还看了一个电影。",
+  "pinyin": "wǒ hé Duǒduo zài jiā zuò le jǐ gè běijīng cài, hái kàn le yī gè diànyǐng.",
+  "en": "Duoduo and I cooked a few Beijing dishes at home, and watched a film.",
+  "kind": "dialogue",
+  "batch": "s08"
+ },
+ {
+  "n": 201,
+  "part": "sentences",
+  "hanzi": "你好！我叫朵朵。你叫什么名字？",
+  "pinyin": "nǐhǎo! wǒ jiào Duǒduo. nǐ jiào shénme míngzi?",
+  "en": "Hi! I'm Duoduo. What's your name?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 202,
+  "part": "sentences",
+  "hanzi": "明天我们想带朵朵去大英博物馆。离这儿远吗？",
+  "pinyin": "míngtiān wǒmen xiǎng dài Duǒduo qù Dàyīngbówùguǎn. lí zhèr yuǎn ma?",
+  "en": "Tomorrow we'd like to take Duoduo to the British Museum. Is it far from here?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 203,
+  "part": "sentences",
+  "hanzi": "你们好！想喝点儿什么？",
+  "pinyin": "nǐmen hǎo! xiǎng hē diǎnr shénme?",
+  "en": "Hello, you two! What would you like?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 204,
+  "part": "sentences",
+  "hanzi": "会！我会说英语和中文。你会说中文吗？",
+  "pinyin": "huì! wǒ huì shuō yīngyǔ hé zhōngwén. nǐ huì shuō zhōngwén ma?",
+  "en": "Yes! I speak English and Chinese. Can you speak Chinese?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 205,
+  "part": "sentences",
+  "hanzi": "你晚上几点睡觉？",
+  "pinyin": "nǐ wǎnshang jǐ diǎn shuìjiào?",
+  "en": "What time do you go to bed?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 206,
+  "part": "sentences",
+  "hanzi": "零七七零零，九零零，四六一？",
+  "pinyin": "líng qīqī línglíng, jiǔ línglíng, sìliù yī?",
+  "en": "07700 900… four six one?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 207,
+  "part": "sentences",
+  "hanzi": "我喜欢做饭，也喜欢逛市场。你有什么爱好？",
+  "pinyin": "wǒ xǐhuan zuòfàn, yě xǐhuan guàng shìchǎng. nǐ yǒu shénme àihào?",
+  "en": "I like cooking, and I like wandering round markets. What are your hobbies?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 208,
+  "part": "sentences",
+  "hanzi": "对，我姓林。你姓什么？",
+  "pinyin": "duì, wǒ xìng Lín. nǐ xìng shénme?",
+  "en": "Yes, my surname is Lin. What's your surname?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 209,
+  "part": "sentences",
+  "hanzi": "那是你的饭馆？太好了！你的饭馆叫什么名字？",
+  "pinyin": "nà shì nǐ de fànguǎn? tàihǎole! nǐ de fànguǎn jiào shénme míngzi?",
+  "en": "That's yours? Great! What's it called?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 210,
+  "part": "sentences",
+  "hanzi": "大杯。马克，你喝哪个？",
+  "pinyin": "dà bēi. Mǎkè, nǐ hē nǎge?",
+  "en": "Large. Mark, which one are you having?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 211,
+  "part": "sentences",
+  "hanzi": "不太冷，没有北京那么冷。伦敦冬天常常下雪吗？",
+  "pinyin": "bù tài lěng, méiyǒu běijīng nàme lěng. lúndūn dōngtiān chángcháng xiàxuě ma?",
+  "en": "Not very. Not as cold as Beijing. Does it snow much in London in winter?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 212,
+  "part": "sentences",
+  "hanzi": "真的吗？那我也要送她一件礼物。送什么好呢？",
+  "pinyin": "zhēnde ma? nà wǒ yě yào sòng tā yī jiàn lǐwù. sòng shénme hǎo ne?",
+  "en": "Really? Then I want to get her a present too. What should I give her?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 213,
+  "part": "sentences",
+  "hanzi": "你好！请问，你是马克吗？",
+  "pinyin": "nǐhǎo! qǐngwèn, nǐ shì Mǎkè ma?",
+  "en": "Hello! Excuse me, are you Mark?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 214,
+  "part": "sentences",
+  "hanzi": "马克，上个周末你做了什么？",
+  "pinyin": "Mǎkè, shàng gè zhōumò nǐ zuò le shénme?",
+  "en": "Mark, what did you do last weekend?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 215,
+  "part": "sentences",
+  "hanzi": "月饼呢？买几盒？",
+  "pinyin": "yuèbǐng ne? mǎi jǐ hé?",
+  "en": "What about mooncakes? How many boxes?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 216,
+  "part": "sentences",
+  "hanzi": "那星期天呢？你有空吗？",
+  "pinyin": "nà xīngqītiān ne? nǐ yǒukòng ma?",
+  "en": "What about Sunday, then? Are you free?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 217,
+  "part": "sentences",
+  "hanzi": "几月几号？",
+  "pinyin": "jǐ yuè jǐ hào?",
+  "en": "What's the date?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 218,
+  "part": "sentences",
+  "hanzi": "你几点下班？",
+  "pinyin": "nǐ jǐ diǎn xiàbān?",
+  "en": "What time do you finish work?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 219,
+  "part": "sentences",
+  "hanzi": "成都的冬天冷吗？",
+  "pinyin": "chéngdū de dōngtiān lěng ma?",
+  "en": "Are winters cold in Chengdu?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 220,
+  "part": "sentences",
+  "hanzi": "左拐？然后呢？",
+  "pinyin": "zuǒ guǎi? ránhòu ne?",
+  "en": "Left? And then?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 221,
+  "part": "sentences",
+  "hanzi": "好啊！表哥，你也一起去吧？",
+  "pinyin": "hǎo a! biǎogē, nǐ yě yīqǐ qù ba?",
+  "en": "Sure! You'll come too, won't you, cousin?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 222,
+  "part": "sentences",
+  "hanzi": "陈明呢？他在做饭吗？",
+  "pinyin": "Chénmíng ne? tā zài zuòfàn ma?",
+  "en": "What about Chen Ming? Is he cooking?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 223,
+  "part": "sentences",
+  "hanzi": "你发烧了吗？",
+  "pinyin": "nǐ fāshāo le ma?",
+  "en": "Have you got a temperature?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 224,
+  "part": "sentences",
+  "hanzi": "请问，这是谁的手机？",
+  "pinyin": "qǐngwèn, zhè shì shéi de shǒujī?",
+  "en": "Excuse me, whose phone is this?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 225,
+  "part": "sentences",
+  "hanzi": "马克，你喝咖啡吗？",
+  "pinyin": "Mǎkè, nǐ hē kāfēi ma?",
+  "en": "Mark, will you have a coffee?",
+  "kind": "dialogue",
+  "batch": "s09"
+ },
+ {
+  "n": 226,
+  "part": "sentences",
+  "hanzi": "对。你在哪儿工作？",
+  "pinyin": "duì. nǐ zài nǎr gōngzuò?",
+  "en": "Yes. Where do you work?",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 227,
+  "part": "sentences",
+  "hanzi": "大杯还是中杯？",
+  "pinyin": "dà bēi háishi zhōng bēi?",
+  "en": "Large or medium?",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 228,
+  "part": "sentences",
+  "hanzi": "差五分三点！电影已经开始了，快走吧！",
+  "pinyin": "chà wǔ fēn sān diǎn! diànyǐng yǐjīng kāishǐ le, kuài zǒu ba!",
+  "en": "Five to three! The film's already started. Come on, quick!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 229,
+  "part": "sentences",
+  "hanzi": "星期天上午可以。",
+  "pinyin": "xīngqītiān shàngwǔ kěyǐ.",
+  "en": "Sunday morning's fine.",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 230,
+  "part": "sentences",
+  "hanzi": "星期六你有空吗？我们一起去逛博罗市场吧！",
+  "pinyin": "xīngqī liù nǐ yǒukòng ma? wǒmen yīqǐ qù guàng Bóluóshìchǎng ba!",
+  "en": "Are you free on Saturday? Let's go to Borough Market!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 231,
+  "part": "sentences",
+  "hanzi": "那我们一起开车去吧！",
+  "pinyin": "nà wǒmen yīqǐ kāichē qù ba!",
+  "en": "Then let's all drive there together!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 232,
+  "part": "sentences",
+  "hanzi": "妈妈，我们北京人也很热情啊！来，先吃饺子吧！",
+  "pinyin": "māma, wǒmen běijīng rén yě hěn rèqíng a! lái, xiān chī jiǎozi ba!",
+  "en": "Mum, we Beijingers are friendly too! Now, have some dumplings first!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 233,
+  "part": "sentences",
+  "hanzi": "我有车，可是没去过牛津。我在伦敦住了十年，还没去过！",
+  "pinyin": "wǒ yǒu chē, kěshì méi qù guo Niújīn. wǒ zài lúndūn zhù le shí nián, hái méi qù guo!",
+  "en": "I've got a car, but I've never been. Ten years in London and I still haven't been!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 234,
+  "part": "sentences",
+  "hanzi": "中秋节快乐！",
+  "pinyin": "zhōngqiūjié kuàilè!",
+  "en": "Happy Mid-Autumn!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 235,
+  "part": "sentences",
+  "hanzi": "我头疼，嗓子也疼。",
+  "pinyin": "wǒ tóuténg, sǎngzi yě téng.",
+  "en": "I've got a headache, and a sore throat.",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 236,
+  "part": "sentences",
+  "hanzi": "今天有点儿冷！",
+  "pinyin": "jīntiān yǒudiǎnr lěng!",
+  "en": "It's a bit cold today!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 237,
+  "part": "sentences",
+  "hanzi": "我去过好几次。牛津很漂亮！",
+  "pinyin": "wǒ qù guo hǎojǐ cì. Niújīn hěn piàoliang!",
+  "en": "I've been quite a few times. Oxford's beautiful!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 238,
+  "part": "sentences",
+  "hanzi": "我们在伦敦住了很多年，还不认识路！",
+  "pinyin": "wǒmen zài lúndūn zhù le hěnduō nián, hái bù rènshi lù!",
+  "en": "All these years in London, and we still don't know the way!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 239,
+  "part": "sentences",
+  "hanzi": "星期六？不好意思，星期六饭馆很忙，我要工作。",
+  "pinyin": "xīngqī liù? bùhǎoyìsi, xīngqī liù fànguǎn hěn máng, wǒ yào gōngzuò.",
+  "en": "Saturday? Sorry, Saturday's busy at the restaurant. I have to work.",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 240,
+  "part": "sentences",
+  "hanzi": "十一点。睡觉以前，我喜欢看一点儿书。",
+  "pinyin": "shí yī diǎn. shuìjiào yǐqián, wǒ xǐhuan kàn yīdiǎnr shū.",
+  "en": "Eleven. Before bed I like to read a bit.",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 241,
+  "part": "sentences",
+  "hanzi": "是，我是马克。你好！",
+  "pinyin": "shì, wǒ shì Mǎkè. nǐhǎo!",
+  "en": "Yes, I'm Mark. Hello!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 242,
+  "part": "sentences",
+  "hanzi": "叫“陈家饺子”。",
+  "pinyin": "jiào Chénjiājiǎozi.",
+  "en": "It's called Chen Family Dumplings.",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 243,
+  "part": "sentences",
+  "hanzi": "好啊！星期天我有空。",
+  "pinyin": "hǎo a! xīngqītiān wǒ yǒukòng.",
+  "en": "Sure! I'm free on Sunday.",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 244,
+  "part": "sentences",
+  "hanzi": "二十三岁了！",
+  "pinyin": "èr shí sān suì le!",
+  "en": "Twenty-three!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 245,
+  "part": "sentences",
+  "hanzi": "然后再往前走一百米，就到了。",
+  "pinyin": "ránhòu zài wǎng qián zǒu yī bǎi mǐ, jiù dào le.",
+  "en": "Then walk on another hundred metres, and you're there.",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 246,
+  "part": "sentences",
+  "hanzi": "真的吗？我在大学学设计！",
+  "pinyin": "zhēnde ma? wǒ zài dàxué xué shèjì!",
+  "en": "Really? I study design at university!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 247,
+  "part": "sentences",
+  "hanzi": "你好！很高兴认识你。",
+  "pinyin": "nǐhǎo! hěn gāoxìng rènshi nǐ.",
+  "en": "Hi! Nice to meet you.",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 248,
+  "part": "sentences",
+  "hanzi": "我每天坐公交车去学校，不坐地铁。",
+  "pinyin": "wǒ měitiān zuò gōngjiāochē qù xuéxiào, bù zuò dìtiě.",
+  "en": "I take the bus to college every day. I don't use the Tube.",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 249,
+  "part": "sentences",
+  "hanzi": "还要两个蛋挞。",
+  "pinyin": "hái yào liǎng gè dàntà.",
+  "en": "And two egg tarts, please.",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 250,
+  "part": "sentences",
+  "hanzi": "欢迎欢迎！请坐！",
+  "pinyin": "huānyíng huānyíng! qǐng zuò!",
+  "en": "Welcome, welcome! Have a seat!",
+  "kind": "dialogue",
+  "batch": "s10"
+ },
+ {
+  "n": 251,
+  "part": "sentences",
+  "hanzi": "不行，星期六饭馆很忙，我得工作。",
+  "pinyin": "bùxíng, xīngqī liù fànguǎn hěn máng, wǒ děi gōngzuò.",
+  "en": "I can't. Saturdays are busy. I have to work.",
+  "kind": "dialogue",
+  "batch": "s11"
+ },
+ {
+  "n": 252,
+  "part": "sentences",
+  "hanzi": "我的生日？……也是九月二十五号。",
+  "pinyin": "wǒ de shēngrì? yě shì jiǔ yuè èrshíwǔ hào.",
+  "en": "My birthday? ...It's the twenty-fifth of September too.",
+  "kind": "dialogue",
+  "batch": "s11"
+ },
+ {
+  "n": 253,
+  "part": "sentences",
+  "hanzi": "快来吃蛋糕吧！还有月饼！",
+  "pinyin": "kuài lái chī dàngāo ba! hái yǒu yuèbǐng!",
+  "en": "Come and have some cake! There are mooncakes too!",
+  "kind": "dialogue",
+  "batch": "s11"
+ },
+ {
+  "n": 254,
+  "part": "sentences",
+  "hanzi": "我很喜欢音乐。我喜欢唱歌，也喜欢弹吉他。",
+  "pinyin": "wǒ hěn xǐhuan yīnyuè. wǒ xǐhuan chànggē, yě xǐhuan tán jítā.",
+  "en": "I love music. I like singing, and playing the guitar.",
+  "kind": "dialogue",
+  "batch": "s11"
+ },
+ {
+  "n": 255,
+  "part": "sentences",
+  "hanzi": "我买了一些面包和水果，陈明买了很多菜。",
+  "pinyin": "wǒ mǎi le yīxiē miànbāo hé shuǐguǒ, Chénmíng mǎi le hěnduō cài.",
+  "en": "I bought some bread and fruit, and Chen Ming bought loads of vegetables.",
+  "kind": "dialogue",
+  "batch": "s11"
+ },
+ {
+  "n": 256,
+  "part": "sentences",
+  "hanzi": "饭馆还有两个厨师呢！你是老板，你得回家睡觉！",
+  "pinyin": "fànguǎn hái yǒu liǎng gè chúshī ne! nǐ shì lǎobǎn, nǐ děi huí jiā shuìjiào!",
+  "en": "There are two other chefs! You're the boss. You have to go home to bed!",
+  "kind": "dialogue",
+  "batch": "s11"
+ },
+ {
+  "n": 257,
+  "part": "sentences",
+  "hanzi": "那今年我们在伦敦一起过！",
+  "pinyin": "nà jīnnián wǒmen zài lúndūn yīqǐ guò!",
+  "en": "Then this year we'll celebrate together in London!",
+  "kind": "dialogue",
+  "batch": "s11"
+ },
+ {
+  "n": 258,
+  "part": "sentences",
+  "hanzi": "真的吗？太巧了！",
+  "pinyin": "zhēnde ma? tài qiǎo le!",
+  "en": "Really? What a coincidence!",
+  "kind": "dialogue",
+  "batch": "s11"
+ },
+ {
+  "n": 259,
+  "part": "sentences",
+  "hanzi": "没事儿，就是感冒。多喝热水就好了。",
+  "pinyin": "méishìr, jiù shì gǎnmào. duō hē rèshuǐ jiù hǎo le.",
+  "en": "It's nothing, just a cold. I'll drink lots of hot water and be fine.",
+  "kind": "dialogue",
+  "batch": "s11"
+ },
+ {
+  "n": 260,
+  "part": "sentences",
+  "hanzi": "大家好！今天是中秋节，祝大家中秋节快乐！",
+  "pinyin": "dàjiā hǎo! jīntiān shì zhōngqiūjié, zhù dàjiā zhōngqiūjié kuàilè!",
+  "en": "Hello, everyone! Today's Mid-Autumn. Happy Mid-Autumn, everyone!",
+  "kind": "dialogue",
+  "batch": "s11"
+ },
+ {
+  "n": 1,
+  "part": "words",
+  "hanzi": "你",
+  "pinyin": "nǐ",
+  "en": "you",
+  "batch": "w01"
+ },
+ {
+  "n": 2,
+  "part": "words",
+  "hanzi": "好",
+  "pinyin": "hǎo",
+  "en": "good",
+  "batch": "w01"
+ },
+ {
+  "n": 3,
+  "part": "words",
+  "hanzi": "你好",
+  "pinyin": "nǐ hǎo",
+  "en": "hello",
+  "batch": "w01"
+ },
+ {
+  "n": 4,
+  "part": "words",
+  "hanzi": "我",
+  "pinyin": "wǒ",
+  "en": "I, me",
+  "batch": "w01"
+ },
+ {
+  "n": 5,
+  "part": "words",
+  "hanzi": "是",
+  "pinyin": "shì",
+  "en": "to be; yes",
+  "batch": "w01"
+ },
+ {
+  "n": 6,
+  "part": "words",
+  "hanzi": "谢谢",
+  "pinyin": "xiè xie",
+  "en": "thank you",
+  "batch": "w01"
+ },
+ {
+  "n": 7,
+  "part": "words",
+  "hanzi": "再见",
+  "pinyin": "zài jiàn",
+  "en": "goodbye",
+  "batch": "w01"
+ },
+ {
+  "n": 8,
+  "part": "words",
+  "hanzi": "叫",
+  "pinyin": "jiào",
+  "en": "to be called",
+  "batch": "w01"
+ },
+ {
+  "n": 9,
+  "part": "words",
+  "hanzi": "什么",
+  "pinyin": "shén me",
+  "en": "what",
+  "batch": "w01"
+ },
+ {
+  "n": 10,
+  "part": "words",
+  "hanzi": "名字",
+  "pinyin": "míng zi",
+  "en": "name",
+  "batch": "w01"
+ },
+ {
+  "n": 11,
+  "part": "words",
+  "hanzi": "很",
+  "pinyin": "hěn",
+  "en": "very",
+  "batch": "w01"
+ },
+ {
+  "n": 12,
+  "part": "words",
+  "hanzi": "高兴",
+  "pinyin": "gāo xìng",
+  "en": "happy",
+  "batch": "w01"
+ },
+ {
+  "n": 13,
+  "part": "words",
+  "hanzi": "认识",
+  "pinyin": "rèn shi",
+  "en": "to know (someone)",
+  "batch": "w01"
+ },
+ {
+  "n": 14,
+  "part": "words",
+  "hanzi": "吗",
+  "pinyin": "ma",
+  "en": "(yes/no question)",
+  "batch": "w01"
+ },
+ {
+  "n": 15,
+  "part": "words",
+  "hanzi": "也",
+  "pinyin": "yě",
+  "en": "also",
+  "batch": "w01"
+ },
+ {
+  "n": 16,
+  "part": "words",
+  "hanzi": "呢",
+  "pinyin": "ne",
+  "en": "and …? (asks back)",
+  "batch": "w01"
+ },
+ {
+  "n": 17,
+  "part": "words",
+  "hanzi": "你呢",
+  "pinyin": "nǐ ne",
+  "en": "and you?",
+  "batch": "w01"
+ },
+ {
+  "n": 18,
+  "part": "words",
+  "hanzi": "不",
+  "pinyin": "bù",
+  "en": "not, no",
+  "batch": "w01"
+ },
+ {
+  "n": 19,
+  "part": "words",
+  "hanzi": "客气",
+  "pinyin": "kè qi",
+  "en": "polite",
+  "batch": "w01"
+ },
+ {
+  "n": 20,
+  "part": "words",
+  "hanzi": "对不起",
+  "pinyin": "duì bu qǐ",
+  "en": "sorry",
+  "batch": "w01"
+ },
+ {
+  "n": 21,
+  "part": "words",
+  "hanzi": "没关系",
+  "pinyin": "méi guān xi",
+  "en": "it's OK",
+  "batch": "w01"
+ },
+ {
+  "n": 22,
+  "part": "words",
+  "hanzi": "请",
+  "pinyin": "qǐng",
+  "en": "please",
+  "batch": "w01"
+ },
+ {
+  "n": 23,
+  "part": "words",
+  "hanzi": "不客气",
+  "pinyin": "bù kè qi",
+  "en": "you're welcome",
+  "batch": "w01"
+ },
+ {
+  "n": 24,
+  "part": "words",
+  "hanzi": "再",
+  "pinyin": "zài",
+  "en": "again",
+  "batch": "w01"
+ },
+ {
+  "n": 25,
+  "part": "words",
+  "hanzi": "慢",
+  "pinyin": "màn",
+  "en": "slow",
+  "batch": "w01"
+ },
+ {
+  "n": 26,
+  "part": "words",
+  "hanzi": "懂",
+  "pinyin": "dǒng",
+  "en": "to understand",
+  "batch": "w01"
+ },
+ {
+  "n": 27,
+  "part": "words",
+  "hanzi": "这个",
+  "pinyin": "zhè ge",
+  "en": "this one",
+  "batch": "w01"
+ },
+ {
+  "n": 28,
+  "part": "words",
+  "hanzi": "我不懂",
+  "pinyin": "wǒ bù dǒng",
+  "en": "I don't understand",
+  "batch": "w01"
+ },
+ {
+  "n": 29,
+  "part": "words",
+  "hanzi": "用",
+  "pinyin": "yòng",
+  "en": "to use",
+  "batch": "w01"
+ },
+ {
+  "n": 30,
+  "part": "words",
+  "hanzi": "怎么",
+  "pinyin": "zěn me",
+  "en": "how",
+  "batch": "w01"
+ },
+ {
+  "n": 31,
+  "part": "words",
+  "hanzi": "哪",
+  "pinyin": "nǎ",
+  "en": "which",
+  "batch": "w01"
+ },
+ {
+  "n": 32,
+  "part": "words",
+  "hanzi": "国",
+  "pinyin": "guó",
+  "en": "country",
+  "batch": "w01"
+ },
+ {
+  "n": 33,
+  "part": "words",
+  "hanzi": "人",
+  "pinyin": "rén",
+  "en": "person, people",
+  "batch": "w01"
+ },
+ {
+  "n": 34,
+  "part": "words",
+  "hanzi": "英国",
+  "pinyin": "Yīng guó",
+  "en": "the UK, Britain",
+  "batch": "w01"
+ },
+ {
+  "n": 35,
+  "part": "words",
+  "hanzi": "住",
+  "pinyin": "zhù",
+  "en": "to live",
+  "batch": "w01"
+ },
+ {
+  "n": 36,
+  "part": "words",
+  "hanzi": "在",
+  "pinyin": "zài",
+  "en": "in, at",
+  "batch": "w01"
+ },
+ {
+  "n": 37,
+  "part": "words",
+  "hanzi": "伦敦",
+  "pinyin": "Lún dūn",
+  "en": "London",
+  "batch": "w01"
+ },
+ {
+  "n": 38,
+  "part": "words",
+  "hanzi": "从",
+  "pinyin": "cóng",
+  "en": "from",
+  "batch": "w01"
+ },
+ {
+  "n": 39,
+  "part": "words",
+  "hanzi": "哪里",
+  "pinyin": "nǎ lǐ",
+  "en": "where",
+  "batch": "w01"
+ },
+ {
+  "n": 40,
+  "part": "words",
+  "hanzi": "来",
+  "pinyin": "lái",
+  "en": "to come",
+  "batch": "w01"
+ },
+ {
+  "n": 41,
+  "part": "words",
+  "hanzi": "中国",
+  "pinyin": "Zhōng guó",
+  "en": "China",
+  "batch": "w02"
+ },
+ {
+  "n": 42,
+  "part": "words",
+  "hanzi": "成都",
+  "pinyin": "Chéng dū",
+  "en": "Chengdu",
+  "batch": "w02"
+ },
+ {
+  "n": 43,
+  "part": "words",
+  "hanzi": "北京",
+  "pinyin": "Běi jīng",
+  "en": "Beijing",
+  "batch": "w02"
+ },
+ {
+  "n": 44,
+  "part": "words",
+  "hanzi": "美国",
+  "pinyin": "Měi guó",
+  "en": "the USA",
+  "batch": "w02"
+ },
+ {
+  "n": 45,
+  "part": "words",
+  "hanzi": "会",
+  "pinyin": "huì",
+  "en": "can, know how to",
+  "batch": "w02"
+ },
+ {
+  "n": 46,
+  "part": "words",
+  "hanzi": "说",
+  "pinyin": "shuō",
+  "en": "to say, speak",
+  "batch": "w02"
+ },
+ {
+  "n": 47,
+  "part": "words",
+  "hanzi": "中文",
+  "pinyin": "Zhōng wén",
+  "en": "Chinese",
+  "batch": "w02"
+ },
+ {
+  "n": 48,
+  "part": "words",
+  "hanzi": "汉语",
+  "pinyin": "Hàn yǔ",
+  "en": "Chinese (language)",
+  "batch": "w02"
+ },
+ {
+  "n": 49,
+  "part": "words",
+  "hanzi": "一点儿",
+  "pinyin": "yī diǎn r",
+  "en": "a little",
+  "batch": "w02"
+ },
+ {
+  "n": 50,
+  "part": "words",
+  "hanzi": "法国",
+  "pinyin": "Fǎ guó",
+  "en": "France",
+  "batch": "w02"
+ },
+ {
+  "n": 51,
+  "part": "words",
+  "hanzi": "法语",
+  "pinyin": "Fǎ yǔ",
+  "en": "French",
+  "batch": "w02"
+ },
+ {
+  "n": 52,
+  "part": "words",
+  "hanzi": "英语",
+  "pinyin": "Yīng yǔ",
+  "en": "English",
+  "batch": "w02"
+ },
+ {
+  "n": 53,
+  "part": "words",
+  "hanzi": "和",
+  "pinyin": "hé",
+  "en": "and",
+  "batch": "w02"
+ },
+ {
+  "n": 54,
+  "part": "words",
+  "hanzi": "日本",
+  "pinyin": "Rì běn",
+  "en": "Japan",
+  "batch": "w02"
+ },
+ {
+  "n": 55,
+  "part": "words",
+  "hanzi": "日语",
+  "pinyin": "Rì yǔ",
+  "en": "Japanese",
+  "batch": "w02"
+ },
+ {
+  "n": 56,
+  "part": "words",
+  "hanzi": "澳大利亚",
+  "pinyin": "Ào dà lì yà",
+  "en": "Australia",
+  "batch": "w02"
+ },
+ {
+  "n": 57,
+  "part": "words",
+  "hanzi": "只",
+  "pinyin": "zhǐ",
+  "en": "only",
+  "batch": "w02"
+ },
+ {
+  "n": 58,
+  "part": "words",
+  "hanzi": "我们",
+  "pinyin": "wǒ men",
+  "en": "we, us",
+  "batch": "w02"
+ },
+ {
+  "n": 59,
+  "part": "words",
+  "hanzi": "一起",
+  "pinyin": "yī qǐ",
+  "en": "together",
+  "batch": "w02"
+ },
+ {
+  "n": 60,
+  "part": "words",
+  "hanzi": "学",
+  "pinyin": "xué",
+  "en": "to learn, to study",
+  "batch": "w02"
+ },
+ {
+  "n": 61,
+  "part": "words",
+  "hanzi": "请问",
+  "pinyin": "qǐng wèn",
+  "en": "excuse me",
+  "batch": "w02"
+ },
+ {
+  "n": 62,
+  "part": "words",
+  "hanzi": "姓",
+  "pinyin": "xìng",
+  "en": "surname",
+  "batch": "w02"
+ },
+ {
+  "n": 63,
+  "part": "words",
+  "hanzi": "对",
+  "pinyin": "duì",
+  "en": "right, correct",
+  "batch": "w02"
+ },
+ {
+  "n": 64,
+  "part": "words",
+  "hanzi": "这",
+  "pinyin": "zhè",
+  "en": "this",
+  "batch": "w02"
+ },
+ {
+  "n": 65,
+  "part": "words",
+  "hanzi": "朋友",
+  "pinyin": "péng you",
+  "en": "friend",
+  "batch": "w02"
+ },
+ {
+  "n": 66,
+  "part": "words",
+  "hanzi": "学生",
+  "pinyin": "xué sheng",
+  "en": "student",
+  "batch": "w02"
+ },
+ {
+  "n": 67,
+  "part": "words",
+  "hanzi": "喝",
+  "pinyin": "hē",
+  "en": "to drink",
+  "batch": "w02"
+ },
+ {
+  "n": 68,
+  "part": "words",
+  "hanzi": "咖啡",
+  "pinyin": "kā fēi",
+  "en": "coffee",
+  "batch": "w02"
+ },
+ {
+  "n": 69,
+  "part": "words",
+  "hanzi": "茶",
+  "pinyin": "chá",
+  "en": "tea",
+  "batch": "w02"
+ },
+ {
+  "n": 70,
+  "part": "words",
+  "hanzi": "他",
+  "pinyin": "tā",
+  "en": "he, him",
+  "batch": "w02"
+ },
+ {
+  "n": 71,
+  "part": "words",
+  "hanzi": "她",
+  "pinyin": "tā",
+  "en": "she, her",
+  "batch": "w02"
+ },
+ {
+  "n": 72,
+  "part": "words",
+  "hanzi": "水",
+  "pinyin": "shuǐ",
+  "en": "water",
+  "batch": "w02"
+ },
+ {
+  "n": 73,
+  "part": "words",
+  "hanzi": "老师",
+  "pinyin": "lǎo shī",
+  "en": "teacher",
+  "batch": "w02"
+ },
+ {
+  "n": 74,
+  "part": "words",
+  "hanzi": "做",
+  "pinyin": "zuò",
+  "en": "to do, to make",
+  "batch": "w02"
+ },
+ {
+  "n": 75,
+  "part": "words",
+  "hanzi": "工作",
+  "pinyin": "gōng zuò",
+  "en": "job; to work",
+  "batch": "w02"
+ },
+ {
+  "n": 76,
+  "part": "words",
+  "hanzi": "设计",
+  "pinyin": "shè jì",
+  "en": "design; to design",
+  "batch": "w02"
+ },
+ {
+  "n": 77,
+  "part": "words",
+  "hanzi": "设计师",
+  "pinyin": "shè jì shī",
+  "en": "designer",
+  "batch": "w02"
+ },
+ {
+  "n": 78,
+  "part": "words",
+  "hanzi": "大学",
+  "pinyin": "dà xué",
+  "en": "university",
+  "batch": "w02"
+ },
+ {
+  "n": 79,
+  "part": "words",
+  "hanzi": "大学生",
+  "pinyin": "dà xué shēng",
+  "en": "university student",
+  "batch": "w02"
+ },
+ {
+  "n": 80,
+  "part": "words",
+  "hanzi": "太好了",
+  "pinyin": "tài hǎo le",
+  "en": "great!",
+  "batch": "w02"
+ },
+ {
+  "n": 81,
+  "part": "words",
+  "hanzi": "哪儿",
+  "pinyin": "nǎ r",
+  "en": "where",
+  "batch": "w03"
+ },
+ {
+  "n": 82,
+  "part": "words",
+  "hanzi": "公司",
+  "pinyin": "gōng sī",
+  "en": "company, office",
+  "batch": "w03"
+ },
+ {
+  "n": 83,
+  "part": "words",
+  "hanzi": "医生",
+  "pinyin": "yī shēng",
+  "en": "doctor",
+  "batch": "w03"
+ },
+ {
+  "n": 84,
+  "part": "words",
+  "hanzi": "医院",
+  "pinyin": "yī yuàn",
+  "en": "hospital",
+  "batch": "w03"
+ },
+ {
+  "n": 85,
+  "part": "words",
+  "hanzi": "学校",
+  "pinyin": "xué xiào",
+  "en": "school",
+  "batch": "w03"
+ },
+ {
+  "n": 86,
+  "part": "words",
+  "hanzi": "表哥",
+  "pinyin": "biǎo gē",
+  "en": "(older male) cousin",
+  "batch": "w03"
+ },
+ {
+  "n": 87,
+  "part": "words",
+  "hanzi": "厨师",
+  "pinyin": "chú shī",
+  "en": "chef, cook",
+  "batch": "w03"
+ },
+ {
+  "n": 88,
+  "part": "words",
+  "hanzi": "那",
+  "pinyin": "nà",
+  "en": "that",
+  "batch": "w03"
+ },
+ {
+  "n": 89,
+  "part": "words",
+  "hanzi": "的",
+  "pinyin": "de",
+  "en": "'s (shows who something belongs to)",
+  "batch": "w03"
+ },
+ {
+  "n": 90,
+  "part": "words",
+  "hanzi": "真的",
+  "pinyin": "zhēn de",
+  "en": "really",
+  "batch": "w03"
+ },
+ {
+  "n": 91,
+  "part": "words",
+  "hanzi": "饭馆",
+  "pinyin": "fàn guǎn",
+  "en": "restaurant",
+  "batch": "w03"
+ },
+ {
+  "n": 92,
+  "part": "words",
+  "hanzi": "家",
+  "pinyin": "jiā",
+  "en": "family; home",
+  "batch": "w03"
+ },
+ {
+  "n": 93,
+  "part": "words",
+  "hanzi": "饺子",
+  "pinyin": "jiǎo zi",
+  "en": "dumpling",
+  "batch": "w03"
+ },
+ {
+  "n": 94,
+  "part": "words",
+  "hanzi": "好吃",
+  "pinyin": "hǎo chī",
+  "en": "tasty, delicious",
+  "batch": "w03"
+ },
+ {
+  "n": 95,
+  "part": "words",
+  "hanzi": "谁",
+  "pinyin": "shéi",
+  "en": "who",
+  "batch": "w03"
+ },
+ {
+  "n": 96,
+  "part": "words",
+  "hanzi": "手机",
+  "pinyin": "shǒu jī",
+  "en": "mobile phone",
+  "batch": "w03"
+ },
+ {
+  "n": 97,
+  "part": "words",
+  "hanzi": "零",
+  "pinyin": "líng",
+  "en": "0",
+  "batch": "w03"
+ },
+ {
+  "n": 98,
+  "part": "words",
+  "hanzi": "一",
+  "pinyin": "yī",
+  "en": "1",
+  "batch": "w03"
+ },
+ {
+  "n": 99,
+  "part": "words",
+  "hanzi": "二",
+  "pinyin": "èr",
+  "en": "2",
+  "batch": "w03"
+ },
+ {
+  "n": 100,
+  "part": "words",
+  "hanzi": "三",
+  "pinyin": "sān",
+  "en": "3",
+  "batch": "w03"
+ },
+ {
+  "n": 101,
+  "part": "words",
+  "hanzi": "四",
+  "pinyin": "sì",
+  "en": "4",
+  "batch": "w03"
+ },
+ {
+  "n": 102,
+  "part": "words",
+  "hanzi": "五",
+  "pinyin": "wǔ",
+  "en": "5",
+  "batch": "w03"
+ },
+ {
+  "n": 103,
+  "part": "words",
+  "hanzi": "六",
+  "pinyin": "liù",
+  "en": "6",
+  "batch": "w03"
+ },
+ {
+  "n": 104,
+  "part": "words",
+  "hanzi": "七",
+  "pinyin": "qī",
+  "en": "7",
+  "batch": "w03"
+ },
+ {
+  "n": 105,
+  "part": "words",
+  "hanzi": "八",
+  "pinyin": "bā",
+  "en": "8",
+  "batch": "w03"
+ },
+ {
+  "n": 106,
+  "part": "words",
+  "hanzi": "九",
+  "pinyin": "jiǔ",
+  "en": "9",
+  "batch": "w03"
+ },
+ {
+  "n": 107,
+  "part": "words",
+  "hanzi": "十",
+  "pinyin": "shí",
+  "en": "10",
+  "batch": "w03"
+ },
+ {
+  "n": 108,
+  "part": "words",
+  "hanzi": "百",
+  "pinyin": "bǎi",
+  "en": "100",
+  "batch": "w03"
+ },
+ {
+  "n": 109,
+  "part": "words",
+  "hanzi": "千",
+  "pinyin": "qiān",
+  "en": "1000",
+  "batch": "w03"
+ },
+ {
+  "n": 110,
+  "part": "words",
+  "hanzi": "加",
+  "pinyin": "jiā",
+  "en": "to add",
+  "batch": "w03"
+ },
+ {
+  "n": 111,
+  "part": "words",
+  "hanzi": "个",
+  "pinyin": "gè",
+  "en": "general measure word",
+  "batch": "w03"
+ },
+ {
+  "n": 112,
+  "part": "words",
+  "hanzi": "微信",
+  "pinyin": "Wēi xìn",
+  "en": "WeChat",
+  "batch": "w03"
+ },
+ {
+  "n": 113,
+  "part": "words",
+  "hanzi": "吧",
+  "pinyin": "ba",
+  "en": "let's …, why don't you … (a suggestion)",
+  "batch": "w03"
+ },
+ {
+  "n": 114,
+  "part": "words",
+  "hanzi": "扫",
+  "pinyin": "sǎo",
+  "en": "to scan",
+  "batch": "w03"
+ },
+ {
+  "n": 115,
+  "part": "words",
+  "hanzi": "二维码",
+  "pinyin": "èr wéi mǎ",
+  "en": "QR code",
+  "batch": "w03"
+ },
+ {
+  "n": 116,
+  "part": "words",
+  "hanzi": "电话",
+  "pinyin": "diàn huà",
+  "en": "telephone",
+  "batch": "w03"
+ },
+ {
+  "n": 117,
+  "part": "words",
+  "hanzi": "号码",
+  "pinyin": "hào mǎ",
+  "en": "number",
+  "batch": "w03"
+ },
+ {
+  "n": 118,
+  "part": "words",
+  "hanzi": "幺",
+  "pinyin": "yāo",
+  "en": "one (in phone numbers)",
+  "batch": "w03"
+ },
+ {
+  "n": 119,
+  "part": "words",
+  "hanzi": "大",
+  "pinyin": "dà",
+  "en": "big, large",
+  "batch": "w03"
+ },
+ {
+  "n": 120,
+  "part": "words",
+  "hanzi": "岁",
+  "pinyin": "suì",
+  "en": "years old",
+  "batch": "w03"
+ },
+ {
+  "n": 121,
+  "part": "words",
+  "hanzi": "有",
+  "pinyin": "yǒu",
+  "en": "to have; there is, there are",
+  "batch": "w04"
+ },
+ {
+  "n": 122,
+  "part": "words",
+  "hanzi": "几",
+  "pinyin": "jǐ",
+  "en": "how many (a small number)",
+  "batch": "w04"
+ },
+ {
+  "n": 123,
+  "part": "words",
+  "hanzi": "两",
+  "pinyin": "liǎng",
+  "en": "two (before a measure word)",
+  "batch": "w04"
+ },
+ {
+  "n": 124,
+  "part": "words",
+  "hanzi": "服务员",
+  "pinyin": "fú wù yuán",
+  "en": "waiter, waitress",
+  "batch": "w04"
+ },
+ {
+  "n": 125,
+  "part": "words",
+  "hanzi": "你们",
+  "pinyin": "nǐ men",
+  "en": "you (more than one)",
+  "batch": "w04"
+ },
+ {
+  "n": 126,
+  "part": "words",
+  "hanzi": "天",
+  "pinyin": "tiān",
+  "en": "day",
+  "batch": "w04"
+ },
+ {
+  "n": 127,
+  "part": "words",
+  "hanzi": "太",
+  "pinyin": "tài",
+  "en": "too …, so … (太…了)",
+  "batch": "w04"
+ },
+ {
+  "n": 128,
+  "part": "words",
+  "hanzi": "多",
+  "pinyin": "duō",
+  "en": "many, a lot",
+  "batch": "w04"
+ },
+ {
+  "n": 129,
+  "part": "words",
+  "hanzi": "多少",
+  "pinyin": "duō shǎo",
+  "en": "how many, how much",
+  "batch": "w04"
+ },
+ {
+  "n": 130,
+  "part": "words",
+  "hanzi": "多大",
+  "pinyin": "duō dà",
+  "en": "how old (for adults)",
+  "batch": "w04"
+ },
+ {
+  "n": 131,
+  "part": "words",
+  "hanzi": "差不多",
+  "pinyin": "chà bu duō",
+  "en": "about, almost",
+  "batch": "w04"
+ },
+ {
+  "n": 132,
+  "part": "words",
+  "hanzi": "孩子",
+  "pinyin": "hái zi",
+  "en": "child",
+  "batch": "w04"
+ },
+ {
+  "n": 133,
+  "part": "words",
+  "hanzi": "干",
+  "pinyin": "gàn",
+  "en": "to do (informal)",
+  "batch": "w04"
+ },
+ {
+  "n": 134,
+  "part": "words",
+  "hanzi": "现在",
+  "pinyin": "xiàn zài",
+  "en": "now",
+  "batch": "w04"
+ },
+ {
+  "n": 135,
+  "part": "words",
+  "hanzi": "听",
+  "pinyin": "tīng",
+  "en": "to listen",
+  "batch": "w04"
+ },
+ {
+  "n": 136,
+  "part": "words",
+  "hanzi": "音乐",
+  "pinyin": "yīn yuè",
+  "en": "music",
+  "batch": "w04"
+ },
+ {
+  "n": 137,
+  "part": "words",
+  "hanzi": "饭",
+  "pinyin": "fàn",
+  "en": "meal, rice",
+  "batch": "w04"
+ },
+ {
+  "n": 138,
+  "part": "words",
+  "hanzi": "做饭",
+  "pinyin": "zuò fàn",
+  "en": "to cook",
+  "batch": "w04"
+ },
+ {
+  "n": 139,
+  "part": "words",
+  "hanzi": "看",
+  "pinyin": "kàn",
+  "en": "to look, to watch, to read",
+  "batch": "w04"
+ },
+ {
+  "n": 140,
+  "part": "words",
+  "hanzi": "书",
+  "pinyin": "shū",
+  "en": "book",
+  "batch": "w04"
+ },
+ {
+  "n": 141,
+  "part": "words",
+  "hanzi": "电视",
+  "pinyin": "diàn shì",
+  "en": "TV",
+  "batch": "w04"
+ },
+ {
+  "n": 142,
+  "part": "words",
+  "hanzi": "睡觉",
+  "pinyin": "shuì jiào",
+  "en": "to sleep",
+  "batch": "w04"
+ },
+ {
+  "n": 143,
+  "part": "words",
+  "hanzi": "跑步",
+  "pinyin": "pǎo bù",
+  "en": "to run, go running",
+  "batch": "w04"
+ },
+ {
+  "n": 144,
+  "part": "words",
+  "hanzi": "没",
+  "pinyin": "méi",
+  "en": "not (for actions in progress or done)",
+  "batch": "w04"
+ },
+ {
+  "n": 145,
+  "part": "words",
+  "hanzi": "明天",
+  "pinyin": "míng tiān",
+  "en": "tomorrow",
+  "batch": "w04"
+ },
+ {
+  "n": 146,
+  "part": "words",
+  "hanzi": "今天",
+  "pinyin": "jīn tiān",
+  "en": "today",
+  "batch": "w04"
+ },
+ {
+  "n": 147,
+  "part": "words",
+  "hanzi": "晚上",
+  "pinyin": "wǎn shang",
+  "en": "evening",
+  "batch": "w04"
+ },
+ {
+  "n": 148,
+  "part": "words",
+  "hanzi": "想",
+  "pinyin": "xiǎng",
+  "en": "would like to, want to",
+  "batch": "w04"
+ },
+ {
+  "n": 149,
+  "part": "words",
+  "hanzi": "电影",
+  "pinyin": "diàn yǐng",
+  "en": "film, movie",
+  "batch": "w04"
+ },
+ {
+  "n": 150,
+  "part": "words",
+  "hanzi": "要",
+  "pinyin": "yào",
+  "en": "to be going to; to want",
+  "batch": "w04"
+ },
+ {
+  "n": 151,
+  "part": "words",
+  "hanzi": "去",
+  "pinyin": "qù",
+  "en": "to go",
+  "batch": "w04"
+ },
+ {
+  "n": 152,
+  "part": "words",
+  "hanzi": "吃",
+  "pinyin": "chī",
+  "en": "to eat",
+  "batch": "w04"
+ },
+ {
+  "n": 153,
+  "part": "words",
+  "hanzi": "吃饭",
+  "pinyin": "chī fàn",
+  "en": "to eat, have a meal",
+  "batch": "w04"
+ },
+ {
+  "n": 154,
+  "part": "words",
+  "hanzi": "见",
+  "pinyin": "jiàn",
+  "en": "to see, to meet",
+  "batch": "w04"
+ },
+ {
+  "n": 155,
+  "part": "words",
+  "hanzi": "问",
+  "pinyin": "wèn",
+  "en": "to ask",
+  "batch": "w04"
+ },
+ {
+  "n": 156,
+  "part": "words",
+  "hanzi": "很多",
+  "pinyin": "hěn duō",
+  "en": "lots of, many",
+  "batch": "w04"
+ }
+]
