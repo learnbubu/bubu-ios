@@ -124,7 +124,7 @@ if __name__ == "__main__":
         every = "all" in sys.argv[3:]
         # chapter 1's clips were chosen by ear: never replaced here, even with `all` (the owner
         # heard 你 and 好 come out worse, 2 Oct 2026)
-        owners = set(words([1]))
+        owners = set(words([1])) | set(json.load(open(os.path.join(HERE, "locked.json"), encoding="utf-8"))["texts"])
         kinds = {}
         for _, _, (_, t, kind) in round_lines():
             kinds.setdefault(t, []).append(kind)
