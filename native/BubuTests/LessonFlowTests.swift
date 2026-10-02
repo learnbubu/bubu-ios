@@ -247,6 +247,12 @@ final class LessonFlowTests: XCTestCase {
         }
     }
 
+    /// "How are you?" over 你好吗: no word has one of its own, so each shows the whole.
+    func testAnIdiomHintsTheWholeSentence() {
+        let h = Hints.english("How are you?", [SentenceWord(hanzi: "你好", pinyin: "nǐhǎo"), SentenceWord(hanzi: "吗", pinyin: "ma")])
+        XCTAssertEqual(h.compactMap { $0.word?.hanzi }, ["你好吗", "你好吗", "你好吗"])
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

@@ -100,10 +100,12 @@ enum Hints {
             guard !spare.isEmpty else { break }
             out[i] = Token(text: out[i].text, word: spare.removeFirst(), none: false)
         }
-        let content = out.indices.filter { !stem(out[$0].text).isEmpty && !filler.contains(stem(out[$0].text)) }
-        if content.count == 1, let i = content.first, out[i].word == nil, words.count > 1 {
+        // an idiom (How are you? 你好吗; Sure! 好啊): when no English word has a Chinese word of its
+        // own, every one of them shows the whole
+        let content = out.indices.filter { !stem(out[$0].text).isEmpty && !filler.contains(stem(out[$0].text)) || alias[stem(out[$0].text)] != nil }
+        if !content.isEmpty, content.allSatisfy({ out[$0].word == nil }), words.count > 1 {
             let whole = SentenceWord(hanzi: words.map(\.hanzi).joined(), pinyin: words.map(\.pinyin).joined(separator: " "))
-            out[i] = Token(text: out[i].text, word: whole, none: false)
+            for i in content { out[i] = Token(text: out[i].text, word: whole, none: false) }
         }
         return out
     }
@@ -120,23 +122,43 @@ struct HintChip<Label: View>: View {
     var tapped: (() -> Void)? = nil
     @ViewBuilder var label: Label
     @State private var open = false
+    @State private var openedAt = Date.distantPast
 
     var body: some View {
         Button {
-            open = true
+            withAnimation(.easeOut(duration: 0.12)) { open.toggle() }
+            guard open else { return }
             // said, unless it was only just heard (the speaker beside it says it again)
             if let h = hanzi { Speech.shared.autoSpeak(h) }
             HintTip.used = true
             tapped?()
+            // it closes by itself after a few seconds, or at another tap
+            let stamp = Date()
+            openedAt = stamp
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                if openedAt == stamp { withAnimation(.easeIn(duration: 0.15)) { open = false } }
+            }
         } label: {
             label
                 .padding(.horizontal, 2)
                 .background(open ? Color.accentSoft : highlight ?? .clear, in: RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
-        // always above the word, never beside or under it. arrowEdge is the bubble's own edge
-        // that carries the arrow: .bottom puts the bubble above (.top put it underneath)
-        .popover(isPresented: $open, attachmentAnchor: .rect(.bounds), arrowEdge: .bottom) {
+        // the bubble always above the word, drawn over its neighbours (not a popover: one, once
+        // dismissed, sometimes wouldn't open again, the owner's report of 2 Oct 2026)
+        .overlay(alignment: .top) {
+            if open {
+                bubble
+                    .fixedSize()
+                    .alignmentGuide(.top) { d in d[.bottom] + 6 }
+                    .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .bottom)))
+                    .onTapGesture { withAnimation(.easeIn(duration: 0.12)) { open = false } }
+            }
+        }
+        .zIndex(open ? 10 : 0)
+    }
+
+    private var bubble: some View {
             VStack(spacing: 3) {
                 if let h = hanzi {
                     let py = pinyin ?? Course.wordPy[h] ?? ""
@@ -153,8 +175,9 @@ struct HintChip<Label: View>: View {
             }
             .padding(.horizontal, 14).padding(.vertical, 10)
             .frame(maxWidth: 240)
-            .presentationCompactAdaptation(.popover)
-        }
+            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.panel)
+                .shadow(color: .black.opacity(0.18), radius: 8, y: 3))
+            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
     }
 }
 
