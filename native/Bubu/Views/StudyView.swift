@@ -1243,7 +1243,7 @@ struct SentenceView: View {
                     FlowLayout(spacing: 2, lineSpacing: 4) {
                             ForEach(Array(sent.words.enumerated()), id: \.offset) { i, w in
                                 let new = isNew(w.hanzi)
-                                HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { _ = peeked.insert(i) }) {
+                                HintChip(hanzi: w.hanzi, pinyin: w.pinyin, phrase: Hints.phrase(sent.en, sent.words), tapped: { _ = peeked.insert(i) }) {
                                 VStack(spacing: 1) {
                                     PinyinText(pinyin: w.pinyin, size: 12.5, weight: .semibold)
                                         .opacity(wheels.shows(hanzi: w.hanzi) || pinyinOpen || peeked.contains(i) ? 1 : 0)
@@ -1401,20 +1401,14 @@ struct SentenceView: View {
                 .onChanged { v in dragMoved(t, v, fromBank: !inAnswer) }
                 .onEnded { v in dragEnded(t, v) },
             including: result == nil ? .all : .subviews)
-        .popover(isPresented: Binding(get: { held == t && (inAnswer || !placed.contains(t)) }, set: { if !$0 { held = nil } })) {
-            VStack(spacing: 3) {
-                if let py = t.pinyin {
-                    Text(Hints.meaning(t.text)).font(.nunito(15, .bold)).foregroundStyle(Color.ink)
-                    PinyinText(pinyin: py, size: 14)
-                } else if let w = ex.sentence?.words.first(where: { Hints.english(ex.sentence?.en ?? "", [$0]).contains { $0.text.lowercased() == t.text.lowercased() && $0.word != nil } }) {
-                    ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: 22, weight: .bold)
-                    PinyinText(pinyin: w.pinyin, size: 14)
-                } else {
-                    Text("No separate word in Chinese").font(.nunito(14, .semibold)).foregroundStyle(Color.muted)
-                }
+        .hintBubble(open: Binding(get: { held == t && (inAnswer || !placed.contains(t)) }, set: { if !$0 { held = nil } })) {
+            if t.pinyin != nil {
+                HintBubble(hanzi: t.text, pinyin: t.pinyin)
+            } else {
+                let en = ex.sentence?.en ?? ""
+                let w = Hints.english(en, ex.sentence?.words ?? []).first { $0.text.lowercased() == t.text.lowercased() }?.word
+                HintBubble(hanzi: w?.hanzi, pinyin: w?.pinyin, reverse: true, empty: "Not in this sentence")
             }
-            .padding(.horizontal, 14).padding(.vertical, 10)
-            .presentationCompactAdaptation(.popover)
         }
     }
 }

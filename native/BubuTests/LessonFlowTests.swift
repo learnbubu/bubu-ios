@@ -253,6 +253,15 @@ final class LessonFlowTests: XCTestCase {
         XCTAssertEqual(h.compactMap { $0.word?.hanzi }, ["你好吗", "你好吗", "你好吗"])
     }
 
+    /// 你好吗: each word's hint leads with the phrase, "How are you?" (the owner, 2 Oct 2026).
+    func testAFixedPhraseHintsItsWholeMeaning() {
+        let words = [SentenceWord(hanzi: "你好", pinyin: "nǐhǎo"), SentenceWord(hanzi: "吗", pinyin: "ma")]
+        XCTAssertEqual(Hints.phrase("How are you?", words), "How are you?")
+        XCTAssertNil(Hints.phrase("I am Mark.", [SentenceWord(hanzi: "我", pinyin: "wǒ"), SentenceWord(hanzi: "是", pinyin: "shì"),
+                                                 SentenceWord(hanzi: "马克", pinyin: "Mǎkè")]))
+        XCTAssertEqual(Hints.short("吗"), "(yes/no question)")
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

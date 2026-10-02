@@ -32,6 +32,21 @@ enum Hints {
         return han.map(charEn).filter { !$0.isEmpty }.joined(separator: " + ")
     }
 
+    /// A word's short meaning (its card's `short`, "(yes/no question)"), else its meaning.
+    static func short(_ h: String) -> String {
+        if let c = Course.shared.cardsByHanzi[h.filter(Course.isHan)]?.first { return c.word.gloss }
+        return meaning(h)
+    }
+
+    /// The whole English of a sentence whose words can't be matched one by one (How are you? for
+    /// 你好吗): shown first on each of its Chinese words, as Duolingo's phrase hints.
+    static func phrase(_ en: String, _ words: [SentenceWord]) -> String? {
+        guard words.count > 1 else { return nil }
+        let whole = words.map(\.hanzi).joined()
+        let hits = english(en, words).compactMap(\.word)
+        return !hits.isEmpty && hits.allSatisfy({ $0.hanzi == whole }) ? en : nil
+    }
+
     static let filler: Set<String> = ["the", "a", "an", "to", "of", "is", "are", "am", "be", "it", "its", "that", "this", "and", "or",
                                       "for", "in", "on", "at", "with", "some", "do", "does", "did"]
     static let alias: [String: [String]] = ["me": ["i"], "my": ["i"], "mine": ["i"], "your": ["you"], "yours": ["you"],
@@ -118,6 +133,8 @@ struct HintChip<Label: View>: View {
     var pinyin: String? = nil
     var reverse = false            // show the Chinese, for an English word
     var highlight: Color? = nil
+    /// what the whole phrase means, shown first (你好吗: "How are you?"), as Duolingo's phrase hints
+    var phrase: String? = nil
     /// also told of a tap (a word's pinyin, hidden once it's strong, shows on a tap)
     var tapped: (() -> Void)? = nil
     @ViewBuilder var label: Label
@@ -135,7 +152,7 @@ struct HintChip<Label: View>: View {
             // it closes by itself after a few seconds, or at another tap
             let stamp = Date()
             openedAt = stamp
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
                 if openedAt == stamp { withAnimation(.easeIn(duration: 0.15)) { open = false } }
             }
         } label: {
@@ -144,46 +161,102 @@ struct HintChip<Label: View>: View {
                 .background(open ? Color.accentSoft : highlight ?? .clear, in: RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
-        // the bubble always above the word, drawn over its neighbours (not a popover: one, once
-        // dismissed, sometimes wouldn't open again, the owner's report of 2 Oct 2026)
-        .overlay(alignment: .top) {
-            if open {
-                // a line with no height along the word's top, and the bubble standing on it (an
-                // alignment guide left it over the word: the Mac's check of 0.1.29)
-                Color.clear.frame(height: 0)
-                    .overlay(alignment: .bottom) {
-                        bubble
-                            .fixedSize()
-                            .contentShape(Rectangle())
-                            .onTapGesture { withAnimation(.easeIn(duration: 0.12)) { open = false } }
-                            .padding(.bottom, 6)
-                    }
-                    .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .bottom)))
-            }
+        .hintBubble(open: $open) {
+            HintBubble(hanzi: hanzi, pinyin: pinyin, reverse: reverse, phrase: phrase)
         }
-        .zIndex(open ? 10 : 0)
+    }
+}
+
+/// What a hint says: a phrase's meaning first when there is one, then the word's short meaning
+/// (or, for an English word, its Chinese) and pinyin. Its width is worked out from its text, so
+/// it wraps instead of running off the card (the owner's 你好吗 screenshot, 2 Oct 2026).
+struct HintBubble: View {
+    let hanzi: String?
+    var pinyin: String? = nil
+    var reverse = false
+    var phrase: String? = nil
+    var empty = "No separate word in Chinese"
+
+    private var meaning: String { hanzi.map { Hints.short($0) } ?? "" }
+    private var width: CGFloat {
+        let longest = [phrase ?? "", reverse ? "" : meaning].map(\.count).max() ?? 0
+        let chars = reverse ? CGFloat((hanzi ?? "").count) * 26 : 0
+        return min(220, max(90, max(CGFloat(longest) * 8.6, chars) + 30))
     }
 
-    private var bubble: some View {
-            VStack(spacing: 3) {
-                if let h = hanzi {
-                    let py = pinyin ?? Course.wordPy[h] ?? ""
-                    if reverse {
-                        ToneText(hanzi: h, pinyin: py, size: 24, weight: .bold)
-                    } else {
-                        Text(Hints.meaning(h).isEmpty ? "No meaning listed yet" : Hints.meaning(h))
-                            .font(.nunito(15, .bold)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
-                    }
-                    PinyinText(pinyin: py, size: 14)
+    var body: some View {
+        VStack(spacing: 4) {
+            if let phrase {
+                Text(phrase).font(.nunitoXB(15.5)).foregroundStyle(Color.accent).multilineTextAlignment(.center)
+                if hanzi != nil { Rectangle().fill(Color.line).frame(height: 1).padding(.vertical, 2) }
+            }
+            if let h = hanzi {
+                let py = pinyin ?? Course.wordPy[h] ?? ""
+                if reverse {
+                    ToneText(hanzi: h, pinyin: py, size: 24, weight: .bold)
                 } else {
-                    Text("No separate word in Chinese").font(.nunito(14, .semibold)).foregroundStyle(Color.muted)
+                    Text(meaning.isEmpty ? "No meaning listed yet" : meaning)
+                        .font(.nunito(phrase == nil ? 15 : 13.5, .bold))
+                        .foregroundStyle(phrase == nil ? Color.ink : Color.muted).multilineTextAlignment(.center)
+                }
+                PinyinText(pinyin: py, size: 14)
+            } else if phrase == nil {
+                Text(empty).font(.nunito(14, .semibold)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .frame(width: width)
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.panel)
+            .shadow(color: .black.opacity(0.18), radius: 8, y: 3))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
+    }
+}
+
+extension View {
+    /// A hint bubble standing above this view, drawn over its neighbours and kept on the screen;
+    /// a tap on it closes it. (Not a popover: one, once dismissed, wouldn't always open again,
+    /// and one on a sentence tile, once dismissed, closed the whole lesson: the owner's reports.)
+    func hintBubble<B: View>(open: Binding<Bool>, @ViewBuilder _ bubble: @escaping () -> B) -> some View {
+        modifier(HintBubbleModifier(open: open, bubble: bubble))
+    }
+}
+
+private struct HintBubbleModifier<B: View>: ViewModifier {
+    @Binding var open: Bool
+    let bubble: () -> B
+    @State private var anchor: CGRect = .zero
+    @State private var size: CGSize = .zero
+
+    func body(content: Content) -> some View {
+        content
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { anchor = $0 }
+            .overlay(alignment: .top) {
+                if open {
+                    // a line with no height along the top, and the bubble standing on it
+                    Color.clear.frame(height: 0)
+                        .overlay(alignment: .bottom) {
+                            bubble()
+                                .fixedSize()
+                                .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 }
+                                .offset(x: shift)
+                                .contentShape(Rectangle())
+                                .onTapGesture { withAnimation(.easeIn(duration: 0.12)) { open = false } }
+                                .padding(.bottom, 6)
+                        }
+                        .transition(.opacity)
                 }
             }
-            .padding(.horizontal, 14).padding(.vertical, 10)
-            .frame(maxWidth: 240)
-            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.panel)
-                .shadow(color: .black.opacity(0.18), radius: 8, y: 3))
-            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
+            .zIndex(open ? 10 : 0)
+    }
+
+    /// Sideways, so the bubble stays 12 points inside the screen's edges.
+    private var shift: CGFloat {
+        let screen = UIScreen.main.bounds.width, margin: CGFloat = 12
+        let left = anchor.midX - size.width / 2, right = anchor.midX + size.width / 2
+        if left < margin { return margin - left }
+        if right > screen - margin { return screen - margin - right }
+        return 0
     }
 }
 
