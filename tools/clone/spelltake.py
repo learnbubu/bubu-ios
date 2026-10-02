@@ -53,6 +53,15 @@ def lines(chs, only=None):
     return out
 
 
+REF_SECS = {int(k): v["secs"] for k, v in citation.refs().items()}
+
+
+def voiced(p):
+    """Seconds of sound in a clip (tools/clone/tails.py's stretches)."""
+    import tails
+    return sum(b - a for a, b in tails.stretches(tails.env(p))) / 100
+
+
 def path(t, kind):
     return os.path.join(WORK, "clean", f"{voice.name(t)}-{kind}.mp3")
 
@@ -64,6 +73,9 @@ def passes(t, r):
         return False
     g = judge.grade(t, r["heard"])
     if len(judge.han(t)) == 1:
+        # long enough to finish its tone: the owner heard a clipped 你 (0.33 s of voice, 2 Oct 2026)
+        if r.get("voiced") is not None and r["voiced"] < 0.8 * REF_SECS.get(citation.tone(pinyin(t)), 0.3):
+            return False
         return g <= 3 or not judge.han(r["heard"])
     return g <= 1
 
@@ -125,6 +137,10 @@ if __name__ == "__main__":
                 kept += 1
                 continue
             cands = [(k, sc.get(path(t, k))) for k in kinds.get(t, [])]
+            if len(judge.han(t)) == 1:
+                for k, r in cands:
+                    if r is not None and os.path.exists(path(t, k)):
+                        r["voiced"] = voiced(path(t, k))
             good = [(k, r) for k, r in cands if passes(t, r)]
             # heard exactly first, then said alone before cut from a carrier
             good.sort(key=lambda kr: (judge.grade(t, kr[1]["heard"]), kr[0].startswith("carried"), kr[0]))
