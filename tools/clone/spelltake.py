@@ -122,7 +122,9 @@ if __name__ == "__main__":
     elif cmd == "choose":
         sc = json.load(open(os.path.join(WORK, "scores.json"), encoding="utf-8"))
         every = "all" in sys.argv[3:]
-        owners = set() if every else set(words([1]))
+        # chapter 1's clips were chosen by ear: never replaced here, even with `all` (the owner
+        # heard 你 and 好 come out worse, 2 Oct 2026)
+        owners = set(words([1]))
         kinds = {}
         for _, _, (_, t, kind) in round_lines():
             kinds.setdefault(t, []).append(kind)

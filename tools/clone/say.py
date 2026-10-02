@@ -67,6 +67,9 @@ if __name__ == "__main__":
         model.model.llm.load_state_dict(torch.load(os.path.join(MODEL, "llm.rl.pt"), map_location=model.model.device), strict=True)
     text = [l.strip() for l in open(lines, encoding="utf-8") if l.strip()]
     for n, line in enumerate(text, 1):
+        # a take already made is kept (a long run can be stopped and started again)
+        if os.environ.get("RESUME") and os.path.exists(os.path.join(out, f"{n:02d}.wav")):
+            continue
         t = time.time()
         sr = model.sample_rate
         pieces = []
