@@ -1219,12 +1219,17 @@ struct SentenceView: View {
                     if anyNew { NewBadge() }
                     FlowLayout(spacing: 4, lineSpacing: 4, center: true) {
                         ForEach(Array(Hints.english(sent.en, sent.words).enumerated()), id: \.offset) { _, t in
-                            HintChip(hanzi: t.word?.hanzi, pinyin: t.word?.pinyin, reverse: true) {
-                                Text(t.text).font(.nunito(16.3)).foregroundStyle(Color.ink)
-                                    .overlay(alignment: .bottom) {
-                                        Line().stroke(Color.muted.opacity(t.none ? 0.28 : 0.6), style: StrokeStyle(lineWidth: 2, dash: [1.5, 3]))
-                                            .frame(height: 2).offset(y: 2)
-                                    }
+                            if t.word == nil {
+                                // as Duolingo has it: a word with nothing to show has no underline and no hint
+                                Text(t.text).font(.nunito(16.3)).foregroundStyle(Color.ink).padding(.horizontal, 2)
+                            } else {
+                                HintChip(hanzi: t.word?.hanzi, pinyin: t.word?.pinyin, reverse: true) {
+                                    Text(t.text).font(.nunito(16.3)).foregroundStyle(Color.ink)
+                                        .overlay(alignment: .bottom) {
+                                            Line().stroke(Color.muted.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [1.5, 3]))
+                                                .frame(height: 2).offset(y: 2)
+                                        }
+                                }
                             }
                         }
                     }
