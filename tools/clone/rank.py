@@ -77,7 +77,7 @@ def main(chs):
         cands.sort()
         now = os.path.join(OUT, name(t) + ".mp3")
         before = os.path.join(WORK, "before", name(t) + ".mp3")
-        opts = [("now", now)]
+        opts = [("now", now)] if os.path.exists(now) else []
         if os.path.exists(before):
             opts.append(("as it was", before))
         opts += [(f"new {i + 1}", p) for i, (_, k, p) in enumerate(cands[:3])]
