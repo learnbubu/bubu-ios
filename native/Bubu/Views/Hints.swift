@@ -36,7 +36,9 @@ enum Hints {
                                       "for", "in", "on", "at", "with", "some", "do", "does", "did"]
     static let alias: [String: [String]] = ["me": ["i"], "my": ["i"], "mine": ["i"], "your": ["you"], "yours": ["you"],
                                             "yes": ["yes", "right", "correct"], "ok": ["good", "okay"], "okay": ["good", "okay"],
-                                            "hi": ["hello"], "bye": ["goodbye", "bye"], "thank": ["thank"], "thanks": ["thank"]]
+                                            "hi": ["hello"], "bye": ["goodbye", "bye"], "thank": ["thank"], "thanks": ["thank"],
+                                            // (the owner, 2 Oct 2026: "am" in "I am Mark." is 是)
+                                            "am": ["be"], "is": ["be"], "are": ["be"], "was": ["be"], "were": ["be"], "be": ["be"]]
 
     /// An English word folded to its stem: plurals, -ing, -ed and n't (web: enStem).
     static func stem(_ word: String) -> String {
@@ -65,7 +67,7 @@ enum Hints {
             let m = (Course.wordEn[w.hanzi] ?? meaning(w.hanzi)).replacingOccurrences(of: "\\([^)]*\\)", with: " ", options: .regularExpression)
                 .replacingOccurrences(of: "\\p{Han}+[^,;]*", with: " ", options: .regularExpression)
             let stems = m.components(separatedBy: CharacterSet.letters.union(CharacterSet(charactersIn: "'")).inverted)
-                .map(stem).filter { !$0.isEmpty && !filler.contains($0) }
+                .map(stem).filter { !$0.isEmpty && (!filler.contains($0) || $0 == "be") }
             return (w, Set(stems))
         }
         func keys(_ st: String) -> [String] {
@@ -89,6 +91,14 @@ enum Hints {
             guard !st.isEmpty else { return Token(text: tok, word: nil, none: false) }
             let hit = filler.contains(st) && alias[st] == nil ? nil : find(keys(st))
             return hit.map { Token(text: tok, word: $0, none: false) } ?? Token(text: tok, word: nil, none: true)
+        }
+        // a name: an English name left over takes the name left over in the Chinese, in order
+        // ("Mark." is 马克)
+        let names = Set(Course.shared.nameList)
+        var spare = words.filter { w in names.contains(w.hanzi.filter(Course.isHan)) && !out.contains { $0.word == w } }
+        for i in out.indices where out[i].word == nil && out[i].text.first?.isUppercase == true && out[i].text != "I" {
+            guard !spare.isEmpty else { break }
+            out[i] = Token(text: out[i].text, word: spare.removeFirst(), none: false)
         }
         let content = out.indices.filter { !stem(out[$0].text).isEmpty && !filler.contains(stem(out[$0].text)) }
         if content.count == 1, let i = content.first, out[i].word == nil, words.count > 1 {

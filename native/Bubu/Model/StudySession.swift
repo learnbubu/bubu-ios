@@ -1311,23 +1311,40 @@ struct Exercise {
         let long = sent.words.count > 6 || enWords.count > 7
         let nDistract = long ? 2 : 3
         var tiles: [Tile] = []
+        // the extra tiles: words already met, as Duolingo has it (the owner, 2 Oct 2026: 快 可 能 in
+        // the first lessons); words from the stones up to this one, then any, only if those run short
+        let here = course.lessonOrder[c.lessonId] ?? 0
+        let known = course.cards.filter { !$0.isSentence && met($0.id) }
+        let reached = course.cards.filter { !$0.isSentence && (course.lessonOrder[$0.lessonId] ?? .max) <= here }
         if toChinese {
             let target = Set(sent.words.map(\.hanzi))
             var pool: [SentenceWord] = [], seen = Set<String>()
-            for s in course.sentences.shuffled().prefix(200) where s.hanzi != sent.hanzi {
-                for w in s.words where !target.contains(w.hanzi) && seen.insert(w.hanzi).inserted { pool.append(w) }
-                if pool.count > 40 { break }
+            for group in [known, reached] where pool.count < nDistract {
+                for x in group.shuffled() where !target.contains(x.word.hanzi) && seen.insert(x.word.hanzi).inserted {
+                    pool.append(SentenceWord(hanzi: x.word.hanzi, pinyin: Course.wordPy[x.word.hanzi] ?? x.word.pinyin))
+                }
             }
-            let words = sent.words + pool.shuffled().prefix(nDistract)
+            for s in course.sentences.shuffled().prefix(200) where s.hanzi != sent.hanzi && pool.count < nDistract {
+                for w in s.words where !target.contains(w.hanzi) && seen.insert(w.hanzi).inserted { pool.append(w) }
+            }
+            let words = sent.words + pool.prefix(nDistract)
             tiles = words.enumerated().map { Tile(id: $0.offset, text: $0.element.hanzi, pinyin: $0.element.pinyin) }
         } else {
             let target = Set(enWords.map { $0.lowercased() })
             var pool: [String] = [], seen = Set<String>()
-            for s in course.sentences.shuffled().prefix(200) where s.en != sent.en {
-                for w in Sentence.enWords(s.en) where !target.contains(w.lowercased()) && seen.insert(w.lowercased()).inserted { pool.append(w) }
-                if pool.count > 40 { break }
+            // the English of words already met (their one-word meanings), then of other sentences
+            for group in [known, reached] where pool.count < nDistract {
+                for x in group.shuffled() {
+                    let e = Sentence.enWords(x.word.gloss)
+                    guard e.count == 1, let w = e.first, w.count > 1, !target.contains(w.lowercased()),
+                          seen.insert(w.lowercased()).inserted else { continue }
+                    pool.append(w)
+                }
             }
-            let words = enWords + pool.shuffled().prefix(nDistract)
+            for s in course.sentences.shuffled().prefix(200) where s.en != sent.en && pool.count < nDistract {
+                for w in Sentence.enWords(s.en) where !target.contains(w.lowercased()) && seen.insert(w.lowercased()).inserted { pool.append(w) }
+            }
+            let words = enWords + pool.prefix(nDistract)
             tiles = words.enumerated().map { Tile(id: $0.offset, text: $0.element, pinyin: nil) }
         }
         return Exercise(kind: .sentence, dir: hear ? "hear" : "sentence", card: c, sentence: sent, toChinese: toChinese,

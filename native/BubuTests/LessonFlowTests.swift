@@ -227,6 +227,26 @@ final class LessonFlowTests: XCTestCase {
         XCTAssertEqual(lets.first?.word?.hanzi, "吧", "吧 is let's")
     }
 
+    /// The owner: "I am Mark." hinted "No separate word" over am and Mark.
+    func testBeAndNamesAreHinted() {
+        let words = [SentenceWord(hanzi: "我", pinyin: "wǒ"), SentenceWord(hanzi: "是", pinyin: "shì"), SentenceWord(hanzi: "马克", pinyin: "Mǎkè")]
+        let h = Hints.english("I am Mark.", words)
+        XCTAssertEqual(h.map { $0.word?.hanzi }, ["我", "是", "马克"])
+    }
+
+    /// The owner: 快 可 能 不过 as extra tiles in the second stone. Extra tiles are words met.
+    func testExtraTilesAreWordsAlreadyMet() throws {
+        let shi = card("是")
+        let first = Set(course.lessons.prefix(2).flatMap { course.cards(in: $0.id) }.map(\.id))
+        for _ in 0..<20 {
+            guard let ex = Exercise.make(card: shi, dir: "hear", scope: [], progress: store(), met: { first.contains($0) }),
+                  let sent = ex.sentence else { continue }
+            let extra = Set(ex.tiles.map(\.text)).subtracting(sent.words.map(\.hanzi))
+            let firstWords = Set(course.lessons.prefix(2).flatMap { course.cards(in: $0.id) }.map(\.word.hanzi))
+            XCTAssertTrue(extra.isSubset(of: firstWords), "\(extra)")
+        }
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {
