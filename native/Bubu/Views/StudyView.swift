@@ -484,8 +484,19 @@ struct SpeechBubbleBox<Content: View>: View {
         VStack(spacing: 6) { content }
             .padding(.leading, sentence ? 10 : 13).padding(.trailing, sentence ? 14 : 13).padding(.vertical, 12)
             .frame(maxWidth: .infinity)
-            .background(RoundedRectangle(cornerRadius: 15, style: .continuous).fill(Color.panel))
-            .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).strokeBorder(Color.line, lineWidth: 2))
+            // the outline and tail behind the words, so a word's hint bubble is drawn over them
+            // (the outline ran through the hint: the Mac's check of 0.1.30)
+            .background(alignment: .leading) {
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 15, style: .continuous).fill(Color.panel)
+                    RoundedRectangle(cornerRadius: 15, style: .continuous).strokeBorder(Color.line, lineWidth: 2)
+                    tail
+                }
+            }
+    }
+
+    private var tail: some View {
+        Color.clear.frame(width: 0)
             .overlay(alignment: .leading) {
                 Rectangle().fill(Color.panel).frame(width: 14, height: 14)
                     .overlay(alignment: .bottomLeading) {
@@ -1182,6 +1193,7 @@ struct SentenceView: View {
     /// the words whose hidden pinyin has been shown with a tap
     @State private var peeked: Set<Int> = []
     @State private var held: Exercise.Tile?
+    @State private var justHeld = false
     // dragging a tile (web: the tile follows the finger and its place in the answer
     // follows it): the tile's slot stays in the answer, empty, while a copy is carried
     @State private var drag: TileDrag?
@@ -1392,10 +1404,11 @@ struct SentenceView: View {
 
     private func tile(_ t: Exercise.Tile, inAnswer: Bool, tap: @escaping () -> Void) -> some View {
         let tint: Color? = inAnswer ? (result == true ? .good : result == false ? .again : nil) : nil
-        return Button { if !justDragged { tap() } } label: { tileFace(t, tint: tint) }
+        // a hold shows the tile's hint, and the tap its release makes is ignored (the Mac's check)
+        return Button { if justHeld { justHeld = false } else if !justDragged { tap() } } label: { tileFace(t, tint: tint) }
         .buttonStyle(PressDown(depth: 2))
         .sensoryFeedback(.selection, trigger: placed.count)
-        .simultaneousGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in if drag == nil { held = t; HintTip.used = true } })
+        .simultaneousGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in if drag == nil { held = t; justHeld = true; HintTip.used = true } })
         .highPriorityGesture(
             DragGesture(minimumDistance: 8, coordinateSpace: .named("sentence"))
                 .onChanged { v in dragMoved(t, v, fromBank: !inAnswer) }
