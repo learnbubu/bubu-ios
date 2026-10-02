@@ -1408,7 +1408,12 @@ struct SentenceView: View {
         return Button { if justHeld { justHeld = false } else if !justDragged { tap() } } label: { tileFace(t, tint: tint) }
         .buttonStyle(PressDown(depth: 2))
         .sensoryFeedback(.selection, trigger: placed.count)
-        .simultaneousGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in if drag == nil { held = t; justHeld = true; HintTip.used = true } })
+        .simultaneousGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in
+            guard drag == nil else { return }
+            held = t; justHeld = true; HintTip.used = true
+            // (where the release makes no tap, the next real tap still counts)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { justHeld = false }
+        })
         .highPriorityGesture(
             DragGesture(minimumDistance: 8, coordinateSpace: .named("sentence"))
                 .onChanged { v in dragMoved(t, v, fromBank: !inAnswer) }
