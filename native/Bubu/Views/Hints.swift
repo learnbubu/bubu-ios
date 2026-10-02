@@ -148,11 +148,17 @@ struct HintChip<Label: View>: View {
         // dismissed, sometimes wouldn't open again, the owner's report of 2 Oct 2026)
         .overlay(alignment: .top) {
             if open {
-                bubble
-                    .fixedSize()
-                    .alignmentGuide(.top) { d in d[.bottom] + 6 }
+                // a line with no height along the word's top, and the bubble standing on it (an
+                // alignment guide left it over the word: the Mac's check of 0.1.29)
+                Color.clear.frame(height: 0)
+                    .overlay(alignment: .bottom) {
+                        bubble
+                            .fixedSize()
+                            .contentShape(Rectangle())
+                            .onTapGesture { withAnimation(.easeIn(duration: 0.12)) { open = false } }
+                            .padding(.bottom, 6)
+                    }
                     .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .bottom)))
-                    .onTapGesture { withAnimation(.easeIn(duration: 0.12)) { open = false } }
             }
         }
         .zIndex(open ? 10 : 0)
