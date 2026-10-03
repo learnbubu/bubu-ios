@@ -7,6 +7,8 @@ import SwiftUI
 struct StudyView: View {
     @State var session: StudySession
     var close: () -> Void
+    /// "Wait, don't go!": the close button asks first once something's been answered
+    @State private var quitAsk = false
     @Environment(ProgressStore.self) private var progress
 
     // the current exercise's state
@@ -91,6 +93,12 @@ struct StudyView: View {
                 }
                 .id(m)
                 .allowsHitTesting(false)
+            }
+            if quitAsk && session.result == nil {
+                QuitAsk(keep: { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = false } },
+                        quit: { quitAsk = false; close() })
+                    .transition(.opacity)
+                    .zIndex(20)
             }
         }
         .coordinateSpace(.named("study"))
@@ -194,7 +202,9 @@ struct StudyView: View {
     private var topBar: some View {
         VStack(spacing: 6) {
             HStack(spacing: 12) {
-                Button { close() } label: {
+                Button {
+                    if session.nothingAnswered { close() } else { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = true } }
+                } label: {
                     Image(systemName: "xmark").font(.system(size: 17, weight: .bold)).foregroundStyle(Color.muted)
                         .frame(width: 34, height: 34).contentShape(Rectangle())
                 }
@@ -319,7 +329,8 @@ struct StudyView: View {
             Color.clear.frame(height: 84)
                 .overlay(alignment: .bottom) {
                     if let fb = feedback, let ex, ex.kind != .speak, ex.kind != .write {
-                        FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text), wheels: wheels)
+                        FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text), wheels: wheels,
+                                       inARow: fb.correct && session.combo >= StudySession.comboAt && session.combo % StudySession.comboAt == 0 ? session.combo : nil)
                             .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
                                 .shadow(color: Color.panel, radius: 12, y: -10))
                             .fixedSize(horizontal: false, vertical: true)
@@ -1010,6 +1021,9 @@ struct FeedbackBanner: View {
     var placed: [String] = []
     /// pinyin training wheels, as on the exercise above
     var wheels = Wheels()
+    /// 5, 10, 15 … right in a row: a badge that pops in at the banner's corner (Duolingo's "5 IN A ROW")
+    var inARow: Int? = nil
+    @State private var bounce = false
     @State private var praise = ["Nice!", "Great job!", "Excellent!", "Spot on!", "太棒了!", "对了!"].randomElement()!
     @State private var peek = false
     private let course = Course.shared
@@ -1058,6 +1072,21 @@ struct FeedbackBanner: View {
         .foregroundStyle(tint)
         .padding(.horizontal, 14).padding(.vertical, 12)
         .background(correct ? Color.goodSoft : Color.againSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(alignment: .topTrailing) {
+            if let n = inARow {
+                HStack(spacing: 4) {
+                    Image(systemName: "bolt.fill").font(.system(size: 13, weight: .heavy))
+                    Text("\(n) IN A ROW").font(.nunito(12.5, .black)).tracking(0.6)
+                }
+                .foregroundStyle(Color.white)
+                .padding(.horizontal, 10).padding(.vertical, 5)
+                .background(Color.gold, in: Capsule())
+                .scaleEffect(bounce ? 1 : 0.4)
+                .rotationEffect(.degrees(bounce ? -4 : -18))
+                .offset(x: -10, y: -12)
+                .onAppear { withAnimation(.spring(response: 0.35, dampingFraction: 0.45)) { bounce = true } }
+            }
+        }
     }
 
     /// The word's meaning, briefly enough for the panel: its short meaning when it has one,
@@ -1540,5 +1569,34 @@ struct FlowLayout: Layout {
         }
         if !row.items.isEmpty { rows.append(row) }
         return rows
+    }
+}
+
+/// "Wait, don't go!": closing a session part-way asks first, as Duolingo does, with the sad panda.
+struct QuitAsk: View {
+    let keep: () -> Void
+    let quit: () -> Void
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Color.black.opacity(0.35).ignoresSafeArea().onTapGesture { keep() }
+            VStack(spacing: 14) {
+                Image("panda-sad").resizable().scaledToFit().frame(height: 110)
+                Text("Wait, don't go!").font(.nunitoXB(21)).foregroundStyle(Color.ink)
+                Text("You'll lose this lesson's progress if you leave now.")
+                    .font(.nunito(15.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                Button(action: keep) {
+                    Text("Keep learning").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
+                        .frame(maxWidth: .infinity).padding(15).background(Color.accent, in: Capsule())
+                }
+                .buttonStyle(PressDown(depth: 1))
+                Button(action: quit) {
+                    Text("End lesson").font(.nunitoXB(15.5)).foregroundStyle(Color.again).padding(8)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 22).padding(.top, 22).padding(.bottom, 16)
+            .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Color.panel).ignoresSafeArea(edges: .bottom))
+            .transition(.move(edge: .bottom))
+        }
     }
 }
