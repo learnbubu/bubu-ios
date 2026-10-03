@@ -91,7 +91,9 @@ enum FSRS {
             }
             s.D = nextD(s.D!, g)
         }
-        s.S = max(0.1, s.S!); s.last = now
+        // (a word got right many times in one day multiplied its stability without end, to infinity,
+        // and the interval's Int() trapped: the whole-course playthrough, 3 Oct 2026)
+        s.S = min(36_500, max(0.1, s.S!.isFinite ? s.S! : 36_500)); s.last = now
         if grade == .again {
             s.reps = 0; s.interval = 0
             s.lapses = (s.lapses ?? 0) + 1                 // powers "trouble words"
@@ -100,7 +102,8 @@ enum FSRS {
             s.reps = (s.reps ?? 0) + 1
             // a touch of fuzz so words learnt together don't all fall due the same day
             let iv = interval(S: s.S!), fuzz = iv > 3 ? 1 + (random() - 0.5) * 0.1 : 1
-            s.interval = Double(max(1, min(365, Int((iv * fuzz).rounded()))))
+            let days = (iv * fuzz).rounded()
+            s.interval = days.isFinite ? min(365, max(1, days)) : 365
             s.due = now + s.interval! * day
         }
         return s

@@ -405,7 +405,8 @@ final class LessonFlowTests: XCTestCase {
     /// step, even more than the usual reviews, so it still finishes the lesson.
     func testTheLastStepBringsBackEveryWordNotYetRight() {
         let p = store()
-        let lid = course.lessons.first { course.cards(in: $0.id).count == 5 }!.id
+        // (the biggest stone: three words since every chapter took chapter 1's shape)
+        let lid = course.lessons.max { course.cards(in: $0.id).count < course.cards(in: $1.id).count }!.id
         let cards = course.cards(in: lid)
         let first = StudySession.buildQueue(lessonId: lid, progress: p, focuses: p.selectedFocuses).filter { $0.lessonId == lid }
         // the first step's words were all met, and all missed

@@ -16,6 +16,16 @@ final class FSRSTests: XCTestCase {
         XCTAssertEqual(FSRS.interval(S: 10), 10, accuracy: 1e-9)
     }
 
+    /// Right again and again the same day (practice stones, matches): stability stops growing
+    /// at a hundred years and the interval at a year, instead of overflowing (the app trapped).
+    func testManyRightAnswersInOneDayDontOverflow() {
+        var s = FSRS.schedule(nil, grade: .good, now: now, random: { 0.5 })
+        for k in 1...5000 { s = FSRS.schedule(s, grade: .easy, now: now + Double(k) * 1000, random: { 0.5 }) }
+        XCTAssertTrue(s.S!.isFinite)
+        XCTAssertLessThanOrEqual(s.S!, 36_500)
+        XCTAssertEqual(s.interval, 365)
+    }
+
     func testAgainComesBackInAMinute() {
         let first = FSRS.schedule(nil, grade: .good, now: now, random: { 0.5 })
         let later = now + 3 * FSRS.day
