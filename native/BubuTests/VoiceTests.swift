@@ -28,6 +28,18 @@ final class VoiceTests: XCTestCase {
         for d in drills { XCTAssertNotNil(Speech.clipURL(d.hanzi), "no clip for \(d.hanzi)") }
     }
 
+    /// A flagged clip is kept with its file name and reason, once per text (the list is put back after).
+    func testReportingAClip() {
+        let before = UserDefaults.standard.data(forKey: "audioReports")
+        defer { if let before { UserDefaults.standard.set(before, forKey: "audioReports") } else { AudioReports.clear() } }
+        AudioReports.clear()
+        AudioReports.add("你好", reason: "Wrong tone")
+        AudioReports.add("你好", reason: "Sounds unnatural")
+        XCTAssertEqual(AudioReports.all.count, 1)
+        XCTAssertTrue(AudioReports.has("你好"))
+        XCTAssertEqual(AudioReports.exportText, "k_670d9743542cae3e | 你好 | Sounds unnatural")
+    }
+
     func testAWordWithNoClipFallsBackToTheUsualVoice() {
         XCTAssertNil(Speech.clipURL("这句话没有录音，所以用手机的声音。"))
         // no clip in the speaker's voice: Bùbù's

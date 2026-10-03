@@ -1070,6 +1070,9 @@ struct FeedbackBanner: View {
     /// 5, 10, 15 … right in a row: a badge that pops in at the banner's corner (Duolingo's "5 IN A ROW")
     var inARow: Int? = nil
     @State private var bounce = false
+    @State private var reported = false
+    /// the Chinese this exercise said, for a report on its clip
+    private var said: String { ex.sentence?.hanzi ?? ex.card.word.hanzi }
     @State private var praise = ["Nice!", "Great job!", "Excellent!", "Spot on!", "太棒了!", "对了!"].randomElement()!
     @State private var peek = false
     private let course = Course.shared
@@ -1132,6 +1135,21 @@ struct FeedbackBanner: View {
                 .offset(x: -10, y: -12)
                 .onAppear { withAnimation(.spring(response: 0.35, dampingFraction: 0.45)) { bounce = true } }
             }
+        }
+        // report the clip: one tap and a reason (kept for Settings → Reported audio)
+        .overlay(alignment: .bottomTrailing) {
+            Menu {
+                Section("Report this audio: \(said)") {
+                    ForEach(AudioReports.reasons, id: \.self) { r in
+                        Button(r) { AudioReports.add(said, reason: r); reported = true }
+                    }
+                }
+            } label: {
+                Image(systemName: reported ? "flag.fill" : "flag").font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(tint.opacity(0.75)).padding(10).contentShape(Rectangle())
+            }
+            .accessibilityLabel("Report this audio")
+            .onAppear { reported = AudioReports.has(said) }
         }
     }
 

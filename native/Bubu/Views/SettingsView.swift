@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var importing = false
     @State private var pending: (data: Data, summary: Backup.Summary)?
     @State private var confirmReset = false
+    @State private var reportsTick = 0
     @State private var message: String?
 
     var body: some View {
@@ -114,6 +115,16 @@ struct SettingsView: View {
                         row("Unlimited buns", "Tester only: mistakes never cost a bun (as Plus would).") {
                             Toggle("", isOn: Binding(get: { progress.isPlus }, set: { progress.setPlus($0) }))
                                 .labelsHidden().tint(.accent)
+                        }
+                        divider
+                        row("Reported audio (\(AudioReports.all.count))", "Clips you flagged in lessons. Copy the list and send it over; they'll be made again.") {
+                            HStack(spacing: 14) {
+                                Button("Copy") { UIPasteboard.general.string = AudioReports.exportText }
+                                    .font(.nunito(15, .bold)).foregroundStyle(Color.accent)
+                                Button("Clear") { AudioReports.clear(); reportsTick += 1 }
+                                    .font(.nunito(15, .bold)).foregroundStyle(Color.again)
+                            }
+                            .id(reportsTick)
                         }
                         divider
                         row("Start the stones again", "Tester only: clears every stone, word and streak so the course starts from stone 1. Settings stay.") {
