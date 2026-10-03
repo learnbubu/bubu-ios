@@ -100,9 +100,15 @@ final class SequencingTests: XCTestCase {
         var done = old
         let (restoned, _) = Backup.migrateDone(&done, srs: [:])
         XCTAssertTrue(done.isDisjoint(with: old), "old ids are gone")
-        for l in course.lessons {
+        for l in course.lessons where !l.isPractice {
             let feeders = from[l.id] ?? []
             XCTAssertEqual(done.contains(l.id), feeders.allSatisfy(old.contains), l.id)
+        }
+        // a practice stone (fed by nothing old) is done when everything before it in its chapter is
+        for ch in course.chapters {
+            for (i, id) in ch.lessons.enumerated() where course.lessonById[id]?.isPractice == true {
+                XCTAssertEqual(done.contains(id), i > 0 && ch.lessons[..<i].allSatisfy(done.contains), id)
+            }
         }
         XCTAssertGreaterThan(restoned, 20)
         // a word brought forward from a lesson not reached yet keeps its stone open
