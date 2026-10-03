@@ -77,3 +77,24 @@ The order is a reconstruction. Steps 1–3 and 15, the exercise types, and the 1
 - [A1] https://allenwarren.me/2025/04/22/duolingo-chinese-course-review/
 - [R1] https://www.alllanguageresources.com/duolingo-chinese-review/
 - [M1] https://medium.com/language-learners-toolkit/duolingo-unleashed-decoding-the-secrets-behind-its-language-learning-magic-23255fb3f870
+
+## In-lesson look and feel (research, 3 Oct 2026)
+
+Sources: Duolingo's 2023 Method whitepaper, its blog, duoplanet, and design teardowns.
+
+| Duolingo | Bùbù |
+|---|---|
+| Check → a banner slides up: pale green/red, correct answer with pinyin, one big button | yes |
+| Progress bar eases forward on every answer | yes |
+| Every missed item re-asked at the end; the lesson ends when all are right | yes (`retries`) |
+| NEW WORD label in purple; new words recur from recognition to production | yes (and a meet card first, by choice) |
+| Types capped per lesson; easy → hard; a no-word-bank "hard" translation near the end | caps and order yes; **no typed "hard" exercise yet** |
+| "5 IN A ROW" badge with a bounce at combo milestones | yes, from 3 Oct 2026 (`FeedbackBanner.inARow`) |
+| Ding/boing sounds and haptics | yes |
+| Characters react; a big celebration for a perfect lesson | panda moods yes; perfect-lesson celebration to check |
+| Closing mid-lesson asks first ("keep learning" / "end session"), with a sad Duo | yes, from 3 Oct 2026 (`QuitAsk`) |
+| Speaker + turtle on listening; tiles speak and move to the answer line | yes |
+| End sequence: Lesson complete (XP, accuracy, time) → streak → quests | yes (`DoneView`'s three stages) |
+| Picture cards for nouns ("Which one is tea?") | **no** (needs art) |
+| Keyboard instead of word bank from level 2 | **no** (typing is next) |
+| Practice Hub: mistakes, words, listen, speak, stories | partly (the lesson sheet's practice and Home tiles) |
