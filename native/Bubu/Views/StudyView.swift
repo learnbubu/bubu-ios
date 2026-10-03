@@ -844,6 +844,8 @@ struct ChoiceView: View {
                          long: ex.dir == "gap" && (ex.sentence?.words.map(\.hanzi).joined().count ?? 0) > 9) {
                 if isNew { NewBadge() }
                 switch ex.dir {
+                case "picture":
+                    Text(w.gloss).font(.nunitoXB(19)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 case "gap":
                     if let sent = ex.sentence { gapPrompt(sent) }
                 case "recall":
@@ -885,7 +887,7 @@ struct ChoiceView: View {
             }
             // the word's pinyin, big and tone-coloured under the bubble while it's new; once it's
             // strong its place stays, and a tap on the word (or the eye) shows it
-            if !["recall", "pinyin", "listen", "gap"].contains(ex.dir) {
+            if !["recall", "pinyin", "listen", "gap", "picture"].contains(ex.dir) {
                 ZStack {
                     PinyinText(pinyin: w.pinyin, size: 22).opacity(pinyinShown || peek ? 1 : 0)
                     if !(pinyinShown || peek) {
@@ -903,10 +905,17 @@ struct ChoiceView: View {
                 Button("What are tones?") { Coach.tonesLinkTapped(); tonesOpen = true }
                     .font(.nunito(14, .bold)).foregroundStyle(Color.accent).padding(.top, 8)
             }
+            if ex.dir == "picture" {
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                    ForEach(ex.options, id: \.self) { opt in pictureCard(opt) }
+                }
+                .padding(.top, 18)
+            } else {
             VStack(spacing: 9) {
                 ForEach(ex.options, id: \.self) { opt in option(opt) }
             }
             .padding(.top, 18)
+            }
             if ex.dir == "listen", let skip {
                 // its place is kept once the exercise is answered, so nothing moves
                 ZStack {
@@ -945,6 +954,28 @@ struct ChoiceView: View {
 
     private func reveal() {
         withAnimation(.easeOut(duration: 0.15)) { peek = true }
+    }
+
+    /// One picture card: the picture, the word and (as the training wheels say) its pinyin.
+    private func pictureCard(_ opt: String) -> some View {
+        let isAnswer = opt == ex.answer
+        let state: Bool? = !answered || skipped ? nil : isAnswer ? true : opt == picked ? false : nil
+        let selected = !answered && opt == picked
+        let edge: Color = state == true ? Color.good : state == false ? Color.again : selected ? Color.accent : Color.line
+        let fill: Color = state == true ? Color.goodSoft : state == false ? Color.againSoft : selected ? Color.accentSoft : Color.panel
+        return Button { choose(opt) } label: {
+            VStack(spacing: 6) {
+                Text(Pictures.of(opt) ?? "").font(.system(size: 54)).frame(height: 66)
+                Text(opt).font(.hanzi(20, .bold)).foregroundStyle(Color.ink)
+                PinyinText(pinyin: Course.wordPy[opt] ?? "", size: 13, weight: .bold).opacity(pinyinShown ? 1 : 0)
+            }
+            .frame(maxWidth: .infinity).padding(.vertical, 14)
+            .background(fill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(edge, lineWidth: selected ? 3 : 2))
+        }
+        .buttonStyle(PressDown(depth: 2))
+        .disabled(answered)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     /// The gap, as Duolingo draws it: a box you can't miss, dashed while empty, holding the
@@ -1051,7 +1082,7 @@ struct FeedbackBanner: View {
         let tint = correct ? Color.good : Color.again
         let lookalike: Card? = {
             guard !correct, let chosen else { return nil }
-            let c = ex.dir == "recall" || ex.dir == "gap" ? course.cards.first { $0.word.hanzi == chosen }
+            let c = ["recall", "gap", "picture"].contains(ex.dir) ? course.cards.first { $0.word.hanzi == chosen }
                 : ex.dir == "recognize" || ex.dir == "listen" ? course.cards.first { $0.word.gloss == chosen } : nil
             guard let c, CharData.shared.wordSim(w.hanzi, c.word.hanzi) >= 1.5 else { return nil }
             return c

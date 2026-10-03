@@ -239,7 +239,7 @@ enum Correction {
         switch ex.dir {
         case "pinyin":
             return toneLine(hanzi: w.hanzi, right: w.pinyin, chosen: chosen)
-        case "recall", "gap":
+        case "recall", "gap", "picture":
             guard let o = cards.first(where: { $0.word.hanzi == chosen })?.word, o.hanzi != w.hanzi else { return nil }
             return meaningLine(w, o)
         case "recognize", "listen":

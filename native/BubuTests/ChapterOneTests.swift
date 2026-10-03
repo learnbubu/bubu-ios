@@ -129,7 +129,7 @@ final class ChapterOneTests: XCTestCase {
             if case .meet(let cards, _, _) = s.current {
                 s.next()
                 XCTAssertEqual(s.card?.id, cards[0].id)
-                XCTAssertTrue(["recognize", "listen"].contains(s.dir), s.dir)
+                XCTAssertTrue(["recognize", "listen", "picture"].contains(s.dir), s.dir)
                 continue
             }
             if s.card != nil { s.answer(true) }

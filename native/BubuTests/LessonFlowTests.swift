@@ -276,6 +276,20 @@ final class LessonFlowTests: XCTestCase {
         XCTAssertEqual(ex?.label, "Type it in pinyin")
     }
 
+    /// Picture cards: four different pictures, the word's among them, nothing taught as a sentence.
+    func testPictureCards() throws {
+        let tea = card("茶")
+        for _ in 0..<20 {
+            let ex = try XCTUnwrap(Exercise.make(card: tea, dir: "picture", scope: [], progress: store()))
+            XCTAssertEqual(ex.dir, "picture")
+            XCTAssertEqual(ex.answer, "茶")
+            XCTAssertEqual(Set(ex.options).count, 4)
+            XCTAssertEqual(Set(ex.options.compactMap(Pictures.of)).count, 4, "\(ex.options)")
+        }
+        XCTAssertNil(Exercise.pictureChoice(card("什么")), "no picture for 什么")
+        XCTAssertEqual(Exercise.make(card: tea, dir: "picture", scope: [], progress: store())?.label, "Which one is “tea”?")
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

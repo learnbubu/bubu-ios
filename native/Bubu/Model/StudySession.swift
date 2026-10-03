@@ -780,7 +780,7 @@ final class StudySession: Identifiable {
     /// translated with tiles, a gap filled, heard and built; and, a little (`ladderOnce`),
     /// written or said.
     static let newWordLadder: [[String]] = [
-        ["recognize", "listen"],
+        ["picture", "recognize", "listen"],
         ["sentence", "gap", "listen", "pinyin"],
         ["hear", "gap", "recall", "sentence", "write", "speak"],
         ["gap", "sentence", "hear", "type", "write", "speak", "pinyin", "recall"],
@@ -834,6 +834,8 @@ final class StudySession: Identifiable {
         // filling a gap goes with building sentences, and "tap what you hear" with those and listening
         if focuses.contains("sentence") { enabled.append("gap") }
         if focuses.contains("sentence") && focuses.contains("listen") { enabled.append("hear") }
+        // picture cards for a word with a picture, when three others with pictures can stand beside it
+        if focuses.contains("recognize") && Exercise.pictureChoice(c) != nil { enabled.append("picture") }
         // typing the pinyin goes with recalling a word (a phrase taught as one item isn't typed)
         if focuses.contains("recall") && !c.isSentence && c.word.hanzi.filter(Course.isHan).count <= 3 { enabled.append("type") }
         // "Which pinyin?" asks about tones: not until they've been introduced
@@ -857,7 +859,7 @@ final class StudySession: Identifiable {
         if focuses.count > 1 {
             let reps = s?.reps ?? 0, interval = s?.interval ?? 0
             let level = reps >= 2 || interval >= 7 ? 2 : reps >= 1 ? 1 : 0
-            let rung: [String]? = level == 0 ? ["recognize", "listen"] : level == 1 ? ["recall", "pinyin", "sentence", "listen", "gap", "hear"] : nil
+            let rung: [String]? = level == 0 ? ["recognize", "listen", "picture"] : level == 1 ? ["recall", "pinyin", "sentence", "listen", "gap", "hear"] : nil
             if let rung {
                 var on = enabled.filter { rung.contains($0) }
                 if let before = dirByCard[c.id], on.count > 1 { on.removeAll { $0 == before } }
@@ -1153,7 +1155,8 @@ final class StudySession: Identifiable {
     func debugShow(dir: String) {
         let cards = course.cards(in: lessonId)
         let c = dir == "sentence" ? (course.cards.first { !course.sentences(for: $0).isEmpty } ?? cards[0])
-            : dir == "gap" || dir == "hear" ? (course.cards.first { $0.word.hanzi == "是" } ?? cards[0]) : cards[0]
+            : dir == "gap" || dir == "hear" ? (course.cards.first { $0.word.hanzi == "是" } ?? cards[0])
+            : dir == "picture" ? (course.cards.first { $0.word.hanzi == "茶" } ?? cards[0]) : cards[0]
         current = .card(c)
         self.dir = dir
         // every word counts as met here, so the screenshot always has a sentence
@@ -1211,6 +1214,7 @@ struct Exercise {
         case "speak": return "Say it out loud"
         case "write": return (WriteGuidance(rawValue: writeStage) ?? .full).label
         case "type": return "Type it in pinyin"
+        case "picture": return "Which one is “\(card.word.gloss)”?"
         default: return "What does this mean?"
         }
     }
@@ -1222,6 +1226,7 @@ struct Exercise {
         case "sentence": return sentence(c, met: met ?? { progress.srs[$0] != nil })
         case "hear": return sentence(c, met: met ?? { progress.srs[$0] != nil }, hear: true)
         case "type": return Exercise(kind: .type, dir: "type", card: c, answer: c.word.pinyin)
+        case "picture": return pictureChoice(c)
         case "gap": return gap(c, scope: scope, met: met ?? { progress.srs[$0] != nil })
         case "speak": return speak(c, met: met ?? { progress.srs[$0] != nil })
         case "write":
@@ -1297,6 +1302,25 @@ struct Exercise {
         let ok = Course.shared.speakSentences(for: c, met: met)
         let phrase = !ok.isEmpty && Double.random(in: 0..<1) < sentenceChance ? ok.randomElement() : nil
         return Exercise(kind: .speak, dir: "speak", card: c, sentence: phrase)
+    }
+
+    /// Picture cards: four words with pictures, the card's among them, the others from the stones
+    /// nearest it (never two with the same picture). Nil when the word has no picture or too few
+    /// others do.
+    static func pictureChoice(_ c: Card) -> Exercise? {
+        let course = Course.shared
+        guard let mine = Pictures.of(c.word.hanzi) else { return nil }
+        let here = course.lessonOrder[c.lessonId] ?? 0
+        let others = course.cards.filter { Pictures.of($0.word.hanzi) != nil && $0.word.hanzi != c.word.hanzi && !$0.isSentence }
+            .sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
+        var options: [String] = [], pics: Set<String> = [mine], words: Set<String> = [c.word.hanzi]
+        // from the nearest twelve, shuffled, so it isn't always the same three
+        for x in Array(others.prefix(12)).shuffled() + others where options.count < 3 {
+            guard let p = Pictures.of(x.word.hanzi), !pics.contains(p), !words.contains(x.word.hanzi) else { continue }
+            pics.insert(p); words.insert(x.word.hanzi); options.append(x.word.hanzi)
+        }
+        guard options.count == 3 else { return nil }
+        return Exercise(kind: .choice, dir: "picture", card: c, options: (options + [c.word.hanzi]).shuffled(), answer: c.word.hanzi)
     }
 
     /// Typed pinyin against the right pinyin: letters only, tones optional (tone marks or numbers),
