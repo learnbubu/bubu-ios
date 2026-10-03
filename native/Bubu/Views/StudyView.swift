@@ -9,6 +9,8 @@ struct StudyView: View {
     var close: () -> Void
     /// what's been typed, in a typing exercise
     @State private var typed = ""
+    /// the parts picked, in a build-the-character exercise
+    @State private var built: Set<String> = []
     /// "Wait, don't go!": the close button asks first once something's been answered
     @State private var quitAsk = false
     @Environment(ProgressStore.self) private var progress
@@ -171,7 +173,7 @@ struct StudyView: View {
     }
 
     private func resetExercise() {
-        pick = ChoicePick(); skipped = false; placed = []; typed = ""; feedback = nil; exerciseKey = UUID()
+        pick = ChoicePick(); skipped = false; placed = []; typed = ""; built = []; feedback = nil; exerciseKey = UUID()
         srsAtStart = progress.srs
         if session.exercise != nil {
             let key = exerciseKey
@@ -282,6 +284,8 @@ struct StudyView: View {
                         if ex.kind == .sentence {
                             SentenceView(ex: ex, placed: $placed, result: feedback?.correct, wheels: wheels,
                                          skipped: skipped, skip: { cantListen() })
+                        } else if ex.kind == .build {
+                            BuildView(ex: ex, picked: $built, result: feedback?.correct)
                         } else if ex.kind == .type {
                             TypeView(ex: ex, typed: $typed, result: feedback?.correct) { if !session.answered { checkType() } }
                         } else if ex.kind == .write {
@@ -324,9 +328,11 @@ struct StudyView: View {
         let isSentence = ex?.kind == .sentence
         let isChoice = ex?.kind == .choice
         let isType = ex?.kind == .type
-        let checks = (isSentence || isChoice || isType) && !session.answered
+        let isBuild = ex?.kind == .build
+        let checks = (isSentence || isChoice || isType || isBuild) && !session.answered
         let ready = session.answered || (isSentence && !placed.isEmpty) || (isChoice && pick.canCheck)
             || (isType && !typed.trimmingCharacters(in: .whitespaces).isEmpty)
+            || (isBuild && built.count == (ex?.answer.components(separatedBy: "|").count ?? 0))
         let fill = !ready ? Color.accent.opacity(0.38) : feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent
         let ink = !ready ? Color.onAccent.opacity(0.7) : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
         return ZStack(alignment: .bottom) {
@@ -345,7 +351,7 @@ struct StudyView: View {
                     }
                 }
             Button {
-                if !checks { advance() } else if isSentence { checkSentence() } else if isType { checkType() } else { checkChoice() }
+                if !checks { advance() } else if isSentence { checkSentence() } else if isType { checkType() } else if isBuild { checkBuild() } else { checkChoice() }
             } label: {
                 Text(checks ? "Check" : session.isQuiz ? "Next →" : "Continue")
                     .font(.nunitoXB(16.8)).foregroundStyle(ink)
@@ -388,6 +394,15 @@ struct StudyView: View {
         session.skip()
         pick = ChoicePick(); placed = []
         withAnimation { skipped = true }
+    }
+
+    private func checkBuild() {
+        guard let ex = session.exercise, !session.answered else { return }
+        let correct = ex.builds(built)
+        session.answer(correct)
+        Sounds.shared.play(correct ? "correct" : "wrong")
+        withAnimation { feedback = Feedback(correct: correct, chosen: built.sorted().joined(separator: " + ")) }
+        playAnswer(ex)
     }
 
     private func checkType() {
@@ -1697,5 +1712,59 @@ struct TypeView: View {
         }
         .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { focused = true } }
         .onChange(of: result) { _, r in if r != nil { focused = false } }
+    }
+}
+
+/// Build the character: its meaning and pinyin, and six parts to pick from (two or three of them
+/// make it). Once answered, the sum: 女 + 子 = 好.
+struct BuildView: View {
+    let ex: Exercise
+    @Binding var picked: Set<String>
+    let result: Bool?
+
+    private var parts: [String] { ex.answer.components(separatedBy: "|") }
+
+    var body: some View {
+        let w = ex.card.word
+        VStack(spacing: 18) {
+            MascotPrompt(mood: result) {
+                if ex.isNew { NewBadge() }
+                if result == nil {
+                    Text("?").font(.hanzi(44, .medium)).foregroundStyle(Color.muted.opacity(0.5))
+                } else {
+                    Text(parts.joined(separator: " + ") + " = " + w.hanzi).font(.hanzi(28, .medium)).foregroundStyle(Color.ink)
+                }
+                PinyinText(pinyin: w.pinyin, size: 18)
+                Text(w.gloss).font(.nunito(16)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+            }
+            Text("Pick the \(parts.count == 2 ? "two" : "three") parts it's made of")
+                .font(.nunito(13.5, .bold)).foregroundStyle(Color.muted)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
+                ForEach(ex.options, id: \.self) { part in tile(part) }
+            }
+        }
+    }
+
+    private func tile(_ part: String) -> some View {
+        let isPart = parts.contains(part)
+        let on = picked.contains(part)
+        let state: Bool? = result == nil ? nil : isPart ? true : on ? false : nil
+        let edge: Color = state == true ? Color.good : state == false ? Color.again : on ? Color.accent : Color.line
+        let fill: Color = state == true ? Color.goodSoft : state == false ? Color.againSoft : on ? Color.accentSoft : Color.panel
+        let name = CharData.shared.partNames[part]?.first ?? CharData.shared.meaning(part)
+        return Button {
+            guard result == nil else { return }
+            if on { picked.remove(part) } else if picked.count < parts.count { picked.insert(part) }
+        } label: {
+            VStack(spacing: 2) {
+                Text(part).font(.hanzi(30, .medium)).foregroundStyle(Color.ink)
+                Text(name).font(.nunito(11.5, .semibold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity).padding(.vertical, 10)
+            .background(fill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(edge, lineWidth: on ? 3 : 2))
+        }
+        .buttonStyle(PressDown(depth: 2))
+        .disabled(result != nil)
     }
 }

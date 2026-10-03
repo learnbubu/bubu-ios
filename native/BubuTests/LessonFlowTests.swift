@@ -290,6 +290,18 @@ final class LessonFlowTests: XCTestCase {
         XCTAssertEqual(Exercise.make(card: tea, dir: "picture", scope: [], progress: store())?.label, "Which one is “tea”?")
     }
 
+    /// Build the character: 好's two parts among six, picked in either order.
+    func testBuildTheCharacter() throws {
+        let ex = try XCTUnwrap(Exercise.buildChoice(card("好")))
+        XCTAssertEqual(ex.kind, .build)
+        XCTAssertEqual(ex.options.count, 6)
+        XCTAssertEqual(Set(ex.options).count, 6)
+        XCTAssertTrue(Set(["女", "子"]).isSubset(of: Set(ex.options)))
+        XCTAssertTrue(ex.builds(["子", "女"]))
+        XCTAssertFalse(ex.builds(["女"]))
+        XCTAssertNil(Exercise.buildChoice(card("你好")), "two characters: not built")
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

@@ -782,12 +782,12 @@ final class StudySession: Identifiable {
     static let newWordLadder: [[String]] = [
         ["picture", "recognize", "listen"],
         ["sentence", "gap", "listen", "pinyin"],
-        ["hear", "gap", "recall", "sentence", "write", "speak"],
+        ["hear", "gap", "recall", "sentence", "build", "write", "speak"],
         ["gap", "sentence", "hear", "type", "write", "speak", "pinyin", "recall"],
         ["type", "speak", "write", "hear", "sentence", "recall", "listen"],
     ]
     /// A stone's new words are written once and said once in its session, no more ("a little").
-    static let ladderOnce: Set<String> = ["write", "speak", "type"]
+    static let ladderOnce: Set<String> = ["write", "speak", "type", "build"]
     /// A new word may be written or said once it's been got right this often in the session.
     static let rightBeforeSpeaking = 2
 
@@ -836,6 +836,8 @@ final class StudySession: Identifiable {
         if focuses.contains("sentence") && focuses.contains("listen") { enabled.append("hear") }
         // picture cards for a word with a picture, when three others with pictures can stand beside it
         if focuses.contains("recognize") && Exercise.pictureChoice(c) != nil { enabled.append("picture") }
+        // building a character from its parts goes with writing
+        if focuses.contains("write") && Exercise.buildChoice(c) != nil { enabled.append("build") }
         // typing the pinyin goes with recalling a word (a phrase taught as one item isn't typed)
         if focuses.contains("recall") && !c.isSentence && c.word.hanzi.filter(Course.isHan).count <= 3 { enabled.append("type") }
         // "Which pinyin?" asks about tones: not until they've been introduced
@@ -1156,7 +1158,8 @@ final class StudySession: Identifiable {
         let cards = course.cards(in: lessonId)
         let c = dir == "sentence" ? (course.cards.first { !course.sentences(for: $0).isEmpty } ?? cards[0])
             : dir == "gap" || dir == "hear" ? (course.cards.first { $0.word.hanzi == "是" } ?? cards[0])
-            : dir == "picture" ? (course.cards.first { $0.word.hanzi == "茶" } ?? cards[0]) : cards[0]
+            : dir == "picture" ? (course.cards.first { $0.word.hanzi == "茶" } ?? cards[0])
+            : dir == "build" ? (course.cards.first { $0.word.hanzi == "好" } ?? cards[0]) : cards[0]
         current = .card(c)
         self.dir = dir
         // every word counts as met here, so the screenshot always has a sentence
@@ -1183,7 +1186,7 @@ final class StudySession: Identifiable {
 
 /// One question on screen: what's asked, the options, and the right answer.
 struct Exercise {
-    enum Kind { case choice, sentence, speak, write, type }
+    enum Kind { case choice, sentence, speak, write, type, build }
     let kind: Kind
     let dir: String
     let card: Card
@@ -1216,6 +1219,7 @@ struct Exercise {
         case "speak": return "Say it out loud"
         case "write": return (WriteGuidance(rawValue: writeStage) ?? .full).label
         case "type": return "Type it in pinyin"
+        case "build": return "Build the character"
         case "picture": return "Which one is “\(card.word.gloss)”?"
         default: return "What does this mean?"
         }
@@ -1229,6 +1233,7 @@ struct Exercise {
         case "hear": return sentence(c, met: met ?? { progress.srs[$0] != nil }, hear: true)
         case "type": return Exercise(kind: .type, dir: "type", card: c, answer: c.word.pinyin)
         case "picture": return pictureChoice(c)
+        case "build": return buildChoice(c)
         case "gap": return gap(c, scope: scope, met: met ?? { progress.srs[$0] != nil })
         case "speak": return speak(c, met: met ?? { progress.srs[$0] != nil })
         case "write":
@@ -1324,6 +1329,31 @@ struct Exercise {
         guard options.count == 3 else { return nil }
         return Exercise(kind: .choice, dir: "picture", card: c, options: (options + [c.word.hanzi]).shuffled(), answer: c.word.hanzi)
     }
+
+    /// Build the character: a one-character word's parts (女 + 子 = 好) among parts of other
+    /// characters, to pick. Nil for a word of more characters, or one that doesn't split into
+    /// two or three parts. `options` are the parts to choose from; `answer` the right ones, joined.
+    static func buildChoice(_ c: Card) -> Exercise? {
+        let ch = c.word.hanzi.filter(Course.isHan)
+        guard ch.count == 1, let parts = CharData.shared.chars[ch]?.c?.map({ $0[0] }), (2...3).contains(parts.count),
+              Set(parts).count == parts.count, !parts.contains(ch) else { return nil }
+        let course = Course.shared
+        let here = course.lessonOrder[c.lessonId] ?? 0
+        // other parts: from the characters of the words nearest this one in the course
+        let near = course.cards.filter { $0.word.hanzi.filter(Course.isHan).count == 1 && $0.word.hanzi != ch }
+            .sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
+        var others: [String] = [], seen = Set(parts)
+        for x in Array(near.prefix(30)).shuffled() + near where others.count < 6 - parts.count {
+            for p in CharData.shared.chars[x.word.hanzi]?.c?.map({ $0[0] }) ?? [] where others.count < 6 - parts.count {
+                if seen.insert(p).inserted { others.append(p) }
+            }
+        }
+        guard others.count == 6 - parts.count else { return nil }
+        return Exercise(kind: .build, dir: "build", card: c, options: (parts + others).shuffled(), answer: parts.joined(separator: "|"))
+    }
+
+    /// The parts picked make the character: the same parts, in any order.
+    func builds(_ picked: Set<String>) -> Bool { picked == Set(answer.components(separatedBy: "|")) }
 
     /// Typed pinyin against the right pinyin: letters only, tones optional (tone marks or numbers),
     /// ü as u or v, spaces and apostrophes ignored.
