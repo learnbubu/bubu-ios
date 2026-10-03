@@ -1,6 +1,5 @@
 """What a speech recogniser (Whisper, run here) makes of each take, to pick takes without ears.
-    C:\\Users\\domch\\bubu-voice\\venv\\Scripts\\python tools\\clone\\hear.py out.json file1.mp3 ...   (or a folder)
-Then tools/clone/judge.py grades what was heard against what each clip should say.
+    venv\\Scripts\\python redo\\hear.py out.json file1.mp3 file2.mp3 ...   (or a folder)
 """
 import json, os, sys
 import whisper

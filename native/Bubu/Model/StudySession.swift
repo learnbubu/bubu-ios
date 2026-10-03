@@ -783,11 +783,11 @@ final class StudySession: Identifiable {
         ["recognize", "listen"],
         ["sentence", "gap", "listen", "pinyin"],
         ["hear", "gap", "recall", "sentence", "write", "speak"],
-        ["gap", "sentence", "hear", "write", "speak", "pinyin", "recall"],
-        ["speak", "write", "hear", "sentence", "recall", "listen"],
+        ["gap", "sentence", "hear", "type", "write", "speak", "pinyin", "recall"],
+        ["type", "speak", "write", "hear", "sentence", "recall", "listen"],
     ]
     /// A stone's new words are written once and said once in its session, no more ("a little").
-    static let ladderOnce: Set<String> = ["write", "speak"]
+    static let ladderOnce: Set<String> = ["write", "speak", "type"]
     /// A new word may be written or said once it's been got right this often in the session.
     static let rightBeforeSpeaking = 2
 
@@ -834,6 +834,8 @@ final class StudySession: Identifiable {
         // filling a gap goes with building sentences, and "tap what you hear" with those and listening
         if focuses.contains("sentence") { enabled.append("gap") }
         if focuses.contains("sentence") && focuses.contains("listen") { enabled.append("hear") }
+        // typing the pinyin goes with recalling a word (a phrase taught as one item isn't typed)
+        if focuses.contains("recall") && !c.isSentence && c.word.hanzi.filter(Course.isHan).count <= 3 { enabled.append("type") }
         // "Which pinyin?" asks about tones: not until they've been introduced
         if !tonesTaught { enabled.removeAll { $0 == "pinyin" } }
         // a sentence only when all its other words have been met (see Course.sentences(for:met:))
@@ -1176,7 +1178,7 @@ final class StudySession: Identifiable {
 
 /// One question on screen: what's asked, the options, and the right answer.
 struct Exercise {
-    enum Kind { case choice, sentence, speak, write }
+    enum Kind { case choice, sentence, speak, write, type }
     let kind: Kind
     let dir: String
     let card: Card
@@ -1208,6 +1210,7 @@ struct Exercise {
         case "gap": return "Fill the gap"
         case "speak": return "Say it out loud"
         case "write": return (WriteGuidance(rawValue: writeStage) ?? .full).label
+        case "type": return "Type it in pinyin"
         default: return "What does this mean?"
         }
     }
@@ -1218,6 +1221,7 @@ struct Exercise {
         switch dir {
         case "sentence": return sentence(c, met: met ?? { progress.srs[$0] != nil })
         case "hear": return sentence(c, met: met ?? { progress.srs[$0] != nil }, hear: true)
+        case "type": return Exercise(kind: .type, dir: "type", card: c, answer: c.word.pinyin)
         case "gap": return gap(c, scope: scope, met: met ?? { progress.srs[$0] != nil })
         case "speak": return speak(c, met: met ?? { progress.srs[$0] != nil })
         case "write":
@@ -1293,6 +1297,19 @@ struct Exercise {
         let ok = Course.shared.speakSentences(for: c, met: met)
         let phrase = !ok.isEmpty && Double.random(in: 0..<1) < sentenceChance ? ok.randomElement() : nil
         return Exercise(kind: .speak, dir: "speak", card: c, sentence: phrase)
+    }
+
+    /// Typed pinyin against the right pinyin: letters only, tones optional (tone marks or numbers),
+    /// ü as u or v, spaces and apostrophes ignored.
+    static func typedMatches(_ typed: String, pinyin: String) -> Bool {
+        func plain(_ s: String) -> String {
+            s.lowercased().decomposedStringWithCanonicalMapping
+                .unicodeScalars.filter { CharacterSet.letters.contains($0) && $0.value < 0x300 }
+                .map { String($0) }.joined()
+                .replacingOccurrences(of: "v", with: "u").replacingOccurrences(of: "ü", with: "u")
+        }
+        let a = plain(typed), b = plain(pinyin)
+        return !a.isEmpty && a == b
     }
 
     /// What to say, its pinyin and its meaning.

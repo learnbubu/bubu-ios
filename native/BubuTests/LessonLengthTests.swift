@@ -93,7 +93,7 @@ final class LessonLengthTests: XCTestCase {
         checkNewWords(steps, fresh)
         for c in fresh { XCTAssertEqual(ex.filter { $0.id == c.id }.count, 5, c.word.hanzi) }
         // no tones yet, so no "Which pinyin?"
-        XCTAssertTrue(ex.allSatisfy { ["recognize", "listen", "recall", "sentence", "gap", "hear", "write", "speak"].contains($0.dir) },
+        XCTAssertTrue(ex.allSatisfy { ["recognize", "listen", "recall", "sentence", "gap", "hear", "write", "speak", "type"].contains($0.dir) },
                       "\(ex.map(\.dir))")
         let got = steps.map { $0.meet ? "meet \($0.hanzi)" : "\($0.dir) \($0.hanzi)" }
         XCTAssertEqual(Array(got.prefix(7)), [

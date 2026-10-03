@@ -7,6 +7,8 @@ import SwiftUI
 struct StudyView: View {
     @State var session: StudySession
     var close: () -> Void
+    /// what's been typed, in a typing exercise
+    @State private var typed = ""
     /// "Wait, don't go!": the close button asks first once something's been answered
     @State private var quitAsk = false
     @Environment(ProgressStore.self) private var progress
@@ -169,7 +171,7 @@ struct StudyView: View {
     }
 
     private func resetExercise() {
-        pick = ChoicePick(); skipped = false; placed = []; feedback = nil; exerciseKey = UUID()
+        pick = ChoicePick(); skipped = false; placed = []; typed = ""; feedback = nil; exerciseKey = UUID()
         srsAtStart = progress.srs
         if session.exercise != nil {
             let key = exerciseKey
@@ -280,6 +282,8 @@ struct StudyView: View {
                         if ex.kind == .sentence {
                             SentenceView(ex: ex, placed: $placed, result: feedback?.correct, wheels: wheels,
                                          skipped: skipped, skip: { cantListen() })
+                        } else if ex.kind == .type {
+                            TypeView(ex: ex, typed: $typed, result: feedback?.correct) { if !session.answered { checkType() } }
                         } else if ex.kind == .write {
                             WriteView(ex: ex, answered: session.answered) { settle(true) }
                         } else if ex.kind == .speak {
@@ -319,8 +323,10 @@ struct StudyView: View {
         let ex = session.exercise
         let isSentence = ex?.kind == .sentence
         let isChoice = ex?.kind == .choice
-        let checks = (isSentence || isChoice) && !session.answered
+        let isType = ex?.kind == .type
+        let checks = (isSentence || isChoice || isType) && !session.answered
         let ready = session.answered || (isSentence && !placed.isEmpty) || (isChoice && pick.canCheck)
+            || (isType && !typed.trimmingCharacters(in: .whitespaces).isEmpty)
         let fill = !ready ? Color.accent.opacity(0.38) : feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent
         let ink = !ready ? Color.onAccent.opacity(0.7) : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
         return ZStack(alignment: .bottom) {
@@ -339,7 +345,7 @@ struct StudyView: View {
                     }
                 }
             Button {
-                if !checks { advance() } else if isSentence { checkSentence() } else { checkChoice() }
+                if !checks { advance() } else if isSentence { checkSentence() } else if isType { checkType() } else { checkChoice() }
             } label: {
                 Text(checks ? "Check" : session.isQuiz ? "Next →" : "Continue")
                     .font(.nunitoXB(16.8)).foregroundStyle(ink)
@@ -382,6 +388,15 @@ struct StudyView: View {
         session.skip()
         pick = ChoicePick(); placed = []
         withAnimation { skipped = true }
+    }
+
+    private func checkType() {
+        guard let ex = session.exercise, !session.answered else { return }
+        let correct = Exercise.typedMatches(typed, pinyin: ex.answer)
+        session.answer(correct)
+        Sounds.shared.play(correct ? "correct" : "wrong")
+        withAnimation { feedback = Feedback(correct: correct, chosen: typed) }
+        playAnswer(ex)
     }
 
     private func checkSentence() {
@@ -1116,7 +1131,7 @@ struct FeedbackBanner: View {
 
     @ViewBuilder
     private func wordAnswer(_ w: Word) -> some View {
-        let first = ex.dir == "recognize" ? "en" : ex.dir == "pinyin" ? "py" : "hz"
+        let first = ex.dir == "recognize" ? "en" : ex.dir == "pinyin" || ex.dir == "type" ? "py" : "hz"
         let rest = ["hz", "py", "en"].filter { $0 != first }
         // a long meaning gets a line of its own rather than a narrow column beside the pinyin
         let apart = first != "en" && Self.brief(w).count > Self.longMeaning
@@ -1598,5 +1613,40 @@ struct QuitAsk: View {
             .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Color.panel).ignoresSafeArea(edges: .bottom))
             .transition(.move(edge: .bottom))
         }
+    }
+}
+
+/// Type it in pinyin: the word and its meaning, and a box for its pinyin (tones optional), as
+/// Duolingo's typed exercises near the end of a lesson. Return checks it.
+struct TypeView: View {
+    let ex: Exercise
+    @Binding var typed: String
+    let result: Bool?
+    var submit: () -> Void
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        let w = ex.card.word
+        VStack(spacing: 22) {
+            MascotPrompt(mood: result) {
+                if ex.isNew { NewBadge() }
+                Text(w.hanzi).font(.hanzi(w.hanzi.count > 3 ? 32 : 44, .medium)).foregroundStyle(Color.ink)
+                Text(w.gloss).font(.nunito(16)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+            }
+            TextField("Type the pinyin", text: $typed)
+                .font(.nunito(22, .bold)).foregroundStyle(Color.ink)
+                .multilineTextAlignment(.center)
+                .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.asciiCapable)
+                .submitLabel(.done).onSubmit(submit)
+                .focused($focused)
+                .disabled(result != nil)
+                .padding(.vertical, 16).padding(.horizontal, 14)
+                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.panel))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
+            Text("Tones are optional: ni hao or ni3 hao3").font(.nunito(12.5)).foregroundStyle(Color.muted)
+        }
+        .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { focused = true } }
+        .onChange(of: result) { _, r in if r != nil { focused = false } }
     }
 }

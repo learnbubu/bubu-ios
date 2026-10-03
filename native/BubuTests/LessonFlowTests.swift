@@ -262,6 +262,20 @@ final class LessonFlowTests: XCTestCase {
         XCTAssertEqual(Hints.short("吗"), "(yes/no question)")
     }
 
+    /// Typing the pinyin: tones optional, ü as u or v, spaces and apostrophes ignored.
+    func testTypedPinyinIsForgiving() {
+        XCTAssertTrue(Exercise.typedMatches("ni hao", pinyin: "nǐ hǎo"))
+        XCTAssertTrue(Exercise.typedMatches("ni3hao3", pinyin: "nǐ hǎo"))
+        XCTAssertTrue(Exercise.typedMatches("Nǐ Hǎo", pinyin: "nǐ hǎo"))
+        XCTAssertTrue(Exercise.typedMatches("lv", pinyin: "lǜ"))
+        XCTAssertTrue(Exercise.typedMatches("xian'zai", pinyin: "xiàn zài"))
+        XCTAssertFalse(Exercise.typedMatches("ni", pinyin: "nǐ hǎo"))
+        XCTAssertFalse(Exercise.typedMatches("", pinyin: "nǐ"))
+        let ex = Exercise.make(card: card("你好"), dir: "type", scope: [], progress: store())
+        XCTAssertEqual(ex?.kind, .type)
+        XCTAssertEqual(ex?.label, "Type it in pinyin")
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

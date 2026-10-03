@@ -59,6 +59,8 @@ def texts(chapter):
     out = [t for v, t in voice.plan(chs) if v == "k"]
     if NEW:
         out = [t for t in out if not os.path.exists(os.path.join(voice.OUT, voice.name(t) + ".mp3"))]
+    if os.environ.get("SENTENCES_ONLY"):          # words are made by spelltake.py, with their tones spelled out
+        out = [t for t in out if len(voice.han(t)) > 4 or any(p in t for p in "，。！？,.!?")]
     return out
 
 
