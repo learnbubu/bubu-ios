@@ -1163,6 +1163,8 @@ final class StudySession: Identifiable {
         exercise = Exercise.make(card: c, dir: dir, scope: [c.lessonId], progress: progress, met: { _ in true })
         exercise?.isNew = true
     }
+    /// four right already, so the next right answer is the fifth in a row
+    func debugCombo(_ n: Int) { combo = n }
     func debugFinish() {
         combo = 4; answeredCount = 8; againCount = 1; stepsDone = sessionTotal
         queue = []

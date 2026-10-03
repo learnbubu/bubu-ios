@@ -965,11 +965,11 @@ struct ChoiceView: View {
         let fill: Color = state == true ? Color.goodSoft : state == false ? Color.againSoft : selected ? Color.accentSoft : Color.panel
         return Button { choose(opt) } label: {
             VStack(spacing: 6) {
-                Text(Pictures.of(opt) ?? "").font(.system(size: 54)).frame(height: 66)
+                Text(Pictures.of(opt) ?? "").font(.system(size: 48)).frame(height: 56)
                 Text(opt).font(.hanzi(20, .bold)).foregroundStyle(Color.ink)
                 PinyinText(pinyin: Course.wordPy[opt] ?? "", size: 13, weight: .bold).opacity(pinyinShown ? 1 : 0)
             }
-            .frame(maxWidth: .infinity).padding(.vertical, 14)
+            .frame(maxWidth: .infinity).padding(.vertical, 10)
             .background(fill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(edge, lineWidth: selected ? 3 : 2))
         }

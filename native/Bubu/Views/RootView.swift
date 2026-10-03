@@ -88,7 +88,7 @@ struct RootView: View {
             }
             return
         }
-        guard let screen = Launch.screen, ["study", "meet", "tip", "practicerun", "quiz", "sentence", "sentencedrag", "gap", "hear", "type", "picture", "speak", "write", "done", "donefinal", "donenext", "char", "buns"].contains(screen) else { return }
+        guard let screen = Launch.screen, ["study", "meet", "tip", "practicerun", "quiz", "sentence", "sentencedrag", "gap", "hear", "type", "picture", "inarow", "speak", "write", "done", "donefinal", "donenext", "char", "buns"].contains(screen) else { return }
         if screen == "practicerun", let pr = Course.shared.lessons.first(where: { $0.isPractice }) {
             router.tab = .learn
             router.study = StudySession.lesson(pr.id, progress)
@@ -101,6 +101,7 @@ struct RootView: View {
         case "quiz": s.debugShow(dir: "recognize")
         case "sentence", "sentencedrag": s.debugShow(dir: "sentence")
         case "gap", "hear", "type", "picture": s.debugShow(dir: screen)
+        case "inarow": s.debugShow(dir: "recognize"); s.debugCombo(4)
         case "speak": s.debugShow(dir: "speak")
         case "write": s.debugShow(dir: "write")
         case "done", "donefinal", "donenext": s.debugFinish()
