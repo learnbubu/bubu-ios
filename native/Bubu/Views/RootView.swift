@@ -72,8 +72,13 @@ struct RootView: View {
     }
 
     /// Screens the cloud screenshot run asks for with `-screen`.
+    private static var debugShown = false
     private func debugScreens() {
         #if DEBUG
+        // once: onAppear can run twice at launch, and a second session presented over the first
+        // left the first exercise answered but not shown (the Mac's lldb check of 3 Oct 2026)
+        guard !Self.debugShown else { return }
+        Self.debugShown = true
         if Launch.screen == "avatar" { router.tab = .profile; router.profilePath = [.avatar]; return }
         if Launch.screen == "tones" { router.homePath = [.tones]; return }
         if Launch.screen == "guide" { router.tab = .learn; router.learnPath = [.guide(1)]; return }
