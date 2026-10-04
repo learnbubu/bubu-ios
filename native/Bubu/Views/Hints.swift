@@ -128,6 +128,13 @@ enum Hints {
 
 /// A tappable piece of a prompt that shows a small bubble: the meaning and pinyin of a
 /// Chinese word, or the Chinese for an English word (web: hintable).
+/// Which hint bubble is open: one at a time, so opening one closes any other (the owner,
+/// 4 Oct 2026: "they both stay up at the same time").
+@Observable final class HintFocus {
+    static let shared = HintFocus()
+    var open: AnyHashable?
+}
+
 struct HintChip<Label: View>: View {
     let hanzi: String?
     var pinyin: String? = nil
@@ -138,12 +145,14 @@ struct HintChip<Label: View>: View {
     /// also told of a tap (a word's pinyin, hidden once it's strong, shows on a tap)
     var tapped: (() -> Void)? = nil
     @ViewBuilder var label: Label
-    @State private var open = false
+    @State private var me = UUID()
     @State private var openedAt = Date.distantPast
+    private var focus = HintFocus.shared
+    private var open: Bool { focus.open == AnyHashable(me) }
 
     var body: some View {
         Button {
-            withAnimation(.easeOut(duration: 0.12)) { open.toggle() }
+            withAnimation(.easeOut(duration: 0.12)) { focus.open = open ? nil : AnyHashable(me) }
             guard open else { return }
             // said, unless it was only just heard (the speaker beside it says it again)
             if let h = hanzi { Speech.shared.autoSpeak(h) }
@@ -153,7 +162,7 @@ struct HintChip<Label: View>: View {
             let stamp = Date()
             openedAt = stamp
             DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-                if openedAt == stamp { withAnimation(.easeIn(duration: 0.15)) { open = false } }
+                if openedAt == stamp && open { withAnimation(.easeIn(duration: 0.15)) { focus.open = nil } }
             }
         } label: {
             label
@@ -161,7 +170,7 @@ struct HintChip<Label: View>: View {
                 .background(open ? Color.accentSoft : highlight ?? .clear, in: RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)
-        .hintBubble(open: $open) {
+        .hintBubble(open: Binding(get: { open }, set: { if !$0 && open { focus.open = nil } })) {
             HintBubble(hanzi: hanzi, pinyin: pinyin, reverse: reverse, phrase: phrase)
         }
     }

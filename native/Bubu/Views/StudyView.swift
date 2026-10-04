@@ -447,6 +447,7 @@ struct StudyView: View {
         // nothing said for the last exercise runs on into the next (the owner: it "bleeds into the
         // next question that speaks")
         Speech.shared.stop()
+        HintFocus.shared.open = nil
         withAnimation {
             session.next()
             resetExercise()
@@ -1522,6 +1523,7 @@ struct SentenceView: View {
         .simultaneousGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in
             guard drag == nil else { return }
             held = t; justHeld = true; HintTip.used = true
+            HintFocus.shared.open = AnyHashable("tile-\(t.id)")      // (closes any word's hint)
             // (where the release makes no tap, the next real tap still counts)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { justHeld = false }
         })
@@ -1530,7 +1532,8 @@ struct SentenceView: View {
                 .onChanged { v in dragMoved(t, v, fromBank: !inAnswer) }
                 .onEnded { v in dragEnded(t, v) },
             including: result == nil ? .all : .subviews)
-        .hintBubble(open: Binding(get: { held == t && (inAnswer || !placed.contains(t)) }, set: { if !$0 { held = nil } })) {
+        .hintBubble(open: Binding(get: { held == t && (inAnswer || !placed.contains(t)) && HintFocus.shared.open == AnyHashable("tile-\(t.id)") },
+                                  set: { if !$0 { held = nil; if HintFocus.shared.open == AnyHashable("tile-\(t.id)") { HintFocus.shared.open = nil } } })) {
             if t.pinyin != nil {
                 HintBubble(hanzi: t.text, pinyin: t.pinyin)
             } else {
