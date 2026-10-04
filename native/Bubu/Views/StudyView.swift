@@ -1803,8 +1803,9 @@ struct TypeView: View {
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
             // (wrapping, never clipped: the Mac's check of 0.1.38 found the descenders cut off)
-            Text(ex.typeHanzi ? "Use the 🌐 key for the Chinese keyboard"
-                              : "Tones are optional: ni hao or ni3 hao3. Characters count too.")
+            // (an SF Symbol, not the 🌐 emoji: the emoji's fallback font clipped Nunito's descenders)
+            (ex.typeHanzi ? Text("Use the ") + Text(Image(systemName: "globe")) + Text(" key for the Chinese keyboard")
+                          : Text("Tones are optional: ni hao or ni3 hao3. Characters count too."))
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
                 .lineLimit(3).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 8)
         }
