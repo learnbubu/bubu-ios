@@ -200,13 +200,13 @@ final class BeginnerHelpsTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(s.result).accuracy, 100)
     }
 
-    /// Stones 2 and 3 are still about fifteen steps with their match.
+    /// Stones 2 and 3 are still about twelve steps with their match (fifteen before 4 Oct 2026).
     func testStonesStayAboutFifteenStepsWithTheMatch() {
         let p = store()
         _ = play(StudySession(lessonId: chapter1[0].id, progress: p), p)
         for stone in chapter1[1...2] {
             let s = StudySession(lessonId: stone.id, progress: p)
-            XCTAssertTrue((14...16).contains(s.sessionTotal), "\(stone.id): \(s.sessionTotal)")
+            XCTAssertTrue((11...14).contains(s.sessionTotal), "\(stone.id): \(s.sessionTotal)")
             let steps = play(s, p)
             XCTAssertEqual(steps.filter { if case .meet = $0 { return false } else { return true } }.count, s.sessionTotal)
         }

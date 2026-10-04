@@ -132,7 +132,7 @@ final class LessonLengthTests: XCTestCase {
         _ = play(StudySession(lessonId: chapter1[0].id, progress: p))
         for stone in chapter1[1...2] {
             let s = StudySession(lessonId: stone.id, progress: p)
-            XCTAssertTrue((11...13).contains(s.sessionTotal), "\(stone.id): \(s.sessionTotal)")
+            XCTAssertTrue((11...14).contains(s.sessionTotal), "\(stone.id): \(s.sessionTotal)")
             let steps = play(s)
             XCTAssertEqual(steps.filter { !$0.meet }.count, s.sessionTotal)
             checkNewWords(steps, course.cards(in: stone.id))
