@@ -77,7 +77,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding
 
   <div class="card">
     <h2>Fire relit: options</h2>
-    <p class="hint">No crackle any more. The set above uses option 6.</p>
+    <p class="hint">No crackle any more. The set above uses option 7.</p>
     <div class="designs" id="fires"></div>
   </div>
 
@@ -185,6 +185,14 @@ const FIRES = [
    ...FIRE, run:45, sparkle:35, whooshLand:0.6},
   {name:"Swoosh with sparkles, slower", about:"Your pick (5) with a slower swoosh: it takes about a second to build before the chord lights.",
    ...FIRE, run:45, sparkle:35, whooshLen:1050, whooshLand:0.72},
+  {name:"6, landing on the peak", about:"The chord lands right as the swoosh is loudest, so they hit together.",
+   ...FIRE, run:45, sparkle:35, whooshLen:1050, whooshPeak:0.62, whooshLand:0.62},
+  {name:"6, swoosh into the hit", about:"The swoosh keeps building all the way up and the chord hits at its very top, then the swoosh drops away.",
+   ...FIRE, run:45, sparkle:35, whooshLen:1050, whooshPeak:0.85, whooshLand:0.84, attack:20},
+  {name:"6, overlapping", about:"The chord starts swelling in under the swoosh as it builds, so one flows into the other.",
+   ...FIRE, run:45, sparkle:35, whooshLen:1050, whooshPeak:0.7, whooshLand:0.45, attack:260},
+  {name:"6, quicker build", about:"The same idea but a little tighter: a 0.8 s swoosh with the chord landing on its peak.",
+   ...FIRE, run:45, sparkle:35, whooshLen:800, whooshPeak:0.7, whooshLand:0.7, attack:40},
 ];
 const SET = {
   correct:   {...TB},
@@ -203,7 +211,7 @@ const SET = {
   // glitter falling (mostly glockenspiel), then a pop
   chest:     {...TB, steps:[[100],[97],[93],[88],[85],[81],[85,93]], times:[0, 40, 80, 120, 160, 200, 330], sample:"glockenspiel", sampleLvl:60, sampleOct:0, fmLvl:0.55, pick:120, run:45, sparkle:30, len:800, tail:50},
   // a whoosh into a warm, swelling chord
-  relight:   {...FIRES[5]},
+  relight:   {...FIRES[6]},
 };
 function playSet(){ let t = ac().currentTime + 0.05; SET_ORDER.forEach(k => { const d = render1(SET[k], t); t += Math.max(0.5, d + 0.35); }); }
 let D = JSON.parse(JSON.stringify(DESIGNS));
@@ -293,12 +301,13 @@ function whoosh(c, out, t, level, secs, opt){
   // a swoosh: noise through a rising band-pass, swelling in and out, swept left to right,
   // with a lower body under it and a few crackles at the start
   const L = secs || 0.4;
+  const pk = opt.peak || 0.6;
   const mk = (lo, hi, q, lvl, panFrom, panTo) => {
     const s = c.createBufferSource(); s.buffer = noise(c);
     const f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = q;
     f.frequency.setValueAtTime(lo, t); f.frequency.exponentialRampToValueAtTime(hi, t + L * 0.85);
     const g = c.createGain(); g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(lvl, t + L * 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + L);
+    g.gain.exponentialRampToValueAtTime(lvl, t + L * pk); g.gain.exponentialRampToValueAtTime(0.0001, t + L);
     const p = c.createStereoPanner(); p.pan.setValueAtTime(panFrom, t); p.pan.linearRampToValueAtTime(panTo, t + L);
     s.connect(f).connect(g).connect(p).connect(out); s.start(t, Math.random() * 0.3); s.stop(t + L + 0.02);
   };
@@ -361,7 +370,7 @@ function render1(P0, when){
   const out = chain(c, P);
   let t0 = (when ?? c.currentTime) + 0.03;
   const wl = (P.whooshLen || 400) / 1000;
-  if (P.whoosh) { whoosh(c, out, t0, P.whoosh / 100 * 0.45, wl, {low: P.whooshLow, pitch: P.whooshPitch, crackle: P.crackle}); t0 += wl * (P.whooshLand || 0.7); }
+  if (P.whoosh) { whoosh(c, out, t0, P.whoosh / 100 * 0.45, wl, {low: P.whooshLow, pitch: P.whooshPitch, crackle: P.crackle, peak: P.whooshPeak}); t0 += wl * (P.whooshLand || 0.7); }
   const n = P.steps.length, w = P.width / 100 * 0.5;
   const at = i => (P.times && P.times.length === n ? P.times[i] * (P.stretch || 100) / 100 : i * P.gap) / 1000;
   P.steps.forEach((chord, i) => {
