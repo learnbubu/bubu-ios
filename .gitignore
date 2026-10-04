@@ -8,3 +8,5 @@ native/Bubu/Info.plist
 build/
 tools/.voices/
 tools/record/out/
+tools/sfx/.venv/
+tools/sfx/out/
