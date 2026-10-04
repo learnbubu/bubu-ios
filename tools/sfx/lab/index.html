@@ -183,7 +183,7 @@ const SET = {
   // glitter falling (mostly glockenspiel), then a pop
   chest:     {...TB, steps:[[100],[97],[93],[88],[85],[81],[85,93]], times:[0, 40, 80, 120, 160, 200, 330], sample:"glockenspiel", sampleLvl:60, sampleOct:0, fmLvl:0.55, pick:120, run:45, sparkle:30, len:800, tail:50},
   // a whoosh into a warm, swelling chord
-  relight:   {...TB, whoosh:65, steps:[[69,73,76]], attack:90, idx0:1.8, len:900, body:40, sparkle:25, run:0, tail:55, vel:78},
+  relight:   {...TB, whoosh:100, whooshLen:620, steps:[[69,73,76]], attack:90, idx0:1.8, len:900, body:40, sparkle:25, run:0, tail:55, vel:78},
 };
 function playSet(){ let t = ac().currentTime + 0.05; SET_ORDER.forEach(k => { const d = render1(SET[k], t); t += Math.max(0.5, d + 0.35); }); }
 let D = JSON.parse(JSON.stringify(DESIGNS));
@@ -268,13 +268,28 @@ function noise(c){
   let s = 11; for (let i = 0; i < n; i++){ s = (s * 16807) % 2147483647; d[i] = s / 2147483647 * 2 - 1; }
   return noiseBuf = b;
 }
-function whoosh(c, out, t, level){
-  const s = c.createBufferSource(); s.buffer = noise(c);
-  const f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 1.2;
-  f.frequency.setValueAtTime(350, t); f.frequency.exponentialRampToValueAtTime(4500, t + 0.32);
-  const g = c.createGain(); g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(level, t + 0.24); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
-  s.connect(f).connect(g).connect(out); s.start(t, 0.2); s.stop(t + 0.42);
+function whoosh(c, out, t, level, secs){
+  // a swoosh: noise through a rising band-pass, swelling in and out, swept left to right,
+  // with a lower body under it and a few crackles at the start
+  const L = secs || 0.4;
+  const mk = (lo, hi, q, lvl, panFrom, panTo) => {
+    const s = c.createBufferSource(); s.buffer = noise(c);
+    const f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = q;
+    f.frequency.setValueAtTime(lo, t); f.frequency.exponentialRampToValueAtTime(hi, t + L * 0.85);
+    const g = c.createGain(); g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(lvl, t + L * 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t + L);
+    const p = c.createStereoPanner(); p.pan.setValueAtTime(panFrom, t); p.pan.linearRampToValueAtTime(panTo, t + L);
+    s.connect(f).connect(g).connect(p).connect(out); s.start(t, Math.random() * 0.3); s.stop(t + L + 0.02);
+  };
+  mk(300, 5000, 1.1, level, -0.6, 0.6);
+  mk(120, 900, 0.8, level * 0.7, -0.3, 0.3);
+  for (let k = 0; k < 6; k++){
+    const tt = t + 0.02 + k * L * 0.09 + Math.random() * 0.02;
+    const s = c.createBufferSource(); s.buffer = noise(c);
+    const f = c.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 2500;
+    const g = c.createGain(); g.gain.setValueAtTime(level * 0.5 * (1 - k / 7), tt); g.gain.setTargetAtTime(0.0001, tt, 0.004);
+    s.connect(f).connect(g).connect(out); s.start(tt, Math.random()); s.stop(tt + 0.03);
+  }
 }
 function transient(c, out, t, level, freq){
   if (level <= 0) return;
@@ -324,7 +339,8 @@ function render1(P0, when){
              decay: P0.decay * ring, len: P0.len * ring};
   const out = chain(c, P);
   let t0 = (when ?? c.currentTime) + 0.03;
-  if (P.whoosh) { whoosh(c, out, t0, P.whoosh / 100 * 0.3); t0 += 0.26; }
+  const wl = (P.whooshLen || 400) / 1000;
+  if (P.whoosh) { whoosh(c, out, t0, P.whoosh / 100 * 0.45, wl); t0 += wl * 0.7; }
   const n = P.steps.length, w = P.width / 100 * 0.5;
   const at = i => (P.times && P.times.length === n ? P.times[i] * (P.stretch || 100) / 100 : i * P.gap) / 1000;
   P.steps.forEach((chord, i) => {
@@ -348,7 +364,7 @@ function render1(P0, when){
       run.forEach((m, k) => bellVoice(c, out, m, t + 0.06 + k * 0.035, v * P.run / 100 * 0.25 * (1 - k * 0.15), 260, (k % 2 ? 1 : -1) * w));
     }
   });
-  return (P.whoosh ? 0.26 : 0) + at(n - 1) + (P.len + P.fade) / 1000;
+  return (P.whoosh ? (P.whooshLen || 400) / 1000 * 0.7 : 0) + at(n - 1) + (P.len + P.fade) / 1000;
 }
 function play(i){ render1(D[i ?? cur]); }
 function playAll(){ let t = ac().currentTime + 0.05; D.forEach(P => { const d = render1(P, t); t += d + 0.5; }); }
