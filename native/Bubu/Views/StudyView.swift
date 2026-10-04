@@ -42,10 +42,8 @@ struct StudyView: View {
 
     /// the study card's height, to tell a phone where a multiple-choice exercise fits
     @State private var cardHeight: CGFloat = 0
-    /// the exercise's visible height, and the feedback banner's, so the answers sit low and
-    /// rise clear of the banner when it comes up
+    /// the exercise's visible height, so the answers sit low in the card
     @State private var scrollHeight: CGFloat = 0
-    @State private var bannerHeight: CGFloat = 0
     /// A multiple-choice exercise stays still (no scrolling); the feedback slides up over its foot.
     /// On a small phone (an SE) it scrolls instead.
     private var fixed: Bool {
@@ -68,12 +66,11 @@ struct StudyView: View {
                         ScrollViewReader { reader in
                             ScrollView(fixed ? [] : .vertical) {
                                 content.padding(.horizontal, 12).padding(.top, 15)
-                                    .padding(.bottom, 12 + (bannerShown ? bannerHeight : 0))
+                                    .padding(.bottom, 12 + bannerRoom)
                                     .frame(minHeight: scrollHeight, alignment: .top)
                                 Color.clear.frame(height: 1).id("exercise-end")
                             }
                             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { scrollHeight = max(0, $0 - 1) }
-                            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: bannerShown)
                             .scrollIndicators(.hidden)
                             .scrollBounceBehavior(.basedOnSize)
                             // the feedback takes room from the exercise: keep the answers in view
@@ -320,10 +317,11 @@ struct StudyView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.9), value: exerciseKey)
     }
 
-    /// The feedback banner is up over the exercise's foot.
-    private var bannerShown: Bool {
-        guard feedback != nil, let ex = session.exercise else { return false }
-        return ex.kind != .speak && ex.kind != .write
+    /// Room kept at a multiple-choice exercise's foot from the start, so the feedback pops up
+    /// over it as an overlay and nothing moves (the owner, 4 Oct 2026: not "sliding up again").
+    private var bannerRoom: CGFloat {
+        guard case .card = session.current, session.exercise?.kind == .choice else { return 0 }
+        return 118
     }
 
     private var promptLabel: String {
@@ -362,7 +360,6 @@ struct StudyView: View {
                             .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
                                 .shadow(color: Color.panel, radius: 12, y: -10))
                             .fixedSize(horizontal: false, vertical: true)
-                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bannerHeight = $0 }
                             .padding(.bottom, 79)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
