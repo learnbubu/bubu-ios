@@ -70,9 +70,15 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding
 
   <div class="card">
     <h2>The Bùbù set</h2>
-    <p class="hint">Your pick as Correct, and the other nine in its style. ▶ any one, or hear them all in a row.</p>
+    <p class="hint">One family, each with its own gesture: Correct climbs the chord, Combo goes 'ding-ding!', Goal is a 'ta-daa', Lesson complete is a little tune, Level up whooshes and runs, Milestone booms and blooms, Chest glitters down and pops, Fire relit whooshes into a warm swell.</p>
     <div class="designs" id="set"></div>
     <div class="row"><button class="play" id="playSet">▶ Play the set</button></div>
+  </div>
+
+  <div class="card">
+    <h2>Wrong: five options</h2>
+    <p class="hint">Low, short and muted, a soft 'bwomp' rather than a buzzer. The set above uses option 1 for now.</p>
+    <div class="designs" id="wrongs"></div>
   </div>
 
   <div class="card">
@@ -147,17 +153,37 @@ const DESIGNS = [
 // THE SET: the owner's pick (Straight, a touch brighter) and the other nine in its style
 const SET_ORDER = ["correct","wrong","tap","combo","goal","complete","levelup","milestone","chest","relight"];
 const SET_LABEL = {correct:"Correct",wrong:"Wrong",tap:"Tap",combo:"Combo",goal:"Daily goal",complete:"Lesson complete",levelup:"Level up",milestone:"Milestone",chest:"Chest",relight:"Fire relit"};
+// wrong: low, short, muted, like a soft 'bwomp'; five to choose from
+const WRONGS = [
+  {name:"Low bwomp", about:"Two low, muted notes falling a fourth with a little droop. Short and soft.",
+   ...TB, steps:[[57],[52]], gap:130, idx0:1.1, idx1:0.15, bright:32, vel:72, accent:0, sparkle:0, run:0, transient:12, sample:"marimba", sampleLvl:28, sampleOct:0, bend:-60, len:260, tail:8, body:45, echo:0, room:6},
+  {name:"Soft double thud", about:"The same low note twice, the second one sinking. Like a gentle 'nuh-uh'.",
+   ...TB, steps:[[57],[57]], times:[0, 120], idx0:1.0, idx1:0.1, bright:30, vel:72, accent:0, sparkle:0, run:0, transient:10, sample:"marimba", sampleLvl:25, sampleOct:0, bend:-110, len:240, tail:8, body:45, echo:0, room:6},
+  {name:"Off-key slip", about:"A note slips down a semitone, just off the key. Subtle 'not quite'.",
+   ...TB, steps:[[64],[63]], gap:110, idx0:1.3, idx1:0.2, bright:36, vel:68, accent:0, sparkle:0, run:0, transient:14, sample:"vibraphone", sampleLvl:20, bend:-80, len:280, tail:10, body:35, echo:0, room:8},
+  {name:"Muted tumble", about:"Three short muted notes tumbling down. Quick and light, not a buzzer.",
+   ...TB, steps:[[64],[60],[57]], gap:70, pick:80, idx0:1.0, idx1:0.1, bright:30, vel:70, accent:0, sparkle:0, run:0, transient:12, sample:"marimba", sampleLvl:25, sampleOct:0, bend:-40, len:240, tail:8, body:40, echo:0, room:6},
+  {name:"Gentle uh-oh", about:"A soft 'uh-oh': two notes falling, the second held a beat later.",
+   ...TB, steps:[[62],[57]], times:[0, 170], idx0:1.2, idx1:0.15, bright:32, vel:70, accent:0, sparkle:0, run:0, transient:10, sample:"vibraphone", sampleLvl:22, bend:-30, len:300, tail:10, body:40, echo:0, room:8},
+];
 const SET = {
   correct:   {...TB},
-  wrong:     {...TB, steps:[[76],[72]], gap:120, idx0:1.5, idx1:0.2, bright:40, vel:62, accent:0, sparkle:0, run:0, transient:20, sampleLvl:22, bend:-45, len:330, tail:25, body:25},
-  tap:       {...TB, steps:[[88]], vel:38, len:90, sparkle:0, run:0, sample:"none", echo:0, room:6, tail:10, transient:30, body:0},
-  combo:     {...TB, steps:[[69],[73],[76],[81],[85,88]], gap:70},
-  goal:      {...TB, steps:[[69],[73],[76],[81],[85],[88,93]], gap:72, sparkle:30, run:30, len:700, tail:50},
-  complete:  {...TB, steps:[[69],[73],[76],[81,85,88,93]], gap:105, sparkle:30, run:35, len:950, tail:60, body:35},
-  levelup:   {...TB, steps:[[64],[69],[73],[76],[81],[85],[88],[93,97]], gap:60, sparkle:30, run:40, len:950, tail:60},
-  milestone: {...TB, steps:[[57,64],[69],[73],[76],[81,85,88,93]], gap:140, body:45, sparkle:30, run:40, len:1300, tail:70, width:75},
-  chest:     {...TB, steps:[[93],[88],[85],[81],[85,88,93]], gap:55, sparkle:30, run:45, len:900, tail:55},
-  relight:   {...TB, steps:[[64],[69],[73,76]], gap:130, idx0:2.2, vel:72, sparkle:20, run:0, len:850, tail:55, body:35},
+  wrong:     {...WRONGS[0]},
+  tap:       {...TB, steps:[[88]], vel:34, len:60, sparkle:0, run:0, sample:"marimba", sampleLvl:30, sampleOct:-12, echo:0, room:4, tail:5, transient:35, body:0, idx0:1.6},
+  // a quick, high, sparkly 'ding-ding!'
+  combo:     {...TB, steps:[[88],[93,97]], times:[0, 70], pick:70, sample:"glockenspiel", sampleLvl:26, sampleOct:0, sparkle:35, run:30, len:520, tail:35},
+  // 'ta-daa': a short chord, then a bigger one
+  goal:      {...TB, steps:[[69,73,76],[81,85,88]], times:[0, 150], pick:110, len:800, body:40, vel:85, width:80, sparkle:25, run:30, tail:45},
+  // a little tune that lands home: A C# E, F#-E, then the chord
+  complete:  {...TB, steps:[[69],[73],[76],[78],[76],[81,85,88]], times:[0, 95, 190, 310, 400, 530], pick:120, len:1000, sparkle:30, run:35, tail:55, body:35},
+  // a whoosh up, a fast two-octave run and a bright landing
+  levelup:   {...TB, whoosh:45, steps:[[64],[69],[73],[76],[81],[85],[88],[93,97,100]], gap:42, pick:90, len:1000, sparkle:30, run:50, tail:55, idx0:3.0},
+  // a low boom, then the chord blooming in two waves
+  milestone: {...TB, steps:[[45,57],[69,76,81],[85,88,93]], times:[0, 230, 460], body:60, len:1500, sparkle:35, run:45, width:85, tail:75, vel:85},
+  // glitter falling (mostly glockenspiel), then a pop
+  chest:     {...TB, steps:[[100],[97],[93],[88],[85],[81],[85,93]], times:[0, 40, 80, 120, 160, 200, 330], sample:"glockenspiel", sampleLvl:60, sampleOct:0, fmLvl:0.55, pick:120, run:45, sparkle:30, len:800, tail:50},
+  // a whoosh into a warm, swelling chord
+  relight:   {...TB, whoosh:65, steps:[[69,73,76]], attack:90, idx0:1.8, len:900, body:40, sparkle:25, run:0, tail:55, vel:78},
 };
 function playSet(){ let t = ac().currentTime + 0.05; SET_ORDER.forEach(k => { const d = render1(SET[k], t); t += Math.max(0.5, d + 0.35); }); }
 let D = JSON.parse(JSON.stringify(DESIGNS));
@@ -184,16 +210,17 @@ async function preload(){ setStatus("Loading the recorded instruments…"); awai
 function nearest(name, m){ const l = buffers[name]; if (!l) return null; let b = l[0]; for (const e of l) if (Math.abs(e.midi - m) < Math.abs(b.midi - m)) b = e; return b; }
 
 // a smooth envelope: quick attack, exponential decay, then a gentle fade to true silence
-function env(g, t, peak, decay, total){
+function env(g, t, peak, decay, total, attack){
+  const A = Math.max(0.002, (attack || 0) / 1000);
   g.gain.setValueAtTime(0, t);
-  g.gain.linearRampToValueAtTime(peak, t + 0.002);
-  g.gain.setTargetAtTime(0, t + 0.002, Math.max(0.02, decay / 3));
+  g.gain.linearRampToValueAtTime(peak, t + A);
+  g.gain.setTargetAtTime(0, t + A, Math.max(0.02, decay / 3));
   g.gain.setTargetAtTime(0, t + total * 0.7, Math.max(0.03, total * 0.12));
 }
 function fmVoice(c, out, m, t, vel, lenMs, pan, P, scoop, bend){
   const f = hz(m), L = lenMs / 1000 + P.fade / 1000, decay = P.decay / 1000 * (lenMs / 420);
   const p = c.createStereoPanner(); p.pan.value = pan; p.connect(out);
-  const amp = c.createGain(); env(amp, t, vel, decay, L); amp.connect(p);
+  const amp = c.createGain(); env(amp, t, vel * (P.fmLvl ?? 1), decay, L, P.attack); amp.connect(p);
   const b = P.bright / 55;
   [-1, 1].forEach(side => {
     const det = Math.pow(2, side * P.detune / 2 / 1200);
@@ -241,6 +268,14 @@ function noise(c){
   let s = 11; for (let i = 0; i < n; i++){ s = (s * 16807) % 2147483647; d[i] = s / 2147483647 * 2 - 1; }
   return noiseBuf = b;
 }
+function whoosh(c, out, t, level){
+  const s = c.createBufferSource(); s.buffer = noise(c);
+  const f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 1.2;
+  f.frequency.setValueAtTime(350, t); f.frequency.exponentialRampToValueAtTime(4500, t + 0.32);
+  const g = c.createGain(); g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(level, t + 0.24); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+  s.connect(f).connect(g).connect(out); s.start(t, 0.2); s.stop(t + 0.42);
+}
 function transient(c, out, t, level, freq){
   if (level <= 0) return;
   const s = c.createBufferSource(); s.buffer = noise(c);
@@ -287,7 +322,9 @@ function render1(P0, when){
   const ring = Math.min(1.4, 0.55 + 0.45 * k);
   const P = {...P0, echo: P0.echo * k, room: P0.room * k, fade: Math.max(80, P0.fade * k),
              decay: P0.decay * ring, len: P0.len * ring};
-  const out = chain(c, P), t0 = (when ?? c.currentTime) + 0.03;
+  const out = chain(c, P);
+  let t0 = (when ?? c.currentTime) + 0.03;
+  if (P.whoosh) { whoosh(c, out, t0, P.whoosh / 100 * 0.3); t0 += 0.26; }
   const n = P.steps.length, w = P.width / 100 * 0.5;
   const at = i => (P.times && P.times.length === n ? P.times[i] * (P.stretch || 100) / 100 : i * P.gap) / 1000;
   P.steps.forEach((chord, i) => {
@@ -311,7 +348,7 @@ function render1(P0, when){
       run.forEach((m, k) => bellVoice(c, out, m, t + 0.06 + k * 0.035, v * P.run / 100 * 0.25 * (1 - k * 0.15), 260, (k % 2 ? 1 : -1) * w));
     }
   });
-  return at(n - 1) + (P.len + P.fade) / 1000;
+  return (P.whoosh ? 0.26 : 0) + at(n - 1) + (P.len + P.fade) / 1000;
 }
 function play(i){ render1(D[i ?? cur]); }
 function playAll(){ let t = ac().currentTime + 0.05; D.forEach(P => { const d = render1(P, t); t += d + 0.5; }); }
@@ -342,6 +379,17 @@ function renderSet(){
   });
 }
 document.getElementById("playSet").onclick = playSet;
+function renderWrongs(){
+  const el = document.getElementById("wrongs"); el.innerHTML = "";
+  WRONGS.forEach((W, i) => {
+    const d = document.createElement("div"); d.className = "design";
+    d.innerHTML = `<div class="n">${i + 1}</div><div><b></b><small></small></div><button class="play">▶ Play</button>`;
+    d.querySelector("b").textContent = W.name; d.querySelector("small").textContent = W.about;
+    d.onclick = () => render1(W);
+    d.querySelector(".play").onclick = (e) => { e.stopPropagation(); render1(W); };
+    el.appendChild(d);
+  });
+}
 function render(){
   const db = document.getElementById("designs"); db.innerHTML = "";
   D.forEach((P, i) => {
@@ -408,6 +456,7 @@ document.getElementById("copy").onclick = async (e) => {
   setTimeout(() => e.target.textContent = "Copy recipe", 1800);
 };
 renderSet();
+renderWrongs();
 render();
 // for Claude's renderer: the set as WAV files, rendered offline exactly as heard here
 async function renderSetWav(){
