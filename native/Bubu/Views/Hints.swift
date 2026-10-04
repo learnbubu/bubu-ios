@@ -32,6 +32,96 @@ enum Hints {
         return han.map(charEn).filter { !$0.isEmpty }.joined(separator: " + ")
     }
 
+    /// Up to three meanings of a word, the short one first: its card's meaning split at ; and ,,
+    /// asides and Chinese examples left out (说: speak, talk, say). As Duolingo's hint rows.
+    static func senses(_ h: String, max n: Int = 3) -> [String] {
+        let han = h.filter(Course.isHan)
+        var out = [short(h)]
+        for c in Course.shared.cardsByHanzi[han] ?? [] {
+            let plain = c.word.en.replacingOccurrences(of: "\\([^)]*\\)", with: " ", options: .regularExpression)
+                .replacingOccurrences(of: "\\p{Han}+[^,;]*", with: " ", options: .regularExpression)
+            for part in plain.components(separatedBy: CharacterSet(charactersIn: ";,")) {
+                let t = part.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: "  ", with: " ")
+                guard !t.isEmpty, t.count <= 24, !out.contains(where: { $0.lowercased() == t.lowercased() }) else { continue }
+                out.append(t)
+            }
+        }
+        return Array(out.filter { !$0.isEmpty }.prefix(n))
+    }
+
+    /// Words that work together across a sentence (你 … 吗 "do you…?", 会 说 "can speak"), as
+    /// Duolingo links them in its hints (the owner, 4 Oct 2026: "when we click on words to see
+    /// what they mean and connect to one another").
+    struct Link: Hashable {
+        let header: String          // 你 … 吗
+        let pinyin: String          // nǐ … ma
+        let meanings: [String]      // do you, are you
+    }
+
+    static let pronounEn: [String: (String, String)] = [
+        "你": ("you", "you"), "您": ("you", "you"), "他": ("he", "him"), "她": ("she", "her"), "我": ("I", "me"),
+        "我们": ("we", "us"), "你们": ("you", "you"), "他们": ("they", "them"), "她们": ("they", "them"),
+    ]
+    static let possessive: [String: String] = ["我": "my", "你": "your", "您": "your", "他": "his", "她": "her",
+                                               "我们": "our", "你们": "your", "他们": "their", "她们": "their"]
+
+    /// The link the word at `i` takes part in, if any.
+    static func link(_ words: [SentenceWord], at i: Int) -> Link? {
+        let hz = words.map(\.hanzi), py = words.map(\.pinyin)
+        guard hz.indices.contains(i) else { return nil }
+        func at(_ k: Int) -> String? { hz.indices.contains(k) ? hz[k] : nil }
+        func meaningOf(_ k: Int) -> String { short(hz[k]).replacingOccurrences(of: "to ", with: "", options: .anchored) }
+        func make(_ a: Int, _ b: Int, _ m: [String]) -> Link {
+            let gap = b - a > 1
+            return Link(header: hz[a] + (gap ? " … " : " ") + hz[b], pinyin: py[a] + (gap ? " … " : " ") + py[b], meanings: m)
+        }
+        // a question with 吗: its subject and the 吗 (你 … 吗: do you / are you)
+        if let q = hz.lastIndex(of: "吗"), let s = hz.firstIndex(where: { pronounEn[$0] != nil }), s < q, i == s || i == q {
+            let (sub, _) = pronounEn[hz[s]]!
+            let aux = sub == "he" || sub == "she" ? ["does \(sub)", "is \(sub)"] : sub == "I" ? ["do I", "am I"] : ["do \(sub)", "are \(sub)"]
+            return make(s, q, aux.map { $0 + " …?" })
+        }
+        // 会 + verb: can …
+        if let k = hz.firstIndex(of: "会"), let v = at(k + 1), v.first.map(Course.isHan) == true, i == k || i == k + 1 {
+            return make(k, k + 1, ["can " + meaningOf(k + 1), "know how to " + meaningOf(k + 1)])
+        }
+        // 不 / 没 + word: not …
+        for neg in ["不", "没"] {
+            if let k = hz.firstIndex(of: neg), at(k + 1) != nil, i == k || i == k + 1 {
+                let m = meaningOf(k + 1)
+                return make(k, k + 1, neg == "没" ? ["didn't " + m, "not " + m] : ["not " + m, "don't " + m])
+            }
+        }
+        // 很 + adjective: very … (or just "is …")
+        if let k = hz.firstIndex(of: "很"), at(k + 1) != nil, i == k || i == k + 1 {
+            return make(k, k + 1, ["very " + meaningOf(k + 1), "is " + meaningOf(k + 1)])
+        }
+        // X 的: X's (我的: my)
+        if let k = hz.firstIndex(of: "的"), k > 0, i == k || i == k - 1 {
+            let owner = hz[k - 1]
+            return make(k - 1, k, [possessive[owner] ?? (meaningOf(k - 1) + "'s")])
+        }
+        // 太 … 了: too … / so …!
+        if let a = hz.firstIndex(of: "太"), let b = hz.lastIndex(of: "了"), a < b, i == a || i == b {
+            let m = b - a > 1 ? meaningOf(a + 1) : "…"
+            return make(a, b, ["too " + m, "so " + m + "!"])
+        }
+        // 想 / 要 + verb: want to … / going to …
+        for (w, m) in [("想", ["want to ", "would like to "]), ("要", ["going to ", "want to "])] {
+            if let k = hz.firstIndex(of: w), at(k + 1) != nil, i == k || i == k + 1 {
+                return make(k, k + 1, m.map { $0 + meaningOf(k + 1) })
+            }
+        }
+        // 在 + place: at / in …
+        if let k = hz.firstIndex(of: "在"), at(k + 1) != nil, i == k || i == k + 1 {
+            return make(k, k + 1, ["in " + meaningOf(k + 1), "at " + meaningOf(k + 1)])
+        }
+        // a sentence ending in 吧 or 呢: let's … / and …?
+        if hz.last == "吧" && i == hz.count - 1 { return Link(header: "… 吧", pinyin: "… ba", meanings: ["let's …", "… OK?"]) }
+        if hz.last == "呢" && i == hz.count - 1 { return Link(header: "… 呢", pinyin: "… ne", meanings: ["and …?", "what about …?"]) }
+        return nil
+    }
+
     /// A word's short meaning (its card's `short`, "(yes/no question)"), else its meaning.
     static func short(_ h: String) -> String {
         if let c = Course.shared.cardsByHanzi[h.filter(Course.isHan)]?.first { return c.word.gloss }
@@ -142,6 +232,8 @@ struct HintChip<Label: View>: View {
     var highlight: Color? = nil
     /// what the whole phrase means, shown first (你好吗: "How are you?"), as Duolingo's phrase hints
     var phrase: String? = nil
+    /// words it works with across the sentence (你 … 吗 "do you…?"), shown above its own meanings
+    var link: Hints.Link? = nil
     /// also told of a tap (a word's pinyin, hidden once it's strong, shows on a tap)
     var tapped: (() -> Void)? = nil
     @ViewBuilder var label: Label
@@ -171,7 +263,7 @@ struct HintChip<Label: View>: View {
         }
         .buttonStyle(.plain)
         .hintBubble(open: Binding(get: { open }, set: { if !$0 && open { focus.open = nil } })) {
-            HintBubble(hanzi: hanzi, pinyin: pinyin, reverse: reverse, phrase: phrase)
+            HintBubble(hanzi: hanzi, pinyin: pinyin, reverse: reverse, phrase: phrase, link: link)
         }
     }
 }
@@ -184,41 +276,71 @@ struct HintBubble: View {
     var pinyin: String? = nil
     var reverse = false
     var phrase: String? = nil
+    var link: Hints.Link? = nil
     var empty = "No separate word in Chinese"
 
-    private var meaning: String { hanzi.map { Hints.short($0) } ?? "" }
+    private var rows: [String] { reverse ? [] : (hanzi.map { Hints.senses($0) } ?? []) }
     private var width: CGFloat {
-        let longest = [phrase ?? "", reverse ? "" : meaning].map(\.count).max() ?? 0
-        let chars = reverse ? CGFloat((hanzi ?? "").count) * 26 : 0
-        return min(220, max(90, max(CGFloat(longest) * 8.6, chars) + 30))
+        let texts = [phrase ?? ""] + rows + (link?.meanings ?? []) + [link?.header ?? ""]
+        let longest = CGFloat(texts.map(\.count).max() ?? 0) * 8.4
+        let chars = CGFloat(max((hanzi ?? "").count, (link?.header.count ?? 0) / 2)) * 26
+        return min(240, max(110, max(longest, chars) + 28))
     }
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 0) {
             if let phrase {
-                Text(phrase).font(.nunitoXB(15.5)).foregroundStyle(Color.accent).multilineTextAlignment(.center)
-                if hanzi != nil { Rectangle().fill(Color.line).frame(height: 1).padding(.vertical, 2) }
+                row(phrase, strong: true)
+                divider
+            }
+            if let link {
+                // the words working together, then what they mean together
+                VStack(spacing: 1) {
+                    Text(link.pinyin).font(.nunito(12, .semibold)).foregroundStyle(Color.muted)
+                    Text(link.header).font(.hanzi(20, .bold)).foregroundStyle(Color.ink)
+                }
+                .padding(.vertical, 7)
+                divider
+                ForEach(link.meanings, id: \.self) { m in
+                    row(m, strong: true)
+                    divider
+                }
             }
             if let h = hanzi {
                 let py = pinyin ?? Course.wordPy[h] ?? ""
                 if reverse {
-                    ToneText(hanzi: h, pinyin: py, size: 24, weight: .bold)
+                    ToneText(hanzi: h, pinyin: py, size: 24, weight: .bold).padding(.vertical, 8)
                 } else {
-                    Text(meaning.isEmpty ? "No meaning listed yet" : meaning)
-                        .font(.nunito(phrase == nil ? 15 : 13.5, .bold))
-                        .foregroundStyle(phrase == nil ? Color.ink : Color.muted).multilineTextAlignment(.center)
+                    VStack(spacing: 1) {
+                        PinyinText(pinyin: py, size: 12.5)
+                        if link != nil || phrase != nil { Text(h).font(.hanzi(17, .semibold)).foregroundStyle(Color.ink) }
+                    }
+                    .padding(.top, 6).padding(.bottom, rows.isEmpty ? 6 : 2)
+                    ForEach(Array(rows.enumerated()), id: \.offset) { k, m in
+                        if k > 0 { divider }
+                        row(m, strong: k == 0 && link == nil && phrase == nil)
+                    }
+                    if rows.isEmpty { row("No meaning listed yet", strong: false) }
                 }
-                PinyinText(pinyin: py, size: 14)
-            } else if phrase == nil {
-                Text(empty).font(.nunito(14, .semibold)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+            } else if phrase == nil && link == nil {
+                row(empty, strong: false)
             }
         }
         .fixedSize(horizontal: false, vertical: true)
-        .padding(.horizontal, 14).padding(.vertical, 10)
         .frame(width: width)
         .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.panel)
             .shadow(color: .black.opacity(0.18), radius: 8, y: 3))
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private var divider: some View { Rectangle().fill(Color.line).frame(height: 1) }
+
+    private func row(_ text: String, strong: Bool) -> some View {
+        Text(text).font(.nunito(strong ? 15.5 : 14.5, strong ? .heavy : .semibold))
+            .foregroundStyle(strong ? Color.ink : Color.ink.opacity(0.8))
+            .multilineTextAlignment(.center).frame(maxWidth: .infinity)
+            .padding(.horizontal, 12).padding(.vertical, 7)
     }
 }
 

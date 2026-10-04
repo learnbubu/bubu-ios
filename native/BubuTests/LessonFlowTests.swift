@@ -302,6 +302,22 @@ final class LessonFlowTests: XCTestCase {
         XCTAssertNil(Exercise.buildChoice(card("你好")), "two characters: not built")
     }
 
+    /// Hints link words that work together, as Duolingo's: 你 … 吗 "do you…?", 会 说 "can speak",
+    /// 我 的 "my"; and give up to three meanings.
+    func testHintLinksWordsThatWorkTogether() {
+        let w = { (h: String, p: String) in SentenceWord(hanzi: h, pinyin: p) }
+        let q = [w("你", "nǐ"), w("会", "huì"), w("说", "shuō"), w("法语", "Fǎyǔ"), w("吗", "ma")]
+        XCTAssertEqual(Hints.link(q, at: 0)?.header, "你 … 吗")
+        XCTAssertEqual(Hints.link(q, at: 4)?.meanings.first, "do you …?")
+        XCTAssertEqual(Hints.link(q, at: 1)?.header, "会 说")
+        XCTAssertTrue(Hints.link(q, at: 1)?.meanings.first?.hasPrefix("can ") == true)
+        XCTAssertNil(Hints.link(q, at: 3), "法语 works alone here")
+        let mine = [w("这", "zhè"), w("是", "shì"), w("我", "wǒ"), w("的", "de"), w("手机", "shǒujī")]
+        XCTAssertEqual(Hints.link(mine, at: 2)?.meanings, ["my"])
+        XCTAssertLessThanOrEqual(Hints.senses("说").count, 3)
+        XCTAssertFalse(Hints.senses("说").isEmpty)
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

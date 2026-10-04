@@ -605,24 +605,56 @@ struct BubbleSound: View {
 /// tortoise button beside it.
 struct ListenButtons: View {
     let text: String
+    /// the bars dance while it's being said (an estimate of how long: no word from the player)
+    @State private var playing = false
+    @State private var playedAt = Date.distantPast
+    private static let bars: [CGFloat] = [0.25, 0.45, 0.7, 0.4, 0.9, 0.55, 1, 0.65, 0.8, 0.45, 0.95, 0.6, 0.75, 0.35, 0.55, 0.25]
+
     var body: some View {
-        HStack(spacing: 12) {
-            Button { Speech.shared.speak(text) } label: {
-                Image(systemName: "speaker.wave.2.fill").font(.system(size: 30, weight: .semibold)).foregroundStyle(Color.onAccent)
-                    .frame(width: 74, height: 64)
-                    .background(Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        // Duolingo's way, in ours: one wide sound bar (speaker and a waveform) to tap, and "Slow"
+        // with the tortoise under it (the owner, 4 Oct 2026)
+        VStack(alignment: .trailing, spacing: 6) {
+            Button { say(slow: false) } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "speaker.wave.2.fill").font(.system(size: 24, weight: .semibold))
+                    HStack(alignment: .center, spacing: 3) {
+                        ForEach(Array(Self.bars.enumerated()), id: \.offset) { i, h in
+                            Capsule().frame(width: 3.5, height: 30 * (playing ? max(0.2, h * CGFloat.random(in: 0.6...1.2)) : h))
+                                .animation(playing ? .easeInOut(duration: 0.22).repeatForever(autoreverses: true).delay(Double(i) * 0.03)
+                                                   : .easeOut(duration: 0.2), value: playing)
+                        }
+                    }
+                    .frame(height: 32)
+                }
+                .foregroundStyle(Color.accent)
+                .padding(.horizontal, 16).padding(.vertical, 12)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.accentSoft))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.accent.opacity(0.35), lineWidth: 2))
             }
-            .buttonStyle(PressDown(depth: 1))
+            .buttonStyle(PressDown(depth: 2))
             .accessibilityLabel("Play")
-            Button { Speech.shared.speak(text, slow: true) } label: {
-                Image(systemName: "tortoise.fill").font(.system(size: 20, weight: .semibold)).foregroundStyle(Color.onAccent)
-                    .frame(width: 52, height: 46)
-                    .background(Color.accent.opacity(0.75), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+            Button { say(slow: true) } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "tortoise.fill").font(.system(size: 14, weight: .semibold))
+                    Text("SLOW").font(.nunito(13, .black)).tracking(0.8)
+                }
+                .foregroundStyle(Color.accent)
+                .padding(.horizontal, 10).padding(.vertical, 5)
             }
-            .buttonStyle(PressDown(depth: 1))
+            .buttonStyle(.plain)
             .accessibilityLabel("Play slowly")
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
+    }
+
+    private func say(slow: Bool) {
+        Speech.shared.speak(text, slow: slow)
+        let stamp = Date()
+        playedAt = stamp
+        playing = true
+        // about how long it takes to say: a quarter second a character, longer when slow
+        let secs = Double(max(2, text.filter(Course.isHan).count)) * (slow ? 0.45 : 0.28) + 0.3
+        DispatchQueue.main.asyncAfter(deadline: .now() + secs) { if playedAt == stamp { playing = false } }
     }
 }
 
@@ -1367,7 +1399,8 @@ struct SentenceView: View {
                     FlowLayout(spacing: 2, lineSpacing: 4) {
                             ForEach(Array(sent.words.enumerated()), id: \.offset) { i, w in
                                 let new = isNew(w.hanzi)
-                                HintChip(hanzi: w.hanzi, pinyin: w.pinyin, phrase: Hints.phrase(sent.en, sent.words), tapped: { _ = peeked.insert(i) }) {
+                                HintChip(hanzi: w.hanzi, pinyin: w.pinyin, phrase: Hints.phrase(sent.en, sent.words),
+                                         link: Hints.link(sent.words, at: i), tapped: { _ = peeked.insert(i) }) {
                                 VStack(spacing: 1) {
                                     PinyinText(pinyin: w.pinyin, size: 12.5, weight: .semibold)
                                         .opacity(wheels.shows(hanzi: w.hanzi) || pinyinOpen || peeked.contains(i) ? 1 : 0)
