@@ -1,0 +1,812 @@
+{
+"sheets": [
+[
+{
+"w": "人",
+"d": "a single friendly cartoon person waving"
+},
+{
+"w": "朋友",
+"d": "two cartoon kids side by side, arms round each other"
+},
+{
+"w": "学生",
+"d": "a cartoon kid with a school backpack and a book"
+},
+{
+"w": "老师",
+"d": "a cartoon teacher pointing at a small green chalkboard"
+},
+{
+"w": "医生",
+"d": "a cartoon doctor in a white coat with a stethoscope"
+},
+{
+"w": "厨师",
+"d": "a cartoon chef in a white hat holding a wok"
+},
+{
+"w": "设计师",
+"d": "a cartoon designer with a pencil and a sketchbook"
+},
+{
+"w": "大学生",
+"d": "a cartoon student in a graduation cap"
+},
+{
+"w": "孩子",
+"d": "a small cartoon child smiling"
+},
+{
+"w": "服务员",
+"d": "a cartoon waiter carrying a tray with a teapot"
+},
+{
+"w": "妈妈",
+"d": "a cartoon mum smiling"
+},
+{
+"w": "爸爸",
+"d": "a cartoon dad smiling"
+},
+{
+"w": "家",
+"d": "a small cosy house with a red door"
+},
+{
+"w": "家人",
+"d": "a cartoon family of three together"
+},
+{
+"w": "歌手",
+"d": "a cartoon singer with a microphone"
+},
+{
+"w": "观众",
+"d": "a small row of cartoon people clapping"
+}
+],
+[
+{
+"w": "老板",
+"d": "a cartoon boss in a suit with a briefcase"
+},
+{
+"w": "运动员",
+"d": "a cartoon athlete running"
+},
+{
+"w": "警察",
+"d": "a cartoon police officer in a cap"
+},
+{
+"w": "英国",
+"d": "the UK flag on a little flagpole"
+},
+{
+"w": "中国",
+"d": "the Chinese flag on a little flagpole"
+},
+{
+"w": "美国",
+"d": "the USA flag on a little flagpole"
+},
+{
+"w": "法国",
+"d": "the French flag on a little flagpole"
+},
+{
+"w": "日本",
+"d": "the Japanese flag on a little flagpole"
+},
+{
+"w": "澳大利亚",
+"d": "the Australian flag on a little flagpole"
+},
+{
+"w": "大学",
+"d": "a grand university building with columns"
+},
+{
+"w": "公司",
+"d": "a modern office building"
+},
+{
+"w": "医院",
+"d": "a hospital building with a red cross"
+},
+{
+"w": "学校",
+"d": "a small school building with a bell"
+},
+{
+"w": "饭馆",
+"d": "a little Chinese restaurant front with red lanterns"
+},
+{
+"w": "市场",
+"d": "a market stall with fruit and an awning"
+},
+{
+"w": "图书馆",
+"d": "a library building with books"
+}
+],
+[
+{
+"w": "地铁",
+"d": "an underground train in a tunnel"
+},
+{
+"w": "地铁站",
+"d": "an underground station entrance with steps going down"
+},
+{
+"w": "电影院",
+"d": "a cinema front with a film reel sign"
+},
+{
+"w": "店",
+"d": "a small shop front with an awning"
+},
+{
+"w": "咖啡店",
+"d": "a café front with a coffee cup sign"
+},
+{
+"w": "超市",
+"d": "a shopping trolley full of groceries"
+},
+{
+"w": "街",
+"d": "a short city street with shops"
+},
+{
+"w": "路",
+"d": "a winding road"
+},
+{
+"w": "路口",
+"d": "a road junction with a traffic light"
+},
+{
+"w": "银行",
+"d": "a bank building with a coin sign"
+},
+{
+"w": "博物馆",
+"d": "a museum building with columns and a dinosaur skeleton"
+},
+{
+"w": "车站",
+"d": "a bus stop with a shelter and sign"
+},
+{
+"w": "洗手间",
+"d": "a toilet door with a toilet sign"
+},
+{
+"w": "药店",
+"d": "a pharmacy front with a green cross"
+},
+{
+"w": "体育馆",
+"d": "a sports hall building with a ball sign"
+},
+{
+"w": "健身房",
+"d": "a dumbbell and a kettlebell"
+}
+],
+[
+{
+"w": "公园",
+"d": "a park with a tree, a bench and a path"
+},
+{
+"w": "酒吧",
+"d": "a pub front with a hanging sign"
+},
+{
+"w": "厨房",
+"d": "a kitchen counter with a stove and pans"
+},
+{
+"w": "火车站",
+"d": "a railway station building with a clock"
+},
+{
+"w": "站台",
+"d": "a train platform with a waiting train"
+},
+{
+"w": "机场",
+"d": "a plane taking off over a control tower"
+},
+{
+"w": "城市",
+"d": "a small city skyline"
+},
+{
+"w": "地图",
+"d": "a folded paper map with a red pin"
+},
+{
+"w": "咖啡",
+"d": "a coffee"
+},
+{
+"w": "茶",
+"d": "a tea"
+},
+{
+"w": "水",
+"d": "a water"
+},
+{
+"w": "饺子",
+"d": "a dumpling"
+},
+{
+"w": "饭",
+"d": "a bowl of white rice with chopsticks"
+},
+{
+"w": "面包",
+"d": "a bread"
+},
+{
+"w": "水果",
+"d": "a small pile of fruit"
+},
+{
+"w": "菜",
+"d": "a plate of green vegetables"
+}
+],
+[
+{
+"w": "奶茶",
+"d": "a cup of bubble tea with a straw and pearls"
+},
+{
+"w": "珍珠",
+"d": "a spoon of chewy tapioca pearls"
+},
+{
+"w": "糖",
+"d": "wrapped sweets and sugar cubes"
+},
+{
+"w": "芒果",
+"d": "a mango"
+},
+{
+"w": "绿茶",
+"d": "a green tea"
+},
+{
+"w": "冰",
+"d": "ice cubes"
+},
+{
+"w": "蛋挞",
+"d": "a Portuguese-style egg tart"
+},
+{
+"w": "可乐",
+"d": "a cola"
+},
+{
+"w": "果汁",
+"d": "a juice"
+},
+{
+"w": "饮料",
+"d": "a soft drink cup with a straw"
+},
+{
+"w": "月饼",
+"d": "a mooncake"
+},
+{
+"w": "蛋糕",
+"d": "a cake"
+},
+{
+"w": "咖喱",
+"d": "a curry"
+},
+{
+"w": "热水",
+"d": "a glass of steaming hot water"
+},
+{
+"w": "苹果",
+"d": "a apple"
+},
+{
+"w": "橙子",
+"d": "a orange"
+}
+],
+[
+{
+"w": "香蕉",
+"d": "a banana"
+},
+{
+"w": "葡萄",
+"d": "a grapes"
+},
+{
+"w": "鱼",
+"d": "a fish"
+},
+{
+"w": "水煮鱼",
+"d": "a bowl of Sichuan fish in red chilli oil"
+},
+{
+"w": "鸡",
+"d": "a chicken"
+},
+{
+"w": "宫保鸡丁",
+"d": "a plate of kung pao chicken with peanuts"
+},
+{
+"w": "西红柿",
+"d": "a tomato"
+},
+{
+"w": "鸡蛋",
+"d": "a egg"
+},
+{
+"w": "辣椒",
+"d": "a chilli (pepper)"
+},
+{
+"w": "肉",
+"d": "a meat"
+},
+{
+"w": "牛肉",
+"d": "a beef"
+},
+{
+"w": "猪肉",
+"d": "a pork"
+},
+{
+"w": "汤",
+"d": "a bowl of soup"
+},
+{
+"w": "筷子",
+"d": "a chopsticks"
+},
+{
+"w": "豆腐",
+"d": "a tofu"
+},
+{
+"w": "面条",
+"d": "a noodles"
+}
+],
+[
+{
+"w": "羊肉",
+"d": "a lamb"
+},
+{
+"w": "啤酒",
+"d": "a beer"
+},
+{
+"w": "外卖",
+"d": "a takeaway box with chopsticks"
+},
+{
+"w": "烤鸡",
+"d": "a roast chicken"
+},
+{
+"w": "土豆",
+"d": "a potato"
+},
+{
+"w": "盐",
+"d": "a salt"
+},
+{
+"w": "锅",
+"d": "a wok"
+},
+{
+"w": "刀",
+"d": "a kitchen cleaver"
+},
+{
+"w": "烤鸭",
+"d": "a glossy roast duck on a plate"
+},
+{
+"w": "甜点",
+"d": "a little dessert pudding"
+},
+{
+"w": "火锅",
+"d": "a bubbling hotpot with two broths"
+},
+{
+"w": "手机",
+"d": "a mobile phone"
+},
+{
+"w": "电话",
+"d": "an old-style telephone"
+},
+{
+"w": "书",
+"d": "a book"
+},
+{
+"w": "电视",
+"d": "a TV"
+},
+{
+"w": "电影",
+"d": "a film clapperboard"
+}
+],
+[
+{
+"w": "音乐",
+"d": "music notes"
+},
+{
+"w": "吉他",
+"d": "a guitar"
+},
+{
+"w": "游戏",
+"d": "a game controller"
+},
+{
+"w": "照片",
+"d": "a photo print of mountains"
+},
+{
+"w": "票",
+"d": "a paper ticket"
+},
+{
+"w": "门票",
+"d": "an entrance ticket with a tear-off stub"
+},
+{
+"w": "车票",
+"d": "a train ticket"
+},
+{
+"w": "机票",
+"d": "a boarding pass"
+},
+{
+"w": "卡",
+"d": "a bank card"
+},
+{
+"w": "礼物",
+"d": "a wrapped gift box with a bow"
+},
+{
+"w": "唱片",
+"d": "a vinyl record"
+},
+{
+"w": "衣服",
+"d": "a T-shirt and a jumper"
+},
+{
+"w": "围巾",
+"d": "a scarf"
+},
+{
+"w": "灯笼",
+"d": "a lantern"
+},
+{
+"w": "车",
+"d": "a small car"
+},
+{
+"w": "自行车",
+"d": "a bicycle"
+}
+],
+[
+{
+"w": "公交车",
+"d": "a bus"
+},
+{
+"w": "出租车",
+"d": "a taxi"
+},
+{
+"w": "飞机",
+"d": "a plane"
+},
+{
+"w": "火车",
+"d": "a train"
+},
+{
+"w": "大巴",
+"d": "a long-distance coach"
+},
+{
+"w": "船",
+"d": "a ferry boat"
+},
+{
+"w": "伞",
+"d": "an open umbrella"
+},
+{
+"w": "药",
+"d": "medicine bottle and pills"
+},
+{
+"w": "钱",
+"d": "coins and banknotes"
+},
+{
+"w": "英镑",
+"d": "a pound coin and a pound note"
+},
+{
+"w": "人民币",
+"d": "a red Chinese 100-yuan banknote (stylised, no real details)"
+},
+{
+"w": "现金",
+"d": "a stack of cash"
+},
+{
+"w": "菜单",
+"d": "a restaurant menu"
+},
+{
+"w": "球",
+"d": "a ball"
+},
+{
+"w": "篮球",
+"d": "a basketball"
+},
+{
+"w": "网球",
+"d": "a tennis"
+}
+],
+[
+{
+"w": "乒乓球",
+"d": "a table tennis"
+},
+{
+"w": "羽毛球",
+"d": "a badminton"
+},
+{
+"w": "球拍",
+"d": "a badminton racket"
+},
+{
+"w": "板球",
+"d": "a cricket bat and ball"
+},
+{
+"w": "鞋",
+"d": "a pair of shoes"
+},
+{
+"w": "运动鞋",
+"d": "a pair of trainers"
+},
+{
+"w": "瑜伽",
+"d": "a cartoon person doing yoga on a mat"
+},
+{
+"w": "电池",
+"d": "a battery"
+},
+{
+"w": "电脑",
+"d": "a computer"
+},
+{
+"w": "耳机",
+"d": "a headphones"
+},
+{
+"w": "相机",
+"d": "a camera"
+},
+{
+"w": "手表",
+"d": "a watch"
+},
+{
+"w": "平板电脑",
+"d": "a tablet (computer)"
+},
+{
+"w": "桌子",
+"d": "a wooden table"
+},
+{
+"w": "乒乓球桌",
+"d": "a table-tennis table"
+},
+{
+"w": "钢琴",
+"d": "a piano"
+}
+],
+[
+{
+"w": "冰箱",
+"d": "a fridge"
+},
+{
+"w": "闹钟",
+"d": "a alarm clock"
+},
+{
+"w": "行李箱",
+"d": "a suitcase"
+},
+{
+"w": "护照",
+"d": "a passport"
+},
+{
+"w": "邮件",
+"d": "an envelope with an @ sign"
+},
+{
+"w": "信",
+"d": "a sealed letter"
+},
+{
+"w": "明信片",
+"d": "a postcard with a stamp"
+},
+{
+"w": "日记",
+"d": "a diary with a ribbon"
+},
+{
+"w": "视频",
+"d": "a phone showing a video call"
+},
+{
+"w": "短信",
+"d": "a phone with a text bubble"
+},
+{
+"w": "消息",
+"d": "a chat bubble with three dots"
+},
+{
+"w": "汉字",
+"d": "the character 字 written in ink on paper"
+},
+{
+"w": "熊猫",
+"d": "a panda (in the house style, no backpack)"
+},
+{
+"w": "歌",
+"d": "a singing music note"
+},
+{
+"w": "生日",
+"d": "a birthday cake with candles"
+},
+{
+"w": "派对",
+"d": "party balloons and confetti"
+}
+],
+[
+{
+"w": "春节",
+"d": "a red envelope and firecrackers"
+},
+{
+"w": "中秋节",
+"d": "a mooncake under a full moon"
+},
+{
+"w": "新年",
+"d": "fireworks"
+},
+{
+"w": "奥运会",
+"d": "five interlocking coloured rings (generic, not the official logo)"
+},
+{
+"w": "冠军",
+"d": "a gold trophy"
+},
+{
+"w": "头",
+"d": "a cartoon head smiling"
+},
+{
+"w": "眼睛",
+"d": "a pair of cartoon eyes"
+},
+{
+"w": "牙",
+"d": "a smiling cartoon tooth"
+},
+{
+"w": "肚子",
+"d": "a cartoon tummy with two hands on it"
+},
+{
+"w": "嗓子",
+"d": "a cartoon person touching their sore throat"
+},
+{
+"w": "太阳",
+"d": "a smiling sun"
+},
+{
+"w": "月亮",
+"d": "a crescent moon"
+},
+{
+"w": "晴天",
+"d": "a sun in a clear sky"
+},
+{
+"w": "阴天",
+"d": "grey clouds"
+},
+{
+"w": "冬天",
+"d": "a snowy tree"
+},
+{
+"w": "夏天",
+"d": "a beach umbrella under the sun"
+}
+],
+[
+{
+"w": "春天",
+"d": "a blossoming branch"
+},
+{
+"w": "秋天",
+"d": "falling orange leaves"
+}
+]
+],
+"same": {
+"汽车": "车",
+"米饭": "饭",
+"青菜": "菜",
+"足球": "球"
+}
+}

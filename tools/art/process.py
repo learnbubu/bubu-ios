@@ -1,0 +1,120 @@
+"""Turns out/raw/*.png (art on solid magenta) into app-ready transparent PNGs in out/final/:
+
+- the magenta is keyed out, with the pink fringe on soft edges cleaned up (despill), and the
+  image is trimmed to its artwork;
+- corners and hanging pieces also get a mirrored copy (-right) for the other side of the path;
+- picture sheets (4 columns) are sliced into one PNG per word, named after the word, using
+  picture_sheets.json for the order; words that share a picture get a copy each.
+
+Then out/review.html shows everything on a checkerboard and on the app's cream, to catch any
+leftover pink, missing icons or text the model added.
+"""
+import glob
+import json
+import os
+import shutil
+
+import numpy as np
+from PIL import Image
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+RAW = os.path.join(HERE, "out", "raw")
+FINAL = os.path.join(HERE, "out", "final")
+
+
+def background(a):
+    """The backdrop colour, read from the four corners (pure magenta is asked for, but the
+    model sometimes drifts, e.g. to raspberry)."""
+    k = 12
+    patches = np.concatenate([a[:k, :k].reshape(-1, 3), a[:k, -k:].reshape(-1, 3),
+                              a[-k:, :k].reshape(-1, 3), a[-k:, -k:].reshape(-1, 3)])
+    return np.median(patches, axis=0)
+
+
+def key(im, bg=None):
+    """The backdrop -> transparent, by colour distance from it, with the fringe despilled."""
+    a = np.asarray(im.convert("RGB")).astype(np.float32)
+    if bg is None:
+        bg = background(a)
+    if np.abs(bg - np.array([255, 0, 255])).max() < 60:
+        # true magenta: key on 'magenta-ness' (red and blue both above green), which nothing in
+        # the palette has, so soft edges come out clean
+        m = np.minimum(a[..., 0], a[..., 2]) - a[..., 1]
+        alpha = 1 - np.clip((m - 60) / (190 - 60), 0, 1)
+    else:
+        # anything else (e.g. raspberry): distance from it, kept tight because the coral
+        # backpack sits only ~75 away from raspberry
+        d = np.sqrt(((a - bg) ** 2).sum(axis=2))
+        alpha = np.clip((d - 22) / (62 - 22), 0, 1)
+    # despill: on soft edges, remove the backdrop's share of the colour (un-premultiply)
+    edge = (alpha > 0) & (alpha < 1)
+    fg = a.copy()
+    fg[edge] = (a[edge] - (1 - alpha[edge, None]) * bg) / np.maximum(alpha[edge, None], 0.05)
+    out = np.dstack([fg, alpha * 255]).clip(0, 255).astype(np.uint8)
+    im = Image.fromarray(out, "RGBA")
+    bbox = im.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
+    return im.crop(bbox) if bbox else im
+
+
+def leftover_pink(im):
+    """Share of visible pixels that still look magenta: a sign the model put pink in the art."""
+    a = np.asarray(im).astype(np.int32)
+    vis = a[..., 3] > 200
+    m = (np.minimum(a[..., 0], a[..., 2]) - a[..., 1]) > 90
+    return float((m & vis).sum()) / max(1, vis.sum())
+
+
+def slice_sheet(im, n, cols=4):
+    rows = (n + cols - 1) // cols
+    W, H = im.size
+    cells = []
+    for i in range(n):
+        x, y = i % cols, i // cols
+        cells.append(im.crop((x * W // cols, y * H // rows, (x + 1) * W // cols, (y + 1) * H // rows)))
+    return cells
+
+
+def main():
+    os.makedirs(FINAL, exist_ok=True)
+    sheets = json.load(open(os.path.join(HERE, "picture_sheets.json"), encoding="utf-8"))
+    report = []
+    for p in sorted(glob.glob(os.path.join(RAW, "*.png"))):
+        name = os.path.splitext(os.path.basename(p))[0]
+        raw = Image.open(p)
+        if name.startswith("pictures-picture-sheet-"):
+            i = int(name.split("-")[3]) - 1
+            words = sheets["sheets"][i]
+            os.makedirs(os.path.join(FINAL, "pictures"), exist_ok=True)
+            bg = background(np.asarray(raw.convert("RGB")).astype(np.float32))
+            for cell, it in zip(slice_sheet(raw, len(words)), words):
+                k = key(cell, bg)
+                k.save(os.path.join(FINAL, "pictures", it["w"] + ".png"))
+                report.append(("pictures/" + it["w"] + ".png", it["d"], leftover_pink(k)))
+            continue
+        k = key(raw)
+        k.save(os.path.join(FINAL, name + ".png"))
+        report.append((name + ".png", "", leftover_pink(k)))
+        if name.startswith(("corner-", "hang-")):
+            k.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(FINAL, name + "-right.png"))
+    # words drawn with another word's picture
+    for w, same in sheets.get("same", {}).items():
+        src = os.path.join(FINAL, "pictures", same + ".png")
+        if os.path.exists(src):
+            shutil.copy(src, os.path.join(FINAL, "pictures", w + ".png"))
+    rows = "".join(
+        f'<figure><div class="ck"><img src="final/{f}"></div><div class="cr"><img src="final/{f}"></div>'
+        f'<figcaption>{f}{" · " + d if d else ""}{" · <b>pink " + format(pk, ".1%") + "</b>" if pk > 0.002 else ""}</figcaption></figure>'
+        for f, d, pk in report)
+    html = ("<!doctype html><meta charset=utf-8><title>Bùbù art review</title><style>body{font-family:system-ui;margin:16px;background:#fff}"
+            "main{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}figure{margin:0}"
+            ".ck,.cr{height:140px;display:grid;place-items:center;border-radius:8px}"
+            ".ck{background:repeating-conic-gradient(#ccc 0 25%,#fff 0 50%) 0 0/16px 16px}.cr{background:#f6f1e4;margin-top:4px}"
+            "img{max-width:96%;max-height:130px}figcaption{font-size:12px;margin-top:4px}b{color:#c00}</style>"
+            f"<h1>Bùbù art review ({len(report)})</h1><main>{rows}</main>")
+    open(os.path.join(HERE, "out", "review.html"), "w", encoding="utf-8").write(html)
+    flagged = [f for f, _, pk in report if pk > 0.002]
+    print(f"{len(report)} images to out/final; {len(flagged)} with leftover pink: {flagged[:10]}")
+
+
+if __name__ == "__main__":
+    main()
