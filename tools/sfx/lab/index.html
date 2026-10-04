@@ -83,7 +83,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding
 
   <div class="card">
     <h2>Wrong: five options</h2>
-    <p class="hint">Low, short and muted, a soft 'bwomp' rather than a buzzer. The set above uses option 1 for now.</p>
+    <p class="hint">Low, short and muted, a soft 'bwomp' rather than a buzzer. The set above uses option 5.</p>
     <div class="designs" id="wrongs"></div>
   </div>
 
@@ -196,7 +196,7 @@ const FIRES = [
 ];
 const SET = {
   correct:   {...TB},
-  wrong:     {...WRONGS[0]},
+  wrong:     {...WRONGS[4]},
   tap:       {...TB, steps:[[88]], vel:34, len:60, sparkle:0, run:0, sample:"marimba", sampleLvl:30, sampleOct:-12, echo:0, room:4, tail:5, transient:35, body:0, idx0:1.6},
   // a quick, high, sparkly 'ding-ding!'
   combo:     {...TB, steps:[[88],[93,97]], times:[0, 70], pick:70, sample:"glockenspiel", sampleLvl:26, sampleOct:0, sparkle:35, run:30, len:520, tail:35},
