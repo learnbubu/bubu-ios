@@ -313,7 +313,14 @@ struct HintBubble: View {
     var alternatives: [SentenceWord] = []
     var empty = "No separate word in Chinese"
 
-    private var rows: [String] { reverse ? [] : (hanzi.map { Hints.senses($0) } ?? []) }
+    private var rows: [String] {
+        guard !reverse, let h = hanzi else { return [] }
+        // not a meaning the link above already says (呢: "and …?" twice)
+        let said = (link?.meanings ?? []).map { $0.lowercased().replacingOccurrences(of: " …?", with: "").replacingOccurrences(of: " …", with: "") }
+        let all = Hints.senses(h)
+        let kept = all.filter { r in !said.contains { r.lowercased().hasPrefix($0) } }
+        return kept.isEmpty ? Array(all.prefix(1)) : kept
+    }
     private var width: CGFloat {
         let texts = [phrase ?? "", span ?? ""] + rows + (link?.meanings ?? []) + [link?.header ?? ""]
         let longest = CGFloat(texts.map(\.count).max() ?? 0) * 8.4
@@ -404,21 +411,28 @@ private struct HintBubbleModifier<B: View>: ViewModifier {
     @State private var anchor: CGRect = .zero
     @State private var size: CGSize = .zero
 
+    /// Below the word, as Duolingo's (above, the exercise card cut a tall one off: the Mac's
+    /// check of 0.1.37); above only when it wouldn't fit below (a word low on the screen).
+    private var below: Bool {
+        let screen = UIScreen.main.bounds.height
+        return anchor.maxY + 6 + size.height < screen - 110
+    }
+
     func body(content: Content) -> some View {
         content
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { anchor = $0 }
-            .overlay(alignment: .top) {
+            .overlay(alignment: below ? .bottom : .top) {
                 if open {
-                    // a line with no height along the top, and the bubble standing on it
+                    // a line with no height along the word's edge, and the bubble hanging from it
                     Color.clear.frame(height: 0)
-                        .overlay(alignment: .bottom) {
+                        .overlay(alignment: below ? .top : .bottom) {
                             bubble()
                                 .fixedSize()
                                 .onGeometryChange(for: CGSize.self) { $0.size } action: { size = $0 }
                                 .offset(x: shift)
                                 .contentShape(Rectangle())
                                 .onTapGesture { withAnimation(.easeIn(duration: 0.12)) { open = false } }
-                                .padding(.bottom, 6)
+                                .padding(below ? .top : .bottom, 6)
                         }
                         .transition(.opacity)
                 }
@@ -426,9 +440,10 @@ private struct HintBubbleModifier<B: View>: ViewModifier {
             .zIndex(open ? 10 : 0)
     }
 
-    /// Sideways, so the bubble stays 12 points inside the screen's edges.
+    /// Sideways, so the bubble stays clear of the exercise card's edges (about 19 points in from
+    /// the screen's, and a little more).
     private var shift: CGFloat {
-        let screen = UIScreen.main.bounds.width, margin: CGFloat = 12
+        let screen = UIScreen.main.bounds.width, margin: CGFloat = 26
         let left = anchor.midX - size.width / 2, right = anchor.midX + size.width / 2
         if left < margin { return margin - left }
         if right > screen - margin { return screen - margin - right }
