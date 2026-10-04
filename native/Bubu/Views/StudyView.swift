@@ -666,9 +666,10 @@ struct ListenButtons: View {
             Button { say(slow: false) } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "speaker.wave.2.fill").font(.system(size: 24, weight: .semibold))
-                    HStack(alignment: .center, spacing: 3) {
+                    // (narrow enough for the bubble at its 200 pt: it was 10 pt over, and widened the card)
+                    HStack(alignment: .center, spacing: 2.5) {
                         ForEach(Array(Self.bars.enumerated()), id: \.offset) { i, h in
-                            Capsule().frame(width: 3.5, height: 30 * (playing ? max(0.2, h * CGFloat.random(in: 0.6...1.2)) : h))
+                            Capsule().frame(width: 3, height: 30 * (playing ? max(0.2, h * CGFloat.random(in: 0.6...1.2)) : h))
                                 .animation(playing ? .easeInOut(duration: 0.22).repeatForever(autoreverses: true).delay(Double(i) * 0.03)
                                                    : .easeOut(duration: 0.2), value: playing)
                         }
@@ -676,7 +677,7 @@ struct ListenButtons: View {
                     .frame(height: 32)
                 }
                 .foregroundStyle(Color.accent)
-                .padding(.horizontal, 16).padding(.vertical, 12)
+                .padding(.horizontal, 12).padding(.vertical, 12)
                 .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.accentSoft))
                 .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.accent.opacity(0.35), lineWidth: 2))
             }
@@ -1802,7 +1803,7 @@ struct TypeView: View {
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
             // (wrapping, never clipped: the Mac's check of 0.1.38 found the descenders cut off)
-            Text(ex.typeHanzi ? "Switch to the Chinese (Pinyin) keyboard with the 🌐 key"
+            Text(ex.typeHanzi ? "Use the 🌐 key for the Chinese keyboard"
                               : "Tones are optional: ni hao or ni3 hao3. Characters count too.")
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
                 .lineLimit(3).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 8)
