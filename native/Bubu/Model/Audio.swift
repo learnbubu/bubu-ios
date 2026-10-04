@@ -154,6 +154,7 @@ final class Speech {
     /// Says a text: a recorded clip in the speaker's voice (Bùbù's when no speaker is given, or
     /// the speaker has none), else the phone's own voice.
     func speak(_ text: String, slow: Bool = false, speaker: String? = nil) {
+        if Launch.silent { lastText = text; lastAt = Date(); return }
         // asked for twice at once (two parts of a screen both saying it): said once, not
         // cut off and started again
         if !slow, text == lastText, Date().timeIntervalSince(lastAt) < 0.6 { return }
@@ -234,6 +235,7 @@ final class Sounds {
     }
 
     func play(_ name: String) {
+        if Launch.silent { return }
         guard enabled else { return }
         if name == "goal" { lastGoal = Date() }
         // the lesson-complete chime is dropped if the goal fanfare just played

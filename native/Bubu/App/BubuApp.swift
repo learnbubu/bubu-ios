@@ -42,6 +42,10 @@ enum Launch {
     }
     /// `-plus`, in debug builds only: run as a Bùbù Plus member (there's no purchase yet).
     static var plus: Bool { ProcessInfo.processInfo.arguments.contains("-plus") }
+    /// Nothing is heard: under the tests, or launched with `-silent` (the Mac's checks, when
+    /// someone nearby is on a call: the owner, 4 Oct 2026).
+    static let silent: Bool = ProcessInfo.processInfo.arguments.contains("-silent")
+        || ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     static let rewardScreens: Set<String> = ["hud", "buns", "shop", "pocket"]
     /// the lesson-step screenshots: the path with a step badge, and the done screens
     static let stepScreens: Set<String> = ["pathstep", "donefinal", "donenext", "pathpractice", "practice", "practicerun"]
