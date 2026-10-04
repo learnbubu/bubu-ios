@@ -1381,8 +1381,7 @@ struct SentenceView: View {
                                 Text(t.text).font(.nunito(16.3)).foregroundStyle(Color.ink).padding(.horizontal, 2)
                             } else {
                                 HintChip(hanzi: t.word?.hanzi, pinyin: t.word?.pinyin, reverse: true,
-                                         span: Hints.span(tokens, at: i),
-                                         alternatives: Hints.alternatives(t.text, besides: t.word?.hanzi ?? "")) {
+                                         span: Hints.span(tokens, at: i), english: t.text) {
                                     Text(t.text).font(.nunito(16.3)).foregroundStyle(Color.ink)
                                         .overlay(alignment: .bottom) {
                                             Line().stroke(Color.muted.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [1.5, 3]))

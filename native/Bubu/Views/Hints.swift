@@ -263,7 +263,8 @@ struct HintChip<Label: View>: View {
     var link: Hints.Link? = nil
     /// for an English word: its span (How are you) and other Chinese for it
     var span: String? = nil
-    var alternatives: [SentenceWord] = []
+    /// the English word tapped: its other Chinese are looked up when the bubble opens
+    var english: String? = nil
     /// also told of a tap (a word's pinyin, hidden once it's strong, shows on a tap)
     var tapped: (() -> Void)? = nil
     @ViewBuilder var label: Label
@@ -293,7 +294,8 @@ struct HintChip<Label: View>: View {
         }
         .buttonStyle(.plain)
         .hintBubble(open: Binding(get: { open }, set: { if !$0 && open { focus.open = nil } })) {
-            HintBubble(hanzi: hanzi, pinyin: pinyin, reverse: reverse, phrase: phrase, link: link, span: span, alternatives: alternatives)
+            HintBubble(hanzi: hanzi, pinyin: pinyin, reverse: reverse, phrase: phrase, link: link, span: span,
+                       alternatives: english.map { Hints.alternatives($0, besides: hanzi ?? "") } ?? [])
         }
     }
 }
@@ -313,10 +315,9 @@ struct HintBubble: View {
 
     private var rows: [String] { reverse ? [] : (hanzi.map { Hints.senses($0) } ?? []) }
     private var width: CGFloat {
-        let texts = [phrase ?? ""] + rows + (link?.meanings ?? []) + [link?.header ?? ""]
+        let texts = [phrase ?? "", span ?? ""] + rows + (link?.meanings ?? []) + [link?.header ?? ""]
         let longest = CGFloat(texts.map(\.count).max() ?? 0) * 8.4
         let chars = CGFloat(([hanzi ?? ""] + alternatives.map(\.hanzi)).map(\.count).max() ?? 0) * 26
-            + CGFloat((link?.header.count ?? 0) / 2) * 0 + CGFloat(span?.count ?? 0) * 0
         return min(240, max(110, max(longest, chars) + 28))
     }
 
