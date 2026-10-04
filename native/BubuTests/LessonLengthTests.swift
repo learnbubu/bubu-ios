@@ -60,22 +60,23 @@ final class LessonLengthTests: XCTestCase {
     // MARK: the numbers
 
     func testTheShapeNumbers() {
-        XCTAssertEqual(StudySession.stoneLen, 15)
-        XCTAssertEqual(StudySession.baseReps(new: 2), 4)
-        XCTAssertEqual(StudySession.baseReps(new: 3), 4)
-        XCTAssertEqual(StudySession.baseReps(new: 5), 3)
+        // (4 Oct 2026, "feels slow learning": lessons of about twelve, each new word three times)
+        XCTAssertEqual(StudySession.stoneLen, 12)
+        XCTAssertEqual(StudySession.baseReps(new: 2), 3)
+        XCTAssertEqual(StudySession.baseReps(new: 3), 3)
+        XCTAssertEqual(StudySession.baseReps(new: 4), 3)
         XCTAssertEqual(StudySession.reviewsWanted(new: 3), 3)
-        XCTAssertEqual(StudySession.reviewsWanted(new: 2), 7)
-        XCTAssertEqual(StudySession.reviewsWanted(new: 5), 0)
-        XCTAssertEqual(StudySession.repsPerNew(new: 3, reviews: 0), 5, "the first stone: 3 words × 5")
-        XCTAssertEqual(StudySession.repsPerNew(new: 3, reviews: 3), 4)
-        XCTAssertEqual(StudySession.repsPerNew(new: 2, reviews: 7), 4)
-        XCTAssertEqual(StudySession.repsPerNew(new: 5, reviews: 0), 3)
+        XCTAssertEqual(StudySession.reviewsWanted(new: 2), 6)
+        XCTAssertEqual(StudySession.reviewsWanted(new: 4), 0)
+        XCTAssertEqual(StudySession.repsPerNew(new: 3, reviews: 0), 4, "the first stone: 3 words × 4")
+        XCTAssertEqual(StudySession.repsPerNew(new: 3, reviews: 3), 3)
+        XCTAssertEqual(StudySession.repsPerNew(new: 2, reviews: 6), 3)
+        XCTAssertEqual(StudySession.repsPerNew(new: 4, reviews: 0), 3)
     }
 
     // MARK: stone 1, the showcase
 
-    /// The very first stone (你 · 好 · 你好) has no earlier words: its own words come up five
+    /// The very first stone (你 · 好 · 你好) has no earlier words: its own words come up four
     /// times each, recognise first, then a mix: listening, sentences (你好，马克！), recalling,
     /// and one word written and one said.
     func testTheFirstStoneIsFifteenVariedExercises() {
@@ -86,12 +87,12 @@ final class LessonLengthTests: XCTestCase {
         let s = StudySession(lessonId: stone.id, progress: p)
         XCTAssertTrue(s.stoneShaped)
         XCTAssertFalse(s.tonesTaught)
-        XCTAssertEqual(s.sessionTotal, 15, "three words: too few for a match")
+        XCTAssertEqual(s.sessionTotal, 12, "three words: too few for a match")
         let steps = play(s)
         let ex = steps.filter { !$0.meet }
         XCTAssertEqual(ex.count, s.sessionTotal, "the progress bar counts every exercise")
         checkNewWords(steps, fresh)
-        for c in fresh { XCTAssertEqual(ex.filter { $0.id == c.id }.count, 5, c.word.hanzi) }
+        for c in fresh { XCTAssertEqual(ex.filter { $0.id == c.id }.count, 4, c.word.hanzi) }
         // no tones yet, so no "Which pinyin?"
         XCTAssertTrue(ex.allSatisfy { ["recognize", "listen", "recall", "sentence", "gap", "hear", "write", "speak", "type", "picture", "build"].contains($0.dir) },
                       "\(ex.map(\.dir))")
@@ -131,7 +132,7 @@ final class LessonLengthTests: XCTestCase {
         _ = play(StudySession(lessonId: chapter1[0].id, progress: p))
         for stone in chapter1[1...2] {
             let s = StudySession(lessonId: stone.id, progress: p)
-            XCTAssertTrue((14...16).contains(s.sessionTotal), "\(stone.id): \(s.sessionTotal)")
+            XCTAssertTrue((11...13).contains(s.sessionTotal), "\(stone.id): \(s.sessionTotal)")
             let steps = play(s)
             XCTAssertEqual(steps.filter { !$0.meet }.count, s.sessionTotal)
             checkNewWords(steps, course.cards(in: stone.id))
@@ -139,7 +140,7 @@ final class LessonLengthTests: XCTestCase {
         }
     }
 
-    /// A stone further on, with three new words and plenty of earlier ones: 14–16 exercises,
+    /// A stone further on, with three new words and plenty of earlier ones: 11–13 exercises,
     /// each new word 3+ times and spaced, earlier words (from stones before it) filling the rest.
     func testAMidCourseStoneWithThreeNewWords() throws {
         let p = store()
@@ -151,7 +152,7 @@ final class LessonLengthTests: XCTestCase {
         }
         let fresh = course.cards(in: stone.id)
         let s = StudySession(lessonId: stone.id, progress: p)
-        XCTAssertTrue((14...16).contains(s.sessionTotal), "\(s.sessionTotal)")
+        XCTAssertTrue((11...13).contains(s.sessionTotal), "\(s.sessionTotal)")
         let steps = play(s)
         let ex = steps.filter { !$0.meet }
         XCTAssertEqual(ex.count, s.sessionTotal)
@@ -194,7 +195,7 @@ final class LessonLengthTests: XCTestCase {
         let s = try XCTUnwrap(StudySession.lesson(chapter1[3].id, p))
         XCTAssertTrue(s.isPractice)
         XCTAssertFalse(s.stoneShaped)
-        XCTAssertTrue((14...16).contains(s.sessionTotal), "\(s.sessionTotal)")
+        XCTAssertTrue((11...13).contains(s.sessionTotal), "\(s.sessionTotal)")
         XCTAssertEqual(play(s).count, s.sessionTotal)
     }
 

@@ -444,6 +444,9 @@ struct StudyView: View {
             Moments.shared.show(.buns(.init(ctx: .mid, review: reviewHere, refilled: { advance() }, end: close)))
             return
         }
+        // nothing said for the last exercise runs on into the next (the owner: it "bleeds into the
+        // next question that speaks")
+        Speech.shared.stop()
         withAnimation {
             session.next()
             resetExercise()

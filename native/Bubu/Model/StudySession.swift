@@ -9,16 +9,16 @@ final class StudySession: Identifiable {
     /// New words are met one at a time, each practised straight away (Duolingo's way).
     static let newPerSession = 6, meetGroup = 1, sessionLen = 12
     /// A stone's session is about this many exercises (Duolingo's lesson: ~15, 3–5 minutes).
-    static let stoneLen = 15
+    static let stoneLen = 12          // (was 15: the owner, 4 Oct 2026, "feels slow learning")
     /// How often each new word comes up in its stone's session: usually `newReps` (3 when a
     /// stone has 4–5 new words), up to `newRepsMax` when there are too few earlier words to
     /// review (the course's first stones).
-    static let newRepsMin = 3, newReps = 4, newRepsMax = 5
+    static let newRepsMin = 3, newReps = 3, newRepsMax = 4
     /// A new word's first right answers in a session schedule its reviews; the extra practice
     /// after them doesn't push its first review further out.
     static let scheduledPerSession = 2
     /// A practice stone's exercises.
-    static let practiceLen = 15
+    static let practiceLen = 12
     static let xpCorrect = 2, xpCombo = 3, xpPerfect = 5, xpSession = 10, xpLesson = 25, comboAt = 5
 
     /// The exercise kinds, as the web's FOCUSES.
@@ -782,7 +782,7 @@ final class StudySession: Identifiable {
     static let newWordLadder: [[String]] = [
         ["picture", "recognize", "listen"],
         ["sentence", "gap", "listen", "pinyin"],
-        ["hear", "gap", "recall", "sentence", "build", "write", "speak"],
+        ["hear", "gap", "recall", "sentence", "type", "build", "write", "speak"],
         ["gap", "sentence", "hear", "type", "write", "speak", "pinyin", "recall"],
         ["type", "speak", "write", "hear", "sentence", "recall", "listen"],
     ]
@@ -870,6 +870,11 @@ final class StudySession: Identifiable {
             }
         }
         if enabled.isEmpty { enabled = ["recognize"] }
+        // reviews too: each of the harder kinds (write, speak, type, build) once a lesson at most
+        // (the step logs of 4 Oct 2026 showed four to six of them in a lesson of fifteen)
+        if enabled.contains(where: { !Self.ladderOnce.contains($0) }) {
+            enabled.removeAll { Self.ladderOnce.contains($0) && (dirsUsed[$0] ?? 0) >= 1 }
+        }
         if let l = lastDir, enabled.count > 1 { enabled.removeAll { $0 == l } }
         let d = enabled.randomElement() ?? "recognize"
         dirByCard[c.id] = d
@@ -1020,7 +1025,10 @@ final class StudySession: Identifiable {
         guard sessionTotal > 0 else { return 0 }
         let pairs = matchCards.count
         let part = pairs == 0 || matchFinished ? 0 : Double(matched.count) / Double(pairs)
-        return min(Double(stepsDone) + part, Double(sessionTotal)) / Double(sessionTotal)
+        // a wrong answer moves the bar too, half a step, as Duolingo's does (the step it owes is
+        // added to the length, so the bar still ends exactly full)
+        let missed = isQuiz ? 0 : Double(againCount) * 0.5
+        return min(Double(stepsDone) + part + missed, Double(sessionTotal) + missed) / (Double(sessionTotal) + missed)
     }
     var hasMeetLeft: Bool { queue.contains { if case .meet = $0 { return true } else { return false } } }
 

@@ -118,6 +118,9 @@ enum Backup {
     /// 0.1.34's stones (chapter 2 on) and the stones now holding their words: every chapter took
     /// chapter 1's shape on 3 Oct 2026.
     static let oldStones2: [String: [String]] = bundled("oldstones2")
+    /// 0.1.35's stones (two or three words) and the stones now holding their words: stones of
+    /// three or four from 4 Oct 2026.
+    static let oldStones3: [String: [String]] = bundled("oldstones3")
 
     private static func bundled(_ name: String) -> [String: [String]] {
         guard let url = Bundle.main.url(forResource: name, withExtension: "json"),
@@ -136,12 +139,13 @@ enum Backup {
     static func migrateDone(_ done: inout Set<String>, srs: [String: SRSRecord], course: Course = .shared,
                             oldLessons: [String: [String]] = Backup.oldLessons,
                             oldStones: [String: [String]] = Backup.oldStones,
-                            oldStones2: [String: [String]] = Backup.oldStones2) -> (restoned: Int, carried: Int) {
+                            oldStones2: [String: [String]] = Backup.oldStones2,
+                            oldStones3: [String: [String]] = Backup.oldStones3) -> (restoned: Int, carried: Int) {
         let stale = done.filter { course.lessonById[$0] == nil }
         guard !stale.isEmpty else { return (0, 0) }
         done.subtract(stale)
         var restoned = 0, carried = 0
-        for map in [oldLessons, oldStones, oldStones2] {
+        for map in [oldLessons, oldStones, oldStones2, oldStones3] {
             let was = stale.filter { map[$0] != nil }
             guard !was.isEmpty else { continue }
             var from: [String: [String]] = [:]
@@ -163,7 +167,7 @@ enum Backup {
     }
 
     static func restonedNote(_ n: Int) -> String {
-        "Lessons are now shorter: two or three new words a stone, with practice in between. \(n) stone\(n == 1 ? " is" : "s are") done from your progress, and your words keep their reviews."
+        "Lessons are now shorter: three or four new words a stone, shorter lessons, practice every few stones. \(n) stone\(n == 1 ? " is" : "s are") done from your progress, and your words keep their reviews."
     }
 
     /// What a backup holds, before restoring it; nil if it isn't one.
