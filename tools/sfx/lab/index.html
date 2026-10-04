@@ -1,0 +1,428 @@
+<title>Bùbù Sound Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
+<style>
+:root{
+  --bg:#f6f4ee; --panel:#ffffff; --ink:#1d2a2a; --muted:#6b7775; --line:#e3e0d6;
+  --accent:#2e7a6b; --accent-soft:#dcefe9; --lip:#c9d8d2; --gold:#e09a1f; --gold-soft:#fdf1d8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#141a19; --panel:#1d2524; --ink:#eef3f1; --muted:#9aa8a5; --line:#2e3937;
+    --accent:#5cc2aa; --accent-soft:#20332f; --lip:#2a3a37; --gold:#f5b03d; --gold-soft:#33291a;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#141a19; --panel:#1d2524; --ink:#eef3f1; --muted:#9aa8a5; --line:#2e3937;
+  --accent:#5cc2aa; --accent-soft:#20332f; --lip:#2a3a37; --gold:#f5b03d; --gold-soft:#33291a;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;margin:0;padding-inline:16px;padding-block:22px 48px}
+main{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-size:26px;font-weight:900;margin:0;letter-spacing:-.3px}
+.lede{color:var(--muted);font-size:15px;line-height:1.5;margin:6px 0 0;max-width:64ch}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 4px 0 var(--lip);display:flex;flex-direction:column;gap:12px}
+h2{font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:0}
+.hint{font-size:13px;color:var(--muted);margin:-4px 0 0;line-height:1.4}
+button{font:inherit;cursor:pointer;border:none;color:inherit}
+.designs{display:flex;flex-direction:column;gap:10px}
+.design{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:10px 12px;cursor:pointer}
+.design.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 3px 0 var(--accent)}
+.design .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:2px solid var(--line);font-weight:900}
+.design.on .n{border-color:var(--accent);color:var(--accent)}
+.design b{display:block;font-size:16px}
+.design small{display:block;color:var(--muted);font-size:13px;line-height:1.35;margin-top:2px}
+.play{background:var(--accent);color:var(--panel);font-weight:900;border-radius:10px;padding:9px 14px;box-shadow:0 3px 0 color-mix(in srgb,var(--accent) 60%,#000)}
+.play:active{transform:translateY(2px)}
+.big{background:var(--accent);color:var(--panel);font-weight:900;font-size:18px;padding:14px;border-radius:999px;box-shadow:0 4px 0 color-mix(in srgb,var(--accent) 60%,#000);flex:1}
+.big.alt{background:var(--panel);color:var(--accent);border:2px solid var(--accent);box-shadow:0 4px 0 var(--accent)}
+.big:active{transform:translateY(3px)}
+.bar{display:flex;gap:10px;position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);z-index:2}
+.sliders{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+label{display:flex;flex-direction:column;gap:4px;font-size:13.5px;font-weight:700}
+label span{display:flex;justify-content:space-between;color:var(--muted);font-weight:700;gap:8px}
+label span i{font-style:normal;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--bg);border:2px solid var(--line);font-weight:800;font-size:13.5px;padding:7px 11px;border-radius:12px}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.steps{display:flex;flex-direction:column;gap:6px}
+.step{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center}
+.step>b{font-size:12px;color:var(--muted);text-align:right}
+.keys{display:flex;gap:3px;flex-wrap:wrap}
+.key{min-width:36px;padding:6px 0;border-radius:8px;background:var(--bg);border:2px solid var(--line);font-weight:800;font-size:12px}
+.key.on{background:var(--gold-soft);border-color:var(--gold)}
+.x{background:transparent;color:var(--muted);font-size:16px;padding:4px 6px}
+.ghost{background:transparent;border:2px solid var(--line);font-weight:800;padding:8px 12px;border-radius:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:11.5px;white-space:pre-wrap;word-break:break-all;margin:0;color:var(--muted);max-height:110px;overflow:auto}
+.status{font-size:13px;color:var(--muted)}
+@media (max-width:560px){.sliders{grid-template-columns:1fr}.design{grid-template-columns:auto 1fr}.design .play{grid-column:1/-1}}
+</style>
+
+<main>
+  <header>
+    <h1>Bùbù sound lab: Correct</h1>
+    <p class="lede"><b>A touch brighter</b> with the rhythm spiced up: swung, triplets, dotted, a held breath, a grace-note flourish, an early landing, and an echo answer. Same sound, same chord; only the timing changes. <b>Rhythm speed</b> (under Notes) speeds any of them up or slows them down.</p>
+    <p class="status" id="status"></p>
+  </header>
+
+  <div class="card">
+    <h2>The Bùbù set</h2>
+    <p class="hint">Your pick as Correct, and the other nine in its style. ▶ any one, or hear them all in a row.</p>
+    <div class="designs" id="set"></div>
+    <div class="row"><button class="play" id="playSet">▶ Play the set</button></div>
+  </div>
+
+  <div class="card">
+    <h2>Designs</h2>
+    <div class="designs" id="designs"></div>
+  </div>
+
+  <div class="card">
+    <h2 id="editTitle">Tweak</h2>
+    <p class="hint">Changes apply to the design you've picked. “Reset” puts it back as it was.</p>
+    <div class="sliders" id="tailSlider"></div>
+    <h2>Tone</h2>
+    <div class="sliders" id="toneSliders"></div>
+    <h2>Real instrument underneath</h2>
+    <div class="chips" id="samples"></div>
+    <div class="sliders" id="layerSliders"></div>
+  </div>
+
+  <div class="card">
+    <h2>Notes</h2>
+    <p class="hint">Steps play in order; tap more than one key for a chord. The last step gets the accent and the sparkle.</p>
+    <div class="steps" id="steps"></div>
+    <div class="row"><button class="ghost" id="addStep">+ Add a step</button></div>
+    <div class="sliders" id="noteSliders"></div>
+  </div>
+
+  <div class="card">
+    <h2>Recipe</h2>
+    <p class="hint">When it's right, copy this and paste it to Claude, who renders it at full quality and builds the other nine sounds to match.</p>
+    <pre id="recipe"></pre>
+    <div class="row"><button class="ghost" id="copy">Copy recipe</button><button class="ghost" id="reset">Reset this design</button></div>
+  </div>
+
+  <div class="bar"><button class="big" id="play">▶ Play</button><button class="big alt" id="playAll">Play all</button></div>
+</main>
+
+<script>
+const KEYS = []; for (let m = 64; m <= 105; m++) if ([9,11,1,2,4,6,8].includes(m % 12)) KEYS.push(m);
+const NN = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const nm = m => NN[m % 12] + (Math.floor(m / 12) - 1);
+const SAMPLES = [["none","None"],["vibraphone","Vibraphone"],["glockenspiel","Glockenspiel"],["kalimba","Kalimba"],["marimba","Marimba"],["handchimes","Hand chimes"]];
+
+// warm keys: FM ratio 1, a gentle strike that mellows, a little tine, detuned pair
+const WARM = {ratio:1, idx0:2.2, idx1:0.3, idxTau:90, decay:420, tine:20, tineRatio:14, detune:9, bright:55};
+const BASE = {...WARM, transient:35, sparkle:25, body:20, width:45, room:18, echo:18, echoTime:110, fifth:0,
+              run:0, scoop:0, sample:"none", sampleLvl:0, sampleOct:0, fade:420, punch:50, vel:80, accent:30, gap:100, len:520};
+const BLOOM = {...BASE, steps:[[81],[85,88]], gap:115, sample:"vibraphone", sampleLvl:30, width:70, room:14, echo:8, fade:380, len:560, body:30, tail:40};
+const FOUR = {...BLOOM, steps:[[76],[81,85]], body:35};
+const BDDD = {...FOUR, gap:78, len:560};
+const UP = {...BDDD, steps:[[69],[73],[76],[81,85]]};
+// small steps from number 2, same pitch: a touch more shine in the strike itself (not higher layers),
+// and fun from rhythm and bounce rather than sparkle
+const TB = {...UP, idx0:2.8, idx1:0.4, bright:62, sampleLvl:34};
+// rhythms that aren't straight 4/4: each step gets its own time (ms from the start)
+const DESIGNS = [
+  {name:"Straight (as before)", about:"A touch brighter, evenly spaced: ba-da-da-dum. For comparison.", ...TB},
+  {name:"Swung", about:"Long-short, long-short, like a little shuffle: baa-da baa-dum.",
+   ...TB, times:[0, 115, 165, 285]},
+  {name:"Triplet tumble", about:"Three quick notes tumble in a triplet, then a beat later the chord lands.",
+   ...TB, times:[0, 52, 104, 235]},
+  {name:"Dotted skip", about:"A held first note, then two skipping ones into the chord: daah, da-da-dum.",
+   ...TB, times:[0, 150, 200, 270]},
+  {name:"Hold before the landing", about:"Three even notes, a tiny breath, then the chord: ba-da-da … dum!",
+   ...TB, times:[0, 85, 170, 360]},
+  {name:"Grace-note flourish", about:"A quick little turn (C#, D#, E) before the chord, like a flick of the wrist.",
+   ...TB, steps:[[69],[73],[75],[76],[81,85]], times:[0, 95, 150, 178, 265]},
+  {name:"Push", about:"The chord comes a fraction early, before you expect it: an eager, bouncy 'yes!'.",
+   ...TB, times:[0, 100, 200, 255]},
+  {name:"Echo answer", about:"Lands on the chord, then a quiet high E answers back off the beat.",
+   ...TB, steps:[[69],[73],[76],[81,85],[88]], times:[0, 80, 160, 240, 395]},
+];
+// THE SET: the owner's pick (Straight, a touch brighter) and the other nine in its style
+const SET_ORDER = ["correct","wrong","tap","combo","goal","complete","levelup","milestone","chest","relight"];
+const SET_LABEL = {correct:"Correct",wrong:"Wrong",tap:"Tap",combo:"Combo",goal:"Daily goal",complete:"Lesson complete",levelup:"Level up",milestone:"Milestone",chest:"Chest",relight:"Fire relit"};
+const SET = {
+  correct:   {...TB},
+  wrong:     {...TB, steps:[[76],[72]], gap:120, idx0:1.5, idx1:0.2, bright:40, vel:62, accent:0, sparkle:0, run:0, transient:20, sampleLvl:22, bend:-45, len:330, tail:25, body:25},
+  tap:       {...TB, steps:[[88]], vel:38, len:90, sparkle:0, run:0, sample:"none", echo:0, room:6, tail:10, transient:30, body:0},
+  combo:     {...TB, steps:[[69],[73],[76],[81],[85,88]], gap:70},
+  goal:      {...TB, steps:[[69],[73],[76],[81],[85],[88,93]], gap:72, sparkle:30, run:30, len:700, tail:50},
+  complete:  {...TB, steps:[[69],[73],[76],[81,85,88,93]], gap:105, sparkle:30, run:35, len:950, tail:60, body:35},
+  levelup:   {...TB, steps:[[64],[69],[73],[76],[81],[85],[88],[93,97]], gap:60, sparkle:30, run:40, len:950, tail:60},
+  milestone: {...TB, steps:[[57,64],[69],[73],[76],[81,85,88,93]], gap:140, body:45, sparkle:30, run:40, len:1300, tail:70, width:75},
+  chest:     {...TB, steps:[[93],[88],[85],[81],[85,88,93]], gap:55, sparkle:30, run:45, len:900, tail:55},
+  relight:   {...TB, steps:[[64],[69],[73,76]], gap:130, idx0:2.2, vel:72, sparkle:20, run:0, len:850, tail:55, body:35},
+};
+function playSet(){ let t = ac().currentTime + 0.05; SET_ORDER.forEach(k => { const d = render1(SET[k], t); t += Math.max(0.5, d + 0.35); }); }
+let D = JSON.parse(JSON.stringify(DESIGNS));
+try { const s = JSON.parse(localStorage.getItem("bubu-lab9") || "null"); if (Array.isArray(s) && s.length === DESIGNS.length) D = s; } catch(e) {}
+let cur = 0;
+try { cur = +localStorage.getItem("bubu-lab9-cur") || 0; } catch(e) {}
+
+// ---------- audio ----------
+let ctx = null, manifest = null;
+const buffers = {};
+const ac = () => ctx || (ctx = new (window.AudioContext || window.webkitAudioContext)());
+const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+fetch("kit/manifest.json").then(r => r.json()).then(m => { manifest = m; preload(); }).catch(() => setStatus("Couldn't load the recorded instruments; the synth still works."));
+function setStatus(t){ document.getElementById("status").textContent = t; }
+async function loadInst(name){
+  if (!manifest || !manifest[name] || buffers[name]) return;
+  const v = manifest[name];
+  buffers[name] = await Promise.all(v.entries.map(async e => {
+    const r = await fetch(`kit/${name}/${e.key}.mp3`);
+    return {midi: e.midi, cents: e.cents || 0, buf: await ac().decodeAudioData(await r.arrayBuffer())};
+  }));
+}
+async function preload(){ setStatus("Loading the recorded instruments…"); await Promise.all(SAMPLES.map(s => loadInst(s[0]))); setStatus(""); }
+function nearest(name, m){ const l = buffers[name]; if (!l) return null; let b = l[0]; for (const e of l) if (Math.abs(e.midi - m) < Math.abs(b.midi - m)) b = e; return b; }
+
+// a smooth envelope: quick attack, exponential decay, then a gentle fade to true silence
+function env(g, t, peak, decay, total){
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(peak, t + 0.002);
+  g.gain.setTargetAtTime(0, t + 0.002, Math.max(0.02, decay / 3));
+  g.gain.setTargetAtTime(0, t + total * 0.7, Math.max(0.03, total * 0.12));
+}
+function fmVoice(c, out, m, t, vel, lenMs, pan, P, scoop, bend){
+  const f = hz(m), L = lenMs / 1000 + P.fade / 1000, decay = P.decay / 1000 * (lenMs / 420);
+  const p = c.createStereoPanner(); p.pan.value = pan; p.connect(out);
+  const amp = c.createGain(); env(amp, t, vel, decay, L); amp.connect(p);
+  const b = P.bright / 55;
+  [-1, 1].forEach(side => {
+    const det = Math.pow(2, side * P.detune / 2 / 1200);
+    const car = c.createOscillator();
+    car.frequency.setValueAtTime(f * det * (1 - scoop * 0.04), t);
+    car.frequency.exponentialRampToValueAtTime(f * det, t + 0.015 + scoop * 0.04);
+    if (bend) car.frequency.setTargetAtTime(f * det * Math.pow(2, bend / 1200), t + 0.04, 0.07);
+    const mod = c.createOscillator(); mod.frequency.setValueAtTime(f * det * P.ratio, t);
+    const mg = c.createGain();
+    mg.gain.setValueAtTime(P.idx0 * b * f * P.ratio, t);
+    mg.gain.setTargetAtTime(P.idx1 * b * f * P.ratio, t, P.idxTau / 1000);
+    mod.connect(mg).connect(car.frequency);
+    const cg = c.createGain(); cg.gain.value = 0.5;
+    const sp = c.createStereoPanner(); sp.pan.value = side * P.width / 100 * 0.35;
+    car.connect(cg).connect(sp).connect(amp);
+    car.start(t); mod.start(t); car.stop(t + L + 0.3); mod.stop(t + L + 0.3);
+  });
+  if (P.tine > 0){
+    const o = c.createOscillator(); o.frequency.value = f * P.tineRatio;
+    const g = c.createGain(); g.gain.setValueAtTime(vel * P.tine / 100 * 0.22, t); g.gain.setTargetAtTime(0, t, 0.012);
+    o.connect(g).connect(p); o.start(t); o.stop(t + 0.25);
+  }
+  if (P.body > 0){
+    const o = c.createOscillator(); o.frequency.value = f / 2;
+    const g = c.createGain(); env(g, t, vel * P.body / 100 * 0.45, decay * 0.6, L * 0.8);
+    o.connect(g).connect(p); o.start(t); o.stop(t + L + 0.3);
+  }
+}
+function sampleVoice(c, out, name, m, t, level, lenMs, pan, fadeMs){
+  const e = nearest(name, m); if (!e || level <= 0) return;
+  const s = c.createBufferSource(); s.buffer = e.buf;
+  s.playbackRate.value = Math.pow(2, (m - e.midi - e.cents / 100) / 12);
+  const g = c.createGain(), L = (lenMs + fadeMs) / 1000;
+  g.gain.setValueAtTime(level, t); g.gain.setTargetAtTime(0, t + lenMs / 1000 * 0.6, Math.max(0.04, fadeMs / 1000 / 2.5));
+  const p = c.createStereoPanner(); p.pan.value = pan;
+  s.connect(g).connect(p).connect(out); s.start(t); s.stop(t + L + 0.4);
+}
+function bellVoice(c, out, m, t, vel, ms, pan){
+  fmVoice(c, out, m, t, vel, ms, pan, {ratio:3.5, idx0:2.0, idx1:0.7, idxTau:150, decay:500, tine:0, tineRatio:1, detune:5, bright:55, width:40, body:0, fade:400}, 0);
+}
+let noiseBuf = null;
+function noise(c){
+  if (noiseBuf && noiseBuf.sampleRate === c.sampleRate) return noiseBuf;
+  const n = c.sampleRate, b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0);
+  let s = 11; for (let i = 0; i < n; i++){ s = (s * 16807) % 2147483647; d[i] = s / 2147483647 * 2 - 1; }
+  return noiseBuf = b;
+}
+function transient(c, out, t, level, freq){
+  if (level <= 0) return;
+  const s = c.createBufferSource(); s.buffer = noise(c);
+  const f = c.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq; f.Q.value = 0.9;
+  const g = c.createGain(); g.gain.setValueAtTime(level, t); g.gain.setTargetAtTime(0, t, 0.0018);
+  s.connect(f).connect(g).connect(out); s.start(t, 0.1); s.stop(t + 0.03);
+}
+function impulse(c){
+  const n = Math.floor(c.sampleRate * 1.0), b = c.createBuffer(2, n, c.sampleRate);
+  let s = 5;
+  for (let ch = 0; ch < 2; ch++){ const d = b.getChannelData(ch); for (let i = 0; i < n; i++){ s = (s * 16807) % 2147483647; const tt = i / c.sampleRate; d[i] = (s / 2147483647 * 2 - 1) * Math.exp(-tt / 0.16) * (1 - Math.exp(-tt / 0.004)); } }
+  return b;
+}
+function chain(c, P){
+  const input = c.createGain();
+  const hp = c.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 110;
+  const box = c.createBiquadFilter(); box.type = "peaking"; box.frequency.value = 500; box.Q.value = 1; box.gain.value = -2;
+  const air = c.createBiquadFilter(); air.type = "highshelf"; air.frequency.value = 9000; air.gain.value = 2.5;
+  const comp = c.createDynamicsCompressor();
+  comp.threshold.value = -8 - P.punch / 100 * 16; comp.ratio.value = 2 + P.punch / 100 * 3; comp.attack.value = 0.008; comp.release.value = 0.2; comp.knee.value = 8;
+  const makeup = c.createGain(); makeup.gain.value = 1 + P.punch / 100 * 0.8;
+  // ping-pong echo, darkened, so it adds polish without clutter
+  const echoIn = c.createGain(); echoIn.gain.value = P.echo / 100 * 0.45;
+  const dl = c.createDelay(1), dr = c.createDelay(1); dl.delayTime.value = P.echoTime / 1000; dr.delayTime.value = P.echoTime / 1000;
+  const fb = c.createGain(); fb.gain.value = 0.32;
+  const dark = c.createBiquadFilter(); dark.type = "lowpass"; dark.frequency.value = 5000;
+  const merger = c.createChannelMerger(2);
+  echoIn.connect(dl); dl.connect(dark).connect(dr); dr.connect(fb).connect(dl);
+  dl.connect(merger, 0, 0); dr.connect(merger, 0, 1);
+  const conv = c.createConvolver(); conv.buffer = impulse(c);
+  const wet = c.createGain(); wet.gain.value = P.room / 100 * 0.5;
+  const limit = c.createDynamicsCompressor(); limit.threshold.value = -1.5; limit.ratio.value = 20; limit.attack.value = 0.001; limit.release.value = 0.08; limit.knee.value = 0;
+  const vol = c.createGain(); vol.gain.value = 0.7;
+  input.connect(hp).connect(box).connect(air).connect(comp).connect(makeup);
+  makeup.connect(limit); makeup.connect(echoIn); merger.connect(limit);
+  makeup.connect(conv); conv.connect(wet).connect(limit);
+  limit.connect(vol).connect(c.destination);
+  return input;
+}
+function render1(P0, when){
+  const c = ac(); if (c.state === "suspended") c.resume();
+  // the Tail dial: 50 is as designed; lower trims the echo, room and fade together
+  const k = (P0.tail ?? 50) / 50;
+  const ring = Math.min(1.4, 0.55 + 0.45 * k);
+  const P = {...P0, echo: P0.echo * k, room: P0.room * k, fade: Math.max(80, P0.fade * k),
+             decay: P0.decay * ring, len: P0.len * ring};
+  const out = chain(c, P), t0 = (when ?? c.currentTime) + 0.03;
+  const n = P.steps.length, w = P.width / 100 * 0.5;
+  const at = i => (P.times && P.times.length === n ? P.times[i] * (P.stretch || 100) / 100 : i * P.gap) / 1000;
+  P.steps.forEach((chord, i) => {
+    const last = i === n - 1, t = t0 + at(i);
+    const nextGap = last ? 0 : (at(i + 1) - at(i)) * 1000;
+    const base = P.vel / 100 * 0.55 * (0.8 + 0.2 * i / Math.max(1, n - 1));
+    const v = last ? base * (1 + P.accent / 100 * 0.6) : base;
+    const pan = n > 1 ? (i / (n - 1) - 0.5) * w : 0;
+    const len = last ? P.len : P.pick ? P.pick : Math.min(P.len, nextGap * 2.5 + 140);
+    const notes = last && P.fifth > 0 ? chord : chord;
+    notes.forEach((m, j) => {
+      const pp = pan + (j - (notes.length - 1) / 2) * w * 0.6;
+      fmVoice(c, out, m, t, v / Math.sqrt(notes.length), len, pp, P, P.scoop / 100, last ? (P.bend || 0) : 0);
+      if (P.sample !== "none") sampleVoice(c, out, P.sample, m + P.sampleOct, t, v * P.sampleLvl / 100 * 1.2 / Math.sqrt(notes.length), len, -pp * 0.5, P.fade);
+    });
+    if (last && P.fifth > 0) fmVoice(c, out, Math.max(...chord) + 7 - 12, t + 0.004, v * P.fifth / 100 * 0.5, len, -pan, P, 0);
+    transient(c, out, t, P.transient / 100 * 0.45, 5200 - 600 * (i % 2));
+    if (last && P.sparkle > 0) bellVoice(c, out, Math.max(...chord) + 12, t + 0.012, v * P.sparkle / 100 * 0.6, Math.max(400, len), -pan);
+    if (last && P.run > 0){
+      const top = Math.max(...chord) + 12, run = [0, 4, 7, 12].map(x => top + x);
+      run.forEach((m, k) => bellVoice(c, out, m, t + 0.06 + k * 0.035, v * P.run / 100 * 0.25 * (1 - k * 0.15), 260, (k % 2 ? 1 : -1) * w));
+    }
+  });
+  return at(n - 1) + (P.len + P.fade) / 1000;
+}
+function play(i){ render1(D[i ?? cur]); }
+function playAll(){ let t = ac().currentTime + 0.05; D.forEach(P => { const d = render1(P, t); t += d + 0.5; }); }
+
+// ---------- UI ----------
+function save(){ try { localStorage.setItem("bubu-lab9", JSON.stringify(D)); localStorage.setItem("bubu-lab9-cur", cur); } catch(e) {} document.getElementById("recipe").textContent = JSON.stringify(D[cur]); }
+function sliders(id, list, obj){
+  const el = document.getElementById(id); el.innerHTML = "";
+  list.forEach(([k, name, lo, hi, step, fmt]) => {
+    const l = document.createElement("label"), f = fmt || (v => v);
+    l.innerHTML = `<span>${name}<i>${f(obj[k] ?? 0)}</i></span><input type="range" min="${lo}" max="${hi}" step="${step}" value="${obj[k] ?? 0}">`;
+    const inp = l.querySelector("input");
+    inp.oninput = () => { obj[k] = +inp.value; l.querySelector("i").textContent = f(obj[k]); save(); };
+    inp.onchange = () => play();
+    el.appendChild(l);
+  });
+}
+const ms = v => `${v} ms`;
+function renderSet(){
+  const el = document.getElementById("set"); el.innerHTML = "";
+  SET_ORDER.forEach((k, i) => {
+    const d = document.createElement("div"); d.className = "design";
+    d.innerHTML = `<div class="n">${i + 1}</div><div><b></b></div><button class="play">▶ Play</button>`;
+    d.querySelector("b").textContent = SET_LABEL[k];
+    d.onclick = () => render1(SET[k]);
+    d.querySelector(".play").onclick = (e) => { e.stopPropagation(); render1(SET[k]); };
+    el.appendChild(d);
+  });
+}
+document.getElementById("playSet").onclick = playSet;
+function render(){
+  const db = document.getElementById("designs"); db.innerHTML = "";
+  D.forEach((P, i) => {
+    const d = document.createElement("div"); d.className = "design" + (i === cur ? " on" : "");
+    d.innerHTML = `<div class="n">${i + 1}</div><div><b></b><small></small></div><button class="play">▶ Play</button>`;
+    d.querySelector("b").textContent = P.name; d.querySelector("small").textContent = P.about;
+    d.onclick = () => { cur = i; render(); play(i); };
+    d.querySelector(".play").onclick = (e) => { e.stopPropagation(); play(i); };
+    db.appendChild(d);
+  });
+  const P = D[cur];
+  document.getElementById("editTitle").textContent = `Tweak: ${cur + 1}. ${P.name}`;
+  sliders("tailSlider", [["tail","Tail (echo, room, fade and ring together)",0,100,1, v => v < 30 ? `${v} · dry` : v > 70 ? `${v} · long` : `${v}`]], P);
+  sliders("toneSliders", [
+    ["idx0","Strike brightness",0,8,0.1], ["idx1","Ring brightness",0,3,0.1],
+    ["idxTau","How fast it mellows",10,400,5,ms], ["decay","Ring length",100,1200,10,ms],
+    ["tine","Tine ping",0,100,1], ["detune","Warm shimmer (detune)",0,25,1, v => `${v} cents`],
+    ["fade","Fade-out",100,1200,10,ms], ["bright","Overall brightness",0,100,1],
+  ], P);
+  const sb = document.getElementById("samples"); sb.innerHTML = "";
+  SAMPLES.forEach(([v, n]) => {
+    const b = document.createElement("button"); b.className = "chip" + (P.sample === v ? " on" : ""); b.textContent = n;
+    b.onclick = () => { P.sample = v; if (v !== "none" && !P.sampleLvl) P.sampleLvl = 30; render(); play(); };
+    sb.appendChild(b);
+  });
+  sliders("layerSliders", [
+    ["sampleLvl","Instrument level",0,100,1], ["sampleOct","Instrument octave",-12,12,12, v => v ? (v > 0 ? "+1 oct" : "−1 oct") : "same"],
+    ["transient","Transient (click)",0,100,1], ["sparkle","Sparkle bell",0,100,1],
+    ["run","Sparkle run after",0,100,1], ["body","Body (octave down)",0,100,1],
+    ["fifth","Fifth underneath",0,100,1], ["echo","Echo",0,100,1],
+    ["echoTime","Echo time",60,250,5,ms], ["room","Room",0,100,1],
+    ["width","Stereo width",0,100,1], ["punch","Punch",0,100,1],
+  ], P);
+  const st = document.getElementById("steps"); st.innerHTML = "";
+  P.steps.forEach((chord, i) => {
+    const row = document.createElement("div"); row.className = "step";
+    row.innerHTML = `<b>${i + 1}</b><div class="keys"></div>`;
+    KEYS.forEach(m => {
+      const k = document.createElement("button"); k.className = "key" + (chord.includes(m) ? " on" : ""); k.textContent = nm(m);
+      k.onclick = () => { const at = chord.indexOf(m); if (at >= 0) { if (chord.length > 1) chord.splice(at, 1); } else chord.push(m); chord.sort((a, b) => a - b); render(); play(); };
+      row.querySelector(".keys").appendChild(k);
+    });
+    const x = document.createElement("button"); x.className = "x"; x.textContent = "✕"; x.title = "Remove step";
+    x.onclick = () => { if (P.steps.length > 1) { P.steps.splice(i, 1); delete P.times; render(); play(); } };
+    row.appendChild(x); st.appendChild(row);
+  });
+  sliders("noteSliders", [
+    ["gap","Speed between notes (even rhythm only)",30,250,5,ms],
+    ["stretch","Rhythm speed (custom rhythms)",60,140,5, v => `${v}%`], ["len","Note length",120,1500,10,ms],
+    ["vel","Loudness",10,100,1], ["accent","Last-note accent",0,100,1],
+    ["scoop","Bounce (scoop up into notes)",0,100,1],
+    ["pick","Pickup notes: short (pop) → long (0 = natural)",0,300,10, v => v ? `${v} ms` : "natural"],
+  ], P);
+  save();
+}
+document.getElementById("addStep").onclick = () => { const P = D[cur]; if (P.steps.length < 6) { P.steps.push([...P.steps[P.steps.length - 1]]); delete P.times; render(); } };
+document.getElementById("play").onclick = () => play();
+document.getElementById("playAll").onclick = playAll;
+document.getElementById("reset").onclick = () => { D[cur] = JSON.parse(JSON.stringify(DESIGNS[cur])); render(); play(); };
+document.getElementById("copy").onclick = async (e) => {
+  const text = `Bùbù correct sound recipe (design ${cur + 1}): ` + JSON.stringify(D[cur]);
+  try { await navigator.clipboard.writeText(text); e.target.textContent = "Copied"; }
+  catch(err){ const r = document.createRange(); r.selectNodeContents(document.getElementById("recipe")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); e.target.textContent = "Selected: copy it"; }
+  setTimeout(() => e.target.textContent = "Copy recipe", 1800);
+};
+renderSet();
+render();
+// for Claude's renderer: the set as WAV files, rendered offline exactly as heard here
+async function renderSetWav(){
+  const out = {}, real = ctx;
+  for (const k of SET_ORDER){
+    const off = new OfflineAudioContext(2, 44100 * 4, 44100);
+    ctx = off; noiseBuf = null;
+    render1(SET[k], 0);
+    const b = await off.startRendering();
+    const L = b.getChannelData(0), R = b.getChannelData(1);
+    let peak = 0; for (let i = 0; i < L.length; i++) peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i]));
+    let end = L.length; while (end > 0 && Math.max(Math.abs(L[end-1]), Math.abs(R[end-1])) < peak * 0.0003) end--;
+    out[k] = [L.slice(0, end), R.slice(0, end)];
+  }
+  ctx = real; noiseBuf = null;
+  return out;
+}
+</script>

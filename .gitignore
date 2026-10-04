@@ -10,3 +10,11 @@ tools/.voices/
 tools/record/out/
 tools/sfx/.venv/
 tools/sfx/out/
+lab_dist/
+tools/sfx/samples/
+tools/sfx/kit/
+tools/sfx/render/
+tools/sfx/final/
+tools/sfx/board/
+tools/sfx/lab/files.json
+tools/sfx/__pycache__/
