@@ -281,7 +281,9 @@ struct HintChip<Label: View>: View {
             withAnimation(.easeOut(duration: 0.12)) { focus.open = open ? nil : AnyHashable(me) }
             guard open else { return }
             // said, unless it was only just heard (the speaker beside it says it again)
-            if let h = hanzi { Speech.shared.autoSpeak(h) }
+            // only in a recorded voice: with no clip for it (an English word's 你好吗) the phone's
+            // robotic voice said it (the owner, 4 Oct 2026), so a hint without one stays quiet
+            if let h = hanzi, Speech.clipURL(h) != nil { Speech.shared.autoSpeak(h) }
             HintTip.used = true
             tapped?()
             // it closes by itself after a few seconds, or at another tap
