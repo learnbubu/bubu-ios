@@ -42,6 +42,10 @@ struct StudyView: View {
 
     /// the study card's height, to tell a phone where a multiple-choice exercise fits
     @State private var cardHeight: CGFloat = 0
+    /// the exercise's visible height, and the feedback banner's, so the answers sit low and
+    /// rise clear of the banner when it comes up
+    @State private var scrollHeight: CGFloat = 0
+    @State private var bannerHeight: CGFloat = 0
     /// A multiple-choice exercise stays still (no scrolling); the feedback slides up over its foot.
     /// On a small phone (an SE) it scrolls instead.
     private var fixed: Bool {
@@ -63,9 +67,13 @@ struct StudyView: View {
                     VStack(spacing: 0) {
                         ScrollViewReader { reader in
                             ScrollView(fixed ? [] : .vertical) {
-                                content.padding(.horizontal, 12).padding(.top, 15).padding(.bottom, 12)
+                                content.padding(.horizontal, 12).padding(.top, 15)
+                                    .padding(.bottom, 12 + (bannerShown ? bannerHeight : 0))
+                                    .frame(minHeight: scrollHeight, alignment: .top)
                                 Color.clear.frame(height: 1).id("exercise-end")
                             }
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { scrollHeight = max(0, $0 - 1) }
+                            .animation(.spring(response: 0.3, dampingFraction: 0.85), value: bannerShown)
                             .scrollIndicators(.hidden)
                             .scrollBounceBehavior(.basedOnSize)
                             // the feedback takes room from the exercise: keep the answers in view
@@ -306,8 +314,16 @@ struct StudyView: View {
             }
             .id(exerciseKey)
             .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
+            .frame(maxHeight: .infinity, alignment: .top)
         }
+        .frame(maxHeight: .infinity, alignment: .top)
         .animation(.spring(response: 0.35, dampingFraction: 0.9), value: exerciseKey)
+    }
+
+    /// The feedback banner is up over the exercise's foot.
+    private var bannerShown: Bool {
+        guard feedback != nil, let ex = session.exercise else { return false }
+        return ex.kind != .speak && ex.kind != .write
     }
 
     private var promptLabel: String {
@@ -346,6 +362,7 @@ struct StudyView: View {
                             .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
                                 .shadow(color: Color.panel, radius: 12, y: -10))
                             .fixedSize(horizontal: false, vertical: true)
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { bannerHeight = $0 }
                             .padding(.bottom, 79)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
@@ -407,7 +424,7 @@ struct StudyView: View {
 
     private func checkType() {
         guard let ex = session.exercise, !session.answered else { return }
-        let correct = Exercise.typedMatches(typed, pinyin: ex.answer)
+        let correct = ex.typedRight(typed)
         session.answer(correct)
         Sounds.shared.play(correct ? "correct" : "wrong")
         withAnimation { feedback = Feedback(correct: correct, chosen: typed) }
@@ -533,26 +550,56 @@ struct SpeechBubbleBox<Content: View>: View {
             .frame(maxWidth: .infinity)
             // the outline and tail behind the words, so a word's hint bubble is drawn over them
             // (the outline ran through the hint: the Mac's check of 0.1.30)
-            .background(alignment: .leading) {
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 15, style: .continuous).fill(Color.panel)
-                    RoundedRectangle(cornerRadius: 15, style: .continuous).strokeBorder(Color.line, lineWidth: 2)
-                    tail
-                }
+            // (one shape: the tail and the box were drawn apart and looked disconnected)
+            .background {
+                BubbleShape().fill(Color.panel)
+                BubbleShape().stroke(Color.line, style: StrokeStyle(lineWidth: 2, lineJoin: .round))
             }
     }
+}
 
-    private var tail: some View {
-        Color.clear.frame(width: 0)
-            .overlay(alignment: .leading) {
-                Rectangle().fill(Color.panel).frame(width: 14, height: 14)
-                    .overlay(alignment: .bottomLeading) {
-                        Path { p in p.move(to: .init(x: 0, y: 0)); p.addLine(to: .init(x: 0, y: 14)); p.addLine(to: .init(x: 14, y: 14)) }
-                            .stroke(Color.line, lineWidth: 2)
-                    }
-                    .rotationEffect(.degrees(45))
-                    .offset(x: -8)
-            }
+/// A rounded box with a tail out of the middle of its left side, as one outline.
+struct BubbleShape: Shape {
+    var radius: CGFloat = 15
+    var tail: CGFloat = 10       // how far it points out
+    var half: CGFloat = 9        // half its height where it meets the box
+    func path(in rect: CGRect) -> Path {
+        let r = rect.insetBy(dx: 1, dy: 1), rad = min(radius, r.height / 2)
+        var p = Path()
+        p.move(to: CGPoint(x: r.minX + rad, y: r.minY))
+        p.addLine(to: CGPoint(x: r.maxX - rad, y: r.minY))
+        p.addArc(center: CGPoint(x: r.maxX - rad, y: r.minY + rad), radius: rad, startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
+        p.addLine(to: CGPoint(x: r.maxX, y: r.maxY - rad))
+        p.addArc(center: CGPoint(x: r.maxX - rad, y: r.maxY - rad), radius: rad, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+        p.addLine(to: CGPoint(x: r.minX + rad, y: r.maxY))
+        p.addArc(center: CGPoint(x: r.minX + rad, y: r.maxY - rad), radius: rad, startAngle: .degrees(90), endAngle: .degrees(180), clockwise: false)
+        p.addLine(to: CGPoint(x: r.minX, y: r.midY + half))
+        p.addLine(to: CGPoint(x: r.minX - tail, y: r.midY))
+        p.addLine(to: CGPoint(x: r.minX, y: r.midY - half))
+        p.addLine(to: CGPoint(x: r.minX, y: r.minY + rad))
+        p.addArc(center: CGPoint(x: r.minX + rad, y: r.minY + rad), radius: rad, startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
+        p.closeSubpath()
+        return p
+    }
+}
+
+/// Duolingo's raised tile: a face with a coloured lip under it that it presses down into.
+struct Tile3D: ButtonStyle {
+    var fill: Color
+    var edge: Color
+    var radius: CGFloat = 14
+    var lip: CGFloat = 4
+    var line: CGFloat = 2
+    func makeBody(configuration: Configuration) -> some View {
+        let down = configuration.isPressed ? lip - 1 : 0
+        configuration.label
+            .background(fill, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(edge, lineWidth: line))
+            .offset(y: down)
+            .padding(.bottom, lip)
+            .background(RoundedRectangle(cornerRadius: radius, style: .continuous).fill(edge).padding(.top, lip))
+            .animation(.spring(response: 0.18, dampingFraction: 0.7), value: configuration.isPressed)
+            .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed)
     }
 }
 
@@ -891,7 +938,7 @@ struct ChoiceView: View {
     var body: some View {
         let w = ex.card.word
         let isNew = ex.isNew
-        let big: CGFloat = w.hanzi.count > 3 ? 32 : 44
+        let big: CGFloat = w.hanzi.count > 3 ? 30 : w.hanzi.count == 3 ? 36 : 44
         VStack(spacing: 0) {
             MascotPrompt(mood: answered && !skipped ? (picked == ex.answer) : nil, sentence: ex.dir == "gap",
                          long: ex.dir == "gap" && (ex.sentence?.words.map(\.hanzi).joined().count ?? 0) > 9) {
@@ -915,22 +962,38 @@ struct ChoiceView: View {
                     SpeakerButton(text: w.hanzi, size: 15, withSlow: true)
                 case "pinyin":
                     Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(isNew ? Color.newInk : Color.ink)
+                        .lineLimit(1).minimumScaleFactor(0.5)
                     Text(w.gloss).font(.nunito(16)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 case "listen":
                     ListenButtons(text: w.hanzi)
                 default:
-                    // the word, the sound at its left (as Duolingo has it); its pinyin is under the bubble
+                    // the word on one line, the sound at its left and its pinyin over it (as Duolingo
+                    // has it); while it's strong the pinyin's place stays, and a tap (or the eye) shows it
                     HStack(alignment: .center, spacing: 8) {
                     BubbleSound(text: w.hanzi)
                     VStack(spacing: 2) {
+                        ZStack {
+                            PinyinText(pinyin: w.pinyin, size: 17).lineLimit(1).minimumScaleFactor(0.6)
+                                .opacity(pinyinShown || peek ? 1 : 0)
+                            if !(pinyinShown || peek) {
+                                Button { reveal() } label: {
+                                    Image(systemName: "eye").font(.system(size: 13, weight: .semibold))
+                                        .foregroundStyle(Color.muted.opacity(0.7)).padding(2)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Show pinyin")
+                            }
+                        }
                         if isNew {
                             HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { reveal() }) {
                                 Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(Color.newInk)
+                                    .lineLimit(1).minimumScaleFactor(0.5)
                                     .overlay(alignment: .bottom) { Line().stroke(Color.newInk, style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2) }
                             }
                         } else {
                             Button { reveal() } label: {
                                 ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: big, weight: .medium)
+                                    .lineLimit(1).minimumScaleFactor(0.5)
                             }
                             .buttonStyle(.plain)
                         }
@@ -938,36 +1001,20 @@ struct ChoiceView: View {
                     }
                 }
             }
-            // the word's pinyin, big and tone-coloured under the bubble while it's new; once it's
-            // strong its place stays, and a tap on the word (or the eye) shows it
-            if !["recall", "pinyin", "listen", "gap", "picture"].contains(ex.dir) {
-                ZStack {
-                    PinyinText(pinyin: w.pinyin, size: 22).opacity(pinyinShown || peek ? 1 : 0)
-                    if !(pinyinShown || peek) {
-                        Button { reveal() } label: {
-                            Image(systemName: "eye").font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(Color.muted.opacity(0.7)).padding(4)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Show pinyin")
-                    }
-                }
-                .frame(maxWidth: .infinity).padding(.top, 10)
-            }
             if ex.dir == "pinyin" && Coach.showTonesLink {
                 Button("What are tones?") { Coach.tonesLinkTapped(); tonesOpen = true }
                     .font(.nunito(14, .bold)).foregroundStyle(Color.accent).padding(.top, 8)
             }
             if ex.dir == "picture" {
+                Spacer(minLength: 18)
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                     ForEach(ex.options, id: \.self) { opt in pictureCard(opt) }
                 }
-                .padding(.top, 18)
             } else {
-            VStack(spacing: 9) {
+            Spacer(minLength: 18)
+            VStack(spacing: 10) {
                 ForEach(ex.options, id: \.self) { opt in option(opt) }
             }
-            .padding(.top, 18)
             }
             if ex.dir == "listen", let skip {
                 // its place is kept once the exercise is answered, so nothing moves
@@ -1023,10 +1070,8 @@ struct ChoiceView: View {
                 PinyinText(pinyin: Course.wordPy[opt] ?? "", size: 13, weight: .bold).opacity(pinyinShown ? 1 : 0)
             }
             .frame(maxWidth: .infinity).padding(.vertical, 10)
-            .background(fill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(edge, lineWidth: selected ? 3 : 2))
         }
-        .buttonStyle(PressDown(depth: 2))
+        .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 16))
         .disabled(answered)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
@@ -1098,12 +1143,9 @@ struct ChoiceView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 14).padding(.vertical, ex.dir == "recall" || ex.dir == "gap" ? 10 : 13.5)
-            .background(fill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(edge, lineWidth: selected ? 2 : 1))
+            .padding(.horizontal, 14).padding(.vertical, ex.dir == "recall" || ex.dir == "gap" ? 10 : 14)
         }
-        .buttonStyle(PressDown(depth: 1))
+        .buttonStyle(Tile3D(fill: fill, edge: edge))
         .disabled(answered)
         .accessibilityAddTraits(selected ? .isSelected : [])
         .animation(.easeOut(duration: 0.15), value: answered)
@@ -1233,7 +1275,7 @@ struct FeedbackBanner: View {
 
     @ViewBuilder
     private func wordAnswer(_ w: Word) -> some View {
-        let first = ex.dir == "recognize" ? "en" : ex.dir == "pinyin" || ex.dir == "type" ? "py" : "hz"
+        let first = ex.dir == "recognize" ? "en" : ex.dir == "pinyin" || (ex.dir == "type" && !ex.typeHanzi) ? "py" : "hz"
         let rest = ["hz", "py", "en"].filter { $0 != first }
         // a long meaning gets a line of its own rather than a narrow column beside the pinyin
         let apart = first != "en" && Self.brief(w).count > Self.longMeaning
@@ -1739,13 +1781,19 @@ struct TypeView: View {
         VStack(spacing: 22) {
             MascotPrompt(mood: result) {
                 if ex.isNew { NewBadge() }
-                Text(w.hanzi).font(.hanzi(w.hanzi.count > 3 ? 32 : 44, .medium)).foregroundStyle(Color.ink)
-                Text(w.gloss).font(.nunito(16)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                if ex.typeHanzi {
+                    // in characters: the meaning, and the characters once it's answered
+                    Text(w.gloss).font(.nunitoXB(22)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                    if result != nil { ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: 30, weight: .medium) }
+                } else {
+                    Text(w.hanzi).font(.hanzi(w.hanzi.count > 3 ? 32 : 44, .medium)).foregroundStyle(Color.ink)
+                    Text(w.gloss).font(.nunito(16)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                }
             }
-            TextField("Type the pinyin", text: $typed)
+            TextField(ex.typeHanzi ? "Type it in Chinese" : "Type the pinyin", text: $typed)
                 .font(.nunito(22, .bold)).foregroundStyle(Color.ink)
                 .multilineTextAlignment(.center)
-                .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.asciiCapable)
+                .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(ex.typeHanzi ? .default : .asciiCapable)
                 .submitLabel(.done).onSubmit(submit)
                 .focused($focused)
                 .disabled(result != nil)
@@ -1753,7 +1801,9 @@ struct TypeView: View {
                 .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.panel))
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
-            Text("Tones are optional: ni hao or ni3 hao3").font(.nunito(12.5)).foregroundStyle(Color.muted)
+            Text(ex.typeHanzi ? "Use the Chinese (Pinyin) keyboard: the 🌐 key switches to it"
+                              : "Tones are optional: ni hao or ni3 hao3. Characters count too.")
+                .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
         }
         .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { focused = true } }
         .onChange(of: result) { _, r in if r != nil { focused = false } }

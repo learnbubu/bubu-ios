@@ -39,18 +39,18 @@ struct MatchView: View {
             Text(audio ? "Tap a sound to hear it, then its characters." : "Tap a word, then its meaning.")
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
                 .padding(.top, 2)
+            Spacer(minLength: 6)
             Button(action: done) {
                 Text("Continue").font(.nunitoXB(16.8))
-                    .foregroundStyle(session.matchFinished ? Color.onAccent : Color.muted.opacity(0.45))
-                    .frame(maxWidth: .infinity).padding(14)
-                    .background(session.matchFinished ? Color.accent : Color.line,
-                                in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .foregroundStyle(session.matchFinished ? Color.onAccent : Color.onAccent.opacity(0.7))
+                    .frame(maxWidth: .infinity).padding(15)
+                    .background(session.matchFinished ? Color.accent : Color.accent.opacity(0.38), in: Capsule())
             }
             .buttonStyle(PressDown(depth: 1))
             .disabled(!session.matchFinished)
-            .padding(.top, 6)
+            .padding(.bottom, 2)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             guard left.isEmpty else { return }
             let l = cards.shuffled()
@@ -79,11 +79,8 @@ struct MatchView: View {
             face(side, c)
                 .frame(maxWidth: .infinity, minHeight: 60)
                 .padding(.horizontal, 8).padding(.vertical, 6)
-                .background(fill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(edge, lineWidth: isPicked || isWrong || isDone ? 2 : 1.5))
         }
-        .buttonStyle(PressDown(depth: 1))
+        .buttonStyle(Tile3D(fill: fill, edge: edge))
         .disabled(isDone)
         .opacity(faded.contains(c.id) ? 0.35 : 1)
         .modifier(MatchShake(shakes: CGFloat(shakes[k] ?? 0)))

@@ -24,6 +24,8 @@ struct Prefs: Codable, Equatable {
     // for beginners (see Beginner.swift); nil means never chosen
     var pinyinMode: String?     // Settings → Pinyin: "auto", "always" or "known" (nil = Auto)
     var autoplay: Bool?         // play exercises' Chinese automatically (nil = on)
+    /// Settings → Typing answers: "auto" (pinyin in 起步 1-3, then characters), "pinyin" or "hanzi" (nil = Auto)
+    var typing: String?
 
     init() {}
     init(from decoder: Decoder) throws {
@@ -46,6 +48,7 @@ struct Prefs: Codable, Equatable {
         remindersAsked = try? c.decode(Bool.self, forKey: .remindersAsked)
         pinyinMode = try? c.decode(String.self, forKey: .pinyinMode)
         autoplay = try? c.decode(Bool.self, forKey: .autoplay)
+        typing = try? c.decode(String.self, forKey: .typing)
     }
 
     var colorScheme: ColorScheme? { theme == "light" ? .light : theme == "dark" ? .dark : nil }

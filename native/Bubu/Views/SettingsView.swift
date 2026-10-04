@@ -80,6 +80,11 @@ struct SettingsView: View {
                     divider
                     toggle("Sound effects", "Chimes for right and wrong, and the end of a session.", $p.prefs.sound)
                     divider
+                    row("Typing answers", "Automatic: pinyin in 起步 1–3, then characters with the Chinese keyboard. Characters always count.", stack: true) {
+                        Segments(options: [("auto", "Automatic"), ("pinyin", "Pinyin"), ("hanzi", "Characters")],
+                                 value: Binding(get: { p.prefs.typing ?? "auto" }, set: { p.prefs.typing = $0 == "auto" ? nil : $0 }))
+                    }
+                    divider
                     row("Pinyin", "Over the Chinese in exercises. Auto: over a word until you know it well, then a tap away. Hide when known: only until you've got a word right once.", stack: true) {
                         Segments(options: [(PinyinMode.auto.rawValue, "Auto"), (PinyinMode.always.rawValue, "Always"), (PinyinMode.known.rawValue, "Hide when known")],
                                  value: Binding(get: { p.prefs.pinyin.rawValue }, set: { p.prefs.pinyin = PinyinMode(rawValue: $0) ?? .auto }))

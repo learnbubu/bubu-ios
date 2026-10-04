@@ -79,8 +79,8 @@ struct DoneView: View {
             Spacer(minLength: 0)
             // the image has room around Bùbù, so it's drawn big enough to read as the hero
             // (a little smaller beside a list of words)
-            Image("done-panda").resizable().scaledToFit().frame(height: recap.count > 2 ? 160 : recap.isEmpty ? 230 : 190)
-            Text(r.title).font(.nunito(22, .black)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+            Image("done-panda").resizable().scaledToFit().frame(height: recap.count > 2 ? 150 : recap.isEmpty ? 220 : 180)
+            Text(r.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).multilineTextAlignment(.center)
                 .padding(.top, 2)
             if r.steps > 1 {
                 // a step of a longer lesson: how far through it you are, and what's next
@@ -88,22 +88,33 @@ struct DoneView: View {
                 Text(r.steps - r.step == 1 ? "One more step finishes the lesson" : "\(r.steps - r.step) more steps finish the lesson")
                     .font(.nunito(14, .semibold)).foregroundStyle(Color.muted).padding(.top, 6)
             } else if r.lessonFinished, let l = course.lessonById[session.lessonId] {
-                Text(l.name).font(.nunito(14, .semibold)).foregroundStyle(Color.muted).lineLimit(1).padding(.top, 2)
+                Text(l.name).font(.nunito(14.5, .semibold))
+                    .foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.8).padding(.top, 4)
             }
+            // Duolingo's result tiles: a coloured band with the label, the number on white under it
             HStack(spacing: 10) {
-                DoneTile(value: r.xp, format: { "+\($0)" }, label: "XP", bg: Color(light: 0xFEEBBB, dark: 0x2A2B23), ink: Color(light: 0xB06A0A, dark: 0xF5B03D), delay: 0.2)
-                DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: "Time", bg: .accentSoft, ink: .accent, delay: 0.42)
-                DoneTile(value: r.accuracy, format: { "\($0)%" }, label: "Accuracy", bg: .goodSoft, ink: .good, delay: 0.64)
+                DoneTile(value: r.xp, format: { "+\($0)" }, label: "Total XP", icon: "bolt.fill", tint: Color(light: 0xF0A92E, dark: 0xF5B03D), delay: 0.2)
+                DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: "Time", icon: "clock.fill", tint: .accent, delay: 0.42)
+                DoneTile(value: r.accuracy, format: { "\($0)%" }, label: "Accuracy", icon: "scope", tint: .good, delay: 0.64)
             }
-            .padding(.top, recap.isEmpty ? 22 : 16).padding(.bottom, 6)
-            VStack(spacing: 6) {
-                if r.perfect { note("Perfect! No mistakes, +5 XP", fg: .gold, bg: .accentSoft) }
-                if r.lessonFinished { note("Lesson done: double XP for the next 15 minutes", fg: .accent, bg: .accentSoft) }
-                if r.fixed > 0 { note("\(r.fixed) mistake\(r.fixed == 1 ? "" : "s") fixed", fg: .good, bg: .goodSoft) }
-                else if r.mistakes > 0 { note("\(r.mistakes) mistake\(r.mistakes == 1 ? "" : "s") saved to practise in Fix your mistakes", fg: .again, bg: .againSoft) }
-                else if progress.boostActive && !r.lessonFinished { note("Double XP is on", fg: .accent, bg: .accentSoft) }
+            .padding(.top, recap.isEmpty ? 22 : 16).padding(.bottom, 4)
+            // what this earned, as quiet rows rather than shouting pills
+            let notes: [(String, String, Color)] = ([
+                r.perfect ? ("star.fill", "Perfect: no mistakes, +5 XP", Color.gold) : nil,
+                r.lessonFinished ? ("bolt.fill", "Double XP for the next 15 minutes", Color.accent) : nil,
+                r.fixed > 0 ? ("checkmark.circle.fill", "\(r.fixed) mistake\(r.fixed == 1 ? "" : "s") fixed", Color.good)
+                    : r.mistakes > 0 ? ("arrow.counterclockwise.circle.fill", "\(r.mistakes) mistake\(r.mistakes == 1 ? "" : "s") saved to Fix your mistakes", Color.again)
+                    : progress.boostActive && !r.lessonFinished ? ("bolt.fill", "Double XP is on", Color.accent) : nil,
+            ] as [(String, String, Color)?]).compactMap { $0 }
+            if !notes.isEmpty {
+                VStack(alignment: .leading, spacing: 7) {
+                    ForEach(notes, id: \.1) { n in note(n.1, icon: n.0, tint: n.2) }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 14).padding(.vertical, 11)
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
+                .padding(.top, 12)
             }
-            .padding(.top, 10)
             if !recap.isEmpty {
                 WordRecap(title: r.learned.isEmpty ? "YOU PRACTISED" : "YOU LEARNED", cards: recap)
                     .padding(.top, 14)
@@ -126,10 +137,12 @@ struct DoneView: View {
         }
     }
 
-    private func note(_ t: String, fg: Color, bg: Color) -> some View {
-        Text(t).font(.nunito(13.8, .bold)).foregroundStyle(fg).multilineTextAlignment(.center)
-            .padding(.horizontal, 14).padding(.vertical, 6)
-            .background(bg, in: Capsule())
+    private func note(_ t: String, icon: String, tint: Color) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon).font(.system(size: 15, weight: .semibold)).foregroundStyle(tint)
+                .frame(width: 20)
+            Text(t).font(.nunito(14, .bold)).foregroundStyle(Color.ink).lineLimit(2)
+        }
     }
 
     // MARK: stage 2: the fire
@@ -243,19 +256,30 @@ struct DoneTile: View {
     let value: Int
     let format: (Int) -> String
     let label: String
-    let bg: Color
-    let ink: Color
+    var icon: String
+    var tint: Color
     let delay: Double
     @State private var shown = 0
 
     var body: some View {
-        VStack(spacing: 2) {
-            Text(label.uppercased()).font(.nunitoXB(10.9)).tracking(1.1).foregroundStyle(ink)
-            Text(format(shown)).font(.nunito(24.8, .black)).monospacedDigit().foregroundStyle(ink)
-                .contentTransition(.numericText())
+        VStack(spacing: 0) {
+            Text(label.uppercased()).font(.nunitoXB(11)).tracking(1.1).foregroundStyle(.white)
+                .lineLimit(1).minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity).padding(.vertical, 5)
+                .background(tint)
+            HStack(spacing: 5) {
+                Image(systemName: icon).font(.system(size: 15, weight: .bold))
+                Text(format(shown)).font(.nunito(21, .black)).monospacedDigit()
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                    .contentTransition(.numericText())
+            }
+            .foregroundStyle(tint)
+            .frame(maxWidth: .infinity).padding(.vertical, 12).padding(.horizontal, 4)
+            .background(Color.panel)
+            .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+            .padding([.horizontal, .bottom], 2.5)
         }
-        .frame(maxWidth: .infinity).padding(.top, 12).padding(.horizontal, 6).padding(.bottom, 10)
-        .background(bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(tint, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .task {
             try? await Task.sleep(for: .seconds(delay))
             let steps = 20

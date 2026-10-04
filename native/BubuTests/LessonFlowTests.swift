@@ -329,6 +329,25 @@ final class LessonFlowTests: XCTestCase {
         XCTAssertEqual(Hints.span(t, at: 0), "How are you?")
     }
 
+    /// Typing: characters always count; Automatic types pinyin in 起步 1–3 and characters after.
+    func testTypingInCharacters() throws {
+        let p = store()
+        let nali = try XCTUnwrap(course.cards.first { $0.word.hanzi == "哪里" })
+        let ex = try XCTUnwrap(Exercise.make(card: nali, dir: "type", scope: [], progress: p))
+        XCTAssertFalse(ex.typeHanzi, "book 1: pinyin")
+        XCTAssertTrue(ex.typedRight("na li"))
+        XCTAssertTrue(ex.typedRight("哪里"))
+        XCTAssertFalse(ex.typedRight("那里"))
+        let late = try XCTUnwrap(course.cards.first { $0.lessonId.hasPrefix("jinbu1-") && !$0.isSentence })
+        let ex2 = try XCTUnwrap(Exercise.make(card: late, dir: "type", scope: [], progress: p))
+        XCTAssertTrue(ex2.typeHanzi, "after 起步 3: characters")
+        XCTAssertEqual(ex2.label, "Type it in Chinese")
+        XCTAssertTrue(ex2.typedRight(late.word.hanzi))
+        XCTAssertFalse(ex2.typedRight(late.word.pinyin), "pinyin doesn't count when it's characters")
+        XCTAssertFalse(Exercise.typesHanzi(late, setting: "pinyin"))
+        XCTAssertTrue(Exercise.typesHanzi(nali, setting: "hanzi"))
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {

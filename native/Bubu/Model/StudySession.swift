@@ -1207,6 +1207,8 @@ struct Exercise {
     var tiles: [Tile] = []
     /// "Tap what you hear": the sentence is only said, and built from Chinese tiles
     var hearOnly = false
+    /// a typing exercise answered in characters (the iPhone's Chinese keyboard), not pinyin
+    var typeHanzi = false
     /// a word not learned yet when the question was asked: shows the NEW WORD badge
     var isNew = false
     /// writing help, a `WriteGuidance` raw value: 0 full, 1 outline, 2 from memory
@@ -1226,7 +1228,7 @@ struct Exercise {
         case "gap": return "Fill the gap"
         case "speak": return "Say it out loud"
         case "write": return (WriteGuidance(rawValue: writeStage) ?? .full).label
-        case "type": return "Type it in pinyin"
+        case "type": return typeHanzi ? "Type it in Chinese" : "Type it in pinyin"
         case "build": return "Build the character"
         case "picture": return "Which one is “\(card.word.gloss)”?"
         default: return "What does this mean?"
@@ -1239,7 +1241,10 @@ struct Exercise {
         switch dir {
         case "sentence": return sentence(c, met: met ?? { progress.srs[$0] != nil })
         case "hear": return sentence(c, met: met ?? { progress.srs[$0] != nil }, hear: true)
-        case "type": return Exercise(kind: .type, dir: "type", card: c, answer: c.word.pinyin)
+        case "type":
+            // (the owner, 4 Oct 2026: characters preferred, pinyin fine for the first books, and a choice)
+            return Exercise(kind: .type, dir: "type", card: c, answer: c.word.pinyin,
+                            typeHanzi: typesHanzi(c, setting: progress.prefs.typing))
         case "picture": return pictureChoice(c)
         case "build": return buildChoice(c)
         case "gap": return gap(c, scope: scope, met: met ?? { progress.srs[$0] != nil })
@@ -1362,6 +1367,22 @@ struct Exercise {
 
     /// The parts picked make the character: the same parts, in any order.
     func builds(_ picked: Set<String>) -> Bool { picked == Set(answer.components(separatedBy: "|")) }
+
+    /// Whether a word is typed in characters: always, never, or (Automatic) from 起步 4 on.
+    static func typesHanzi(_ c: Card, setting: String?) -> Bool {
+        switch setting {
+        case "hanzi": return true
+        case "pinyin": return false
+        default: return !["qibu1-", "qibu2-", "qibu3-"].contains { c.lessonId.hasPrefix($0) }
+        }
+    }
+
+    /// A typed answer: the word's characters always count; in pinyin mode, its pinyin too.
+    func typedRight(_ typed: String) -> Bool {
+        let han = typed.filter(Course.isHan)
+        if !han.isEmpty { return han == card.word.hanzi.filter(Course.isHan) }
+        return !typeHanzi && Exercise.typedMatches(typed, pinyin: answer)
+    }
 
     /// Typed pinyin against the right pinyin: letters only, tones optional (tone marks or numbers),
     /// ü as u or v, spaces and apostrophes ignored.

@@ -356,7 +356,12 @@ struct HintBubble: View {
                     // as Duolingo's: the English (with the words beside it that go with it), then a row
                     // for each Chinese: this sentence's first, then others that mean it
                     if let span { row(span, strong: true); divider }
-                    ToneText(hanzi: h, pinyin: py, size: 24, weight: .bold).padding(.vertical, 8)
+                    // pinyin and characters, always both (the owner, 4 Oct 2026)
+                    VStack(spacing: 1) {
+                        PinyinText(pinyin: py, size: 13)
+                        ToneText(hanzi: h, pinyin: py, size: 24, weight: .bold)
+                    }
+                    .padding(.vertical, 7)
                     ForEach(alternatives, id: \.hanzi) { a in
                         divider
                         VStack(spacing: 1) {
