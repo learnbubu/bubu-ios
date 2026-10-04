@@ -76,10 +76,11 @@ struct DoneView: View {
         // which the fire stage shows next anyway
         let recap = r.learned.isEmpty ? r.practised : r.learned
         return VStack(spacing: 0) {
-            Spacer(minLength: 0)
-            // the image has room around Bùbù, so it's drawn big enough to read as the hero
-            // (a little smaller beside a list of words)
-            Image("done-panda").resizable().scaledToFit().frame(height: recap.count > 2 ? 150 : recap.isEmpty ? 220 : 180)
+            // Bùbù takes whatever height is spare, so the card is filled from the top rather than
+            // centred with empty room above (the owner, 4 Oct 2026)
+            Image("done-panda").resizable().scaledToFit()
+                .frame(minHeight: 120, maxHeight: recap.isEmpty ? 300 : 260)
+                .layoutPriority(-1)
             Text(r.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).multilineTextAlignment(.center)
                 .padding(.top, 2)
             if r.steps > 1 {
@@ -133,7 +134,6 @@ struct DoneView: View {
                 .background(Color.bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .padding(.top, 18)
             }
-            Spacer(minLength: 0)
         }
     }
 
