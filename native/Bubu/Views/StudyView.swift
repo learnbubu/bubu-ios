@@ -513,6 +513,8 @@ struct MascotPrompt<Content: View>: View {
         }
         .frame(minHeight: long || compact ? 78 : 140)
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: compact)
+        // above what follows it, so a word's hint hanging down covers the answer line (it ran through)
+        .zIndex(1)
         .onChange(of: mood) { _, new in
             guard new != nil else { return }
             withAnimation(.easeOut(duration: 0.17)) { pop = true }

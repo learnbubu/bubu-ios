@@ -123,8 +123,11 @@ enum Hints {
         if let k = hz.firstIndex(of: "很"), at(k + 1) != nil, i == k || i == k + 1 {
             return make(k, k + 1, ["very " + meaningOf(k + 1), "is " + meaningOf(k + 1)])
         }
-        // X 的: X's (我的: my)
-        if let k = hz.firstIndex(of: "的"), k > 0, i == k || i == k - 1 {
+        // X 的: X's (我的: my), when X is a person or a thing; after a verb (你拍的照片) 的 ties a whole
+        // clause to the noun, and isn't linked
+        if let k = hz.firstIndex(of: "的"), k > 0, i == k || i == k - 1,
+           possessive[hz[k - 1]] != nil || Course.shared.nameList.contains(hz[k - 1])
+            || (Course.shared.cardsByHanzi[hz[k - 1]]?.first?.word.pos ?? "").hasPrefix("n") {
             let owner = hz[k - 1]
             return make(k - 1, k, [possessive[owner] ?? (meaningOf(k - 1) + "'s")])
         }
@@ -415,7 +418,7 @@ private struct HintBubbleModifier<B: View>: ViewModifier {
     /// check of 0.1.37); above only when it wouldn't fit below (a word low on the screen).
     private var below: Bool {
         let screen = UIScreen.main.bounds.height
-        return anchor.maxY + 6 + size.height < screen - 110
+        return anchor.maxY + 6 + size.height < screen - 170      // (the Check button's band)
     }
 
     func body(content: Content) -> some View {
