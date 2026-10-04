@@ -65,6 +65,33 @@ enum Hints {
     static let possessive: [String: String] = ["我": "my", "你": "your", "您": "your", "他": "his", "她": "her",
                                                "我们": "our", "你们": "your", "他们": "their", "她们": "their"]
 
+    /// Other Chinese for an English word, beside the sentence's own (speak: 说, 讲): course words
+    /// whose short meaning is that word (or "to" it), up to `n`, the most common first.
+    static func alternatives(_ english: String, besides primary: String, max n: Int = 2) -> [SentenceWord] {
+        let st = stem(english)
+        guard !st.isEmpty, !filler.contains(st) || alias[st] != nil else { return [] }
+        var out: [SentenceWord] = [], seen: Set<String> = [primary]
+        for c in Course.shared.cards where !c.isSentence {
+            let g = c.word.gloss.lowercased()
+            let parts = g.components(separatedBy: CharacterSet(charactersIn: ",;")).map {
+                stem($0.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: "to ", with: "", options: .anchored))
+            }
+            guard parts.contains(st), seen.insert(c.word.hanzi).inserted else { continue }
+            out.append(SentenceWord(hanzi: c.word.hanzi, pinyin: Course.wordPy[c.word.hanzi] ?? c.word.pinyin))
+            if out.count == n { break }
+        }
+        return out
+    }
+
+    /// The English words beside token `i` that share its Chinese ("How are you" all 你好吗), as one span.
+    static func span(_ tokens: [Token], at i: Int) -> String? {
+        guard let w = tokens[i].word else { return nil }
+        var a = i, b = i
+        while a > 0, tokens[a - 1].word == w { a -= 1 }
+        while b + 1 < tokens.count, tokens[b + 1].word == w { b += 1 }
+        return a == b ? nil : tokens[a...b].map(\.text).joined(separator: " ")
+    }
+
     /// The link the word at `i` takes part in, if any.
     static func link(_ words: [SentenceWord], at i: Int) -> Link? {
         let hz = words.map(\.hanzi), py = words.map(\.pinyin)
@@ -234,6 +261,9 @@ struct HintChip<Label: View>: View {
     var phrase: String? = nil
     /// words it works with across the sentence (你 … 吗 "do you…?"), shown above its own meanings
     var link: Hints.Link? = nil
+    /// for an English word: its span (How are you) and other Chinese for it
+    var span: String? = nil
+    var alternatives: [SentenceWord] = []
     /// also told of a tap (a word's pinyin, hidden once it's strong, shows on a tap)
     var tapped: (() -> Void)? = nil
     @ViewBuilder var label: Label
@@ -263,7 +293,7 @@ struct HintChip<Label: View>: View {
         }
         .buttonStyle(.plain)
         .hintBubble(open: Binding(get: { open }, set: { if !$0 && open { focus.open = nil } })) {
-            HintBubble(hanzi: hanzi, pinyin: pinyin, reverse: reverse, phrase: phrase, link: link)
+            HintBubble(hanzi: hanzi, pinyin: pinyin, reverse: reverse, phrase: phrase, link: link, span: span, alternatives: alternatives)
         }
     }
 }
@@ -277,13 +307,16 @@ struct HintBubble: View {
     var reverse = false
     var phrase: String? = nil
     var link: Hints.Link? = nil
+    var span: String? = nil
+    var alternatives: [SentenceWord] = []
     var empty = "No separate word in Chinese"
 
     private var rows: [String] { reverse ? [] : (hanzi.map { Hints.senses($0) } ?? []) }
     private var width: CGFloat {
         let texts = [phrase ?? ""] + rows + (link?.meanings ?? []) + [link?.header ?? ""]
         let longest = CGFloat(texts.map(\.count).max() ?? 0) * 8.4
-        let chars = CGFloat(max((hanzi ?? "").count, (link?.header.count ?? 0) / 2)) * 26
+        let chars = CGFloat(([hanzi ?? ""] + alternatives.map(\.hanzi)).map(\.count).max() ?? 0) * 26
+            + CGFloat((link?.header.count ?? 0) / 2) * 0 + CGFloat(span?.count ?? 0) * 0
         return min(240, max(110, max(longest, chars) + 28))
     }
 
@@ -309,7 +342,18 @@ struct HintBubble: View {
             if let h = hanzi {
                 let py = pinyin ?? Course.wordPy[h] ?? ""
                 if reverse {
+                    // as Duolingo's: the English (with the words beside it that go with it), then a row
+                    // for each Chinese: this sentence's first, then others that mean it
+                    if let span { row(span, strong: true); divider }
                     ToneText(hanzi: h, pinyin: py, size: 24, weight: .bold).padding(.vertical, 8)
+                    ForEach(alternatives, id: \.hanzi) { a in
+                        divider
+                        VStack(spacing: 1) {
+                            PinyinText(pinyin: a.pinyin, size: 12)
+                            Text(a.hanzi).font(.hanzi(19, .semibold)).foregroundStyle(Color.ink.opacity(0.8))
+                        }
+                        .padding(.vertical, 6)
+                    }
                 } else {
                     VStack(spacing: 1) {
                         PinyinText(pinyin: py, size: 12.5)

@@ -318,6 +318,17 @@ final class LessonFlowTests: XCTestCase {
         XCTAssertFalse(Hints.senses("说").isEmpty)
     }
 
+    /// An English word's hint: this sentence's Chinese, then others that mean it; a span when the
+    /// words beside it share its Chinese.
+    func testEnglishHintsOfferOtherChinese() {
+        let alts = Hints.alternatives("speak", besides: "说")
+        XCTAssertFalse(alts.contains { $0.hanzi == "说" })
+        XCTAssertLessThanOrEqual(alts.count, 2)
+        let w = [SentenceWord(hanzi: "你好", pinyin: "nǐhǎo"), SentenceWord(hanzi: "吗", pinyin: "ma")]
+        let t = Hints.english("How are you?", w)
+        XCTAssertEqual(Hints.span(t, at: 0), "How are you?")
+    }
+
     // MARK: the sentence rule
 
     func testALongSentenceOfNewWordsIsNeverChosen() {
