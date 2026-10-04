@@ -1538,7 +1538,9 @@ struct SentenceView: View {
                 HintBubble(hanzi: t.text, pinyin: t.pinyin)
             } else {
                 let en = ex.sentence?.en ?? ""
-                let w = Hints.english(en, ex.sentence?.words ?? []).first { $0.text.lowercased() == t.text.lowercased() }?.word
+                // (the hint's words keep their punctuation, "password?", the tiles don't: compare them bare)
+                let bare = { (x: String) in Sentence.enWords(x).first?.lowercased() ?? x.lowercased() }
+                let w = Hints.english(en, ex.sentence?.words ?? []).first { bare($0.text) == bare(t.text) }?.word
                 HintBubble(hanzi: w?.hanzi, pinyin: w?.pinyin, reverse: true, empty: "Not in this sentence")
             }
         }
