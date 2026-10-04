@@ -1801,9 +1801,11 @@ struct TypeView: View {
                 .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.panel))
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
-            Text(ex.typeHanzi ? "Use the Chinese (Pinyin) keyboard: the 🌐 key switches to it"
+            // (wrapping, never clipped: the Mac's check of 0.1.38 found the descenders cut off)
+            Text(ex.typeHanzi ? "Switch to the Chinese (Pinyin) keyboard with the 🌐 key"
                               : "Tones are optional: ni hao or ni3 hao3. Characters count too.")
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                .lineLimit(3).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 8)
         }
         .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { focused = true } }
         .onChange(of: result) { _, r in if r != nil { focused = false } }
@@ -1856,10 +1858,8 @@ struct BuildView: View {
                 Text(name).font(.nunito(11.5, .semibold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.7)
             }
             .frame(maxWidth: .infinity).padding(.vertical, 10)
-            .background(fill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(edge, lineWidth: on ? 3 : 2))
         }
-        .buttonStyle(PressDown(depth: 2))
+        .buttonStyle(Tile3D(fill: fill, edge: edge))
         .disabled(result != nil)
     }
 }
