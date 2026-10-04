@@ -1779,8 +1779,10 @@ struct TypeView: View {
 
     var body: some View {
         let w = ex.card.word
-        VStack(spacing: 22) {
-            MascotPrompt(mood: result) {
+        // with the keyboard up, a smaller Bùbù and tighter spacing, so the note under the field
+        // isn't pushed past the card's foot (the Mac's check of 0.1.38 found it cut)
+        VStack(spacing: focused ? 14 : 22) {
+            MascotPrompt(mood: result, compact: focused) {
                 if ex.isNew { NewBadge() }
                 if ex.typeHanzi {
                     // in characters: the meaning, and the characters once it's answered
