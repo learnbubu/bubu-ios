@@ -32,10 +32,17 @@ def background(a):
 
 
 def key(im, bg=None):
-    """The backdrop -> transparent, by colour distance from it, with the fringe despilled."""
+    """The backdrop -> transparent, trimmed to the artwork."""
     a = np.asarray(im.convert("RGB")).astype(np.float32)
     if bg is None:
         bg = background(a)
+    im = Image.fromarray(_key_array(a, bg), "RGBA")
+    bbox = im.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
+    return im.crop(bbox) if bbox else im
+
+
+def _key_array(a, bg):
+    """RGB float array -> RGBA uint8, the backdrop keyed out, the fringe despilled."""
     if np.abs(bg - np.array([255, 0, 255])).max() < 60:
         # true magenta: key on 'magenta-ness' (red and blue both above green), which nothing in
         # the palette has, so soft edges come out clean
@@ -50,10 +57,7 @@ def key(im, bg=None):
     edge = (alpha > 0) & (alpha < 1)
     fg = a.copy()
     fg[edge] = (a[edge] - (1 - alpha[edge, None]) * bg) / np.maximum(alpha[edge, None], 0.05)
-    out = np.dstack([fg, alpha * 255]).clip(0, 255).astype(np.uint8)
-    im = Image.fromarray(out, "RGBA")
-    bbox = im.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
-    return im.crop(bbox) if bbox else im
+    return np.dstack([fg, alpha * 255]).clip(0, 255).astype(np.uint8)
 
 
 def leftover_pink(im):
@@ -64,13 +68,29 @@ def leftover_pink(im):
     return float((m & vis).sum()) / max(1, vis.sum())
 
 
-def slice_sheet(im, n, cols=4):
+def slice_sheet(im, n, bg, cols=4):
+    """One icon per cell. The whole sheet is keyed first, then each cell keeps only the shapes
+    whose centre falls inside it, so a neighbour's edge poking over the line isn't cut in."""
+    from scipy import ndimage
     rows = (n + cols - 1) // cols
+    a = np.asarray(im.convert("RGB")).astype(np.float32)
     W, H = im.size
+    full = _key_array(a, bg)
+    mask = full[..., 3] > 40
+    lab, k = ndimage.label(mask)
+    cents = ndimage.center_of_mass(mask, lab, range(1, k + 1))
+    sizes = ndimage.sum(mask, lab, range(1, k + 1))
     cells = []
     for i in range(n):
         x, y = i % cols, i // cols
-        cells.append(im.crop((x * W // cols, y * H // rows, (x + 1) * W // cols, (y + 1) * H // rows)))
+        x0, y0, x1, y1 = x * W // cols, y * H // rows, (x + 1) * W // cols, (y + 1) * H // rows
+        keep = [j + 1 for j, (cy, cx) in enumerate(cents)
+                if x0 <= cx < x1 and y0 <= cy < y1 and sizes[j] > 30]
+        cell = full.copy()
+        cell[..., 3] = np.where(np.isin(lab, keep), cell[..., 3], 0)
+        img = Image.fromarray(cell, "RGBA")
+        bbox = img.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
+        cells.append(img.crop(bbox) if bbox else img.crop((x0, y0, x1, y1)))
     return cells
 
 
@@ -86,8 +106,7 @@ def main():
             words = sheets["sheets"][i]
             os.makedirs(os.path.join(FINAL, "pictures"), exist_ok=True)
             bg = background(np.asarray(raw.convert("RGB")).astype(np.float32))
-            for cell, it in zip(slice_sheet(raw, len(words)), words):
-                k = key(cell, bg)
+            for k, it in zip(slice_sheet(raw, len(words), bg), words):
                 k.save(os.path.join(FINAL, "pictures", it["w"] + ".png"))
                 report.append(("pictures/" + it["w"] + ".png", it["d"], leftover_pink(k)))
             continue
