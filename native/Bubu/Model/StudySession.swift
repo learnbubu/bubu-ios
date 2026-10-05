@@ -861,7 +861,7 @@ final class StudySession: Identifiable {
         if focuses.count > 1 {
             let reps = s?.reps ?? 0, interval = s?.interval ?? 0
             let level = reps >= 2 || interval >= 7 ? 2 : reps >= 1 ? 1 : 0
-            let rung: [String]? = level == 0 ? ["recognize", "listen", "picture"] : level == 1 ? ["recall", "pinyin", "sentence", "listen", "gap", "hear"] : nil
+            let rung: [String]? = level == 0 ? ["recognize", "listen", "picture"] : level == 1 ? ["recall", "pinyin", "sentence", "listen", "gap", "hear", "picture"] : nil
             if let rung {
                 var on = enabled.filter { rung.contains($0) }
                 if let before = dirByCard[c.id], on.count > 1 { on.removeAll { $0 == before } }
@@ -876,6 +876,13 @@ final class StudySession: Identifiable {
             enabled.removeAll { Self.ladderOnce.contains($0) && (dirsUsed[$0] ?? 0) >= 1 }
         }
         if let l = lastDir, enabled.count > 1 { enabled.removeAll { $0 == l } }
+        // a word with a picture gets its picture card often, not as one kind in eight (the owner,
+        // 5 Oct 2026: "not really seeing that exercise"): up to twice a session
+        if enabled.contains("picture"), (dirsUsed["picture"] ?? 0) < 2, Double.random(in: 0..<1) < 0.45 {
+            dirByCard[c.id] = "picture"
+            lastDir = "picture"
+            return "picture"
+        }
         let d = enabled.randomElement() ?? "recognize"
         dirByCard[c.id] = d
         lastDir = d

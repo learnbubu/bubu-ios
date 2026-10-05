@@ -3,7 +3,7 @@ import CoreGraphics
 /// Scenery made with the art pipeline (tools/art, Oct 2026). Written by tools/art/install.py; don't edit.
 enum NewArt {
     /// Corners, anchored bottom-left like the fol- pieces; the path mirrors them for the right.
-    static let corners: [String] = ["corner-bamboo-grove-fuller", "corner-bonsai-on-plinth", "corner-ginkgo-in-autumn", "corner-karst-rocks", "corner-koi-pond", "corner-lotus-pond-edge", "corner-moon-gate-wall", "corner-osmanthus", "corner-peonies", "corner-pine-on-rocks", "corner-stone-lantern", "corner-tea-terraces", "corner-weeping-willow", "corner-winter-plum"]
+    static let corners: [String] = ["corner-bamboo-grove-fuller", "corner-bonsai-on-plinth", "corner-ginkgo-in-autumn", "corner-karst-rocks", "corner-koi-pond", "corner-lotus-pond-edge", "corner-moon-gate-wall", "corner-osmanthus", "corner-peonies", "corner-pine-on-rocks", "corner-stone-lantern", "corner-tall-autumn-maple", "corner-tall-bamboo-and-stone-pagoda", "corner-tall-bamboo-and-wooden-signpost", "corner-tall-bamboo-with-a-hanging-lantern", "corner-tall-cypress-and-urn", "corner-tall-lantern-post", "corner-tall-magnolia", "corner-tall-osmanthus", "corner-tall-pine-and-boulders", "corner-tall-pine-over-a-trickle", "corner-tall-plum-tree", "corner-tall-willow-by-the-water", "corner-tea-terraces", "corner-weeping-willow", "corner-winter-plum"]
     /// Free-standing landmarks, like the land- pieces.
     static let landmarks: [String] = ["scene-courtyard-gate", "scene-great-wall", "scene-mountain-pavilion", "scene-night-market-stalls", "scene-paifang-archway", "scene-river-boat", "scene-round-hall", "scene-stone-bridge-and-willow", "scene-teahouse"]
     static let art: [String: ArtSize] = [
@@ -18,6 +18,18 @@ enum NewArt {
         "corner-peonies": ArtSize(w: 60, ar: 1.642, side: "left"),
         "corner-pine-on-rocks": ArtSize(w: 60, ar: 1.366, side: "left"),
         "corner-stone-lantern": ArtSize(w: 60, ar: 1.351, side: "left"),
+        "corner-tall-autumn-maple": ArtSize(w: 48, ar: 1.685, side: "left"),
+        "corner-tall-bamboo-and-stone-pagoda": ArtSize(w: 48, ar: 1.651, side: "left"),
+        "corner-tall-bamboo-and-wooden-signpost": ArtSize(w: 48, ar: 1.711, side: "left"),
+        "corner-tall-bamboo-with-a-hanging-lantern": ArtSize(w: 48, ar: 1.61, side: "left"),
+        "corner-tall-cypress-and-urn": ArtSize(w: 48, ar: 1.761, side: "left"),
+        "corner-tall-lantern-post": ArtSize(w: 48, ar: 1.622, side: "left"),
+        "corner-tall-magnolia": ArtSize(w: 48, ar: 1.829, side: "left"),
+        "corner-tall-osmanthus": ArtSize(w: 48, ar: 1.664, side: "left"),
+        "corner-tall-pine-and-boulders": ArtSize(w: 48, ar: 1.875, side: "left"),
+        "corner-tall-pine-over-a-trickle": ArtSize(w: 48, ar: 1.616, side: "left"),
+        "corner-tall-plum-tree": ArtSize(w: 48, ar: 1.815, side: "left"),
+        "corner-tall-willow-by-the-water": ArtSize(w: 48, ar: 1.695, side: "left"),
         "corner-tea-terraces": ArtSize(w: 60, ar: 1.304, side: "left"),
         "corner-weeping-willow": ArtSize(w: 60, ar: 1.485, side: "left"),
         "corner-winter-plum": ArtSize(w: 60, ar: 1.398, side: "left"),
@@ -43,6 +55,18 @@ enum NewArt {
         "corner-peonies": [[0.0, 0.25], [0.0, 0.46], [0.0, 0.557], [0.0, 0.734], [0.0, 0.781], [0.0, 0.867], [0.0, 0.94], [0.0, 0.942], [0.0, 1.0], [0.0, 0.996]],
         "corner-pine-on-rocks": [[0.0, 0.422], [0.0, 0.504], [0.0, 0.707], [0.0, 0.715], [0.0, 0.877], [0.0, 0.876], [0.0, 0.414], [0.0, 0.63], [0.0, 0.876], [0.0, 1.0]],
         "corner-stone-lantern": [[0.0, 0.254], [0.0, 0.3], [0.0, 0.377], [0.0, 0.526], [0.0, 0.52], [0.0, 0.688], [0.0, 0.679], [0.0, 0.749], [0.0, 0.932], [0.0, 1.0]],
+        "corner-tall-autumn-maple": [[0.049, 0.425], [0.006, 0.463], [0.0, 0.627], [0.0, 0.67], [0.0, 0.597], [0.0, 0.558], [0.0, 0.397], [0.0, 0.481], [0.0, 0.689], [0.0, 1.0]],
+        "corner-tall-bamboo-and-stone-pagoda": [[0.033, 0.42], [0.0, 0.426], [0.0, 0.479], [0.0, 0.462], [0.0, 0.453], [0.0, 0.488], [0.0, 0.545], [0.0, 0.646], [0.0, 0.925], [0.0, 1.0]],
+        "corner-tall-bamboo-and-wooden-signpost": [[0.027, 0.384], [0.0, 0.405], [0.0, 0.439], [0.0, 0.51], [0.0, 0.356], [0.0, 0.519], [0.0, 0.542], [0.0, 0.65], [0.0, 0.918], [0.0, 1.0]],
+        "corner-tall-bamboo-with-a-hanging-lantern": [[0.02, 0.435], [0.0, 0.551], [0.0, 0.569], [0.0, 0.399], [0.0, 0.458], [0.0, 0.483], [0.0, 0.435], [0.0, 0.653], [0.0, 0.719], [0.0, 1.0]],
+        "corner-tall-cypress-and-urn": [[0.117, 0.25], [0.067, 0.468], [0.049, 0.507], [0.039, 0.534], [0.031, 0.546], [0.0, 0.548], [0.0, 0.579], [0.0, 0.667], [0.0, 0.916], [0.0, 1.0]],
+        "corner-tall-lantern-post": [[0.032, 0.505], [0.05, 0.551], [0.029, 0.568], [0.067, 0.495], [0.023, 0.474], [0.0, 0.422], [0.0, 0.454], [0.0, 0.591], [0.0, 0.905], [0.0, 1.0]],
+        "corner-tall-magnolia": [[0.053, 0.417], [0.022, 0.535], [0.0, 0.602], [0.0, 0.63], [0.0, 0.494], [0.0, 0.366], [0.0, 0.47], [0.0, 0.567], [0.0, 0.758], [0.0, 1.0]],
+        "corner-tall-osmanthus": [[0.03, 0.383], [0.0, 0.481], [0.0, 0.538], [0.0, 0.444], [0.0, 0.47], [0.0, 0.436], [0.0, 0.44], [0.0, 0.601], [0.0, 0.924], [0.0, 1.0]],
+        "corner-tall-pine-and-boulders": [[0.023, 0.6], [0.023, 0.644], [0.023, 0.662], [0.123, 0.738], [0.065, 0.529], [0.0, 0.558], [0.0, 0.579], [0.0, 0.692], [0.0, 0.99], [0.0, 1.0]],
+        "corner-tall-pine-over-a-trickle": [[0.079, 0.501], [0.02, 0.754], [0.0, 0.767], [0.0, 0.531], [0.0, 0.485], [0.0, 0.467], [0.0, 0.53], [0.0, 0.605], [0.0, 0.754], [0.0, 1.0]],
+        "corner-tall-plum-tree": [[0.012, 0.524], [0.032, 0.556], [0.01, 0.663], [0.0, 0.776], [0.0, 0.782], [0.0, 0.367], [0.0, 0.433], [0.0, 0.512], [0.0, 0.683], [0.0, 1.0]],
+        "corner-tall-willow-by-the-water": [[0.0, 0.484], [0.0, 0.552], [0.0, 0.61], [0.008, 0.623], [0.0, 0.665], [0.0, 0.665], [0.0, 0.652], [0.0, 0.637], [0.0, 0.925], [0.0, 1.0]],
         "corner-tea-terraces": [[0.0, 0.248], [0.0, 0.394], [0.0, 0.412], [0.0, 0.258], [0.0, 0.459], [0.0, 0.552], [0.0, 0.71], [0.0, 0.823], [0.0, 0.967], [0.0, 1.0]],
         "corner-weeping-willow": [[0.0, 0.292], [0.0, 0.525], [0.0, 0.729], [0.0, 0.784], [0.0, 0.787], [0.0, 0.741], [0.0, 0.719], [0.0, 0.682], [0.0, 0.962], [0.0, 1.0]],
         "corner-winter-plum": [[0.0, 0.278], [0.0, 0.452], [0.0, 0.68], [0.0, 0.873], [0.0, 0.91], [0.0, 0.492], [0.0, 0.415], [0.0, 0.606], [0.0, 0.734], [0.0, 1.0]],
