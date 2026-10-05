@@ -23,6 +23,8 @@ HANG = [
     ("Cloud swirls", "auspicious cloud swirls (xiangyun) in soft cream and pale jade drifting down the edge in a loose column"),
     ("Edge waterfall", "a thin waterfall spilling from a mossy ledge at the top-left and falling straight down in a narrow ribbon, a little mist at the bottom"),
 ]
+# (first try hung everything from a blossom branch, copied from the willow reference: jobs.json
+# now has the no-branch wording and branch-free references for this group)
 SHAPE = ("SHAPE, like the attached hanging willow: it hangs in from the TOP-LEFT corner, straight down along the left edge, "
          "long and narrow - about a third of the canvas width and most of its height - with plenty of empty magenta to the right. "
          "Portrait canvas, 4:5.")
