@@ -737,6 +737,10 @@ struct MeetView: View {
         VStack(spacing: 10) {
             VStack(spacing: 8) {
                 NewBadge()
+                if let pic = Pictures.asset(w.hanzi) {
+                    Image(pic).resizable().scaledToFit().frame(height: 84).padding(.top, 4)
+                        .accessibilityHidden(true)
+                }
                 TappableHanzi(text: w.hanzi, pinyin: w.pinyin, size: w.hanzi.count > 3 ? 44 : 64, weight: .bold)
                     .padding(.top, 6)
                 PinyinText(pinyin: w.pinyin, size: 24, weight: .semibold)

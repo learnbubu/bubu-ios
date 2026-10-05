@@ -50,6 +50,11 @@ struct PickPage: View {
                                 HStack(spacing: 10) {
                                     Image(systemName: on ? "checkmark.circle.fill" : "circle")
                                         .font(.system(size: 20)).foregroundStyle(on ? Color.accent : Color.line)
+                                    Group {
+                                        if let pic = Pictures.asset(c.word.hanzi) { Image(pic).resizable().scaledToFit() }
+                                        else { Color.clear }
+                                    }
+                                    .frame(width: 28, height: 28)
                                     Text(c.word.hanzi).font(.hanzi(19, .medium)).foregroundStyle(Color.ink).frame(minWidth: 48, alignment: .leading)
                                     Text(c.word.pinyin).font(.nunito(13.5)).foregroundStyle(Color.gold).lineLimit(1)
                                     Text(c.word.en).font(.nunito(13.5)).foregroundStyle(Color.muted).lineLimit(1)
@@ -145,6 +150,9 @@ struct FlashPage: View {
                     .opacity(flipped ? 0 : 1)
                     face {
                         VStack(spacing: 10) {
+                            if let pic = Pictures.asset(c.word.hanzi) {
+                                Image(pic).resizable().scaledToFit().frame(height: 70)
+                            }
                             TappableHanzi(text: c.word.hanzi, pinyin: c.word.pinyin, size: 30, weight: .bold)
                             PinyinText(pinyin: c.word.pinyin, size: 26)
                             Text(c.word.pos.map { "\(c.word.en) · \($0)" } ?? c.word.en)

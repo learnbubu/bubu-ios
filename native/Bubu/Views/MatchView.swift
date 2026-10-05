@@ -105,8 +105,12 @@ struct MatchView: View {
                 }
             }
         } else {
-            Text(w.gloss).font(.nunito(15.5, .bold)).foregroundStyle(Color.ink)
-                .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.75)
+            if let pic = Pictures.asset(w.hanzi) {
+                Image(pic).resizable().scaledToFit().frame(height: 46)
+            } else {
+                Text(w.gloss).font(.nunito(15.5, .bold)).foregroundStyle(Color.ink)
+                    .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.75)
+            }
         }
     }
 

@@ -370,6 +370,9 @@ struct WordRecap: View {
     private func cell(_ c: Card) -> some View {
         let w = c.word
         return HStack(spacing: 4) {
+            if let pic = Pictures.asset(w.hanzi) {
+                Image(pic).resizable().scaledToFit().frame(width: 30, height: 30).padding(.trailing, 4)
+            }
             VStack(alignment: .leading, spacing: 1) {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text(w.hanzi).font(.hanzi(w.hanzi.count > 2 ? 16 : 19, .semibold)).foregroundStyle(Color.ink)
