@@ -592,14 +592,23 @@ struct SuccessShine: ViewModifier {
     var on: Bool
     var delay: Double = 0
     var radius: CGFloat = 12
+    /// a sentence's word tile (small): its own set of the owner's tuned numbers (the shine tuner, 5 Oct 2026)
+    var compact = false
+
+    /// The owner's settings from the shine tuner: long tiles (choices, picture cards) and small ones.
+    private struct Look { let atLeast, band, wide, thin, gap, sweep: CGFloat }
+    private var look: Look {
+        compact ? Look(atLeast: 44, band: 0.32, wide: 0.47, thin: 0.40, gap: 0.16, sweep: 0.25)
+                : Look(atLeast: 30, band: 0.32, wide: 0.34, thin: 0.30, gap: 0.03, sweep: 0.8)
+    }
     @State private var sweep: CGFloat = -1
     @State private var shining = false      // shown only while it sweeps (the Mac: an opacity tied to the
     @State private var hop = false          // sweep's end value never showed it, 0.1.50)
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var streak: some View {
-        LinearGradient(stops: [.init(color: .white.opacity(0), location: 0), .init(color: .white.opacity(0.85), location: 0.35),
-                               .init(color: .white.opacity(0.85), location: 0.65), .init(color: .white.opacity(0), location: 1)],
+        LinearGradient(stops: [.init(color: .white.opacity(0), location: 0), .init(color: .white, location: 0.35),
+                               .init(color: .white, location: 0.65), .init(color: .white.opacity(0), location: 1)],
                        startPoint: .leading, endPoint: .trailing)
     }
 
@@ -610,13 +619,14 @@ struct SuccessShine: ViewModifier {
                 GeometryReader { g in
                     // two crisp streaks, a wide one and a thin one just behind it, like light off glass
                     // (the owner, 5 Oct 2026: "more like 2 streaks rather than a soft glow")
-                    let band = max(30, g.size.width * 0.32)
-                    HStack(spacing: band * 0.16) {
-                        streak.frame(width: band * 0.34)
-                        streak.frame(width: band * 0.14)
+                    let L = look, band = max(L.atLeast, g.size.width * L.band)
+                    HStack(spacing: band * L.gap) {
+                        streak.frame(width: band * L.wide)
+                        streak.frame(width: band * L.thin)
                     }
-                    .frame(width: band, height: g.size.height * 3)
-                    .rotationEffect(.degrees(20))
+                    .frame(width: band, height: g.size.height * 3)     // (the small set is 103% of the band: it spills, centred, as tuned)
+                    .opacity(0.75)
+                    .rotationEffect(.degrees(27))
                     .frame(height: g.size.height)
                     // the whole sweep is spent crossing the tile: from just off its left edge to just
                     // off its right (sweep -1 to 1 over 2x the width spent half its time off it, and
@@ -635,8 +645,9 @@ struct SuccessShine: ViewModifier {
                     shining = true
                     withAnimation(.spring(response: 0.22, dampingFraction: 0.5)) { hop = true }
                     // slower, so the streaks can be seen crossing (it was 0.55 s: "too fast")
-                    withAnimation(.linear(duration: 0.8)) { sweep = 1 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) { shining = false }
+                    let t = Double(look.sweep)
+                    withAnimation(.linear(duration: t)) { sweep = 1 }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + t + 0.05) { shining = false }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { hop = false }
                     }
@@ -1673,7 +1684,7 @@ struct SentenceView: View {
         // a hold shows the tile's hint, and the tap its release makes is ignored (the Mac's check)
         let order = Double(placed.firstIndex(of: t) ?? 0)
         return Button { if justHeld { justHeld = false } else if !justDragged { tap() } } label: {
-            tileFace(t, tint: tint).modifier(SuccessShine(on: inAnswer && result == true, delay: 0.05 + order * 0.09))
+            tileFace(t, tint: tint).modifier(SuccessShine(on: inAnswer && result == true, delay: 0.05 + order * 0.09, compact: true))
         }
         .buttonStyle(PressDown(depth: 2))
         .sensoryFeedback(.selection, trigger: placed.count)
