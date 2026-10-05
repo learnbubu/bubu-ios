@@ -33,12 +33,18 @@ def background(a):
 
 def key(im, bg=None):
     """The backdrop -> transparent, trimmed to the artwork."""
-    a = np.asarray(im.convert("RGB")).astype(np.float32)
-    if bg is None:
-        bg = background(a)
-    im = Image.fromarray(_key_array(a, bg), "RGBA")
+    im = Image.fromarray(cutout_array(im, bg), "RGBA")
     bbox = im.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
     return im.crop(bbox) if bbox else im
+
+
+def cutout_array(im, bg=None):
+    """Keep existing transparency; only colour-key fully opaque source images."""
+    rgba = np.asarray(im.convert("RGBA"))
+    if rgba[..., 3].min() < 255:
+        return rgba.copy()
+    a = rgba[..., :3].astype(np.float32)
+    return _key_array(a, background(a) if bg is None else bg)
 
 
 def _key_array(a, bg):
@@ -73,9 +79,8 @@ def slice_sheet(im, n, bg, cols=4):
     whose centre falls inside it, so a neighbour's edge poking over the line isn't cut in."""
     from scipy import ndimage
     rows = (n + cols - 1) // cols
-    a = np.asarray(im.convert("RGB")).astype(np.float32)
     W, H = im.size
-    full = _key_array(a, bg)
+    full = cutout_array(im, bg)
     mask = full[..., 3] > 40
     lab, k = ndimage.label(mask)
     cents = ndimage.center_of_mass(mask, lab, range(1, k + 1))
@@ -106,7 +111,7 @@ def main():
             words = sheets["sheets"][i]
             os.makedirs(os.path.join(FINAL, "pictures"), exist_ok=True)
             bg = background(np.asarray(raw.convert("RGB")).astype(np.float32))
-            for k, it in zip(slice_sheet(raw, len(words), bg), words):
+            for k, it in zip(slice_sheet(raw, len(words), bg, cols=min(4, len(words))), words):
                 k.save(os.path.join(FINAL, "pictures", it["w"] + ".png"))
                 report.append(("pictures/" + it["w"] + ".png", it["d"], leftover_pink(k)))
             continue
@@ -115,6 +120,13 @@ def main():
         report.append((name + ".png", "", leftover_pink(k)))
         if name.startswith(("corner-", "hang-")):
             k.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(FINAL, name + "-right.png"))
+    # single-icon redos replace a sliced card (picfix.json: file -> word)
+    fixes = json.load(open(os.path.join(HERE, "picfix.json"), encoding="utf-8")) if os.path.exists(os.path.join(HERE, "picfix.json")) else {}
+    for f, w in fixes.items():
+        src = os.path.join(FINAL, f + ".png")
+        if os.path.exists(src):
+            shutil.move(src, os.path.join(FINAL, "pictures", w + ".png"))
+            report.append(("pictures/" + w + ".png", "(redo)", 0.0))
     # words drawn with another word's picture
     for w, same in sheets.get("same", {}).items():
         src = os.path.join(FINAL, "pictures", same + ".png")

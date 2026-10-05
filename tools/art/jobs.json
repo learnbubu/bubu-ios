@@ -711,5 +711,83 @@
    "refs/land-pavilion.png"
   ],
   "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a sticker sheet of 2 small picture icons for a language-learning app, in a neat grid of 4 columns × 1 rows, read left to right and top to bottom, in exactly this order:\n1. a blossoming branch\n2. falling orange leaves\n\nEach icon is one simple, instantly recognisable object or scene, centred in its own equal-sized cell with plenty of empty space around it, all at a similar size, never touching or overlapping a neighbour. People are cute chibi characters in the same style (big heads, small bodies, simple happy faces, a mix of skin tones). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/picfix-1.png",
+  "group": "picfix",
+  "word": "牛肉",
+  "size": "1024x1024",
+  "refs": [
+   "refs/panda-waving.png",
+   "refs/av-011b33dd86d4947f9f9a.png",
+   "refs/fol-blossom.png",
+   "refs/land-pavilion.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate ONE small picture icon for a language-learning app: a plate of sliced cooked beef. Centred, simple and instantly recognisable, with plenty of empty space around it. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/picfix-2.png",
+  "group": "picfix",
+  "word": "猪肉",
+  "size": "1024x1024",
+  "refs": [
+   "refs/panda-waving.png",
+   "refs/av-011b33dd86d4947f9f9a.png",
+   "refs/fol-blossom.png",
+   "refs/land-pavilion.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate ONE small picture icon for a language-learning app: a plate of sliced roast pork belly. Centred, simple and instantly recognisable, with plenty of empty space around it. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/picfix-3.png",
+  "group": "picfix",
+  "word": "羊肉",
+  "size": "1024x1024",
+  "refs": [
+   "refs/panda-waving.png",
+   "refs/av-011b33dd86d4947f9f9a.png",
+   "refs/fol-blossom.png",
+   "refs/land-pavilion.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate ONE small picture icon for a language-learning app: three lamb skewers (yangrou chuanr) on a small plate. Centred, simple and instantly recognisable, with plenty of empty space around it. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/picfix-4.png",
+  "group": "picfix",
+  "word": "英镑",
+  "size": "1024x1024",
+  "refs": [
+   "refs/panda-waving.png",
+   "refs/av-011b33dd86d4947f9f9a.png",
+   "refs/fol-blossom.png",
+   "refs/land-pavilion.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate ONE small picture icon for a language-learning app: a stylised pound coin next to a plain green banknote with a large £ sign (no portrait, no real banknote design). Centred, simple and instantly recognisable, with plenty of empty space around it. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/picfix-5.png",
+  "group": "picfix",
+  "word": "人民币",
+  "size": "1024x1024",
+  "refs": [
+   "refs/panda-waving.png",
+   "refs/av-011b33dd86d4947f9f9a.png",
+   "refs/fol-blossom.png",
+   "refs/land-pavilion.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate ONE small picture icon for a language-learning app: a stylised plain red banknote with a large ¥ sign (no portrait, no real banknote design). Centred, simple and instantly recognisable, with plenty of empty space around it. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/picfix-6.png",
+  "group": "picfix",
+  "word": "奥运会",
+  "size": "1024x1024",
+  "refs": [
+   "refs/panda-waving.png",
+   "refs/av-011b33dd86d4947f9f9a.png",
+   "refs/fol-blossom.png",
+   "refs/land-pavilion.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate ONE small picture icon for a language-learning app: a gold medal on a striped ribbon (no rings, no logos). Centred, simple and instantly recognisable, with plenty of empty space around it. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
