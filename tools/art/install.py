@@ -21,7 +21,7 @@ APP = os.path.join(HERE, "..", "..", "native", "Bubu")
 ASSETS = os.path.join(APP, "Assets.xcassets")
 
 # longest side in pixels, per kind (3x of the largest size drawn)
-MAX = {"pic": 300, "panda": 600, "corner": 900, "scene": 900}
+MAX = {"pic": 300, "panda": 600, "corner": 900, "scene": 900, "hang": 900}
 
 
 def imageset(name, im, longest):
@@ -56,9 +56,9 @@ def main():
     existing = {d[:-len(".imageset")] for d in os.listdir(ASSETS) if d.endswith(".imageset")}
     # remove what this script put there before, so renamed or dropped art doesn't linger
     for d in os.listdir(ASSETS):
-        if d.startswith(("pic-", "corner-", "scene-")) and d.endswith(".imageset"):
+        if d.startswith(("pic-", "corner-", "scene-", "hang-")) and d.endswith(".imageset"):
             shutil.rmtree(os.path.join(ASSETS, d))
-    n = {"pic": 0, "panda": 0, "corner": 0, "scene": 0}
+    n = {"pic": 0, "panda": 0, "corner": 0, "scene": 0, "hang": 0}
     pics = os.path.join(FINAL, "pictures")
     for f in sorted(os.listdir(pics)):
         word = os.path.splitext(f)[0]
@@ -75,6 +75,10 @@ def main():
                 continue                      # never replace the app's original poses
             imageset(name, Image.open(os.path.join(FINAL, f)), MAX["panda"])
             pandas.append(name)
+        elif kind == "hang":
+            # placed by hand in the path editor only (not in the automatic rotation); its size
+            # comes to course.json from the editor's ART
+            imageset(name, Image.open(os.path.join(FINAL, f)), MAX[kind])
         elif kind in ("corner", "scene"):
             im = imageset(name, Image.open(os.path.join(FINAL, f)), MAX[kind])
             art[name] = {"w": 60 if kind == "corner" else 65, "ar": round(im.height / im.width, 3),

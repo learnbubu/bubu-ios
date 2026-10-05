@@ -16,7 +16,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FINAL = os.path.join(HERE, "out", "final")
 WEB = os.path.join(HERE, "..", "..", "..", "chineseLearning", "app")
 APPJS = os.path.join(WEB, "app.js")
-SIZE = {"corner": (60, "left", 900), "scene": (65, "any", 900), "panda": (22, "any", 600)}
+SIZE = {"corner": (60, "left", 900), "scene": (65, "any", 900), "panda": (22, "any", 600), "hang": (45, "left", 900)}
 
 
 def insert_before_close(src, name, lines):
@@ -37,7 +37,7 @@ def main():
             continue
         name = f[:-4]
         kind = name.split("-")[0]
-        if kind not in SIZE or name in have or (name.endswith("-right") and kind == "corner"):
+        if kind not in SIZE or name in have or (name.endswith("-right") and kind in ("corner", "hang")):
             continue
         w, side, longest = SIZE[kind]
         im = Image.open(os.path.join(FINAL, f)).convert("RGBA")
