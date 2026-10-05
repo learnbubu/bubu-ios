@@ -593,7 +593,8 @@ struct SuccessShine: ViewModifier {
     var delay: Double = 0
     var radius: CGFloat = 12
     @State private var sweep: CGFloat = -1
-    @State private var hop = false
+    @State private var shining = false      // shown only while it sweeps (the Mac: an opacity tied to the
+    @State private var hop = false          // sweep's end value never showed it, 0.1.50)
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func body(content: Content) -> some View {
@@ -610,14 +611,16 @@ struct SuccessShine: ViewModifier {
                 }
                 .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
                 .allowsHitTesting(false)
-                .opacity(sweep > -1 && sweep < 1 ? 1 : 0)
+                .opacity(shining ? 1 : 0)
             }
             .onChange(of: on) { _, now in
                 guard now, !reduceMotion else { return }
                 sweep = -1
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    shining = true
                     withAnimation(.spring(response: 0.22, dampingFraction: 0.5)) { hop = true }
                     withAnimation(.easeInOut(duration: 0.55)) { sweep = 1 }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { shining = false }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { hop = false }
                     }
