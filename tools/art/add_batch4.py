@@ -15,7 +15,7 @@ HANG = [
     ("Trailing ivy pot", "a small hanging teal pot with ivy trailing down in long strands"),
     ("Bamboo wind chimes", "bamboo wind-chime tubes hanging on cords from a small bamboo bar"),
     ("Ink scroll", "a hanging scroll with a simple ink painting of misty mountains (no writing, no seals with letters), wooden rods top and bottom"),
-    ("Round silk fan", "a round silk fan painted with a single plum branch, hanging by its handle from a cord with a tassel"),
+    ("Round silk fan", "a round silk fan painted with soft misty mountains, hanging by its handle from a cord with a tassel"),
     ("Jade pendant", "a green jade pendant (a round disc) on a red cord with a red tassel"),
     ("Fish kite", "a red-and-gold fish kite with a long flowing tail trailing down from the top"),
     ("Dried persimmons", "a string of dried orange persimmons hanging down on a cord"),
