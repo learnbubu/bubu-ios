@@ -6,6 +6,9 @@ import UIKit
 /// of 起步 1–5. A word without one is never asked this way.
 enum Pictures {
     static let byHanzi: [String: String] = [
+        // the first chapters' words (batch 3, 5 Oct 2026), so picture cards come up from the start
+        "你好": "👋", "谢谢": "🙏", "再见": "🚶", "名字": "📛", "高兴": "😄", "认识": "🤝", "对不起": "🙇",
+        "慢": "🐢", "说": "🗨️", "学": "✏️", "喝": "🥛", "住": "🏡", "来": "🙋", "一起": "👫",
         // people
         "人": "🧍", "朋友": "🧑‍🤝‍🧑", "学生": "🧑‍🎓", "老师": "🧑‍🏫", "医生": "🧑‍⚕️", "厨师": "🧑‍🍳", "设计师": "🧑‍🎨",
         "大学生": "🎓", "孩子": "🧒", "服务员": "🤵", "妈妈": "👩", "爸爸": "👨", "家": "🏠", "家人": "👨‍👩‍👧",

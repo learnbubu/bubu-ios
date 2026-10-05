@@ -66,6 +66,31 @@ def _key_array(a, bg):
     return np.dstack([fg, alpha * 255]).clip(0, 255).astype(np.uint8)
 
 
+# pieces whose art came back with pink in it that two regenerations didn't shift: the pink is
+# recoloured, to white (mist) or gold (leaves)
+DEPINK = {"corner-tall-karst-pillar": "white", "corner-tall-ginkgo": "gold"}
+
+
+def depink(im, to):
+    a = np.asarray(im.convert("RGBA")).astype(np.float32)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    light = (r + g + b) / 3
+    if to == "white":       # the mist: pale, pink-tinged (the model's try at see-through mist over magenta)
+        pink = (light > 190) & (r - g > 10) & (r >= b) & (a[..., 3] > 0)
+    else:                   # the specks: coral-pink among the gold leaves
+        pink = (r - g > 40) & (b > g - 6) & (a[..., 3] > 0)
+    if to == "white":
+        v = np.clip(light * 1.03, 0, 255)
+        for c, tint in enumerate((0.99, 1.0, 0.98)):              # a soft, slightly warm white
+            a[..., c] = np.where(pink, np.clip(v * tint, 0, 255), a[..., c])
+        a[..., 3] = np.where(pink, a[..., 3] * 0.85, a[..., 3])   # and a little see-through, as mist
+    else:                                                         # a warm gold at the same lightness
+        k = light / 200
+        for c, base in enumerate((240, 178, 60)):
+            a[..., c] = np.where(pink, np.clip(base * k, 0, 255), a[..., c])
+    return Image.fromarray(a.clip(0, 255).astype(np.uint8), "RGBA")
+
+
 def leftover_pink(im):
     """Share of visible pixels that still look magenta: a sign the model put pink in the art."""
     a = np.asarray(im).astype(np.int32)
@@ -116,6 +141,8 @@ def main():
                 report.append(("pictures/" + it["w"] + ".png", it["d"], leftover_pink(k)))
             continue
         k = key(raw)
+        if name in DEPINK:
+            k = depink(k, DEPINK[name])
         k.save(os.path.join(FINAL, name + ".png"))
         report.append((name + ".png", "", leftover_pink(k)))
         if name.startswith(("corner-", "hang-")):

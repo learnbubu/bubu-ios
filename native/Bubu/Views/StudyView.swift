@@ -65,10 +65,15 @@ struct StudyView: View {
                     VStack(spacing: 0) {
                         ScrollViewReader { reader in
                             ScrollView(fixed ? [] : .vertical) {
-                                content.padding(.horizontal, 12).padding(.top, 15)
-                                    .padding(.bottom, 12 + bannerRoom)
-                                    .frame(minHeight: scrollHeight, alignment: .top)
-                                Color.clear.frame(height: 1).id("exercise-end")
+                                // spacing 0: the default stack gap (8 pt) between the exercise and the
+                                // end marker made every exercise 8 pt taller than the card, so it
+                                // scrolled (the Mac's measure of 0.1.49)
+                                VStack(spacing: 0) {
+                                    content.padding(.horizontal, 12).padding(.top, 15)
+                                        .padding(.bottom, 12 + bannerRoom)
+                                        .frame(minHeight: scrollHeight, alignment: .top)
+                                    Color.clear.frame(height: 1).id("exercise-end")
+                                }
                             }
                             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { scrollHeight = max(0, $0 - 1) }
                             .scrollIndicators(.hidden)

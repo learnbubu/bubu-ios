@@ -3,7 +3,7 @@ import CoreGraphics
 /// Scenery made with the art pipeline (tools/art, Oct 2026). Written by tools/art/install.py; don't edit.
 enum NewArt {
     /// Corners, anchored bottom-left like the fol- pieces; the path mirrors them for the right.
-    static let corners: [String] = ["corner-bamboo-grove-fuller", "corner-bonsai-on-plinth", "corner-ginkgo-in-autumn", "corner-karst-rocks", "corner-koi-pond", "corner-lotus-pond-edge", "corner-moon-gate-wall", "corner-osmanthus", "corner-peonies", "corner-pine-on-rocks", "corner-stone-lantern", "corner-tall-autumn-maple", "corner-tall-bamboo-and-stone-pagoda", "corner-tall-bamboo-and-wooden-signpost", "corner-tall-bamboo-with-a-hanging-lantern", "corner-tall-cypress-and-urn", "corner-tall-lantern-post", "corner-tall-magnolia", "corner-tall-osmanthus", "corner-tall-pine-and-boulders", "corner-tall-pine-over-a-trickle", "corner-tall-plum-tree", "corner-tall-willow-by-the-water", "corner-tea-terraces", "corner-weeping-willow", "corner-winter-plum"]
+    static let corners: [String] = ["corner-bamboo-grove-fuller", "corner-bonsai-on-plinth", "corner-ginkgo-in-autumn", "corner-karst-rocks", "corner-koi-pond", "corner-lotus-pond-edge", "corner-moon-gate-wall", "corner-osmanthus", "corner-peonies", "corner-pine-on-rocks", "corner-stone-lantern", "corner-tall-autumn-maple", "corner-tall-bamboo-and-stone-pagoda", "corner-tall-bamboo-and-wooden-signpost", "corner-tall-bamboo-with-a-hanging-lantern", "corner-tall-cypress-and-urn", "corner-tall-ginkgo", "corner-tall-karst-pillar", "corner-tall-lantern-post", "corner-tall-magnolia", "corner-tall-osmanthus", "corner-tall-pine-and-boulders", "corner-tall-pine-over-a-trickle", "corner-tall-plum-tree", "corner-tall-willow-by-the-water", "corner-tea-terraces", "corner-weeping-willow", "corner-winter-plum"]
     /// Free-standing landmarks, like the land- pieces.
     static let landmarks: [String] = ["scene-courtyard-gate", "scene-great-wall", "scene-mountain-pavilion", "scene-night-market-stalls", "scene-paifang-archway", "scene-river-boat", "scene-round-hall", "scene-stone-bridge-and-willow", "scene-teahouse"]
     static let art: [String: ArtSize] = [
@@ -23,6 +23,8 @@ enum NewArt {
         "corner-tall-bamboo-and-wooden-signpost": ArtSize(w: 48, ar: 1.711, side: "left"),
         "corner-tall-bamboo-with-a-hanging-lantern": ArtSize(w: 48, ar: 1.61, side: "left"),
         "corner-tall-cypress-and-urn": ArtSize(w: 48, ar: 1.761, side: "left"),
+        "corner-tall-ginkgo": ArtSize(w: 48, ar: 1.676, side: "left"),
+        "corner-tall-karst-pillar": ArtSize(w: 48, ar: 1.848, side: "left"),
         "corner-tall-lantern-post": ArtSize(w: 48, ar: 1.622, side: "left"),
         "corner-tall-magnolia": ArtSize(w: 48, ar: 1.829, side: "left"),
         "corner-tall-osmanthus": ArtSize(w: 48, ar: 1.664, side: "left"),
@@ -60,6 +62,8 @@ enum NewArt {
         "corner-tall-bamboo-and-wooden-signpost": [[0.027, 0.384], [0.0, 0.405], [0.0, 0.439], [0.0, 0.51], [0.0, 0.356], [0.0, 0.519], [0.0, 0.542], [0.0, 0.65], [0.0, 0.918], [0.0, 1.0]],
         "corner-tall-bamboo-with-a-hanging-lantern": [[0.02, 0.435], [0.0, 0.551], [0.0, 0.569], [0.0, 0.399], [0.0, 0.458], [0.0, 0.483], [0.0, 0.435], [0.0, 0.653], [0.0, 0.719], [0.0, 1.0]],
         "corner-tall-cypress-and-urn": [[0.117, 0.25], [0.067, 0.468], [0.049, 0.507], [0.039, 0.534], [0.031, 0.546], [0.0, 0.548], [0.0, 0.579], [0.0, 0.667], [0.0, 0.916], [0.0, 1.0]],
+        "corner-tall-ginkgo": [[0.028, 0.384], [0.013, 0.443], [0.0, 0.469], [0.035, 0.616], [0.0, 0.616], [0.0, 0.616], [0.0, 0.464], [0.0, 0.52], [0.0, 0.734], [0.0, 1.0]],
+        "corner-tall-karst-pillar": [[0.123, 0.524], [0.066, 0.589], [0.057, 0.671], [0.0, 0.577], [0.035, 0.571], [0.014, 0.491], [0.0, 0.632], [0.0, 0.589], [0.0, 0.807], [0.0, 1.0]],
         "corner-tall-lantern-post": [[0.032, 0.505], [0.05, 0.551], [0.029, 0.568], [0.067, 0.495], [0.023, 0.474], [0.0, 0.422], [0.0, 0.454], [0.0, 0.591], [0.0, 0.905], [0.0, 1.0]],
         "corner-tall-magnolia": [[0.053, 0.417], [0.022, 0.535], [0.0, 0.602], [0.0, 0.63], [0.0, 0.494], [0.0, 0.366], [0.0, 0.47], [0.0, 0.567], [0.0, 0.758], [0.0, 1.0]],
         "corner-tall-osmanthus": [[0.03, 0.383], [0.0, 0.481], [0.0, 0.538], [0.0, 0.444], [0.0, 0.47], [0.0, 0.436], [0.0, 0.44], [0.0, 0.601], [0.0, 0.924], [0.0, 1.0]],
