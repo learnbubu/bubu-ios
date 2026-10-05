@@ -801,6 +801,64 @@
 "w": "秋天",
 "d": "falling orange leaves"
 }
+],
+[
+{
+"w": "你好",
+"d": "a cartoon kid waving hello with a big smile"
+},
+{
+"w": "谢谢",
+"d": "a cartoon kid giving a small polite bow with hands together, thankful"
+},
+{
+"w": "再见",
+"d": "a cartoon kid waving goodbye over their shoulder while walking away"
+},
+{
+"w": "名字",
+"d": "a name badge (a blank 'HELLO my name is' style sticker with no readable letters)"
+},
+{
+"w": "高兴",
+"d": "a beaming, happy cartoon face with sparkles"
+},
+{
+"w": "认识",
+"d": "two cartoon hands shaking"
+},
+{
+"w": "对不起",
+"d": "a cartoon kid looking apologetic with a hand behind their head"
+},
+{
+"w": "慢",
+"d": "a friendly tortoise walking slowly"
+},
+{
+"w": "说",
+"d": "a cartoon kid talking, with a speech bubble"
+},
+{
+"w": "学",
+"d": "a cartoon kid studying at a desk with an open book"
+},
+{
+"w": "喝",
+"d": "a cartoon kid drinking from a cup"
+},
+{
+"w": "住",
+"d": "a cartoon kid standing at the front door of their small house"
+},
+{
+"w": "来",
+"d": "a cartoon kid running happily towards you, arms open"
+},
+{
+"w": "一起",
+"d": "two cartoon kids walking hand in hand"
+}
 ]
 ],
 "same": {
