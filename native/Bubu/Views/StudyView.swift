@@ -1129,9 +1129,9 @@ struct ChoiceView: View {
                 PinyinText(pinyin: Course.wordPy[opt] ?? "", size: 13, weight: .bold).opacity(pinyinShown ? 1 : 0)
             }
             .frame(maxWidth: .infinity).padding(.vertical, 10)
-            .modifier(SuccessShine(on: state == true && opt == picked, delay: 0.05, radius: 16))
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 16))
+        .modifier(SuccessShine(on: state == true && opt == picked, delay: 0.05, radius: 16))
         .disabled(answered)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
@@ -1204,9 +1204,10 @@ struct ChoiceView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 14).padding(.vertical, ex.dir == "recall" || ex.dir == "gap" ? 10 : 14)
-            .modifier(SuccessShine(on: state == true && opt == picked, delay: 0.05, radius: 14))
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge))
+        // on the whole tile (face and lip), so the box and its text hop together (the owner, 5 Oct 2026)
+        .modifier(SuccessShine(on: state == true && opt == picked, delay: 0.05, radius: 14))
         .disabled(answered)
         .accessibilityAddTraits(selected ? .isSelected : [])
         .animation(.easeOut(duration: 0.15), value: answered)
