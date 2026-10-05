@@ -126,7 +126,9 @@ def main():
         src = os.path.join(FINAL, f + ".png")
         if os.path.exists(src):
             shutil.move(src, os.path.join(FINAL, "pictures", w + ".png"))
-            report.append(("pictures/" + w + ".png", "(redo)", 0.0))
+            target = "pictures/" + w + ".png"
+            report = [row for row in report if row[0] not in (f + ".png", target)]
+            report.append((target, "(redo)", leftover_pink(Image.open(os.path.join(FINAL, target)))))
     # words drawn with another word's picture
     for w, same in sheets.get("same", {}).items():
         src = os.path.join(FINAL, "pictures", same + ".png")

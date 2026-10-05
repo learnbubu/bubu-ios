@@ -1,4 +1,5 @@
 import XCTest
+import UIKit
 @testable import Bubu
 
 /// Sentences only from words you've met, and a lesson's steps.
@@ -346,6 +347,21 @@ final class LessonFlowTests: XCTestCase {
         XCTAssertFalse(ex2.typedRight(late.word.pinyin), "pinyin doesn't count when it's characters")
         XCTAssertFalse(Exercise.typesHanzi(late, setting: "pinyin"))
         XCTAssertTrue(Exercise.typesHanzi(nali, setting: "hanzi"))
+    }
+
+    /// The art pipeline's pictures and scenery (tools/art): every picture-card word has its drawn
+    /// picture, and every new scenery piece has a size and its ten painted strips.
+    func testDrawnArtIsComplete() {
+        let missing = Pictures.byHanzi.keys.filter { Pictures.asset($0) == nil }
+        XCTAssertEqual(missing.sorted(), [], "picture cards without a drawn picture")
+        for name in NewArt.corners + NewArt.landmarks {
+            XCTAssertNotNil(NewArt.art[name], name)
+            XCTAssertEqual(NewArt.slabs[name]?.count, 10, name)
+            XCTAssertNotNil(UIImage(named: name), name)
+        }
+        for pose in ["panda-trophy", "panda-streak-fire", "panda-shivering-with-an-ember", "panda-idea", "panda-yawning-at-night"] {
+            XCTAssertNotNil(UIImage(named: pose), pose)
+        }
     }
 
     // MARK: the sentence rule

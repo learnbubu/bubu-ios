@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 /// A picture for a word, for Duolingo's picture cards ("Which one is tea?"): Apple's emoji for
 /// now (the owner, 3 Oct 2026: "picture cards for now, just basic stuff"), for the concrete nouns
@@ -44,4 +45,11 @@ enum Pictures {
     ]
 
     static func of(_ hanzi: String) -> String? { byHanzi[hanzi] }
+
+    /// The drawn picture (tools/art, Oct 2026), an asset named after the word's UTF-8 bytes, if
+    /// the app has one; the emoji stands in where it doesn't.
+    static func asset(_ hanzi: String) -> String? {
+        let name = "pic-" + hanzi.utf8.map { String(format: "%02x", $0) }.joined()
+        return UIImage(named: name) != nil ? name : nil          // (UIKit caches the lookup)
+    }
 }

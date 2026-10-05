@@ -1,0 +1,59 @@
+import CoreGraphics
+
+/// Scenery made with the art pipeline (tools/art, Oct 2026). Written by tools/art/install.py; don't edit.
+enum NewArt {
+    /// Corners, anchored bottom-left like the fol- pieces; the path mirrors them for the right.
+    static let corners: [String] = ["corner-bamboo-grove-fuller", "corner-bonsai-on-plinth", "corner-ginkgo-in-autumn", "corner-karst-rocks", "corner-koi-pond", "corner-lotus-pond-edge", "corner-moon-gate-wall", "corner-osmanthus", "corner-peonies", "corner-pine-on-rocks", "corner-stone-lantern", "corner-tea-terraces", "corner-weeping-willow", "corner-winter-plum"]
+    /// Free-standing landmarks, like the land- pieces.
+    static let landmarks: [String] = ["scene-courtyard-gate", "scene-great-wall", "scene-mountain-pavilion", "scene-night-market-stalls", "scene-paifang-archway", "scene-river-boat", "scene-round-hall", "scene-stone-bridge-and-willow", "scene-teahouse"]
+    static let art: [String: ArtSize] = [
+        "corner-bamboo-grove-fuller": ArtSize(w: 60, ar: 1.554, side: "left"),
+        "corner-bonsai-on-plinth": ArtSize(w: 60, ar: 1.393, side: "left"),
+        "corner-ginkgo-in-autumn": ArtSize(w: 60, ar: 1.493, side: "left"),
+        "corner-karst-rocks": ArtSize(w: 60, ar: 1.433, side: "left"),
+        "corner-koi-pond": ArtSize(w: 60, ar: 1.685, side: "left"),
+        "corner-lotus-pond-edge": ArtSize(w: 60, ar: 1.422, side: "left"),
+        "corner-moon-gate-wall": ArtSize(w: 60, ar: 1.32, side: "left"),
+        "corner-osmanthus": ArtSize(w: 60, ar: 1.463, side: "left"),
+        "corner-peonies": ArtSize(w: 60, ar: 1.642, side: "left"),
+        "corner-pine-on-rocks": ArtSize(w: 60, ar: 1.366, side: "left"),
+        "corner-stone-lantern": ArtSize(w: 60, ar: 1.351, side: "left"),
+        "corner-tea-terraces": ArtSize(w: 60, ar: 1.304, side: "left"),
+        "corner-weeping-willow": ArtSize(w: 60, ar: 1.485, side: "left"),
+        "corner-winter-plum": ArtSize(w: 60, ar: 1.398, side: "left"),
+        "scene-courtyard-gate": ArtSize(w: 65, ar: 0.593, side: "any"),
+        "scene-great-wall": ArtSize(w: 65, ar: 0.57, side: "any"),
+        "scene-mountain-pavilion": ArtSize(w: 65, ar: 0.641, side: "any"),
+        "scene-night-market-stalls": ArtSize(w: 65, ar: 0.557, side: "any"),
+        "scene-paifang-archway": ArtSize(w: 65, ar: 0.56, side: "any"),
+        "scene-river-boat": ArtSize(w: 65, ar: 0.537, side: "any"),
+        "scene-round-hall": ArtSize(w: 65, ar: 0.634, side: "any"),
+        "scene-stone-bridge-and-willow": ArtSize(w: 65, ar: 0.561, side: "any"),
+        "scene-teahouse": ArtSize(w: 65, ar: 0.619, side: "any"),
+    ]
+    static let slabs: [String: [[CGFloat]]] = [
+        "corner-bamboo-grove-fuller": [[0.064, 0.449], [0.0, 0.589], [0.017, 0.625], [0.003, 0.634], [0.064, 0.693], [0.0, 0.66], [0.0, 0.622], [0.0, 0.642], [0.0, 0.953], [0.0, 1.0]],
+        "corner-bonsai-on-plinth": [[0.009, 0.427], [0.0, 0.642], [0.0, 0.709], [0.062, 0.783], [0.0, 0.783], [0.0, 0.486], [0.0, 0.646], [0.0, 0.737], [0.0, 0.947], [0.0, 1.0]],
+        "corner-ginkgo-in-autumn": [[0.0, 0.393], [0.0, 0.547], [0.0, 0.736], [0.0, 0.801], [0.0, 0.75], [0.0, 0.72], [0.0, 0.834], [0.0, 0.668], [0.0, 0.972], [0.0, 1.0]],
+        "corner-karst-rocks": [[0.006, 0.275], [0.0, 0.424], [0.0, 0.631], [0.0, 0.651], [0.0, 0.583], [0.0, 0.699], [0.0, 0.739], [0.0, 0.814], [0.0, 0.916], [0.0, 1.0]],
+        "corner-koi-pond": [[0.0, 0.322], [0.0, 0.524], [0.0, 0.562], [0.0, 0.414], [0.0, 0.702], [0.0, 0.839], [0.0, 0.961], [0.0, 0.957], [0.0, 1.0], [0.0, 0.981]],
+        "corner-lotus-pond-edge": [[0.0, 0.291], [0.017, 0.419], [0.0, 0.57], [0.0, 0.657], [0.0, 0.648], [0.0, 0.641], [0.0, 0.73], [0.0, 0.82], [0.0, 0.975], [0.0, 1.0]],
+        "corner-moon-gate-wall": [[0.0, 0.261], [0.0, 0.384], [0.0, 0.427], [0.0, 0.361], [0.0, 0.657], [0.0, 0.692], [0.0, 0.651], [0.0, 0.799], [0.0, 0.912], [0.0, 1.0]],
+        "corner-osmanthus": [[0.0, 0.512], [0.0, 0.654], [0.0, 0.867], [0.0, 0.87], [0.0, 0.756], [0.0, 0.737], [0.0, 0.639], [0.0, 0.688], [0.0, 0.824], [0.0, 1.0]],
+        "corner-peonies": [[0.0, 0.25], [0.0, 0.46], [0.0, 0.557], [0.0, 0.734], [0.0, 0.781], [0.0, 0.867], [0.0, 0.94], [0.0, 0.942], [0.0, 1.0], [0.0, 0.996]],
+        "corner-pine-on-rocks": [[0.0, 0.422], [0.0, 0.504], [0.0, 0.707], [0.0, 0.715], [0.0, 0.877], [0.0, 0.876], [0.0, 0.414], [0.0, 0.63], [0.0, 0.876], [0.0, 1.0]],
+        "corner-stone-lantern": [[0.0, 0.254], [0.0, 0.3], [0.0, 0.377], [0.0, 0.526], [0.0, 0.52], [0.0, 0.688], [0.0, 0.679], [0.0, 0.749], [0.0, 0.932], [0.0, 1.0]],
+        "corner-tea-terraces": [[0.0, 0.248], [0.0, 0.394], [0.0, 0.412], [0.0, 0.258], [0.0, 0.459], [0.0, 0.552], [0.0, 0.71], [0.0, 0.823], [0.0, 0.967], [0.0, 1.0]],
+        "corner-weeping-willow": [[0.0, 0.292], [0.0, 0.525], [0.0, 0.729], [0.0, 0.784], [0.0, 0.787], [0.0, 0.741], [0.0, 0.719], [0.0, 0.682], [0.0, 0.962], [0.0, 1.0]],
+        "corner-winter-plum": [[0.0, 0.278], [0.0, 0.452], [0.0, 0.68], [0.0, 0.873], [0.0, 0.91], [0.0, 0.492], [0.0, 0.415], [0.0, 0.606], [0.0, 0.734], [0.0, 1.0]],
+        "scene-courtyard-gate": [[0.127, 0.419], [0.072, 0.699], [0.072, 0.71], [0.041, 0.747], [0.02, 0.962], [0.042, 0.976], [0.021, 0.966], [0.001, 0.981], [0.0, 1.0], [0.001, 0.994]],
+        "scene-great-wall": [[0.498, 0.752], [0.229, 0.799], [0.19, 0.901], [0.187, 0.984], [0.087, 1.0], [0.048, 1.0], [0.02, 1.0], [0.002, 0.991], [0.0, 0.989], [0.014, 0.99]],
+        "scene-mountain-pavilion": [[0.584, 0.871], [0.449, 0.9], [0.232, 0.987], [0.178, 0.992], [0.104, 0.867], [0.104, 0.927], [0.227, 0.941], [0.094, 0.971], [0.0, 1.0], [0.002, 1.0]],
+        "scene-night-market-stalls": [[0.106, 0.344], [0.062, 0.719], [0.062, 0.766], [0.011, 0.937], [0.01, 0.98], [0.09, 0.963], [0.049, 0.966], [0.009, 0.993], [0.0, 1.0], [0.013, 0.998]],
+        "scene-paifang-archway": [[0.359, 0.761], [0.144, 0.761], [0.053, 0.87], [0.039, 0.87], [0.038, 0.899], [0.007, 0.924], [0.007, 0.96], [0.03, 0.971], [0.006, 0.993], [0.0, 1.0]],
+        "scene-river-boat": [[0.146, 0.337], [0.097, 0.374], [0.09, 0.416], [0.069, 0.661], [0.036, 0.848], [0.026, 0.963], [0.029, 0.978], [0.0, 0.982], [0.001, 1.0], [0.069, 0.949]],
+        "scene-round-hall": [[0.526, 0.578], [0.444, 0.657], [0.39, 0.711], [0.167, 0.727], [0.106, 0.746], [0.106, 0.78], [0.069, 0.896], [0.024, 0.96], [0.001, 0.992], [0.0, 1.0]],
+        "scene-stone-bridge-and-willow": [[0.209, 0.367], [0.09, 0.746], [0.054, 0.931], [0.043, 0.964], [0.044, 0.978], [0.058, 0.964], [0.024, 0.964], [0.017, 0.972], [0.0, 1.0], [0.08, 0.898]],
+        "scene-teahouse": [[0.239, 0.653], [0.111, 0.713], [0.073, 0.912], [0.073, 0.91], [0.044, 0.872], [0.048, 0.904], [0.123, 0.948], [0.047, 0.968], [0.007, 0.99], [0.0, 1.0]],
+    ]
+}

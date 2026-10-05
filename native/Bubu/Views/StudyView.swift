@@ -825,6 +825,7 @@ struct TipCard: View {
     var done: () -> Void
     var body: some View {
         VStack(spacing: 14) {
+            Image("panda-idea").resizable().scaledToFit().frame(height: 110)
             VStack(alignment: .leading, spacing: 8) {
                 Label { Text(note.title) } icon: { Image(systemName: "lightbulb.fill").foregroundStyle(Color.gold) }
                     .font(.nunitoXB(17)).foregroundStyle(Color.ink)
@@ -1063,7 +1064,11 @@ struct ChoiceView: View {
         let fill: Color = state == true ? Color.goodSoft : state == false ? Color.againSoft : selected ? Color.accentSoft : Color.panel
         return Button { choose(opt) } label: {
             VStack(spacing: 6) {
-                Text(Pictures.of(opt) ?? "").font(.system(size: 48)).frame(height: 56)
+                if let pic = Pictures.asset(opt) {
+                    Image(pic).resizable().scaledToFit().frame(height: 64)
+                } else {
+                    Text(Pictures.of(opt) ?? "").font(.system(size: 48)).frame(height: 56)
+                }
                 Text(opt).font(.hanzi(20, .bold)).foregroundStyle(Color.ink)
                 PinyinText(pinyin: Course.wordPy[opt] ?? "", size: 13, weight: .bold).opacity(pinyinShown ? 1 : 0)
             }

@@ -69,8 +69,8 @@ struct ReminderOffer: View {
         ZStack {
             Color.black.opacity(0.5).ignoresSafeArea()
             VStack(spacing: 6) {
-                Image("done-panda").resizable().scaledToFit().frame(width: 140)
-                    .padding(.top, -48).padding(.bottom, -36)          // the art sits in the middle of a tall canvas
+                Image("panda-yawning-at-night").resizable().scaledToFit().frame(height: 130)
+                    .padding(.bottom, 6)
                 Text("Want a daily reminder?").font(.nunitoXB(22)).foregroundStyle(Color.ink)
                 Text("Bùbù can give you a gentle nudge at \(time) on days you haven't practised yet. Nothing on days you have.")
                     .font(.nunito(15.5, .semibold)).foregroundStyle(Color.muted)

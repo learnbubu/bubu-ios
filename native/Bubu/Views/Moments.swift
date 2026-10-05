@@ -207,7 +207,7 @@ struct MomentCard: View {
     private var content: some View {
         switch moment {
         case .level(let lv, let next):
-            Image(systemName: "crown.fill").font(.system(size: 46)).foregroundStyle(Color.gold)
+            Image("panda-trophy").resizable().scaledToFit().frame(height: 120)
             big(lv)
             title("Level \(lv)!")
             sub("\(next) XP to level \(lv + 1)")
@@ -221,7 +221,7 @@ struct MomentCard: View {
         case .shop:
             ShopCard(progress: progress, close: close)
         case .milestone(let s, let ember, let coins):
-            FlameIcon(lit: true, size: 90)
+            Image("panda-streak-fire").resizable().scaledToFit().frame(height: 120)
             big(s)
             title("day streak!")
             sub(DoneView.milestoneWords[s] ?? "Keep the fire lit.")
@@ -237,7 +237,7 @@ struct MomentCard: View {
             }
             button("Keep going", close).padding(.top, 10)
         case .relit(let streak, let left):
-            FlameIcon(lit: true, size: 90)
+            Image("panda-shivering-with-an-ember").resizable().scaledToFit().frame(height: 120)
             title("Your ember kept the fire lit")
             big(streak, small: true)
             sub("day streak carries on")

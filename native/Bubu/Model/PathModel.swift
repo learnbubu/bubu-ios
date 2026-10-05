@@ -252,9 +252,12 @@ struct PathModel {
     private struct Slot { let art: String; let x: CGFloat; let y: CGFloat; let w: CGFloat; let family: [String] }
 
     /// The JIC edition's families: its choices, so the path matches it band for band.
-    private static let landmarks = ["cluster-right-temple", "land-torii", "land-pagoda", "land-pavilion", "land-house", "land-bridge", "land-waterfall", "land-cliff"]
-    private static let leftFoliage = ["cluster-left-bamboo", "fol-bamboo", "fol-pine", "fol-blossom", "fol-banana", "fol-oak"]
-    private static let rightFoliage = ["cluster-right-bamboo", "fol-bamboo", "fol-pine", "fol-blossom", "fol-banana", "fol-oak"]
+    /// The new art (NewArt, tools/art, Oct 2026) joins them; the torii, a Japanese gate, is
+    /// retired from the rotation in a Chinese course (the owner, 5 Oct 2026).
+    private static let landmarks = ["cluster-right-temple", "land-pagoda", "land-pavilion", "land-house", "land-bridge", "land-waterfall", "land-cliff"]
+        + NewArt.landmarks
+    private static let leftFoliage = ["cluster-left-bamboo", "fol-bamboo", "fol-pine", "fol-blossom", "fol-banana", "fol-oak"] + NewArt.corners
+    private static let rightFoliage = ["cluster-right-bamboo", "fol-bamboo", "fol-pine", "fol-blossom", "fol-banana", "fol-oak"] + NewArt.corners
     private static let template: [Slot] = [
         Slot(art: "cluster-right-temple", x: 69, y: 35.6, w: 65, family: landmarks),
         Slot(art: "cluster-left-bamboo", x: 26.7, y: 98.2, w: 66, family: leftFoliage),
@@ -338,7 +341,7 @@ struct PathModel {
 
     /// The strips a piece paints when its top-left is at (x0, y0), mirrored if flipped.
     private static func strips(_ art: String, _ x0: CGFloat, _ y0: CGFloat, _ w: CGFloat, _ h: CGFloat, _ mirrored: Bool) -> [Box] {
-        guard let sl = slabs[art], !sl.isEmpty else { return [Box(x0: x0, x1: x0 + w, y0: y0, y1: y0 + h)] }
+        guard let sl = slabs[art] ?? NewArt.slabs[art], !sl.isEmpty else { return [Box(x0: x0, x1: x0 + w, y0: y0, y1: y0 + h)] }
         let n = CGFloat(sl.count)
         return sl.enumerated().map { r, sb in
             let l = mirrored ? 1 - sb[1] : sb[0], rr = mirrored ? 1 - sb[0] : sb[1]
@@ -413,7 +416,7 @@ struct PathModel {
     private static func bands(_ course: Course, _ items: [Item], _ xs: [CGFloat], _ mids: [Int: CGFloat], _ sides: [Int: Bool],
                               _ W: CGFloat, composed: [Piece], after composedUntil: Int, firstId: Int) -> [Piece] {
         guard let last = items.last, composedUntil < items.count - 1 else { return [] }
-        let art = course.data.art
+        let art = course.data.art.merging(NewArt.art) { old, _ in old }
         // everything scenery keeps out of: the stones, and the headers, each on its own side
         var obstacles = Grid<Box>()
         for it in items {
