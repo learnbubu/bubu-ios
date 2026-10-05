@@ -31,9 +31,10 @@ URL = "https://api.openai.com/v1/images/edits"
 
 # which existing art each group is shown as a style reference
 REFS = {
-    "corners": ["fol-bamboo", "fol-blossom", "fol-pine"],
-    "hangers": ["fol-blossom", "fol-bamboo"],
-    "scenes": ["land-pavilion-pond", "land-pagoda", "land-hall"],
+    # scenery: the owner's simple examples (the first corners came out too detailed)
+    "corners": ["ref-simple-blossom", "ref-simple-steps"],
+    "hangers": ["ref-simple-blossom", "ref-simple-steps"],
+    "scenes": ["ref-simple-steps", "land-pavilion-pond", "land-pagoda"],
     "pandas": ["panda-waving", "panda-celebrate", "panda-reading", "panda-teacher"],
     "sheets": ["panda-waving", "av-011b33dd86d4947f9f9a", "fol-blossom", "land-pavilion"],
 }
@@ -48,7 +49,11 @@ def slug(s):
 
 
 def ref_png(name):
-    """An existing asset, flattened onto the magenta background so the model sees the format too."""
+    """An existing asset, flattened onto the magenta background so the model sees the format too
+    (or a reference already saved in refs/)."""
+    saved = os.path.join(HERE, "refs", name + ".png")
+    if name.startswith("ref-") and os.path.exists(saved):
+        return open(saved, "rb").read()
     folder = os.path.join(ASSETS, name + ".imageset")
     png = next(f for f in os.listdir(folder) if f.lower().endswith(".png"))
     im = Image.open(os.path.join(folder, png)).convert("RGBA")

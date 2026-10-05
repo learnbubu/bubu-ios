@@ -11,6 +11,10 @@ STYLE = ("Style: Bùbù house style. Flat, soft storybook vector illustration wi
          "No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), "
          "warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, "
          "pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.")
+# scenery is SIMPLE (the owner's references, 5 Oct 2026: 'too detailed'): few elements, big shapes
+SIMPLE = ("Keep it SIMPLE, like the attached references: only a few elements (one tree or feature, two or three rocks, a few leaf clusters and "
+          "three to five small cream flowers), each a big simple shape with a flat fill and at most one soft lighter tone. No fine texture, no small "
+          "detailed leaves, no dense undergrowth, no tiny repeated details. Soft, slightly muted greens. Generous empty space between elements.")
 KEY = ("Background: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, "
        "so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. "
        "No text, no letters, no numbers, no watermark, no border, no frame.")
@@ -19,8 +23,8 @@ PANDA = ("Character: Bùbù, a chubby baby panda. Cream-white face and belly; ch
          "Keep the same proportions: a big round head about as wide as the body, short stubby legs, no outlines.")
 
 CORNERS = [
-    ("Pine on rocks", "a gnarled Chinese pine with flat cloud-shaped foliage leaning out over mossy grey rocks, ferns and a few cream flowers"),
-    ("Lotus pond edge", "the edge of a lotus pond: round lily pads, two cream-and-coral lotus flowers and a bud, reeds, smooth stones at the water's edge"),
+    ("Pine on rocks", "a Chinese pine with three or four flat cloud-shaped foliage pads leaning out over two smooth grey rocks"),
+    ("Lotus pond edge", "the edge of a lotus pond: three big round lily pads, one cream lotus flower and a bud, a smooth stone"),
     ("Stone lantern", "a weathered Chinese stone lantern with a little warm glow inside, moss, ferns and small round shrubs around its base"),
     ("Weeping willow", "a weeping willow with long drooping green fronds hanging over a strip of water and a few stepping stones"),
     ("Ginkgo in autumn", "a ginkgo tree with golden fan-shaped leaves, a few leaves falling, rocks and low shrubs at its base"),
@@ -32,7 +36,7 @@ CORNERS = [
     ("Bonsai on plinth", "a small bonsai pine in a glazed teal pot on a stone plinth, with a few pebbles and moss"),
     ("Winter plum", "a plum branch in winter with coral-red blossoms and soft snow on the branches and on the rocks below"),
     ("Osmanthus", "an osmanthus tree with clusters of tiny golden-orange flowers, rounded shrubs and rocks at its base"),
-    ("Bamboo grove (fuller)", "a dense bamboo grove with tall slender stalks and leaves, grey rocks and ferns, wider and fuller than a single clump"),
+    ("Bamboo grove (fuller)", "three tall bamboo stalks with a few leaf sprays and one rock"),
 ]
 HANGERS = [
     ("Hanging lanterns", "a string of three round red Chinese lanterns with gold tassels hanging from a branch that enters from the top-left corner"),
@@ -77,9 +81,9 @@ PANDAS = [
     ("Peeking from the right", "peeking in from the right edge of the frame, only half its body visible"),
 ]
 
-corner = [{"t": n, "p": f"{STYLE}\n\nCreate a decorative scenery corner: {d}. Anchor the artwork to the BOTTOM-LEFT corner so it fills only the left 55% of the canvas, rising to about 85% of the height at the far left and tapering down to the bottom towards the right, like the attached corner pieces. The right side and the top right stay empty magenta. Portrait canvas, 4:5.\n\n{KEY}"} for n, d in CORNERS]
-hang = [{"t": n, "p": f"{STYLE}\n\nCreate a hanging decoration: {d}. Anchor it to the TOP-LEFT corner and keep it in the top-left area, so it can hang into a screen from above. Portrait canvas, 4:5.\n\n{KEY}"} for n, d in HANGERS]
-scene = [{"t": n, "p": f"{STYLE}\n\nCreate a free-standing landmark vignette: {d}. Centre it on a small cream ground patch, with a soft rounded sticker-like silhouette (no full sky, no full-bleed background). Landscape canvas, 3:2.\n\n{KEY}"} for n, d in SCENES]
+corner = [{"t": n, "p": f"{STYLE}\n\n{SIMPLE}\n\nCreate a decorative scenery corner: {d}. Anchor the artwork to the BOTTOM-LEFT corner so it fills only the left 55% of the canvas, rising to about 85% of the height at the far left and tapering down to the bottom towards the right, like the attached corner pieces. The right side and the top right stay empty magenta. Portrait canvas, 4:5.\n\n{KEY}"} for n, d in CORNERS]
+hang = [{"t": n, "p": f"{STYLE}\n\n{SIMPLE}\n\nCreate a hanging decoration: {d}. Anchor it to the TOP-LEFT corner and keep it in the top-left area, so it can hang into a screen from above. Portrait canvas, 4:5.\n\n{KEY}"} for n, d in HANGERS]
+scene = [{"t": n, "p": f"{STYLE}\n\n{SIMPLE}\n\nCreate a free-standing landmark vignette: {d}. Centre it on a small cream ground patch, with a soft rounded sticker-like silhouette (no full sky, no full-bleed background). Landscape canvas, 3:2.\n\n{KEY}"} for n, d in SCENES]
 panda = [{"t": n, "p": f"{STYLE}\n\n{PANDA}\n\nPose: Bùbù {d}. Full body, centred, with generous margin all round. Square canvas.\n\n{KEY}"} for n, d in PANDAS]
 sheets = []
 for i, sh in enumerate(data["sheets"]):
