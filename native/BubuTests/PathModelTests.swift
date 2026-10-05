@@ -121,7 +121,10 @@ final class PathModelTests: XCTestCase {
             // the generated scenery comes after the composed, and reaches the end of the path
             let startY = m.items[firstBand].y - 844
             for p in generated {
-                let a = try! XCTUnwrap(course.data.art[p.art], "\(p.art) isn't in the art table")
+                // the course's art table, or the art pipeline's (NewArt), as PathModel merges them
+                guard let a = course.data.art[p.art] ?? NewArt.art[p.art] else {
+                    XCTFail("\(p.art) isn't in the art table"); continue
+                }
                 XCTAssertGreaterThan(p.y + p.h / 2, startY, "\(p.art) planted up among the composed pieces at \(width)")
                 XCTAssertLessThanOrEqual(p.y + p.h / 2, m.items.last!.y + PathModel.size * 0.9 + 0.5, "\(p.art) below the last stone")
                 if p.art.hasPrefix("panda") {
