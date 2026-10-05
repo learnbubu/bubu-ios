@@ -597,20 +597,29 @@ struct SuccessShine: ViewModifier {
     @State private var hop = false          // sweep's end value never showed it, 0.1.50)
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    private var streak: some View {
+        LinearGradient(stops: [.init(color: .white.opacity(0), location: 0), .init(color: .white.opacity(0.85), location: 0.35),
+                               .init(color: .white.opacity(0.85), location: 0.65), .init(color: .white.opacity(0), location: 1)],
+                       startPoint: .leading, endPoint: .trailing)
+    }
+
     func body(content: Content) -> some View {
         content
             .offset(y: hop ? -4 : 0)
             .overlay {
                 GeometryReader { g in
-                    LinearGradient(colors: [.white.opacity(0), .white.opacity(0.55), .white.opacity(0)],
-                                   startPoint: .leading, endPoint: .trailing)
-                        // three times the tile's height, so the band's ends stay outside the tile
-                        // once it's tilted (they showed as faint diagonal lines: the Mac's frames)
-                        .frame(width: max(24, g.size.width * 0.45), height: g.size.height * 3)
-                        .rotationEffect(.degrees(18))
-                        .frame(height: g.size.height)
-                        .offset(x: sweep * (g.size.width + g.size.width * 0.45))
-                        .frame(width: g.size.width, height: g.size.height, alignment: .leading)
+                    // two crisp streaks, a wide one and a thin one just behind it, like light off glass
+                    // (the owner, 5 Oct 2026: "more like 2 streaks rather than a soft glow")
+                    let band = max(30, g.size.width * 0.32)
+                    HStack(spacing: band * 0.16) {
+                        streak.frame(width: band * 0.34)
+                        streak.frame(width: band * 0.14)
+                    }
+                    .frame(width: band, height: g.size.height * 3)
+                    .rotationEffect(.degrees(20))
+                    .frame(height: g.size.height)
+                    .offset(x: sweep * (g.size.width + band))
+                    .frame(width: g.size.width, height: g.size.height, alignment: .leading)
                 }
                 .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
                 .allowsHitTesting(false)
@@ -622,8 +631,9 @@ struct SuccessShine: ViewModifier {
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                     shining = true
                     withAnimation(.spring(response: 0.22, dampingFraction: 0.5)) { hop = true }
-                    withAnimation(.easeInOut(duration: 0.55)) { sweep = 1 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { shining = false }
+                    // slower, so the streaks can be seen crossing (it was 0.55 s: "too fast")
+                    withAnimation(.easeInOut(duration: 0.9)) { sweep = 1 }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) { shining = false }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { hop = false }
                     }
@@ -1660,7 +1670,7 @@ struct SentenceView: View {
         // a hold shows the tile's hint, and the tap its release makes is ignored (the Mac's check)
         let order = Double(placed.firstIndex(of: t) ?? 0)
         return Button { if justHeld { justHeld = false } else if !justDragged { tap() } } label: {
-            tileFace(t, tint: tint).modifier(SuccessShine(on: inAnswer && result == true, delay: 0.05 + order * 0.07))
+            tileFace(t, tint: tint).modifier(SuccessShine(on: inAnswer && result == true, delay: 0.05 + order * 0.09))
         }
         .buttonStyle(PressDown(depth: 2))
         .sensoryFeedback(.selection, trigger: placed.count)
