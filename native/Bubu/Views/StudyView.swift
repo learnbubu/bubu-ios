@@ -580,6 +580,47 @@ struct BubbleShape: Shape {
     }
 }
 
+/// A right answer's small celebration, as Duolingo's (the owner, 5 Oct 2026: "pretty cool …
+/// not too over the top"): the tile hops a little and a soft shine sweeps across it, each tile
+/// a beat after the one before. Nothing with Reduce Motion on.
+struct SuccessShine: ViewModifier {
+    var on: Bool
+    var delay: Double = 0
+    var radius: CGFloat = 12
+    @State private var sweep: CGFloat = -1
+    @State private var hop = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .offset(y: hop ? -4 : 0)
+            .overlay {
+                GeometryReader { g in
+                    LinearGradient(colors: [.white.opacity(0), .white.opacity(0.55), .white.opacity(0)],
+                                   startPoint: .leading, endPoint: .trailing)
+                        .frame(width: max(24, g.size.width * 0.45))
+                        .rotationEffect(.degrees(18))
+                        .offset(x: sweep * (g.size.width + g.size.width * 0.45))
+                        .frame(width: g.size.width, height: g.size.height, alignment: .leading)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+                .allowsHitTesting(false)
+                .opacity(sweep > -1 && sweep < 1 ? 1 : 0)
+            }
+            .onChange(of: on) { _, now in
+                guard now, !reduceMotion else { return }
+                sweep = -1
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    withAnimation(.spring(response: 0.22, dampingFraction: 0.5)) { hop = true }
+                    withAnimation(.easeInOut(duration: 0.55)) { sweep = 1 }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { hop = false }
+                    }
+                }
+            }
+    }
+}
+
 /// Duolingo's raised tile: a face with a coloured lip under it that it presses down into.
 struct Tile3D: ButtonStyle {
     var fill: Color
@@ -1077,6 +1118,7 @@ struct ChoiceView: View {
                 PinyinText(pinyin: Course.wordPy[opt] ?? "", size: 13, weight: .bold).opacity(pinyinShown ? 1 : 0)
             }
             .frame(maxWidth: .infinity).padding(.vertical, 10)
+            .modifier(SuccessShine(on: state == true && opt == picked, delay: 0.05, radius: 16))
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 16))
         .disabled(answered)
@@ -1151,6 +1193,7 @@ struct ChoiceView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 14).padding(.vertical, ex.dir == "recall" || ex.dir == "gap" ? 10 : 14)
+            .modifier(SuccessShine(on: state == true && opt == picked, delay: 0.05, radius: 14))
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge))
         .disabled(answered)
@@ -1603,7 +1646,10 @@ struct SentenceView: View {
     private func tile(_ t: Exercise.Tile, inAnswer: Bool, tap: @escaping () -> Void) -> some View {
         let tint: Color? = inAnswer ? (result == true ? .good : result == false ? .again : nil) : nil
         // a hold shows the tile's hint, and the tap its release makes is ignored (the Mac's check)
-        return Button { if justHeld { justHeld = false } else if !justDragged { tap() } } label: { tileFace(t, tint: tint) }
+        let order = Double(placed.firstIndex(of: t) ?? 0)
+        return Button { if justHeld { justHeld = false } else if !justDragged { tap() } } label: {
+            tileFace(t, tint: tint).modifier(SuccessShine(on: inAnswer && result == true, delay: 0.05 + order * 0.07))
+        }
         .buttonStyle(PressDown(depth: 2))
         .sensoryFeedback(.selection, trigger: placed.count)
         .simultaneousGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in

@@ -31,14 +31,8 @@ struct SpeakView: View {
     @State private var blockedBySettings = false
     @State private var skipped = false
     @Environment(\.openURL) private var openURL
-    /// The height the exercise has in the card's scroll area, under the title: the content is
-    /// centred in it.
-    @State private var room: CGFloat = 0
     /// Retries allowed after the first go before it counts as wrong.
     static let maxRetries = 2
-    /// What StudyView puts above the exercise in the same scroll area: the title line and
-    /// its padding, and the scroll view's own top and bottom padding.
-    static let titleRoom: CGFloat = 76
 
     var body: some View {
         let w = ex.card.word
@@ -95,19 +89,11 @@ struct SpeakView: View {
         }
         .frame(maxWidth: .infinity)
         // as the JIC edition: the panda and the bubble sit in the middle of the card when
-        // there's room; taller than the room (a banner, a long phrase), it scrolls as before
-        .frame(minHeight: room, alignment: .center)
-        .background {
-            Color.clear
-                .containerRelativeFrame(.vertical) { h, _ in max(0, h - Self.titleRoom) }
-                .background(GeometryReader { g in
-                    Color.clear
-                        .onAppear { room = g.size.height }
-                        .onChange(of: g.size.height) { _, h in room = h }
-                })
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-        }
+        // there's room; taller than the room (a long phrase), it scrolls. The card hands an
+        // exercise exactly the height left under its title (and a "Previous mistake" tag, which
+        // the old measure, the card less a fixed 76 pt for the title, didn't allow for: it
+        // scrolled by that much, the owner's screenshots of 5 Oct 2026)
+        .frame(maxHeight: .infinity, alignment: .center)
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: outcome)
         .onAppear {
             checkAvailable()
