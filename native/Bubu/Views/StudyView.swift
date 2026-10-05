@@ -618,7 +618,10 @@ struct SuccessShine: ViewModifier {
                     .frame(width: band, height: g.size.height * 3)
                     .rotationEffect(.degrees(20))
                     .frame(height: g.size.height)
-                    .offset(x: sweep * (g.size.width + band))
+                    // the whole sweep is spent crossing the tile: from just off its left edge to just
+                    // off its right (sweep -1 to 1 over 2x the width spent half its time off it, and
+                    // the eased middle crossed in a quarter of a second: the Mac's frames)
+                    .offset(x: -band * 1.4 + (sweep + 1) / 2 * (g.size.width + band * 1.8))
                     .frame(width: g.size.width, height: g.size.height, alignment: .leading)
                 }
                 .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
@@ -632,8 +635,8 @@ struct SuccessShine: ViewModifier {
                     shining = true
                     withAnimation(.spring(response: 0.22, dampingFraction: 0.5)) { hop = true }
                     // slower, so the streaks can be seen crossing (it was 0.55 s: "too fast")
-                    withAnimation(.easeInOut(duration: 0.9)) { sweep = 1 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.95) { shining = false }
+                    withAnimation(.linear(duration: 0.8)) { sweep = 1 }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) { shining = false }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { hop = false }
                     }
