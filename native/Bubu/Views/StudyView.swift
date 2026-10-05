@@ -604,8 +604,11 @@ struct SuccessShine: ViewModifier {
                 GeometryReader { g in
                     LinearGradient(colors: [.white.opacity(0), .white.opacity(0.55), .white.opacity(0)],
                                    startPoint: .leading, endPoint: .trailing)
-                        .frame(width: max(24, g.size.width * 0.45))
+                        // three times the tile's height, so the band's ends stay outside the tile
+                        // once it's tilted (they showed as faint diagonal lines: the Mac's frames)
+                        .frame(width: max(24, g.size.width * 0.45), height: g.size.height * 3)
                         .rotationEffect(.degrees(18))
+                        .frame(height: g.size.height)
                         .offset(x: sweep * (g.size.width + g.size.width * 0.45))
                         .frame(width: g.size.width, height: g.size.height, alignment: .leading)
                 }
