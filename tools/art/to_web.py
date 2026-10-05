@@ -40,6 +40,8 @@ def main():
         if kind not in SIZE or name in have or (name.endswith("-right") and kind in ("corner", "hang")):
             continue
         w, side, longest = SIZE[kind]
+        if "-tall-" in name:
+            w = 48                      # the tall, slim corners take less of the screen's width
         im = Image.open(os.path.join(FINAL, f)).convert("RGBA")
         im.thumbnail((longest, longest), Image.LANCZOS)
         im.save(os.path.join(WEB, "images", "path", name + ".webp"), "WEBP", quality=88, method=6)

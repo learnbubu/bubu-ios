@@ -81,7 +81,8 @@ def main():
             imageset(name, Image.open(os.path.join(FINAL, f)), MAX[kind])
         elif kind in ("corner", "scene"):
             im = imageset(name, Image.open(os.path.join(FINAL, f)), MAX[kind])
-            art[name] = {"w": 60 if kind == "corner" else 65, "ar": round(im.height / im.width, 3),
+            # the tall, slim corners (batch 2) take less of the screen's width
+            art[name] = {"w": (48 if "-tall-" in name else 60) if kind == "corner" else 65, "ar": round(im.height / im.width, 3),
                          "side": "left" if kind == "corner" else "any"}
             strips[name] = slabs(im)
             (corners if kind == "corner" else scenes).append(name)
