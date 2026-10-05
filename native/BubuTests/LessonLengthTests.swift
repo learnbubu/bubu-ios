@@ -101,7 +101,8 @@ final class LessonLengthTests: XCTestCase {
             "meet 你", "recognize 你",
             "meet 好", "recognize 好",
             "listen 你",
-            "meet 你好", "recognize 你好",
+            // 你好 has a picture (batch 3), and a picture card is the ladder's easy first rung too
+            "meet 你好", "picture 你好",
         ], "\(got)")
         // it isn't one word from four options all the way (the owner's report)
         let kinds = Set(ex.map(\.dir))
@@ -111,7 +112,7 @@ final class LessonLengthTests: XCTestCase {
         // after its meet card, a word's first exercise is the easy one
         for (i, st) in steps.enumerated() where st.meet {
             XCTAssertEqual(steps[i + 1].id, st.id)
-            XCTAssertEqual(steps[i + 1].dir, "recognize")
+            XCTAssertTrue(["recognize", "picture"].contains(steps[i + 1].dir), "\(steps[i + 1].dir) after meeting \(st.hanzi)")
         }
         XCTAssertTrue(p.isDone(stone.id))
     }
