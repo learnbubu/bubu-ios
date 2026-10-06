@@ -18,6 +18,10 @@ L = {
     "rig-eyes-happy": (86, 128, 256),
     "rig-eyes-wow": (80, 122, 270),
     "rig-eyes-blink": (90, 132, 248),
+    # just the light eye marks (rig_glint): swapped over the head's own eye patches, which never change
+    "rig-glint-open": (86, 128, 256),
+    "rig-glint-happy": (86, 128, 256),
+    "rig-glint-wow": (80, 122, 270),
     "rig-mouth-smile": (174, 188, 68),
     "rig-mouth-open": (179, 212, 58),
     "rig-tears": (62, 186, 300),
