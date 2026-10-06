@@ -13,7 +13,10 @@ L = {
     "rig-arm-right-down": (322, 292, 88),
     "rig-arm-left-up": (34, 165, 128),
     "rig-arm-right-up": (254, 165, 128),     # the left one mirrored (rig_straps)
-    "rig-straps": (0, 0, 420),                # the chest straps, drawn over the arms
+    "rig-straps": (0, 0, 420),
+    # the second body (straps only) and the backpack on its own, behind his right side
+    "rig2-body": (58, 293, 300),
+    "rig2-pack": (290, 285, 150),                # the chest straps, drawn over the arms
     "rig-head": (32, 4, 352),
     "rig-eyes-open": (86, 128, 256),
     "rig-eyes-happy": (86, 128, 256),
