@@ -42,6 +42,8 @@ def main():
         Image.fromarray(one.astype("uint8")).save(os.path.join(RIG, f"rig-straps-{side}.png"))
         top = one.copy(); top[:, :, 3] *= np.clip((SHOULDER - yy) / 6 + 0.5, 0, 1)
         Image.fromarray(top.astype("uint8")).save(os.path.join(RIG, f"rig-straps-{side}-top.png"))
+    down = Image.open(os.path.join(RIG, "rig-arm-right-down.png"))
+    down.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(RIG, "rig-arm-left-down.png"))
     up = Image.open(os.path.join(RIG, "rig-arm-left-up.png"))
     up.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(RIG, "rig-arm-right-up.png"))
     print("straps:", int(grow.sum()), "px")

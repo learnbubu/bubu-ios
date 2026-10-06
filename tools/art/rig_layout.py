@@ -9,7 +9,7 @@ from PIL import Image
 
 L = {
     "rig-body": (50, 248, 360),
-    "rig-arm-left-down": (2, 282, 118),
+    "rig-arm-left-down": (6, 292, 88),      # the right one mirrored (it had no strap painted on)
     "rig-arm-right-down": (322, 292, 88),
     "rig-arm-left-up": (34, 165, 128),
     "rig-arm-right-up": (254, 165, 128),     # the left one mirrored (rig_straps)
@@ -18,7 +18,7 @@ L = {
     "rig2-body": (50, 274, 316),
     "rig2-pack": (290, 285, 150),
     "rig2-pack-side": (285, 262, 135),
-    "rig2-body-trim": (0, 0, 420),
+    "rig2-body-trim": (0, 0, 420), "rig2-body-trim-L": (0, 0, 420), "rig2-body-trim-R": (0, 0, 420),
     "rig-straps-L": (0, 0, 420), "rig-straps-R": (0, 0, 420),
     "rig-straps-L-top": (0, 0, 420), "rig-straps-R-top": (0, 0, 420),         # rig_trim.py: the shoulder stubs off                # the chest straps, drawn over the arms
     "rig-head": (32, 4, 352),

@@ -16,8 +16,9 @@ if __name__ == "__main__":
     h, w = b.shape[:2]
     x = np.arange(w)[None, :].repeat(h, 0); y = np.arange(h)[:, None].repeat(w, 1)
     # how far inside the side lines, softened over 2 px; only above chest level
-    inside = np.clip(np.minimum(x - LEFT, RIGHT - x) / 2 + 0.5, 0, 1)
-    keep = np.where(y < BELOW, inside, 1.0)
-    b[:, :, 3] *= keep
-    Image.fromarray(b.astype("uint8")).crop((0, 0, 420, 643)).save(os.path.join(HERE, "out", "rig", "rig2-body-trim.png"))
+    # one body per raised side: a lowered arm covers its shoulder, so that side keeps its curve
+    left = np.clip((x - LEFT) / 2 + 0.5, 0, 1); right = np.clip((RIGHT - x) / 2 + 0.5, 0, 1)
+    for name, m in (("trim", np.minimum(left, right)), ("trim-L", left), ("trim-R", right)):
+        c = b.copy(); c[:, :, 3] *= np.where(y < BELOW, m, 1.0)
+        Image.fromarray(c.astype("uint8")).crop((0, 0, 420, 643)).save(os.path.join(HERE, "out", "rig", f"rig2-body-{name}.png"))
     print("ok")
