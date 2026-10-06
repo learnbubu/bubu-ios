@@ -1167,7 +1167,8 @@ final class StudySession: Identifiable {
         progress.addCoins(got)
         let pocket = Moments.Pocket(kind: .red, reward: got, title: chapterEnd ? "Chapter complete!" : "Lesson complete!",
                                     sub: chapterEnd ? "A fuller pocket for a whole chapter" : "Bùbù has something for you.")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { Moments.shared.show(.pocket(pocket)) }
+        // after the done screen's opening splash (about 1.35 s), not over it
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { Moments.shared.show(.pocket(pocket)) }
     }
 
     /// Finishing a chapter's last lesson unlocks its story (web: finishStudy's toast).
