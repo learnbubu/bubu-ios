@@ -45,12 +45,12 @@ def main():
     head = np.array(compose(["rig-head"], pad=0))
     hp = blobs(head, False)
     place = {}
-    for kind in ("open", "wow"):
+    for kind in ("open", "blink", "wow"):
         g = Image.open(os.path.join(HERE, "out", "rig", f"rig-glint-{kind}.png")).convert("RGBA")
         w = g.width
         for side in ("L", "R"):
             half = g.crop((0, 0, w // 2, g.height) if side == "L" else (w // 2, 0, w, g.height))
-            if kind == "open":
+            if kind in ("open", "blink"):
                 # both arcs are the same shape: the right one, cleanly, for both eyes (the left
                 # half picks up stray light specks that throw its size off)
                 half = g.crop((w // 2, 0, w, g.height))
@@ -68,9 +68,9 @@ def main():
             hx0, hy0, hx1, hy1 = hp[side]["patch"]
             hw, hh = hx1 - hx0, hy1 - hy0
             # the wow marks fill more of the patch than the arcs do
-            tw = round(hw * (wr if kind == "open" else 0.62))
+            tw = round(hw * (wr if kind in ("open", "blink") else 0.62))
             th = round(tw * half.height / half.width)
-            ccx, ccy = (hx0 + cx * hw, hy0 + cy * hh) if kind == "open" else (hx0 + hw / 2, hy0 + hh * 0.45)
+            ccx, ccy = (hx0 + cx * hw, hy0 + cy * hh + (2 if kind == "blink" else 0)) if kind in ("open", "blink") else (hx0 + hw / 2, hy0 + hh * 0.45)
             name = f"rig-glint-{kind}-{side}"
             half.save(os.path.join(HERE, "out", "rig", name + ".png"))
             place[name] = (round(ccx - tw / 2), round(ccy - th / 2), tw)
