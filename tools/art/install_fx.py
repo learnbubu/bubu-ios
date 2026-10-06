@@ -17,7 +17,7 @@ ASSETS = os.path.join(APP, "Assets.xcassets")
 RIG = os.path.join(HERE, "out", "rig")
 FINAL = os.path.join(HERE, "out", "final")
 
-PARTS = ["rig2-pack-side", "rig2-body", "rig4-torso-arms",
+PARTS = ["rig2-pack-side", "rig2-body", "rig4-torso-arms", "rig4-torso-armL",
          "rig-arm-left-up", "rig-arm-right-up", "rig-arm-left-down", "rig-arm-right-down",
          "rig-head", "rig-mouth-smile", "rig-mouth-open",
          "rig-glint-open-L", "rig-glint-open-R", "rig-glint-blink-L", "rig-glint-blink-R", "rig-glint-wow-L", "rig-glint-wow-R"]

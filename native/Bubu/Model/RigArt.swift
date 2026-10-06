@@ -8,6 +8,7 @@ enum RigArt {
         "rig2-pack-side": CGRect(x: 285.0, y: 262.0, width: 135.0, height: 204.3),
         "rig2-body": CGRect(x: 50.0, y: 258.0, width: 316.0, height: 384.7),
         "rig4-torso-arms": CGRect(x: -4.0, y: 252.0, width: 424.0, height: 396.4),
+        "rig4-torso-armL": CGRect(x: 0.0, y: 252.0, width: 419.0, height: 391.0),
         "rig-arm-left-up": CGRect(x: -12.0, y: 168.0, width: 150.0, height: 173.2),
         "rig-arm-right-up": CGRect(x: 278.0, y: 168.0, width: 150.0, height: 173.2),
         "rig-arm-left-down": CGRect(x: -15.0, y: 311.0, width: 94.0, height: 198.8),

@@ -21,6 +21,7 @@ L = {
     # the third body and arms (rig3): drawn to fit each other, rounded shoulders, no strap on the arms
     "rig3-body": (50, 258, 316),
     "rig4-torso-arms": (-4, 252, 424),      # the torso with its arms down drawn on (lined up by the belly, feet on the ground)
+    "rig4-torso-armL": (0, 0, 420),         # the same with the arm on the picture's right taken off, for the wave
     "rig3-arm-down": (-15, 311, 94),
     "rig3-arm-down-R": (337, 311, 94),
     "rig3-arm-up": (-12, 168, 150),
