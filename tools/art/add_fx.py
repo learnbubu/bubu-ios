@@ -34,6 +34,14 @@ FX = [
      "slight diagonal, in the jade green of the attached bamboo leaves, with one lighter tone along its middle."),
     ("fx-bamboo-leaf-2", LEAF, "two small bamboo leaves joined at a short stem, spreading in a little V, in the jade "
      "green of the attached bamboo leaves, one leaf a shade lighter than the other."),
+    # more leaves, so the flourish isn't the same two each time (the owner, 6 Oct 2026): a leaf
+    # mid-turn, a sprig of three, and a young pale one
+    ("fx-bamboo-leaf-3", LEAF, "one single bamboo leaf caught mid-spin, gently curled and twisted so part of its "
+     "lighter underside shows, in the jade green of the attached bamboo leaves."),
+    ("fx-bamboo-leaf-4", LEAF, "a small sprig of three bamboo leaves fanning out from a short stem with one tiny "
+     "node, in the jade green of the attached bamboo leaves, the middle leaf the longest."),
+    ("fx-bamboo-leaf-5", LEAF, "one single young bamboo leaf, shorter and a fresher, lighter sage-green than the "
+     "attached leaves, with a gentle curve and a short stem."),
     ("fx-paper-1", CRACK, "one small torn scrap of red firecracker paper, roughly a curled rectangle with ragged "
      "edges and a thin gold stripe along one side."),
     ("fx-paper-2", CRACK, "one small torn scrap of red firecracker paper, a twisted triangular shred with ragged "

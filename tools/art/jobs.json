@@ -1311,5 +1311,35 @@
    "refs/ref-simple-blossom.png"
   ],
   "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw one tiny curl of red firecracker paper, like a little ribbon of paper twisted once. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-bamboo-leaf-3.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-bamboo-leaves.png",
+   "refs/ref-fx-firecracker-string.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw one single bamboo leaf caught mid-spin, gently curled and twisted so part of its lighter underside shows, in the jade green of the attached bamboo leaves. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-bamboo-leaf-4.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-bamboo-leaves.png",
+   "refs/ref-fx-firecracker-string.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw a small sprig of three bamboo leaves fanning out from a short stem with one tiny node, in the jade green of the attached bamboo leaves, the middle leaf the longest. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-bamboo-leaf-5.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-bamboo-leaves.png",
+   "refs/ref-fx-firecracker-string.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw one single young bamboo leaf, shorter and a fresher, lighter sage-green than the attached leaves, with a gentle curve and a short stem. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
