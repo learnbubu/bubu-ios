@@ -15,14 +15,16 @@ RIG = os.path.join(HERE, "out", "rig")
 
 
 def main():
-    b = np.array(compose(["rig-body"], pad=0)).astype(int)
+    # the second body when there is one: it has only the straps in red (the pack is its own piece)
+    body = "rig2-body" if os.path.exists(os.path.join(RIG, "rig2-body.png")) else "rig-body"
+    b = np.array(compose([body], pad=0)).astype(int)
     r, g, bl, a = b[:, :, 0], b[:, :, 1], b[:, :, 2], b[:, :, 3]
     red = (a > 100) & (r > 140) & (r - g > 50) & (r - bl > 40)
     lab, n = ndimage.label(red)
     keep = np.zeros_like(red)
     for i in range(1, n + 1):
         ys, xs = np.where(lab == i)
-        if len(xs) > 2000 and xs.max() < 345:
+        if len(xs) > 2000 and (body == "rig2-body" or xs.max() < 345):
             keep |= lab == i
     # take in their soft edges and darker shading
     grow = ndimage.binary_dilation(keep, iterations=2) & (a > 0) & (r > 70) & (r - g > 25)
