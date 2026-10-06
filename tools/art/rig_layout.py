@@ -17,7 +17,10 @@ L = {
     # the second body (straps only) and the backpack on its own, behind his right side
     "rig2-body": (50, 274, 316),
     "rig2-pack": (290, 285, 150),
-    "rig2-pack-side": (285, 262, 135),                # the chest straps, drawn over the arms
+    "rig2-pack-side": (285, 262, 135),
+    "rig2-body-trim": (0, 0, 420),
+    "rig-straps-L": (0, 0, 420), "rig-straps-R": (0, 0, 420),
+    "rig-straps-L-top": (0, 0, 420), "rig-straps-R-top": (0, 0, 420),         # rig_trim.py: the shoulder stubs off                # the chest straps, drawn over the arms
     "rig-head": (32, 4, 352),
     "rig-eyes-open": (86, 128, 256),
     "rig-eyes-happy": (86, 128, 256),

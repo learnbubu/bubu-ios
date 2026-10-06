@@ -12,6 +12,7 @@ from scipy import ndimage
 from rig_layout import compose, HERE
 
 RIG = os.path.join(HERE, "out", "rig")
+SHOULDER = 322     # where a lowered arm starts to hang in front of the strap
 
 
 def main():
@@ -31,6 +32,16 @@ def main():
     out = b.copy()
     out[~grow, 3] = 0
     Image.fromarray(out.astype("uint8")).crop((0, 0, 420, 643)).save(os.path.join(RIG, "rig-straps.png"))
+    # each side on its own, whole (over a raised arm) or just over the shoulder (a lowered arm
+    # hangs in front of the rest of it)
+    full = Image.fromarray(out.astype("uint8")).crop((0, 0, 420, 643))
+    fa = np.array(full).astype(float)
+    xx = np.arange(fa.shape[1])[None, :]; yy = np.arange(fa.shape[0])[:, None]
+    for side, m in (("L", xx < 208), ("R", xx >= 208)):
+        one = fa.copy(); one[:, :, 3] *= m
+        Image.fromarray(one.astype("uint8")).save(os.path.join(RIG, f"rig-straps-{side}.png"))
+        top = one.copy(); top[:, :, 3] *= np.clip((SHOULDER - yy) / 6 + 0.5, 0, 1)
+        Image.fromarray(top.astype("uint8")).save(os.path.join(RIG, f"rig-straps-{side}-top.png"))
     up = Image.open(os.path.join(RIG, "rig-arm-left-up.png"))
     up.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(RIG, "rig-arm-right-up.png"))
     print("straps:", int(grow.sum()), "px")
