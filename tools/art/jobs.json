@@ -1201,5 +1201,115 @@
    "refs/ref-tall-lantern.png"
   ],
   "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture, and how the willow reaches in from the side edge. Do NOT copy their plants or subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE, like the attached references: only a few elements (one tree or feature, two or three rocks, a few leaf clusters and three to five small cream flowers), each a big simple shape with a flat fill and at most one soft lighter tone. No fine texture, no small detailed leaves, no dense undergrowth, no tiny repeated details. Soft, slightly muted greens. Generous empty space between elements.\n\nCreate a hanging decoration (no tree branch): a thin waterfall spilling from a mossy ledge at the top-left and falling straight down in a narrow ribbon, a little mist at the bottom. SHAPE: it comes in from the LEFT EDGE of the canvas, like the attached willow branch reaches in from the side: it enters from the left edge in the upper part of the canvas and flows down along the left side. NO trees, branches or leaves. Long and narrow: about a third of the canvas width and most of its height, with plenty of empty magenta to the right. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-firecracker.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-firecracker-string.png",
+   "refs/ref-simple-blossom.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw one single red Chinese firecracker standing upright: a short red paper tube with a gold paper band at the top and bottom, and a short twisted fuse at the top. The same firecracker as in the attached string. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-firecracker-knot.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-firecracker-string.png",
+   "refs/ref-simple-blossom.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw the top of a firecracker string: a red Chinese knot with a short red tassel either side, and a plain red cord hanging straight down from it to the bottom of the canvas (no firecrackers on it). It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-pop-1.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-firecracker-string.png",
+   "refs/ref-simple-blossom.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw the first instant of a little firecracker pop: a small, round, soft golden-orange flash with four short stubby rays, and two or three tiny torn scraps of red paper just starting to fly out. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-pop-2.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-firecracker-string.png",
+   "refs/ref-simple-blossom.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw a little firecracker pop at its biggest: a soft golden flash, wider, with six or seven torn scraps of red paper (some with a gold edge) flying outwards in a ring, and two small curls of pale grey smoke. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-pop-3.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-firecracker-string.png",
+   "refs/ref-simple-blossom.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw the end of a little firecracker pop: no flash, just a few torn scraps of red paper drifting apart and two soft curls of pale grey smoke fading out. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-seal.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-firecracker-string.png",
+   "refs/ref-simple-blossom.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw a square red Chinese seal stamp, as pressed on paper: a slightly uneven square of warm red with soft rounded corners and gently worn, imperfect edges, a thin cream border line just inside the edge, and the middle left completely EMPTY (plain red, no characters or marks at all, the app writes in it). It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-bamboo-leaf-1.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-bamboo-leaves.png",
+   "refs/ref-fx-firecracker-string.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw one single bamboo leaf, long and slim with a pointed tip and a short stem, lying at a slight diagonal, in the jade green of the attached bamboo leaves, with one lighter tone along its middle. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-bamboo-leaf-2.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-bamboo-leaves.png",
+   "refs/ref-fx-firecracker-string.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw two small bamboo leaves joined at a short stem, spreading in a little V, in the jade green of the attached bamboo leaves, one leaf a shade lighter than the other. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-paper-1.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-firecracker-string.png",
+   "refs/ref-simple-blossom.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw one small torn scrap of red firecracker paper, roughly a curled rectangle with ragged edges and a thin gold stripe along one side. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-paper-2.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-firecracker-string.png",
+   "refs/ref-simple-blossom.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw one small torn scrap of red firecracker paper, a twisted triangular shred with ragged edges, a slightly darker red on its underside where it curls. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/fx-paper-3.png",
+  "group": "fx",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-fx-firecracker-string.png",
+   "refs/ref-simple-blossom.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw one tiny curl of red firecracker paper, like a little ribbon of paper twisted once. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
