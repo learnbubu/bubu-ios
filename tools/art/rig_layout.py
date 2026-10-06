@@ -18,8 +18,8 @@ L = {
     "rig-eyes-happy": (86, 128, 256),
     "rig-eyes-wow": (80, 122, 270),
     "rig-eyes-blink": (90, 132, 248),
-    "rig-mouth-smile": (176, 184, 68),
-    "rig-mouth-open": (176, 186, 70),
+    "rig-mouth-smile": (174, 188, 68),
+    "rig-mouth-open": (179, 212, 58),
     "rig-tears": (62, 186, 300),
 }
 SIZE = (420, 643)
