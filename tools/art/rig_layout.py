@@ -12,7 +12,8 @@ L = {
     "rig-arm-left-down": (2, 282, 118),
     "rig-arm-right-down": (322, 292, 88),
     "rig-arm-left-up": (34, 165, 128),
-    "rig-arm-right-up": (273, 167, 148),
+    "rig-arm-right-up": (254, 165, 128),     # the left one mirrored (rig_straps)
+    "rig-straps": (0, 0, 420),                # the chest straps, drawn over the arms
     "rig-head": (32, 4, 352),
     "rig-eyes-open": (86, 128, 256),
     "rig-eyes-happy": (86, 128, 256),
