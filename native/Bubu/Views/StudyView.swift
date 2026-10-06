@@ -491,7 +491,7 @@ struct StudyView: View {
             Speech.shared.stop()
             withAnimation(.easeOut(duration: 0.2)) { cheer = CheerView.lines.randomElement()! }
             Sounds.shared.play("goal")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.05) {
                 withAnimation(.easeIn(duration: 0.2)) { cheer = nil }
                 moveOn()
             }

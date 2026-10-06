@@ -1341,5 +1341,135 @@
    "refs/ref-fx-firecracker-string.png"
   ],
   "prompt": "The attached images are existing art from the same app: match their illustration style, palette and texture exactly. Do NOT copy their subjects; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE: big simple shapes with flat fills and at most one soft lighter tone, no fine texture or tiny details.\n\nDraw one single young bamboo leaf, shorter and a fresher, lighter sage-green than the attached leaves, with a gentle curve and a short stem. It is a single small piece for an app animation: draw ONLY this one object, centred, filling about two thirds of the canvas, nothing else in the picture (no ground, no shadow, no scenery). Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-body.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw his body without the head and without the arms: the cream belly, the black legs and feet, and the red backpack straps and pack, with clean rounded ends at the shoulders and neck where the arms and head attach.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-head.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw his head only, with ears, the black eye patches, the cream face, nose and pink cheeks, but with NO eyes and NO mouth: the eye patches plain black, the face plain cream where the mouth would be.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-eyes-open.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only his two eyes, open and bright, exactly as they sit inside the black eye patches (draw the patches too, so they line up), nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-eyes-happy.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only his two eye patches with the eyes closed in happy upturned arcs, as when laughing, nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-eyes-wow.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only his two eye patches with big round sparkling star-shine eyes, amazed, nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-eyes-blink.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only his two eye patches with the eyes shut in calm straight lines, mid-blink, nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-mouth-smile.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only his small smiling mouth, where it sits on his face, nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-mouth-open.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only his mouth wide open in a happy laugh, a little pink tongue showing, where it sits on his face, nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-tears.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only two small happy tears, light blue drops springing out sideways from where his eyes are, nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-arm-left-down.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only his arm on the left of the picture, hanging down at his side as in the reference, nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-arm-left-up.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only his arm on the left of the picture, raised high in a cheer with the paw open, attached at the same shoulder point, nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-arm-right-down.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only his arm on the right of the picture, hanging down at his side as in the reference, nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig-arm-right-up.png",
+  "group": "rig",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing, the panda this is a part of. Draw ONLY the part described, exactly as it looks on him there: the same size, the same position on the canvas and the same angle, as if everything else had been erased from that picture, so the parts can be stacked back into the same panda. Square canvas, the panda filling the same area as in the reference.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw only his arm on the right of the picture, raised high in a cheer with the paw open, attached at the same shoulder point, nothing else.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]

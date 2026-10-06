@@ -455,7 +455,6 @@ struct XPTile: View {
 struct SplashMoment: View {
     let title: String
     @State private var band = false
-    @State private var panda = false
     @State private var words = false
 
     var body: some View {
@@ -466,9 +465,7 @@ struct SplashMoment: View {
                 .scaleEffect(x: band ? 1.4 : 0.01, y: 1, anchor: .leading)
                 .offset(y: -40)
             VStack(spacing: 18) {
-                Image("panda-celebrate").resizable().scaledToFit().frame(height: 230)
-                    .scaleEffect(panda ? 1 : 0.3).opacity(panda ? 1 : 0)
-                    .rotationEffect(.degrees(panda ? -4 : 8))
+                PandaAct(keys: PandaAct.splash, height: 230, loopFrom: 0.98)
                 Text(title).font(.nunito(32, .black)).foregroundStyle(Color.gold).multilineTextAlignment(.center)
                     .scaleEffect(words ? 1 : 0.6).opacity(words ? 1 : 0)
             }
@@ -478,7 +475,6 @@ struct SplashMoment: View {
         .clipped()
         .onAppear {
             withAnimation(.easeOut(duration: 0.25)) { band = true }
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.55).delay(0.12)) { panda = true }
             withAnimation(.spring(response: 0.35, dampingFraction: 0.6).delay(0.3)) { words = true }
         }
     }
