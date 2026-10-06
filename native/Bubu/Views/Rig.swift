@@ -281,7 +281,8 @@ struct BubuRig: View {
             o.lr = lerp(-50, 0, sw) + wave; o.rr = lerp(50, 0, sw) - wave
         }
         if during(wv), let at = Self.tracks[a]?["wave"]?.0 {
-            o.rr = lerp(50, 0, backOut(clamp01((t - at) / 180))) - sin((t - at) / 170 * .pi) * 16 * armSwing
+            // the waving arm stays out to the side (not behind his head), waving about 28° out
+            o.rr = lerp(60, 28, backOut(clamp01((t - at) / 180))) - sin((t - at) / 170 * .pi) * 12 * armSwing
         }
         o.blink = during(track(t, "blink", a)) || during(track(t, "blink2", a))
         let mp = track(t, "mouth", a); o.laugh = during(mp)
