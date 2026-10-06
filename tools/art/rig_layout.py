@@ -26,6 +26,10 @@ L = {
     "rig-mouth-open": (179, 212, 58),
     "rig-tears": (62, 186, 300),
 }
+# the eye marks, one per eye, placed by rig_eyes.py
+_eyes = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out", "rig", "eyes.json")
+if os.path.exists(_eyes):
+    L.update({k: tuple(v) for k, v in json.load(open(_eyes)).items()})
 SIZE = (420, 643)
 HERE = os.path.dirname(os.path.abspath(__file__))
 
