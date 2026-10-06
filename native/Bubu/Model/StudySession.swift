@@ -366,12 +366,6 @@ final class StudySession: Identifiable {
     var matchCards: [Card] { if case .match(let cs, _) = current { return cs } else { return [] } }
     var matchFinished: Bool { !matchCards.isEmpty && matched.count >= matchCards.count }
 
-    /// A pair tapped in the match on screen: the word on the left and the word on the right.
-    /// A right pair counts as a right answer on that word for XP and the quest counters; only a
-    /// word's first `scheduledPerSession` right answers this session reschedule it (and a word
-    /// with a mistake waiting keeps it for a real exercise). A wrong pair costs nothing: no
-    /// bun, no XP, no mistake saved. Finishing the match is one step of the progress bar.
-    @discardableResult
     /// XP through here, so the done screen can show how it was made up: the extra a run earned,
     /// and what double XP added.
     @discardableResult private func gain(_ n: Int, comboExtra: Int = 0) -> (earned: Int, goalReached: Bool) {
@@ -381,6 +375,12 @@ final class StudySession: Identifiable {
         return r
     }
 
+    /// A pair tapped in the match on screen: the word on the left and the word on the right.
+    /// A right pair counts as a right answer on that word for XP and the quest counters; only a
+    /// word's first `scheduledPerSession` right answers this session reschedule it (and a word
+    /// with a mistake waiting keeps it for a real exercise). A wrong pair costs nothing: no
+    /// bun, no XP, no mistake saved. Finishing the match is one step of the progress bar.
+    @discardableResult
     func matchPair(_ leftId: String, _ rightId: String) -> Bool {
         guard case .match(let cards, _) = current, !matched.contains(leftId), !matched.contains(rightId),
               leftId == rightId, let c = cards.first(where: { $0.id == leftId }) else { return false }
