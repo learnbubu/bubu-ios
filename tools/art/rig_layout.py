@@ -18,6 +18,7 @@ L = {
     "rig2-body": (50, 274, 316),
     "rig2-pack": (290, 285, 150),
     "rig2-pack-side": (285, 262, 135),
+    "rig2-body-cut": (0, 0, 420),          # rig_cut.py: the strap cut to his outline where the arms are down
     "rig2-body-trim": (0, 0, 420), "rig2-body-trim-L": (0, 0, 420), "rig2-body-trim-R": (0, 0, 420),
     "rig-straps-L": (0, 0, 420), "rig-straps-R": (0, 0, 420),
     "rig-straps-L-top": (0, 0, 420), "rig-straps-R-top": (0, 0, 420),         # rig_trim.py: the shoulder stubs off                # the chest straps, drawn over the arms
