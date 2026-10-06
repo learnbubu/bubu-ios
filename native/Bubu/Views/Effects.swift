@@ -104,8 +104,8 @@ struct ComboBurst: View {
 struct CheerView: View {
     let text: String
     @State private var words = false
-    /// where Bùbù lands: a different happy pose each time
-    @State private var land = ["panda-thumbs-up", "panda-heart", "panda-waving"].randomElement()!
+    @State private var up = false
+    @State private var away = false
 
     static let lines = ["Way to go!", "太棒了!", "Nice work!", "Incredible!", "做得好!", "Keep it up!"]
 
@@ -115,13 +115,17 @@ struct CheerView: View {
             VStack(spacing: 22) {
                 Text(text).font(.nunito(30, .black)).foregroundStyle(Color.accent)
                     .opacity(words ? 1 : 0).scaleEffect(words ? 1 : 0.7)
-                PandaAct(keys: PandaAct.cheer(land: land), height: 190)
+                // Bùbù in parts, cheering (the owner, 6 Oct 2026): up from below, his act, then away
+                BubuRig(act: .cheer, height: 210)
+                    .offset(y: away ? 700 : up ? 0 : 560)
             }
             Confetti(count: 26).allowsHitTesting(false).opacity(words ? 1 : 0)
         }
         .onAppear {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6).delay(1.0)) { words = true }  // after he lands, not behind his jump
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.8)) { up = true }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6).delay(0.75)) { words = true }  // as he lands, not behind his jump
             withAnimation(.easeIn(duration: 0.25).delay(1.75)) { words = false }
+            withAnimation(.easeIn(duration: 0.3).delay(1.75)) { away = true }
         }
     }
 }

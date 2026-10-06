@@ -465,7 +465,7 @@ struct SplashMoment: View {
                 .scaleEffect(x: band ? 1.4 : 0.01, y: 1, anchor: .leading)
                 .offset(y: -40)
             VStack(spacing: 18) {
-                PandaAct(keys: PandaAct.splash, height: 230, loopFrom: 0.98)
+                BubuRig(act: .double, then: .idle, height: 240)
                 Text(title).font(.nunito(32, .black)).foregroundStyle(Color.gold).multilineTextAlignment(.center)
                     .scaleEffect(words ? 1 : 0.6).opacity(words ? 1 : 0)
             }

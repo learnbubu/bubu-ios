@@ -46,6 +46,8 @@ struct StudyView: View {
     @State private var scrollHeight: CGFloat = 0
     /// the combo burst on screen (its count), and the cheer between parts of a lesson
     @State private var burst: Int?
+    /// the progress bar's place on screen: the burst's firecrackers come out from behind it
+    @State private var barFrame: CGRect = .zero
     @State private var cheer: String?
     @State private var cheered = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -114,7 +116,7 @@ struct StudyView: View {
                 .allowsHitTesting(false)
             }
             if let n = burst {
-                ComboBurst(n: n).id(n).ignoresSafeArea().zIndex(12)
+                FirecrackerBurst(n: n, bar: barFrame).id(n).ignoresSafeArea().zIndex(12)
             }
             if let c = cheer {
                 CheerView(text: c).transition(.opacity).zIndex(14)
@@ -132,7 +134,7 @@ struct StudyView: View {
         .onChange(of: session.combo) { old, n in
             guard n > old, n >= StudySession.comboAt, n % StudySession.comboAt == 0, !reduceMotion else { return }
             burst = n
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { if burst == n { burst = nil } }
+            DispatchQueue.main.asyncAfter(deadline: .now() + FirecrackerBurst.length) { if burst == n { burst = nil } }
         }
         // a level reached during the session waits for its end (the owner, 6 Oct 2026: not mid-lesson)
         .onAppear { progress.holdLevelUps = true }
@@ -167,6 +169,8 @@ struct StudyView: View {
             }
             // the held level-up: a level crossed at 1 s (nothing should show), the lesson over at 3.5 s
             // (the level-up should follow the done screen)
+            // the burst screenshot: the five-in-a-row firecrackers over a question
+            if Launch.screen == "burst" { DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { burst = 5 } }
             if Launch.screen == "levelheld" {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) { _ = progress.earnXP(progress.level.next + 1) }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { session.debugFinish() }
@@ -269,6 +273,10 @@ struct StudyView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Close")
                 ProgressBarShine(value: session.progressFraction, height: 8, combo: session.combo)
+                    .background(GeometryReader { g in
+                        Color.clear.onAppear { barFrame = g.frame(in: .global) }
+                            .onChange(of: g.frame(in: .global)) { _, f in barFrame = f }
+                    })
                 // buns in a lesson, and in a review while they're being earned back
                 if session.onBuns || (session.earnsBuns && progress.buns < ProgressStore.bunsMax) {
                     BunRow(n: progress.isPlus ? ProgressStore.bunsMax : progress.bunState.n, plus: progress.isPlus, bump: session.bunsEarned)
