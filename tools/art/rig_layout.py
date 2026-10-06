@@ -18,6 +18,12 @@ L = {
     "rig2-body": (50, 274, 316),
     "rig2-pack": (290, 285, 150),
     "rig2-pack-side": (285, 262, 135),
+    # the third body and arms (rig3): drawn to fit each other, rounded shoulders, no strap on the arms
+    "rig3-body": (50, 258, 316),
+    "rig3-arm-down": (-3, 285, 99),
+    "rig3-arm-down-R": (320, 285, 99),
+    "rig3-arm-up": (-12, 168, 150),
+    "rig3-arm-up-R": (278, 168, 150),
     "rig2-body-cut": (0, 0, 420),          # rig_cut.py: the strap cut to his outline where the arms are down
     "rig2-body-trim": (0, 0, 420), "rig2-body-trim-L": (0, 0, 420), "rig2-body-trim-R": (0, 0, 420),
     "rig-straps-L": (0, 0, 420), "rig-straps-R": (0, 0, 420),

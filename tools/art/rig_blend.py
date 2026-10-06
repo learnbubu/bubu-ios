@@ -19,12 +19,12 @@ def fur(a):
 
 
 if __name__ == "__main__":
-    body = fur(np.array(compose(["rig2-body"], pad=0)).astype(float))
-    for n in ("rig-arm-left-down", "rig-arm-right-down", "rig-arm-left-up", "rig-arm-right-up"):
+    body = fur(np.array(compose(["rig3-body"], pad=0)).astype(float))
+    for n in ("rig3-arm-down", "rig3-arm-down-R", "rig3-arm-up", "rig3-arm-up-R"):
         a = np.array(Image.open(os.path.join(RIG, n + ".png")).convert("RGBA")).astype(float)
         dark = a[:, :, :3].sum(2) < 260
         a[dark, :3] += body - fur(a)            # the fur matches the body's; paw pads and claws keep theirs
-        if n.endswith("-down"):
+        if False:   # (the rig3 arms have rounded tops: no fade)
             h = a.shape[0]; ys = np.arange(h)[:, None]
             a[:, :, 3] *= np.clip(ys / (FADE * h), 0, 1) ** 0.7
         Image.fromarray(np.clip(a, 0, 255).astype("uint8")).save(os.path.join(RIG, n + ".png"))

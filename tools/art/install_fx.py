@@ -17,13 +17,16 @@ ASSETS = os.path.join(APP, "Assets.xcassets")
 RIG = os.path.join(HERE, "out", "rig")
 FINAL = os.path.join(HERE, "out", "final")
 
-PARTS = ["rig2-pack-side", "rig2-body", "rig2-body-trim", "rig2-body-trim-L", "rig2-body-trim-R",
+PARTS = ["rig2-pack-side", "rig2-body",
          "rig-arm-left-up", "rig-arm-right-up", "rig-arm-left-down", "rig-arm-right-down",
-         "rig-straps-L", "rig-straps-R", "rig-straps-L-top", "rig-straps-R-top",
          "rig-head", "rig-mouth-smile", "rig-mouth-open",
          "rig-glint-open-L", "rig-glint-open-R", "rig-glint-blink-L", "rig-glint-blink-R", "rig-glint-wow-L", "rig-glint-wow-R"]
 # the burst's pieces, by their longest side in pixels
 FX = {"fx-firecracker": 140, "fx-firecracker-knot-nocord": 260, "fx-pop-1": 160, "fx-pop-2": 260, "fx-pop-3": 240, "fx-seal": 340}
+# the app's part names, drawn from the third body and arms (rig3: rounded shoulders, so no trims or strap layers)
+SOURCE = {"rig2-body": "rig3-body", "rig-arm-left-down": "rig3-arm-down", "rig-arm-right-down": "rig3-arm-down-R",
+          "rig-arm-left-up": "rig3-arm-up", "rig-arm-right-up": "rig3-arm-up-R"}
+GONE = ["rig2-body-trim", "rig2-body-trim-L", "rig2-body-trim-R", "rig-straps-L", "rig-straps-R", "rig-straps-L-top", "rig-straps-R-top"]
 DENSITY = 1.25      # rig parts are stored at 1.25 px per canvas px (Bùbù shows about 0.35 pt per canvas px)
 
 
@@ -36,9 +39,13 @@ def imageset(name, im):
 
 def main():
     rects, aspects = {}, {}
+    import shutil
+    for n in GONE:
+        shutil.rmtree(os.path.join(ASSETS, n + ".imageset"), ignore_errors=True)
     for n in PARTS:
-        x, y, w = L[n]
-        im = Image.open(os.path.join(RIG, n + ".png")).convert("RGBA")
+        src = SOURCE.get(n, n)
+        x, y, w = L[src]
+        im = Image.open(os.path.join(RIG, src + ".png")).convert("RGBA")
         s = w / im.width                          # canvas px per image px
         box = im.getbbox()
         im = im.crop(box)

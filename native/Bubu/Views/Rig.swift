@@ -194,7 +194,7 @@ struct BubuRig: View {
 
     // the studio's settings (tuning/rig and its defaults)
     private let squash = 0.16, jump = 110.0, headLag = 1.0, armSwing = 1.0, wiggle = 0.0
-    private let laughSpeed = 0.4, laughBounce = 0.08, armLen = 1.25, packLag = 1.0
+    private let laughSpeed = 0.4, laughBounce = 0.08, armLen = 1.0, packLag = 1.0
     private let breathe = 0.012, breatheMs = 2600.0, sway = 1.2, tilt = 5.0, loopMs = 4200.0
     private static let tracks: [Act: [String: (Double, Double)]] = [
         .cheer: ["crouch": (0, 150), "jump": (150, 380), "arms": (170, 760), "face": (170, 950), "mouth": (210, 860),
@@ -207,7 +207,7 @@ struct BubuRig: View {
     static func length(_ a: Act) -> Double { a == .idle ? 4200 : (tracks[a] ?? [:]).values.map { $0.0 + $0.1 }.max() ?? 0 }
 
     private static let shoulderUp: [String: CGPoint] = ["L": CGPoint(x: 112, y: 312), "R": CGPoint(x: 304, y: 312)]
-    private static let upOut = 15.0
+    private static let upOut = 0.0       // the raised arms are drawn angled out already
 
     var body: some View {
         let scale = height / RigArt.canvas.height
@@ -319,18 +319,14 @@ struct BubuRig: View {
             Image("rig2-pack-side").resizable().frame(width: pack.width, height: pack.height)
                 .rotationEffect(.degrees(o.packRot), anchor: UnitPoint(x: 0.2, y: 0.1))
                 .offset(x: pack.minX, y: pack.minY + o.packY)
-            // fur behind the neck, so the head can lift without a gap under it
-            Ellipse().fill(Color(red: 44 / 255, green: 49 / 255, blue: 55 / 255)).frame(width: 224, height: 110).offset(x: 96, y: 200)
-            part("rig2-body", show: !o.lUp && !o.rUp)
-            part("rig2-body-trim", show: o.lUp && o.rUp)
-            part("rig2-body-trim-L", show: o.lUp && !o.rUp)
-            part("rig2-body-trim-R", show: o.rUp && !o.lUp)
+            // the raised arms come up from behind his rounded shoulders
             upArm("rig-arm-left-up", side: "L", deg: o.lr - Self.upOut, show: o.lUp)
             upArm("rig-arm-right-up", side: "R", deg: o.rr + Self.upOut, show: o.rUp)
+            // fur behind the neck, so the head can lift without a gap under it
+            Ellipse().fill(Color(red: 44 / 255, green: 49 / 255, blue: 55 / 255)).frame(width: 224, height: 110).offset(x: 96, y: 200)
+            part("rig2-body")
             part("rig-arm-left-down", show: !o.lUp)
             part("rig-arm-right-down", show: !o.rUp)
-            part("rig-straps-L", show: o.lUp); part("rig-straps-R", show: o.rUp)
-            part("rig-straps-L-top", show: !o.lUp); part("rig-straps-R-top", show: !o.rUp)
             ZStack(alignment: .topLeading) {
                 part("rig-head")
                 part("rig-glint-open-L", show: !o.blink); part("rig-glint-open-R", show: !o.blink)
