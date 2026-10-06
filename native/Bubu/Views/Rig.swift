@@ -324,9 +324,11 @@ struct BubuRig: View {
             upArm("rig-arm-right-up", side: "R", deg: o.rr + Self.upOut, show: o.rUp)
             // fur behind the neck, so the head can lift without a gap under it
             Ellipse().fill(Color(red: 44 / 255, green: 49 / 255, blue: 55 / 255)).frame(width: 224, height: 110).offset(x: 96, y: 200)
-            part("rig2-body")
-            part("rig-arm-left-down", show: !o.lUp)
-            part("rig-arm-right-down", show: !o.rUp)
+            // both arms down: the torso drawn with its arms on (no shoulder joints); else the torso alone
+            part("rig2-body", show: o.lUp || o.rUp)
+            part("rig-arm-left-down", show: !o.lUp && o.rUp)
+            part("rig-arm-right-down", show: !o.rUp && o.lUp)
+            part("rig4-torso-arms", show: !o.lUp && !o.rUp)
             ZStack(alignment: .topLeading) {
                 part("rig-head")
                 part("rig-glint-open-L", show: !o.blink); part("rig-glint-open-R", show: !o.blink)
