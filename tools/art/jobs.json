@@ -1511,5 +1511,25 @@
    "refs/ref-rig2-noarms.png"
   ],
   "prompt": "The FIRST attached image is Bùbù standing; the SECOND is the same panda without his arms. Draw ONLY his arm on the left of the picture, hanging down at his side as in the first image, so it can be put back onto the second.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nThe WHOLE arm from the top of the shoulder to the paw: at the top a full, smoothly ROUNDED shoulder (a soft dome, like the top of a sausage, never a flat or straight cut), then the arm hanging down with a slight curve, ending in the paw with two or three light grey claw marks. Plain black fur only: no backpack, no straps, no red or orange anywhere. Same size as his arm in the first image. Square canvas, the arm centred.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig3-body.png",
+  "group": "rig3",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/ref-rig2-noarms.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing; the SECOND is the same panda without his arms. Draw ONLY the part described, at the same size and in the same style, so it fits back onto him. Square canvas, the part centred.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nDraw his TORSO and legs only, as in the second image but cleaner: no head, no arms, no backpack. Its outline runs from the neck smoothly over two softly ROUNDED shoulders and then straight down his sides to his hips - NO arm stubs, NO bumps or lumps at the shoulders or armpits, nothing sticking out at the sides. The cream belly, the black chest, legs and feet with light grey claw marks, and the two flat red backpack straps: each strap comes over the top of a shoulder and runs down the chest beside the belly, the same width all the way, ending at the sides of the belly. Same proportions as the second image.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig3-arm-up.png",
+  "group": "rig3",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù standing; the SECOND is him cheering with his arms up. Draw ONLY his arm on the left of the picture, raised up and out in a cheer as in the second image, so it can be put onto his shoulder.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nThe WHOLE arm: at its lower end a full, smoothly ROUNDED shoulder (a soft dome, never a flat or straight cut), then the arm angled up and out, ending in an open paw showing its light grey pad. Plain black fur only: no backpack, no straps, no red or orange anywhere. Same size as his arms in the images. Square canvas, the arm centred.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
