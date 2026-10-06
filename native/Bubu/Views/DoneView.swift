@@ -160,7 +160,8 @@ struct DoneView: View {
         var out = [XPTile.Step(label: "Lesson XP", value: base, tint: Color(light: 0xF0A92E, dark: 0xF5B03D))]
         if r.xpCombo > 0 { out.append(.init(label: "Combo", value: base + r.xpCombo, tint: Color(light: 0xE8743B, dark: 0xF08A5A))) }
         if r.xpDouble > 0 { out.append(.init(label: "2× XP", value: r.xp, tint: Color(light: 0x8B5CF6, dark: 0xA78BFA))) }
-        if out.count > 1 { out[out.count - 1] = .init(label: "Total XP", value: r.xp, tint: out[out.count - 1].tint) }
+        // each part keeps its own label; the total comes last, in the gold of the plain tile
+        if out.count > 1 { out.append(.init(label: "Total XP", value: r.xp, tint: Color(light: 0xF0A92E, dark: 0xF5B03D))) }
         return out
     }
     static func accuracyLabel(_ a: Int) -> String { a >= 100 ? "Perfect" : a >= 90 ? "Amazing" : a >= 75 ? "Great" : "Accuracy" }

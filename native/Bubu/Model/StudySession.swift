@@ -1211,7 +1211,8 @@ final class StudySession: Identifiable {
     }
     /// the done screenshot with every XP step: a run's extra and double XP in the total
     func debugFinishBoosted() {
-        sessionXP += 20; xpComboExtra = 6; xpDoubled = 26
+        // parts that fit the debug finish's 30 XP: 12 the lesson's own, 6 from a run, 12 doubled
+        xpComboExtra = 6; xpDoubled = 12
         debugFinish()
     }
     func debugFinish() {

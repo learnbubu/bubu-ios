@@ -363,7 +363,9 @@ final class ProgressStore {
     /// While a session runs, a level reached waits (`heldLevelUp`) and shows at its end.
     @ObservationIgnored var holdLevelUps = false
     @ObservationIgnored private var heldLevelUp: (level: Int, next: Int)?
+    @ObservationIgnored private var heldPocket: Moments.Moment?
     func showHeldLevelUp() {
+        if let p = heldPocket { heldPocket = nil; Moments.shared.show(p) }
         guard let h = heldLevelUp else { return }
         heldLevelUp = nil
         Moments.shared.show(.level(h.level, next: h.next))
@@ -767,9 +769,12 @@ final class ProgressStore {
         save()
         if all {
             earnXP(Self.chestXP)
-            Moments.shared.show(.pocket(.init(kind: .jade, reward: Self.chestXP, title: "All 3 daily quests done!",
-                                              sub: ember ? "A lucky pocket, full of XP, and an ember" : "A lucky pocket, full of XP")))
-        } else {
+            let pocket = Moments.Moment.pocket(.init(kind: .jade, reward: Self.chestXP, title: "All 3 daily quests done!",
+                                                     sub: ember ? "A lucky pocket, full of XP, and an ember" : "A lucky pocket, full of XP"))
+            // mid-lesson it waits for the end, as the level-up does
+            if holdLevelUps { heldPocket = pocket } else { Moments.shared.show(pocket) }
+        } else if !holdLevelUps {
+            // (mid-lesson, no toast over the question: the done screen's quest card shows it)
             for n in newly { Moments.shared.toast("Quest done: \(n.title)") }
         }
     }
