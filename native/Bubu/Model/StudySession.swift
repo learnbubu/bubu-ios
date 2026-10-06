@@ -1202,6 +1202,18 @@ final class StudySession: Identifiable {
     }
     /// four right already, so the next right answer is the fifth in a row
     func debugCombo(_ n: Int) { combo = n }
+    /// the pairs screenshot: four of the lesson's words to match, with more of the lesson after
+    func debugMatch() {
+        exercise = nil
+        matched = []
+        matchAudio = false
+        current = .match(cards: Array(course.cards(in: lessonId).prefix(4)), listen: false)
+    }
+    /// the done screenshot with every XP step: a run's extra and double XP in the total
+    func debugFinishBoosted() {
+        sessionXP += 20; xpComboExtra = 6; xpDoubled = 26
+        debugFinish()
+    }
     func debugFinish() {
         combo = 4; answeredCount = 8; againCount = 1; stepsDone = sessionTotal
         queue = []

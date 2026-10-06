@@ -60,6 +60,15 @@ struct MatchView: View {
             while tries < 20, r.count > 1, zip(l, r).filter({ pair in pair.0.id == pair.1.id }).count > 1 { r.shuffle(); tries += 1 }
             left = l
             right = r
+            #if DEBUG
+            // the pairs screenshot: each pair matched in turn, then on (to the cheer)
+            if Launch.screen == "pairs" {
+                for (i, c) in cards.enumerated() {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0 + Double(i) * 0.9) { tap(.left, c); tap(.right, c) }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6 + Double(cards.count) * 0.9) { done() }
+            }
+            #endif
         }
         .sensoryFeedback(.success, trigger: session.matched.count)
         .sensoryFeedback(.error, trigger: misses)

@@ -154,6 +154,23 @@ struct StudyView: View {
             #if DEBUG
             // the buns screenshot: out of buns part-way through a lesson
             if Launch.screen == "buns" { DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { advance() } }
+            // the sentence screenshot: the right answer placed and checked, so its tiles go green
+            if Launch.screen == "sentencegood", let ex = session.exercise, let sent = ex.sentence {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    let words = ex.toChinese ? sent.words.map(\.hanzi) : Sentence.enWords(sent.en)
+                    var pool = ex.tiles
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                        placed = words.compactMap { w in pool.firstIndex { $0.text == w }.map { pool.remove(at: $0) } }
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { checkSentence() }
+                }
+            }
+            // the held level-up: a level crossed at 1 s (nothing should show), the lesson over at 3.5 s
+            // (the level-up should follow the done screen)
+            if Launch.screen == "levelheld" {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { _ = progress.earnXP(progress.level.next + 1) }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) { session.debugFinish() }
+            }
             #endif
         }
         .sensoryFeedback(trigger: feedback?.correct) { _, new in

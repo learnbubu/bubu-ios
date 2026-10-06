@@ -93,7 +93,7 @@ struct RootView: View {
             }
             return
         }
-        guard let screen = Launch.screen, ["study", "meet", "tip", "practicerun", "quiz", "sentence", "sentencedrag", "gap", "hear", "type", "picture", "build", "inarow", "speak", "write", "done", "donefinal", "donenext", "char", "buns"].contains(screen) else { return }
+        guard let screen = Launch.screen, ["study", "meet", "tip", "practicerun", "quiz", "sentence", "sentencedrag", "gap", "hear", "type", "picture", "build", "inarow", "speak", "write", "done", "donefinal", "donenext", "char", "buns", "pairs", "sentencegood", "donecombo", "levelheld"].contains(screen) else { return }
         if screen == "practicerun", let pr = Course.shared.lessons.first(where: { $0.isPractice }) {
             router.tab = .learn
             router.study = StudySession.lesson(pr.id, progress)
@@ -104,7 +104,10 @@ struct RootView: View {
         let s = StudySession(lessonId: first, progress: progress)
         switch screen {
         case "quiz": s.debugShow(dir: "recognize")
-        case "sentence", "sentencedrag": s.debugShow(dir: "sentence")
+        case "sentence", "sentencedrag", "sentencegood": s.debugShow(dir: "sentence")
+        case "pairs": s.debugMatch()
+        case "donecombo": s.debugFinishBoosted()
+        case "levelheld": s.debugShow(dir: "recognize")
         case "gap", "hear", "type", "picture", "build": s.debugShow(dir: screen)
         case "inarow": s.debugShow(dir: "recognize"); s.debugCombo(4)
         case "speak": s.debugShow(dir: "speak")
