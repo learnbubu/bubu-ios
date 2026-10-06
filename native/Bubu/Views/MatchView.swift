@@ -81,6 +81,8 @@ struct MatchView: View {
                 .padding(.horizontal, 8).padding(.vertical, 6)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge))
+        // a matched pair hops and shines, as the other right answers (the owner, 6 Oct 2026)
+        .modifier(SuccessShine(on: isDone, delay: side == .right ? 0.05 : 0, radius: 14, compact: true))
         .disabled(isDone)
         .opacity(faded.contains(c.id) ? 0.35 : 1)
         .modifier(MatchShake(shakes: CGFloat(shakes[k] ?? 0)))

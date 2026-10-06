@@ -11,6 +11,10 @@ struct DoneView: View {
     // the step screenshot opens on the last stage, where Next step is
     @State private var stage = Launch.screen == "donenext" ? 2 : 0
     @State private var flameIn = false
+    /// the opening splash: the title over a tilted band with Bùbù and confetti, about a second
+    /// (the owner's Duolingo recording, 6 Oct 2026); not on the debug screens past the first stage
+    @State private var splash = Launch.screen != "donenext"
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let course = Course.shared
 
     static let milestoneWords: [Int: String] = [
@@ -25,7 +29,7 @@ struct DoneView: View {
         // centred) and the buttons stay pinned at the foot
         VStack(spacing: 0) {
             Group {
-                if !r.simple.isEmpty { simple(r) } else {
+                if !r.simple.isEmpty { simple(r) } else if splash && stage == 0 { splashView(r) } else {
                 switch stage {
                 case 0: stageOne(r)
                 case 1: stageTwo(r)
@@ -37,6 +41,7 @@ struct DoneView: View {
             .id(stage)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             buttons(r).padding(.top, 12)
+                .opacity(splash && r.simple.isEmpty && stage == 0 ? 0 : 1)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 18)
@@ -44,6 +49,17 @@ struct DoneView: View {
         .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
         .padding(.top, 8).padding(.bottom, 8)
         .sensoryFeedback(.success, trigger: stage) { _, n in n == 1 }
+        .onAppear {
+            guard splash else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0.6 : 1.35)) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) { splash = false }
+            }
+        }
+    }
+
+    /// The opening splash: a tilted band, Bùbù big and pleased, the title, confetti.
+    private func splashView(_ r: StudySession.Result) -> some View {
+        SplashMoment(title: r.title)
     }
 
     /// The short result the skip test ends on (web: doneSimple).
@@ -94,9 +110,9 @@ struct DoneView: View {
             }
             // Duolingo's result tiles: a coloured band with the label, the number on white under it
             HStack(spacing: 10) {
-                DoneTile(value: r.xp, format: { "+\($0)" }, label: "Total XP", icon: "bolt.fill", tint: Color(light: 0xF0A92E, dark: 0xF5B03D), delay: 0.2)
-                DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: "Time", icon: "clock.fill", tint: .accent, delay: 0.42)
-                DoneTile(value: r.accuracy, format: { "\($0)%" }, label: "Accuracy", icon: "scope", tint: .good, delay: 0.64)
+                XPTile(steps: Self.xpSteps(r), delay: 0.2)
+                DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: Self.timeLabel(r), icon: "clock.fill", tint: .accent, delay: 0.42)
+                DoneTile(value: r.accuracy, format: { "\($0)%" }, label: Self.accuracyLabel(r.accuracy), icon: "scope", tint: .good, delay: 0.64)
             }
             .padding(.top, recap.isEmpty ? 22 : 16).padding(.bottom, 4)
             // what this earned, as quiet rows rather than shouting pills
@@ -135,6 +151,22 @@ struct DoneView: View {
                 .padding(.top, 18)
             }
         }
+    }
+
+    /// The XP tile's steps, each counted up to in turn with its own label (as Duolingo's): the
+    /// lesson's own XP, then what runs added, then what double XP added.
+    static func xpSteps(_ r: StudySession.Result) -> [XPTile.Step] {
+        let base = max(0, r.xp - r.xpCombo - r.xpDouble)
+        var out = [XPTile.Step(label: "Lesson XP", value: base, tint: Color(light: 0xF0A92E, dark: 0xF5B03D))]
+        if r.xpCombo > 0 { out.append(.init(label: "Combo", value: base + r.xpCombo, tint: Color(light: 0xE8743B, dark: 0xF08A5A))) }
+        if r.xpDouble > 0 { out.append(.init(label: "2× XP", value: r.xp, tint: Color(light: 0x8B5CF6, dark: 0xA78BFA))) }
+        if out.count > 1 { out[out.count - 1] = .init(label: "Total XP", value: r.xp, tint: out[out.count - 1].tint) }
+        return out
+    }
+    static func accuracyLabel(_ a: Int) -> String { a >= 100 ? "Perfect" : a >= 90 ? "Amazing" : a >= 75 ? "Great" : "Accuracy" }
+    /// Quick for its length: under about 9 seconds an answer.
+    static func timeLabel(_ r: StudySession.Result) -> String {
+        r.seconds > 0 && r.seconds <= 150 ? "Speedy" : "Time"
     }
 
     private func note(_ t: String, icon: String, tint: Color) -> some View {
@@ -187,7 +219,7 @@ struct DoneView: View {
             heading("Daily quests")
             Text(done == 3 ? "All three done. Lucky pocket opened!" : "\(done) of 3 done today")
                 .font(.nunito(16)).foregroundStyle(Color.muted)
-            QuestRows().padding(.top, 6).padding(.bottom, 14)
+            QuestRows(animated: true).padding(.top, 6).padding(.bottom, 14)
         }
         .frame(maxWidth: .infinity)
     }
@@ -325,6 +357,9 @@ struct WeekStrip: View {
 /// Today's three quests with their bars.
 struct QuestRows: View {
     @Environment(ProgressStore.self) private var progress
+    /// on the done screen: each bar fills in turn, and a finished quest glows gold and shines
+    var animated = false
+    @State private var filled = false
     var body: some View {
         VStack(spacing: 0) {
             ForEach(Array(progress.todayQuests.enumerated()), id: \.offset) { i, q in
@@ -336,15 +371,114 @@ struct QuestRows: View {
                         .background(ok ? Color.goodSoft : Color.accentSoft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                     VStack(alignment: .leading, spacing: 5) {
                         Text(q.title).font(.nunito(14, .bold)).foregroundStyle(Color.ink).lineLimit(1)
-                        Bar(value: Double(n) / Double(q.target), fill: ok ? .good : .accent)
+                        Bar(value: !animated || filled ? Double(n) / Double(q.target) : 0, fill: ok ? .good : .accent)
+                            .animation(.easeOut(duration: 0.55).delay(0.15 + Double(i) * 0.35), value: filled)
                     }
                     Text(ok ? "Done" : "\(n)/\(q.target)").font(.nunitoXB(13)).monospacedDigit()
                         .foregroundStyle(ok ? Color.good : Color.muted)
                         .frame(minWidth: 40, alignment: .trailing)
                 }
                 .padding(.vertical, 8)
-                .overlay(alignment: .top) { if i > 0 { Rectangle().fill(Color.line).frame(height: 1) } }
+                .padding(.horizontal, animated && ok ? 8 : 0)
+                .background {
+                    if animated && ok {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.goodSoft.opacity(0.5))
+                            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.gold, lineWidth: 2))
+                    }
+                }
+                .modifier(SuccessShine(on: animated && ok && filled, delay: 0.15 + Double(i) * 0.35 + 0.5))
+                .overlay(alignment: .top) { if i > 0 && !(animated && ok) { Rectangle().fill(Color.line).frame(height: 1) } }
             }
+        }
+        .onAppear { if animated { DispatchQueue.main.async { filled = true } } }
+    }
+}
+
+/// The XP tile on the done screen: counts up through its steps (Lesson XP, Combo, 2× XP),
+/// its label and colour changing at each, with a little pop as each lands (as Duolingo's).
+struct XPTile: View {
+    struct Step { let label: String; let value: Int; let tint: Color }
+    let steps: [Step]
+    let delay: Double
+    @State private var shown = 0
+    @State private var at = 0
+    @State private var pop = false
+
+    var body: some View {
+        let s = steps[min(at, steps.count - 1)]
+        VStack(spacing: 0) {
+            Text(s.label.uppercased()).font(.nunitoXB(11)).tracking(1.1).foregroundStyle(.white)
+                .lineLimit(1).minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity).padding(.vertical, 5)
+                .background(s.tint)
+                .contentTransition(.opacity)
+            HStack(spacing: 5) {
+                Image(systemName: "bolt.fill").font(.system(size: 15, weight: .bold))
+                Text("+\(shown)").font(.nunito(21, .black)).monospacedDigit()
+                    .lineLimit(1).minimumScaleFactor(0.7)
+                    .contentTransition(.numericText())
+            }
+            .foregroundStyle(s.tint)
+            .frame(maxWidth: .infinity).padding(.vertical, 12).padding(.horizontal, 4)
+            .background(Color.panel)
+            .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+            .padding([.horizontal, .bottom], 2.5)
+        }
+        .background(s.tint, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .scaleEffect(pop ? 1.07 : 1)
+        .shadow(color: s.tint.opacity(pop ? 0.5 : 0), radius: 8)
+        .overlay { CornerSparkles(on: pop, tint: .white) }
+        .animation(.easeOut(duration: 0.2), value: at)
+        .task {
+            try? await Task.sleep(for: .seconds(delay))
+            var from = 0
+            for (k, step) in steps.enumerated() {
+                at = k
+                let n = 16
+                for i in 1...n {
+                    let t = Double(i) / Double(n), eased = 1 - pow(1 - t, 3)
+                    withAnimation(.linear(duration: 0.03)) { shown = from + Int((Double(step.value - from) * eased).rounded()) }
+                    try? await Task.sleep(for: .milliseconds(30))
+                }
+                from = step.value
+                withAnimation(.spring(response: 0.2, dampingFraction: 0.5)) { pop = true }
+                try? await Task.sleep(for: .milliseconds(180))
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) { pop = false }
+                if k < steps.count - 1 { try? await Task.sleep(for: .milliseconds(220)) }
+            }
+        }
+    }
+}
+
+/// The done screen's opening: a tilted green band, Bùbù big and pleased, the title, confetti.
+struct SplashMoment: View {
+    let title: String
+    @State private var band = false
+    @State private var panda = false
+    @State private var words = false
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color.accent.opacity(0.35), Color.accent.opacity(0.75)], startPoint: .leading, endPoint: .trailing)
+                .frame(height: 230)
+                .rotationEffect(.degrees(-9))
+                .scaleEffect(x: band ? 1.4 : 0.01, y: 1, anchor: .leading)
+                .offset(y: -40)
+            VStack(spacing: 18) {
+                Image("panda-celebrate").resizable().scaledToFit().frame(height: 230)
+                    .scaleEffect(panda ? 1 : 0.3).opacity(panda ? 1 : 0)
+                    .rotationEffect(.degrees(panda ? -4 : 8))
+                Text(title).font(.nunito(32, .black)).foregroundStyle(Color.gold).multilineTextAlignment(.center)
+                    .scaleEffect(words ? 1 : 0.6).opacity(words ? 1 : 0)
+            }
+            Confetti(count: 40).allowsHitTesting(false)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.25)) { band = true }
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.55).delay(0.12)) { panda = true }
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.6).delay(0.3)) { words = true }
         }
     }
 }

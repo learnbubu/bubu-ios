@@ -44,6 +44,11 @@ struct StudyView: View {
     @State private var cardHeight: CGFloat = 0
     /// the exercise's visible height, so the answers sit low in the card
     @State private var scrollHeight: CGFloat = 0
+    /// the combo burst on screen (its count), and the cheer between parts of a lesson
+    @State private var burst: Int?
+    @State private var cheer: String?
+    @State private var cheered = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// A multiple-choice exercise stays still (no scrolling); the feedback slides up over its foot.
     /// On a small phone (an SE) it scrolls instead.
     private var fixed: Bool {
@@ -108,6 +113,12 @@ struct StudyView: View {
                 .id(m)
                 .allowsHitTesting(false)
             }
+            if let n = burst {
+                ComboBurst(n: n).id(n).ignoresSafeArea().zIndex(12)
+            }
+            if let c = cheer {
+                CheerView(text: c).transition(.opacity).zIndex(14)
+            }
             if quitAsk && session.result == nil {
                 QuitAsk(keep: { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = false } },
                         quit: { quitAsk = false; close() })
@@ -117,6 +128,20 @@ struct StudyView: View {
         }
         .coordinateSpace(.named("study"))
         .animation(.easeInOut(duration: 0.25), value: session.result != nil)
+        // every fifth right answer in a row: the burst
+        .onChange(of: session.combo) { old, n in
+            guard n > old, n >= StudySession.comboAt, n % StudySession.comboAt == 0, !reduceMotion else { return }
+            burst = n
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { if burst == n { burst = nil } }
+        }
+        // a level reached during the session waits for its end (the owner, 6 Oct 2026: not mid-lesson)
+        .onAppear { progress.holdLevelUps = true }
+        .onDisappear { progress.holdLevelUps = false; progress.showHeldLevelUp() }
+        .onChange(of: session.result != nil) { _, done in
+            guard done else { return }
+            progress.holdLevelUps = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.9) { progress.showHeldLevelUp() }
+        }
         .onChange(of: session.bunsEaten) { _, n in
             guard n > 0 else { return }
             munch = n
@@ -142,6 +167,8 @@ struct StudyView: View {
 
     private func restart(_ s: StudySession) {
         session = s
+        progress.holdLevelUps = true
+        cheered = false
         munch = nil
         loadTips()
         resetExercise()
@@ -224,7 +251,7 @@ struct StudyView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Close")
-                ProgressBarShine(value: session.progressFraction, height: 8)
+                ProgressBarShine(value: session.progressFraction, height: 8, combo: session.combo)
                 // buns in a lesson, and in a review while they're being earned back
                 if session.onBuns || (session.earnsBuns && progress.buns < ProgressStore.bunsMax) {
                     BunRow(n: progress.isPlus ? ProgressStore.bunsMax : progress.bunState.n, plus: progress.isPlus, bump: session.bunsEarned)
@@ -243,17 +270,6 @@ struct StudyView: View {
                     Text(session.title).font(.nunito(13, .bold)).foregroundStyle(Color.muted)
                 }
                 Spacer()
-                if session.combo >= 3 {
-                    let hot = session.combo >= 5
-                    HStack(spacing: 3) {
-                        Image(systemName: "flame.fill").font(.system(size: 11))
-                        Text("\(session.combo)").font(.nunitoXB(12))
-                    }
-                    .foregroundStyle(hot ? Color.white : Color.again)
-                    .padding(.leading, 6).padding(.trailing, 8).padding(.vertical, 2)
-                    .background(hot ? Color.again : Color.againSoft, in: Capsule())
-                    .transition(.scale.combined(with: .opacity))
-                }
                 if progress.boostActive {
                     TimelineView(.periodic(from: .now, by: 1)) { _ in
                         let left = max(0, Int((progress.boostUntil - progress.now()) / 1000))
@@ -451,6 +467,23 @@ struct StudyView: View {
     }
 
     private func advance() {
+        // the pairs round done, more to come: Bùbù cheers first (once a session), as Duolingo's
+        // "Way to go!" after its pairs
+        if case .match = session.current, session.hasMore, !cheered, !reduceMotion {
+            cheered = true
+            Speech.shared.stop()
+            withAnimation(.easeOut(duration: 0.2)) { cheer = CheerView.lines.randomElement()! }
+            Sounds.shared.play("goal")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+                withAnimation(.easeIn(duration: 0.2)) { cheer = nil }
+                moveOn()
+            }
+            return
+        }
+        moveOn()
+    }
+
+    private func moveOn() {
         // "Can't listen now" before anything was answered, in a session of only listening:
         // there's nothing to show for it, so it just closes
         if session.answered && !session.hasMore && session.nothingAnswered {
@@ -491,19 +524,54 @@ struct PreviousMistakeTag: View {
 struct ProgressBarShine: View {
     var value: Double
     var height: CGFloat = 6
+    /// right answers in a row: from `hotAt` the bar turns gold, says "COMBO ×n" over its end and
+    /// flares at its tip with each one, as Duolingo's (the owner's recording, 6 Oct 2026)
+    var combo = 0
+    static let hotAt = 3
+    @State private var flare = false
+
+    private var hot: Bool { combo >= Self.hotAt }
+    private static let gold = LinearGradient(colors: [Color(UIColor(hex: 0xF5B03D)), Color(UIColor(hex: 0xFFD54A))],
+                                             startPoint: .leading, endPoint: .trailing)
+
     var body: some View {
         GeometryReader { g in
+            let fillW = max(0, g.size.width * value)
             ZStack(alignment: .leading) {
                 Capsule().fill(Color.line)
-                Capsule().fill(Color.accent)
-                    .frame(width: max(0, g.size.width * value))
+                Capsule().fill(hot ? AnyShapeStyle(Self.gold) : AnyShapeStyle(Color.accent))
+                    .frame(width: fillW)
                     .overlay(alignment: .top) {
-                        Capsule().fill(.white.opacity(0.25)).frame(height: 2).padding(.horizontal, 4).padding(.top, 1)
+                        Capsule().fill(.white.opacity(0.3)).frame(height: 2).padding(.horizontal, 4).padding(.top, 1)
                     }
+                    .shadow(color: hot ? Color(UIColor(hex: 0xFFD54A)).opacity(0.55) : .clear, radius: 5)
+                // the flare at the tip
+                Circle().fill(RadialGradient(colors: [.white, Color(UIColor(hex: 0xFFE27A)).opacity(0.7), .clear],
+                                             center: .center, startRadius: 0, endRadius: height * 1.8))
+                    .frame(width: height * 3.6, height: height * 3.6)
+                    .scaleEffect(flare ? 1.3 : 0.2).opacity(flare ? 1 : 0)
+                    .position(x: max(height, fillW - height / 2), y: height / 2)
+                    .allowsHitTesting(false)
+            }
+            .overlay(alignment: .topLeading) {
+                if hot {
+                    Text("COMBO ×\(combo)").font(.nunito(10.5, .black)).italic()
+                        .foregroundStyle(Color(UIColor(hex: 0xE09A1F)))
+                        .fixedSize()
+                        .offset(x: min(max(0, fillW - 62), g.size.width - 70), y: -15)
+                        .transition(.scale.combined(with: .opacity))
+                        .id(combo)
+                }
             }
         }
         .frame(height: height)
         .animation(.easeOut(duration: 0.3), value: value)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: combo)
+        .onChange(of: combo) { old, new in
+            guard new > old, new >= Self.hotAt else { return }
+            withAnimation(.easeOut(duration: 0.18)) { flare = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { withAnimation(.easeIn(duration: 0.3)) { flare = false } }
+        }
     }
 }
 
@@ -638,6 +706,8 @@ struct SuccessShine: ViewModifier {
                 .allowsHitTesting(false)
                 .opacity(shining ? 1 : 0)
             }
+            // and two little sparkles at the corners, as Duolingo's (the owner, 6 Oct 2026)
+            .overlay { CornerSparkles(on: on && !reduceMotion, delay: delay) }
             .onChange(of: on) { _, now in
                 guard now, !reduceMotion else { return }
                 sweep = -1
@@ -1673,7 +1743,9 @@ struct SentenceView: View {
         .background {
             ZStack {
                 RoundedRectangle(cornerRadius: 12, style: .continuous).fill(tint ?? Color.line).offset(y: 2)
-                RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.panel)
+                // green (or red) once answered, as the other answers fill (the owner: "it doesn't go green")
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(tint == .good ? Color.goodSoft : tint == .again ? Color.againSoft : Color.panel)
                 RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(tint ?? Color.line, lineWidth: 2)
             }
         }

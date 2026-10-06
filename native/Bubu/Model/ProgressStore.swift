@@ -354,9 +354,19 @@ final class ProgressStore {
         let lv = level.level
         if lv > max(activity.levelSeen, 1) {
             activity.levelSeen = lv; save()
-            Moments.shared.show(.level(lv, next: level.next))
+            // not mid-lesson (the owner, 6 Oct 2026): held for the end of the session
+            if holdLevelUps { heldLevelUp = (lv, level.next) } else { Moments.shared.show(.level(lv, next: level.next)) }
         }
         return (total, reached)
+    }
+
+    /// While a session runs, a level reached waits (`heldLevelUp`) and shows at its end.
+    @ObservationIgnored var holdLevelUps = false
+    @ObservationIgnored private var heldLevelUp: (level: Int, next: Int)?
+    func showHeldLevelUp() {
+        guard let h = heldLevelUp else { return }
+        heldLevelUp = nil
+        Moments.shared.show(.level(h.level, next: h.next))
     }
 
     func recordReview() { activity.days[today, default: 0] += 1; save() }

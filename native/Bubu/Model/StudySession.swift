@@ -105,6 +105,10 @@ final class StudySession: Identifiable {
     private(set) var againCount = 0
     private(set) var learnedCount = 0
     private(set) var sessionXP = 0
+    /// how the session's XP was made up, for the done screen's XP tile (Lesson XP, then the
+    /// extra a run earned, then what double XP added): the extra for runs, and the doubling
+    private(set) var xpComboExtra = 0
+    private(set) var xpDoubled = 0
     private(set) var combo = 0
     private(set) var mistakes = 0
     private(set) var fixedCount = 0
@@ -147,6 +151,9 @@ final class StudySession: Identifiable {
         var learned: [Card] = []
         /// a practice stone's words (up to 6), for its "You practised" card
         var practised: [Card] = []
+        /// of `xp`: the extra runs earned, and what double XP added (the rest is the lesson's own)
+        var xpCombo = 0
+        var xpDouble = 0
     }
 
     // the skip test's tally
@@ -365,6 +372,15 @@ final class StudySession: Identifiable {
     /// with a mistake waiting keeps it for a real exercise). A wrong pair costs nothing: no
     /// bun, no XP, no mistake saved. Finishing the match is one step of the progress bar.
     @discardableResult
+    /// XP through here, so the done screen can show how it was made up: the extra a run earned,
+    /// and what double XP added.
+    @discardableResult private func gain(_ n: Int, comboExtra: Int = 0) -> (earned: Int, goalReached: Bool) {
+        let r = progress.earnXP(n)
+        if r.earned > n { xpDoubled += r.earned - n }
+        xpComboExtra += comboExtra
+        return r
+    }
+
     func matchPair(_ leftId: String, _ rightId: String) -> Bool {
         guard case .match(let cards, _) = current, !matched.contains(leftId), !matched.contains(rightId),
               leftId == rightId, let c = cards.first(where: { $0.id == leftId }) else { return false }
@@ -380,7 +396,7 @@ final class StudySession: Identifiable {
         combo += 1
         if combo == Self.comboAt { DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { Sounds.shared.play("combo") } }
         let mark = progress.xpCounter
-        progress.earnXP(combo >= Self.comboAt ? Self.xpCombo : Self.xpCorrect)
+        gain(combo >= Self.comboAt ? Self.xpCombo : Self.xpCorrect, comboExtra: combo >= Self.comboAt ? Self.xpCombo - Self.xpCorrect : 0)
         progress.questEvent(kind, correct: true)
         sessionXP += progress.xpCounter - mark
         if matched.count >= cards.count {
@@ -960,7 +976,7 @@ final class StudySession: Identifiable {
             combo += 1
             if combo == Self.comboAt { DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { Sounds.shared.play("combo") } }
             let mark = progress.xpCounter
-            progress.earnXP(combo >= Self.comboAt ? Self.xpCombo : Self.xpCorrect)
+            gain(combo >= Self.comboAt ? Self.xpCombo : Self.xpCorrect, comboExtra: combo >= Self.comboAt ? Self.xpCombo - Self.xpCorrect : 0)
             xp = progress.xpCounter - mark
         } else {
             combo = 0
@@ -1058,9 +1074,9 @@ final class StudySession: Identifiable {
         let idle = nothingAnswered && !justFinished
         if !idle {
             progress.questEvent("session", correct: true, lesson: justFinished, perfect: perfect)
-            let s = progress.earnXP(justFinished ? Self.xpLesson : Self.xpSession)
+            let s = gain(justFinished ? Self.xpLesson : Self.xpSession)
             goal = goal || s.goalReached
-            if perfect { let p = progress.earnXP(Self.xpPerfect); goal = goal || p.goalReached }
+            if perfect { let p = gain(Self.xpPerfect); goal = goal || p.goalReached }
         }
         sessionXP += progress.xpCounter - mark
         if justFinished {
@@ -1085,6 +1101,8 @@ final class StudySession: Identifiable {
                         fire: fire, mode: mode)
         if stepDone { result?.step = stepAtStart; result?.steps = total }
         result?.learned = learnedWords
+        result?.xpCombo = xpComboExtra
+        result?.xpDouble = xpDoubled
         if isPractice { result?.practised = practisedWords }
         if !idle { Coach.sessionFinished() }
     }
