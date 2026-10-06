@@ -120,7 +120,7 @@ struct CheerView: View {
             Confetti(count: 26).allowsHitTesting(false).opacity(words ? 1 : 0)
         }
         .onAppear {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6).delay(0.6)) { words = true }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6).delay(1.0)) { words = true }  // after he lands, not behind his jump
             withAnimation(.easeIn(duration: 0.25).delay(1.75)) { words = false }
         }
     }
