@@ -2368,5 +2368,77 @@
    "out/raw/mo-flawless-body.png"
   ],
   "prompt": "The FIRST attached image is a layer of Bùbù's two arms holding a red seal stamp (no body). The SECOND is his body without arms. Draw a NEW version of the FIRST layer only: the same two black arms and the same red stamp, same size and style, but raised: the arms go up and slightly in from where his shoulders are in the second image, the paws holding the stamp high above where his head is, the stamp's flat face pointing down, ready to slam. Draw ONLY the arms and the stamp - no head, no body, nothing else - with each arm ending at the bottom in a soft rounded end of black fur at the shoulder. Keep them on the same canvas position as the shoulders in the second image.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-flawless-armL.png",
+  "group": "layers3",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless-arms.png"
+  ],
+  "prompt": "The attached image is a layer of Bùbù's arms from an app sticker. EDIT it into ONE arm for animation: keep ONLY the arm on the picture's left together with the red stamp it holds (the whole stamp), EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the other arm was covering part of it, draw that part in. The arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-flawless-armR.png",
+  "group": "layers3",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless-arms.png"
+  ],
+  "prompt": "The attached image is a layer of Bùbù's arms from an app sticker. EDIT it into ONE arm for animation: keep ONLY the arm on the picture's right, on its own (no stamp), EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the other arm was covering part of it, draw that part in. The arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-sweep-armL.png",
+  "group": "layers3",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-sweep-limb.png"
+  ],
+  "prompt": "The attached image is a layer of Bùbù's arms from an app sticker. EDIT it into ONE arm for animation: keep ONLY the arm on the picture's left together with the whole broom, EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the other arm was covering part of it, draw that part in. The arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-sweep-armR.png",
+  "group": "layers3",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-sweep-limb.png"
+  ],
+  "prompt": "The attached image is a layer of Bùbù's arms from an app sticker. EDIT it into ONE arm for animation: keep ONLY the arm on the picture's right, on its own (no broom), EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the other arm was covering part of it, draw that part in. The arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-earlybird-armL.png",
+  "group": "layers3",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-earlybird-limb.png"
+  ],
+  "prompt": "The attached image is a layer of Bùbù's arms from an app sticker. EDIT it into ONE arm for animation: keep ONLY the arm on the picture's left together with the cup of tea, EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the other arm was covering part of it, draw that part in. The arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-earlybird-armR.png",
+  "group": "layers3",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-earlybird-limb.png"
+  ],
+  "prompt": "The attached image is a layer of Bùbù's arms from an app sticker. EDIT it into ONE arm for animation: keep ONLY the arm on the picture's right, on its own (no cup), EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the other arm was covering part of it, draw that part in. The arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-brain-armL.png",
+  "group": "layers3",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-brain-limb.png"
+  ],
+  "prompt": "The attached image is a layer of Bùbù's arms from an app sticker. EDIT it into ONE arm for animation: keep ONLY the arm on the picture's left, on its own, EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the other arm was covering part of it, draw that part in. The arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-brain-armR.png",
+  "group": "layers3",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-brain-limb.png"
+  ],
+  "prompt": "The attached image is a layer of Bùbù's arms from an app sticker. EDIT it into ONE arm for animation: keep ONLY the arm on the picture's right, on its own, EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the other arm was covering part of it, draw that part in. The arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
