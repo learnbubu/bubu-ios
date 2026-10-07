@@ -1745,5 +1745,98 @@
    "refs/ref-rig-idle.png"
   ],
   "prompt": "The attached image is existing art from the same app: match its style. Draw ONLY three short curved motion lines in charcoal, like a cartoon 'whoosh', small and centred, nothing else (no character).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk-pocket-gold.png",
+  "group": "pocket",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-red.png"
+  ],
+  "prompt": "The FIRST attached image is a red envelope (red pocket) from the app. EDIT it: keep it EXACTLY the same shape, size, place, pattern, panda clasp and the character in the middle (copy that character exactly, stroke for stroke), and change ONLY its colours: the red becomes rich shining gold (warm yellow-gold with a lighter gold sheen), and the gold patterns, rim and character become deep red. It should look precious, a step up from the red one.\n\nKeep the background flat solid magenta (#FF00FF), nothing else added. No text, no letters, except the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk-pocket-red-open.png",
+  "group": "pocket",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-red.png",
+   "refs/ref-pk-coin.png"
+  ],
+  "prompt": "The FIRST attached image is a red envelope (red pocket) from the app. EDIT it: keep it EXACTLY the same shape, size, place, pattern, panda clasp and the character in the middle (copy that character exactly, stroke for stroke), and open its top flap: the flap folded up and back, and from inside the open pocket a warm golden glow spilling up, with the tops of two or three gold coins (round, with a square hole, like the coin in the second image) peeking out. The front with its character stays as it is.\n\nKeep the background flat solid magenta (#FF00FF), nothing else added. No text, no letters, except the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk-pocket-jade-open.png",
+  "group": "pocket",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-jade.png",
+   "refs/ref-pk-coin.png"
+  ],
+  "prompt": "The FIRST attached image is a jade-green envelope (lucky pocket) from the app. EDIT it: keep it EXACTLY the same shape, size, place, pattern, panda clasp and the character in the middle (copy that character exactly, stroke for stroke), and open its top flap: the flap folded up and back, and from inside the open pocket a warm golden glow spilling up, with the tops of two or three gold coins (round, with a square hole, like the coin in the second image) peeking out. The front with its character stays as it is.\n\nKeep the background flat solid magenta (#FF00FF), nothing else added. No text, no letters, except the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk-coins.png",
+  "group": "pocket",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-coin.png"
+  ],
+  "prompt": "The attached image is the app's gold coin. Draw ONLY three of these same coins tumbling through the air at different angles (one flat-on, one tilted, one almost edge-on), with a tiny sparkle by one, in a loose group. Same style and gold.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk-ingot.png",
+  "group": "pocket",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-coin.png"
+  ],
+  "prompt": "The attached image is the app's gold coin, for the style. Draw ONLY one Chinese gold ingot (yuanbao): the boat shape with raised ends and a rounded dome in the middle, shining gold with a lighter sheen, a tiny sparkle on it.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk-lantern-lit.png",
+  "group": "pocket",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-red.png"
+  ],
+  "prompt": "The attached image is art from the same app, for the style. Draw ONLY one small round red Chinese lantern, glowing warmly from inside, with gold top and bottom caps and a short gold tassel - a simple icon, centred.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk-lantern-unlit.png",
+  "group": "pocket",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-red.png"
+  ],
+  "prompt": "The attached image is art from the same app, for the style. Draw ONLY one small round Chinese lantern that is NOT lit: muted dusty grey-brown paper, darker caps, no glow - the same shape as a lit red lantern icon, centred.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk-swirl.png",
+  "group": "pocket",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-red.png"
+  ],
+  "prompt": "The attached image is art from the same app, for the style. Draw ONLY a single sweeping white swoosh: a thick soft white curved streak that sweeps around in an open circle (like a quick spin around something), tapering at both ends, with two tiny white sparkles - nothing in the middle.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk-rays.png",
+  "group": "pocket",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-red.png"
+  ],
+  "prompt": "The attached image is art from the same app, for the style. Draw ONLY a soft burst of warm light: about twelve gentle pale-gold rays fanning out evenly from the centre in a full circle, soft-edged and fading toward their ends, nothing in the middle.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk-bubu-hold.png",
+  "group": "pocket",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-torso.png",
+   "refs/ref-pk-red.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's body with his arms down. EDIT it: keep the torso, belly, legs, feet and the two red straps EXACTLY as they are, and change ONLY the arms: both arms bent, holding the red envelope from the SECOND image out in front of his belly with both paws, as if offering it (the envelope smaller, about half his body's width, its character facing us, copied exactly).\n\nKeep the background flat solid magenta (#FF00FF), nothing else added. No text, no letters, except the character already on the pocket."
  }
 ]
