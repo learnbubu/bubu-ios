@@ -2238,5 +2238,25 @@
    "refs/ref-rig-idle.png"
   ],
   "prompt": "The attached image is Bùbù holding a big red seal stamp, a layer from an app sticker. EDIT it into the moment just before he stamps: keep Bùbù EXACTLY the same - same size, same place on the canvas, same face, body, legs, backpack and colours - and change ONLY his arms and the stamp: both arms raised up high above his head, holding the red seal stamp up there with both paws, ready to bring it down, the stamp's flat bottom facing down. His happy determined face stays. Bùbù has exactly two ears.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-flawless-body.png",
+  "group": "layers2",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless-bubu.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is Bùbù holding a big red seal stamp, a layer from an app sticker. EDIT it into one layer for animation: keep Bùbù EXACTLY the same - same size, same place on the canvas, same face, body, legs, backpack and colours - but REMOVE his two arms and the red stamp completely, and draw in what they were covering: his chest, belly and sides, whole and smooth, with clean rounded shoulders where the arms join. Bùbù has exactly two ears.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-flawless-arms.png",
+  "group": "layers2",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless-bubu.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is Bùbù holding a big red seal stamp, a layer from an app sticker. EDIT it into one layer for animation: keep ONLY his two arms and the red seal stamp they hold, EXACTLY as they are - same size, same place on the canvas, same angle - and remove everything else (his head, body, legs, backpack) leaving flat magenta. Draw each arm whole up to a rounded shoulder end, as if it went on under his body.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
