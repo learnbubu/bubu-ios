@@ -1541,5 +1541,209 @@
    "refs/ref-rig-idle.png"
   ],
   "prompt": "The FIRST attached image is Bùbù's torso (no head, no arms); the SECOND is the whole panda standing. EDIT the first image: keep the torso EXACTLY as it is - the same size, the same place on the canvas, the same shape and colours, the belly, legs, feet and the two red straps unchanged - and ADD his two arms, hanging down at his sides the way they do in the second image.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nEach arm starts AT ITS SHOULDER: it grows out of the rounded top corner of the torso, joined to it smoothly as one shape (no gap, no seam, no lump), and hangs down beside the body with a slight curve, ending in a paw with two or three light grey claw marks beside the belly. The red strap stays on top, running over the shoulder and down the chest; the arm hangs from under the outer edge of the strap. Both arms the same, mirrored. Black fur the same black as the torso. Still no head and no backpack.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, with nothing else added. No text."
+ },
+ {
+  "file": "out/raw/rig5-head-sad.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-head.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's head. EDIT it: keep the head EXACTLY as it is - the same size and place on the canvas, the same outline, ears, tuft of hair, the black eye patches (their shape and position unchanged), the nose, the pink cheeks and the colours - and change ONLY the face as described: a sad face: the eyes as soft downturned arcs (looking down), small worried eyebrows slanting up in the middle above the eye patches, and a small frown mouth under the nose.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-head-wince.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-head.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's head. EDIT it: keep the head EXACTLY as it is - the same size and place on the canvas, the same outline, ears, tuft of hair, the black eye patches (their shape and position unchanged), the nose, the pink cheeks and the colours - and change ONLY the face as described: an oops face: the eyes squeezed shut as tight > < shapes inside the patches, a small wavy embarrassed mouth, a tiny worried eyebrow over each patch.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-head-wow.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-head.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's head. EDIT it: keep the head EXACTLY as it is - the same size and place on the canvas, the same outline, ears, tuft of hair, the black eye patches (their shape and position unchanged), the nose, the pink cheeks and the colours - and change ONLY the face as described: an amazed face: big round shining eyes with a white highlight in each patch, eyebrows raised, and a small round 'o' mouth.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-head-grin.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-head.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's head. EDIT it: keep the head EXACTLY as it is - the same size and place on the canvas, the same outline, ears, tuft of hair, the black eye patches (their shape and position unchanged), the nose, the pink cheeks and the colours - and change ONLY the face as described: a delighted face: happy closed-arc eyes, and a big open grin showing a little pink tongue, wider than his usual laugh.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-head-think.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-head.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's head. EDIT it: keep the head EXACTLY as it is - the same size and place on the canvas, the same outline, ears, tuft of hair, the black eye patches (their shape and position unchanged), the nose, the pink cheeks and the colours - and change ONLY the face as described: a thinking face: the eyes looking up and to the right (round pupils near the top corner of each patch), and the mouth a small sideways line pushed to one side.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-head-look-down.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-head.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's head. EDIT it: keep the head EXACTLY as it is - the same size and place on the canvas, the same outline, ears, tuft of hair, the black eye patches (their shape and position unchanged), the nose, the pink cheeks and the colours - and change ONLY the face as described: his usual smile, but the eyes open and looking DOWN and slightly to the right (round dark-brown pupils with a white highlight, near the bottom of each patch), as if reading something below him.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-head-wink.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-head.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's head. EDIT it: keep the head EXACTLY as it is - the same size and place on the canvas, the same outline, ears, tuft of hair, the black eye patches (their shape and position unchanged), the nose, the pink cheeks and the colours - and change ONLY the face as described: a cheeky face: the left eye a happy closed arc, the right eye open with a round pupil and highlight, and a sideways smile.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-head-proud.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-head.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's head. EDIT it: keep the head EXACTLY as it is - the same size and place on the canvas, the same outline, ears, tuft of hair, the black eye patches (their shape and position unchanged), the nose, the pink cheeks and the colours - and change ONLY the face as described: a proud face: calm closed-arc eyes, a small confident smile, the chin a touch up (the face only, the head stays still).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-head-sleepy.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-head.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's head. EDIT it: keep the head EXACTLY as it is - the same size and place on the canvas, the same outline, ears, tuft of hair, the black eye patches (their shape and position unchanged), the nose, the pink cheeks and the colours - and change ONLY the face as described: a sleepy face: the eyes as flat half-closed lines, and a small open yawn mouth.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-torso-hips.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-torso.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's body with his arms down. EDIT it: keep the torso, belly, legs, feet and the two red straps EXACTLY as they are - same size, same place - and change ONLY the arms as described, each arm still growing smoothly out of its shoulder with no seam, the straps staying on top of the shoulders: both hands on his hips, elbows bent out to the sides (a proud pose).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-torso-cheer-fists.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-torso.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's body with his arms down. EDIT it: keep the torso, belly, legs, feet and the two red straps EXACTLY as they are - same size, same place - and change ONLY the arms as described, each arm still growing smoothly out of its shoulder with no seam, the straps staying on top of the shoulders: both arms bent with small fists pumped up in front of his chest (a 'yes!' pose).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-torso-scratch.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-torso.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's body with his arms down. EDIT it: keep the torso, belly, legs, feet and the two red straps EXACTLY as they are - same size, same place - and change ONLY the arms as described, each arm still growing smoothly out of its shoulder with no seam, the straps staying on top of the shoulders: his right arm (on the picture's left) raised and bent so the paw is up by where his head would be, as if scratching his head; the other arm hanging down as now.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-torso-hug.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig5-torso.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù's body with his arms down. EDIT it: keep the torso, belly, legs, feet and the two red straps EXACTLY as they are - same size, same place - and change ONLY the arms as described, each arm still growing smoothly out of its shoulder with no seam, the straps staying on top of the shoulders: both arms wrapped around his own belly, paws meeting at the front (a happy self-hug).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep the background flat solid magenta (#FF00FF) exactly as in the first image, nothing else added. No text, no letters."
+ },
+ {
+  "file": "out/raw/rig5-arm-thumbs-up.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The attached images are Bùbù. Draw ONLY his arm on the left of the picture, raised up and out, its paw making a clear thumbs-up. Plain black fur, a rounded shoulder end, no strap. Square canvas, the arm centred.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig5-arm-point.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png",
+   "refs/panda-celebrate.png"
+  ],
+  "prompt": "The attached images are Bùbù. Draw ONLY his arm on the left of the picture, held out to the side and slightly up, its paw pointing with one finger. Plain black fur, a rounded shoulder end, no strap. Square canvas, the arm centred.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig5-fx-sweat.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is existing art from the same app: match its style. Draw ONLY one small light-blue sweat drop with a white highlight, small and centred, nothing else (no character).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig5-fx-question.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is existing art from the same app: match its style. Draw ONLY one chunky question mark in the app's teal green (#2B776D), soft rounded ends, small and centred, nothing else (no character).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig5-fx-sparkles.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is existing art from the same app: match its style. Draw ONLY three small four-point sparkle stars in warm gold, of different sizes, in a loose cluster, small and centred, nothing else (no character).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig5-fx-hearts.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is existing art from the same app: match its style. Draw ONLY two small rounded hearts in soft coral red, one larger than the other, small and centred, nothing else (no character).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig5-fx-zzz.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is existing art from the same app: match its style. Draw ONLY three small 'z' shapes in soft grey-blue, getting bigger up and to the right, small and centred, nothing else (no character).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rig5-fx-lines.png",
+  "group": "rig5",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is existing art from the same app: match its style. Draw ONLY three short curved motion lines in charcoal, like a cartoon 'whoosh', small and centred, nothing else (no character).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
