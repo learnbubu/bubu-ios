@@ -47,6 +47,10 @@ L = {
 _eyes = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out", "rig", "eyes.json")
 if os.path.exists(_eyes):
     L.update({k: tuple(v) for k, v in json.load(open(_eyes)).items()})
+# the professional set, placed by rig5_fit.py
+_r5 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out", "rig", "rig5.json")
+if os.path.exists(_r5):
+    L.update({k: tuple(v) for k, v in json.load(open(_r5)).items()})
 SIZE = (420, 643)
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -54,7 +58,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def part(n):
     im = Image.open(os.path.join(HERE, "out", "rig", n + ".png")).convert("RGBA")
     x, y, w = L[n]
-    return im.resize((w, round(w * im.height / im.width)), Image.LANCZOS), (x, y)
+    return im.resize((round(w), round(w * im.height / im.width)), Image.LANCZOS), (round(x), round(y))
 
 
 def compose(names, pad=60):
