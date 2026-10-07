@@ -613,8 +613,8 @@ struct MascotPrompt<Content: View>: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
-            Image(mood == nil ? "panda-teacher" : mood! ? "panda-celebrate" : "panda-sad")
-                .resizable().scaledToFit()
+            // Bùbù in parts, reacting to the answer (the owner, 7 Oct 2026)
+            BubuMascot(mood: mood, height: long || compact ? 78 : 148)
                 .frame(width: long || compact ? 64 : 122, height: long || compact ? 78 : 148, alignment: .bottom)
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)

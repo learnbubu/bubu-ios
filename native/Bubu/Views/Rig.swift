@@ -353,3 +353,86 @@ struct BubuRig: View {
         .offset(y: o.y * unit)
     }
 }
+
+// MARK: - Bùbù beside the question
+
+/// Bùbù in the lesson's prompt, reacting to the answer (the owner's studio, 7 Oct 2026): waiting
+/// he breathes and blinks, and after a while scratches his head thinking; right, a fist pump with
+/// a grin and sparkles; wrong, an "oops" (eyes squeezed, a sweat drop) with his head drooping.
+/// Drawn from the rig's parts on panda-idle's canvas, `height` points tall.
+struct BubuMascot: View {
+    var mood: Bool?          // nil: asking; true: right; false: wrong
+    var height: CGFloat = 148
+    @State private var since = Date()
+    @State private var askedAt = Date()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        let scale = height / RigArt.canvas.height
+        TimelineView(.animation(paused: reduceMotion)) { tl in
+            pose(now: tl.date)
+        }
+        .frame(width: RigArt.canvas.width * scale, height: height)
+        .onChange(of: mood) { _, m in since = Date(); if m == nil { askedAt = Date() } }
+        .onAppear { since = Date(); askedAt = Date() }
+    }
+
+    private func part(_ name: String, show: Bool = true) -> some View {
+        let r = RigArt.rect[name] ?? .zero
+        return Image(name).resizable().frame(width: r.width, height: r.height).offset(x: r.minX, y: r.minY).opacity(show ? 1 : 0)
+    }
+
+    private func pose(now: Date) -> some View {
+        let scale = height / RigArt.canvas.height
+        let t = now.timeIntervalSince(since) * 1000                 // ms since the answer (or the question)
+        let waited = now.timeIntervalSince(askedAt) * 1000
+        let br = reduceMotion ? 0 : sin(2 * .pi * now.timeIntervalSinceReferenceDate * 1000 / 2600)
+        var face: String? = nil, torso = "rig4-torso-arms", marks: [String] = []
+        var y = 0.0, headRot = 0.0, headDrop = 0.0, blink = false
+        switch mood {
+        case true?:
+            if t < 2600 { face = "rig5-head-grin"; torso = "rig5-torso-cheer-fists"; marks = ["rig5-fx-sparkles"] }
+            if t < 500 { y = -13 * sin(.pi * t / 500) }
+        case false?:
+            if t < 2300 {
+                face = "rig5-head-wince"; marks = ["rig5-fx-sweat"]
+                let e = t < 350 ? 1 - pow(1 - t / 350, 3) : 1, settle = t > 1800 ? 1 - min(1, (t - 1800) / 500) : 1
+                headRot = -11 * e * settle; headDrop = 8 * e * settle
+            }
+        case nil:
+            if waited > 4000 { face = "rig5-head-think"; torso = "rig5-torso-scratch"; marks = ["rig5-fx-question"] }
+            blink = Int(now.timeIntervalSinceReferenceDate * 1000) % 4200 < 140
+        }
+        let markIn = min(1, max(0, (t - 120) / 300))
+        return ZStack(alignment: .topLeading) {
+            part("rig2-pack-side")
+            Ellipse().fill(Color(red: 44 / 255, green: 49 / 255, blue: 55 / 255)).frame(width: 224, height: 110).offset(x: 96, y: 200)
+            ForEach(["rig4-torso-arms", "rig5-torso-cheer-fists", "rig5-torso-scratch"], id: \.self) { n in part(n, show: n == torso) }
+            ZStack(alignment: .topLeading) {
+                Group {
+                    part("rig-head")
+                    part("rig-glint-open-L", show: !blink); part("rig-glint-open-R", show: !blink)
+                    part("rig-glint-blink-L", show: blink); part("rig-glint-blink-R", show: blink)
+                    part("rig-mouth-smile")
+                }
+                .opacity(face == nil ? 1 : 0)
+                ForEach(["rig5-head-grin", "rig5-head-wince", "rig5-head-think"], id: \.self) { n in part(n, show: n == face) }
+                ForEach(["rig5-fx-sparkles", "rig5-fx-sweat", "rig5-fx-question"], id: \.self) { n in
+                    let on = marks.contains(n)
+                    part(n, show: on)
+                        .scaleEffect(on ? 0.3 + 0.7 * markIn : 0.3)
+                        .offset(y: 3 * sin(now.timeIntervalSinceReferenceDate * 1000 / 260) + (n == "rig5-fx-sweat" ? min(1, t / 1400) * 16 : 0))
+                        .opacity(on ? markIn : 0)
+                }
+            }
+            .frame(width: RigArt.canvas.width, height: RigArt.canvas.height, alignment: .topLeading)
+            .rotationEffect(.degrees(headRot), anchor: UnitPoint(x: 0.5, y: 0.45))
+            .offset(y: headDrop - 1.4 * br)
+        }
+        .frame(width: RigArt.canvas.width, height: RigArt.canvas.height, alignment: .topLeading)
+        .scaleEffect(x: 1 - 0.006 * br, y: 1 + 0.012 * br, anchor: .bottom)
+        .scaleEffect(scale, anchor: .topLeading)
+        .frame(width: RigArt.canvas.width * scale, height: height, alignment: .topLeading)
+        .offset(y: y * height / 148)
+    }
+}

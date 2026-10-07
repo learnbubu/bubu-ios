@@ -18,6 +18,9 @@ RIG = os.path.join(HERE, "out", "rig")
 FINAL = os.path.join(HERE, "out", "final")
 
 PARTS = ["rig2-pack-side", "rig2-body", "rig4-torso-arms", "rig4-torso-armL",
+         "rig5-head-sad", "rig5-head-wince", "rig5-head-grin", "rig5-head-think", "rig5-head-wow", "rig5-head-proud",
+         "rig5-torso-cheer-fists", "rig5-torso-scratch", "rig5-torso-hips",
+         "rig5-fx-sweat", "rig5-fx-sparkles", "rig5-fx-question",
          "rig-arm-left-up", "rig-arm-right-up", "rig-arm-left-down", "rig-arm-right-down",
          "rig-head", "rig-mouth-smile", "rig-mouth-open",
          "rig-glint-open-L", "rig-glint-open-R", "rig-glint-blink-L", "rig-glint-blink-R", "rig-glint-wow-L", "rig-glint-wow-R"]

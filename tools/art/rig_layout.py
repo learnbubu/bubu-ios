@@ -47,6 +47,9 @@ L = {
 _eyes = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out", "rig", "eyes.json")
 if os.path.exists(_eyes):
     L.update({k: tuple(v) for k, v in json.load(open(_eyes)).items()})
+# the little marks around his head (rig5 fx), placed by eye
+L.update({"rig5-fx-sweat": (338, 70, 46), "rig5-fx-sparkles": (-30, -20, 120), "rig5-fx-question": (345, -30, 70),
+          "rig5-fx-hearts": (320, -10, 100), "rig5-fx-zzz": (330, -40, 90), "rig5-fx-lines": (-60, 150, 90)})
 # the professional set, placed by rig5_fit.py
 _r5 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out", "rig", "rig5.json")
 if os.path.exists(_r5):
