@@ -1821,15 +1821,6 @@
   "prompt": "The attached image is art from the same app, for the style. Draw ONLY a single sweeping white swoosh: a thick soft white curved streak that sweeps around in an open circle (like a quick spin around something), tapering at both ends, with two tiny white sparkles - nothing in the middle.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
-  "file": "out/raw/pk-rays.png",
-  "group": "pocket",
-  "size": "1024x1024",
-  "refs": [
-   "refs/ref-pk-red.png"
-  ],
-  "prompt": "The attached image is art from the same app, for the style. Draw ONLY a soft burst of warm light: about twelve gentle pale-gold rays fanning out evenly from the centre in a full circle, soft-edged and fading toward their ends, nothing in the middle.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
- },
- {
   "file": "out/raw/pk-bubu-hold.png",
   "group": "pocket",
   "size": "1024x1024",
@@ -1928,5 +1919,314 @@
    "refs/panda-celebrate.png"
   ],
   "prompt": "The attached images are Bùbù, the app's panda. Draw a round BADGE: a warm gold ring with a red inner border, and inside it Bùbù from the chest up, waving and smiling, with a tiny red lantern hanging at the side. Simple and bold, like an achievement icon. Square canvas, the badge centred.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-speedy-blob.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-speedy.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the soft yellow blob backing (the sticker's background shape and its rim) EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-speedy-bubu.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-speedy.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY Bùbù himself (his whole body, head and backpack, in his pose), no cloud, no wind streaks EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). Bùbù has exactly two black ears: if there is a third ear or a stray black ear shape behind his head, remove it. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-speedy-cloud.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-speedy.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the golden swirly cloud he rides EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-speedy-wind.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-speedy.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the white wind streaks EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-flawless-blob.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the coral blob backing EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-flawless-bubu.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY Bùbù holding the red seal stamp (him and the stamp together), no paper EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). Bùbù has exactly two black ears: if there is a third ear or a stray black ear shape behind his head, remove it. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-flawless-paper.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the sheet of paper WITH the red 满分 print on it EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters, apart from the 满分 print copied exactly.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-flawless-paper-blank.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the sheet of paper, with the red print removed so the paper is blank EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-flawless-lines.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the little yellow impact lines EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-kungfu-blob.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-kungfu.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the green blob backing EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-kungfu-bubu.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-kungfu.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY Bùbù in his kung-fu pose EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). Bùbù has exactly two black ears: if there is a third ear or a stray black ear shape behind his head, remove it. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-kungfu-swoosh.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-kungfu.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the motion swooshes EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-sweep-blob.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-sweep.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the blue blob backing EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-sweep-bubu.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-sweep.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY Bùbù with his broom (him and the broom together) EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). Bùbù has exactly two black ears: if there is a third ear or a stray black ear shape behind his head, remove it. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-sweep-crosses.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-sweep.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the red crosses (x marks) and the little dust puffs EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-nightowl-blob.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-nightowl.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the indigo blob backing, with no stars and no moon on it (plain indigo) EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-nightowl-bubu.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-nightowl.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY Bùbù in his pyjamas holding the lantern EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). Bùbù has exactly two black ears: if there is a third ear or a stray black ear shape behind his head, remove it. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-nightowl-sky.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-nightowl.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the crescent moon and the little stars EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-nightowl-glow.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-nightowl.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY a soft warm golden glow where the lantern is (a round halo of light, no lantern) EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-earlybird-blob.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-earlybird.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the peach blob backing, with no sun on it EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-earlybird-bubu.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-earlybird.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY Bùbù holding the cup of tea (him and the cup), no steam, no bun EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). Bùbù has exactly two black ears: if there is a third ear or a stray black ear shape behind his head, remove it. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-earlybird-sun.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-earlybird.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the small rising sun EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-earlybird-steam.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-earlybird.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the curls of steam above the cup EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-earlybird-bun.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-earlybird.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the steamed bun (and its basket) EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-brain-blob.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-brain.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the lilac blob backing EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-brain-bubu.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-brain.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY Bùbù, with his arms out for balance, and NO books on his head (draw the top of his head and ears whole) EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). Bùbù has exactly two black ears: if there is a third ear or a stray black ear shape behind his head, remove it. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-brain-books.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-brain.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the stack of books EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-onfire-blob.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-onfire.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the orange blob backing EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-onfire-bubu.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-onfire.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY Bùbù riding the firecracker rocket (him and the rocket together), no flame or sparks EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). Bùbù has exactly two black ears: if there is a third ear or a stray black ear shape behind his head, remove it. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/mo-onfire-trail.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-onfire.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY the flame and the trail of sparks from the rocket's end EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything else, leaving flat magenta (#FF00FF) where it was. Where something removed was covering part of what you keep, draw that hidden part in, continuing it naturally (e.g. a leg behind a prop). No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden."
+ },
+ {
+  "file": "out/raw/pk-rays.png",
+  "group": "layers",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-red.png"
+  ],
+  "prompt": "The attached image is art from the same app, for the style. Draw ONLY a soft burst of warm light: about twelve gentle rays fanning out evenly from the centre in a full circle, every ray PALE GOLD and cream only (no pink, no red, no purple at all), soft-edged and fading toward their ends, nothing in the middle.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
