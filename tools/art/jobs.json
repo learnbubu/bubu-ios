@@ -2230,16 +2230,6 @@
   "prompt": "The attached image is art from the same app, for the style. Draw ONLY a soft burst of warm light: about twelve gentle rays fanning out evenly from the centre in a full circle, every ray PALE GOLD and cream only (no pink, no red, no purple at all), soft-edged and fading toward their ends, nothing in the middle.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
-  "file": "out/raw/mo-flawless-bubu-up.png",
-  "group": "layers2",
-  "size": "1024x1024",
-  "refs": [
-   "out/raw/mo-flawless-bubu.png",
-   "refs/ref-rig-idle.png"
-  ],
-  "prompt": "The attached image is Bùbù holding a big red seal stamp, a layer from an app sticker. EDIT it into the moment just before he stamps: keep Bùbù EXACTLY the same - same size, same place on the canvas, same face, body, legs, backpack and colours - and change ONLY his arms and the stamp: both arms raised up high, holding the red seal stamp above his head with both paws, ready to bring it down, the stamp's flat bottom facing down. The arms are IN FRONT of him: they come up from his shoulders in front of his body and beside his cheeks, drawn OVER the edges of his head - NOT behind his head, and not behind his ears. Both of his ears stay clearly visible on top of his head, the stamp held above them. His happy determined face stays. Bùbù has exactly two ears.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
- },
- {
   "file": "out/raw/mo-flawless-body.png",
   "group": "layers2",
   "size": "1024x1024",
@@ -2368,5 +2358,15 @@
    "refs/ref-rig-idle.png"
   ],
   "prompt": "The attached image is Bùbù lying forward on his belly, a layer from an app sticker. EDIT it: keep him EXACTLY the same - same size, same place on the canvas, same pose, face, eyebrows, backpack and colours - and fix ONE mistake: on top of his head there is an extra black ear shape. Bùbù must have exactly TWO round black ears, one on each side of the top of his head, both the same size and shape (like his right ear). Remove the extra shape and draw his left ear as a single round ear matching the right one.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-flawless-arms-up.png",
+  "group": "layers2",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless-arms.png",
+   "out/raw/mo-flawless-body.png"
+  ],
+  "prompt": "The FIRST attached image is a layer of Bùbù's two arms holding a red seal stamp (no body). The SECOND is his body without arms. Draw a NEW version of the FIRST layer only: the same two black arms and the same red stamp, same size and style, but raised: the arms go up and slightly in from where his shoulders are in the second image, the paws holding the stamp high above where his head is, the stamp's flat face pointing down, ready to slam. Draw ONLY the arms and the stamp - no head, no body, nothing else - with each arm ending at the bottom in a soft rounded end of black fur at the shoulder. Keep them on the same canvas position as the shoulders in the second image.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
