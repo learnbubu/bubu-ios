@@ -2358,5 +2358,15 @@
    "refs/ref-rig-idle.png"
   ],
   "prompt": "The attached image is Bùbù, a layer from an app sticker. EDIT it into one layer for animation: keep ONLY his two outstretched arms, EXACTLY as they are - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Draw each arm whole up to a rounded end, as if it went on under his body.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mo-speedy-bubu2.png",
+  "group": "layers2",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-speedy-bubu.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is Bùbù lying forward on his belly, a layer from an app sticker. EDIT it: keep him EXACTLY the same - same size, same place on the canvas, same pose, face, eyebrows, backpack and colours - and fix ONE mistake: on top of his head there is an extra black ear shape. Bùbù must have exactly TWO round black ears, one on each side of the top of his head, both the same size and shape (like his right ear). Remove the extra shape and draw his left ear as a single round ear matching the right one.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
