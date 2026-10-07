@@ -34,18 +34,18 @@ if __name__ == "__main__":
     sift = cv2.SIFT_create(nfeatures=5000)
     bf = cv2.BFMatcher()
     for k, layers in LAYERS.items():
-        full = process.key(Image.open(os.path.join(RAW, f"mo-{k}.png")).convert("RGBA")).resize((1024, 1024), Image.LANCZOS)
+        full = process.key_full(Image.open(os.path.join(RAW, f"mo-{k}.png")).convert("RGBA")).resize((1024, 1024), Image.LANCZOS)
         fa = np.asarray(full)
         fg, fm = flat(full)
         kf, df = sift.detectAndCompute(fg, fm)
         for name in layers:
             src = os.path.join(RAW, f"mo-{k}-{name}.png")
             if not os.path.exists(src): continue
-            layer = process.key(Image.open(src).convert("RGBA")).resize((1024, 1024), Image.LANCZOS)
+            layer = process.key_full(Image.open(src).convert("RGBA")).resize((1024, 1024), Image.LANCZOS)
             la = np.asarray(layer)
             if name == "blob":
                 x0, y0, x1, y1 = box(la[:, :, 3]); X0, Y0, X1, Y1 = box(fa[:, :, 3])
-                sx, sy = (X1 - X0) / (x1 - x0), (Y1 - Y0) / (y1 - y0)
+                sx = sy = (Y1 - Y0) / (y1 - y0)
                 M = np.float32([[sx, 0, X0 - x0 * sx], [0, sy, Y0 - y0 * sy]])
                 how = f"outline box, x {sx:.2f} y {sy:.2f}"
             else:
@@ -55,7 +55,7 @@ if __name__ == "__main__":
                 if dl is not None and len(kl) >= 8:
                     good = [m for m, n in bf.knnMatch(dl, df, k=2) if m.distance < 0.75 * n.distance]
                     if len(good) >= 8:
-                        A, inl = cv2.estimateAffine2D(np.float32([kl[m.queryIdx].pt for m in good]),
+                        A, inl = cv2.estimateAffinePartial2D(np.float32([kl[m.queryIdx].pt for m in good]),
                                                       np.float32([kf[m.trainIdx].pt for m in good]),
                                                       method=cv2.RANSAC, ransacReprojThreshold=5)
                         if A is not None and inl.sum() >= 8:

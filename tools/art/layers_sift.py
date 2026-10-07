@@ -26,14 +26,14 @@ if __name__ == "__main__":
     sift = cv2.SIFT_create(nfeatures=4000)
     bf = cv2.BFMatcher()
     for k, layers in LAYERS.items():
-        full = process.key(Image.open(os.path.join(RAW, f"mo-{k}.png")).convert("RGBA")).resize((1024, 1024))
+        full = process.key_full(Image.open(os.path.join(RAW, f"mo-{k}.png")).convert("RGBA")).resize((1024, 1024))
         fg, fm = flat(full)
         kf, df = sift.detectAndCompute(fg, fm)
         for name in layers:
             if name in ("blob", "bubu", "glow"): continue
             src = os.path.join(RAW, f"mo-{k}-{name}.png")
             if not os.path.exists(src): continue
-            layer = process.key(Image.open(src).convert("RGBA")).resize((1024, 1024))
+            layer = process.key_full(Image.open(src).convert("RGBA")).resize((1024, 1024))
             lg, lm = flat(layer)
             kl, dl = sift.detectAndCompute(lg, lm)
             if dl is None or df is None or len(kl) < 6:

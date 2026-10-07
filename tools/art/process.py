@@ -38,6 +38,11 @@ def key(im, bg=None):
     return im.crop(bbox) if bbox else im
 
 
+def key_full(im, bg=None):
+    """The backdrop -> transparent, on the image's own canvas (not trimmed, so its shape and place hold)."""
+    return Image.fromarray(cutout_array(im, bg), "RGBA")
+
+
 def cutout_array(im, bg=None):
     """Keep existing transparency; only colour-key fully opaque source images."""
     rgba = np.asarray(im.convert("RGBA"))

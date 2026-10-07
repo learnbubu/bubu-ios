@@ -18,7 +18,7 @@ N = 256          # matching size
 
 
 def keyed(path):
-    return process.key(Image.open(path).convert("RGBA"))
+    return process.key_full(Image.open(path).convert("RGBA"))
 
 
 def best_place(full, layer, blob=False):
