@@ -17,6 +17,7 @@ from add_layers import LAYERS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RAW, RIG = os.path.join(HERE, "out", "raw"), os.path.join(HERE, "out", "rig")
+PAD = 128
 
 
 def flat(im):
@@ -45,8 +46,8 @@ if __name__ == "__main__":
             la = np.asarray(layer)
             if name == "blob":
                 x0, y0, x1, y1 = box(la[:, :, 3]); X0, Y0, X1, Y1 = box(fa[:, :, 3])
-                sx = sy = (Y1 - Y0) / (y1 - y0)
-                M = np.float32([[sx, 0, X0 - x0 * sx], [0, sy, Y0 - y0 * sy]])
+                sx = sy = min((X1 - X0) / (x1 - x0), (Y1 - Y0) / (y1 - y0))
+                M = np.float32([[sx, 0, (X0 + X1) / 2 - (x0 + x1) / 2 * sx], [0, sy, (Y0 + Y1) / 2 - (y0 + y1) / 2 * sy]])
                 how = f"outline box, x {sx:.2f} y {sy:.2f}"
             else:
                 lg, lm = flat(layer)
@@ -66,6 +67,8 @@ if __name__ == "__main__":
                 if M is None:
                     # keep the earlier placement (even scale); it's the best we have
                     print(f"{k:10s} {name:12s} kept the earlier placement"); continue
-            out = cv2.warpAffine(la, M, (1024, 1024), flags=cv2.INTER_LANCZOS4, borderValue=(0, 0, 0, 0))
+            # on a canvas with room round the sticker's (128 each side), so nothing past its edge is cut off
+            Mp = M.copy(); Mp[0, 2] += PAD; Mp[1, 2] += PAD
+            out = cv2.warpAffine(la, Mp, (1024 + 2 * PAD, 1024 + 2 * PAD), flags=cv2.INTER_LANCZOS4, borderValue=(0, 0, 0, 0))
             Image.fromarray(out).save(os.path.join(RIG, f"mo-{k}-{name}-placed.png"))
             print(f"{k:10s} {name:12s} {how}")
