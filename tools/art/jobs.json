@@ -2360,39 +2360,183 @@
   "prompt": "The attached image is Bùbù lying forward on his belly, a layer from an app sticker. EDIT it: keep him EXACTLY the same - same size, same place on the canvas, same pose, face, eyebrows, backpack and colours - and fix ONE mistake: on top of his head there is an extra black ear shape. Bùbù must have exactly TWO round black ears, one on each side of the top of his head, both the same size and shape (like his right ear). Remove the extra shape and draw his left ear as a single round ear matching the right one.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
-  "file": "out/raw/mo-brain-armL.png",
-  "group": "layers3",
+  "file": "out/raw/m6-flawless-body.png",
+  "group": "rig6",
   "size": "1024x1024",
   "refs": [
-   "out/raw/mo-brain-limb.png"
+   "out/raw/mo-flawless.png",
+   "refs/ref-rig-idle.png"
   ],
-  "prompt": "The attached image is a layer of Bùbù's arms from an app sticker. EDIT it into ONE arm for animation: keep ONLY the arm on the picture's left, on its own, EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the other arm was covering part of it, draw that part in. The arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, stamping a red 满分 seal onto paper. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: Bùbù's body and head only, standing as in the sticker, with NO arms and NO stamp: draw his chest and sides whole, with smooth rounded black shoulders. Bùbù has exactly two round black ears. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
-  "file": "out/raw/mo-brain-armR.png",
-  "group": "layers3",
+  "file": "out/raw/m6-flawless-arms-high.png",
+  "group": "rig6",
   "size": "1024x1024",
   "refs": [
-   "out/raw/mo-brain-limb.png"
+   "out/raw/mo-flawless.png",
+   "refs/ref-rig-idle.png"
   ],
-  "prompt": "The attached image is a layer of Bùbù's arms from an app sticker. EDIT it into ONE arm for animation: keep ONLY the arm on the picture's right, on its own, EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the other arm was covering part of it, draw that part in. The arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, stamping a red 满分 seal onto paper. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY his two arms and the red seal stamp, the arms raised so the stamp is held up high in front of his face (just above his head), ready to slam down; the shoulders where they are in the sticker. Each arm (or leg) ends where it joins his body in a soft ROUNDED end of plain black fur, with no outline, so it can sit over his shoulder (or hip) and turn there without a gap. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
-  "file": "out/raw/mo-nightowl-lantern.png",
-  "group": "layers3",
+  "file": "out/raw/m6-flawless-arms-down.png",
+  "group": "rig6",
   "size": "1024x1024",
   "refs": [
-   "out/raw/mo-nightowl-limb.png"
+   "out/raw/mo-flawless.png",
+   "refs/ref-rig-idle.png"
   ],
-  "prompt": "The attached image is a layer of Bùbù's arm holding a paper lantern, from an app sticker. EDIT it into ONE piece for animation: keep ONLY the lantern itself (its body, top, bottom tassel and its handle loop), EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the paw was covering the top of the handle, draw the handle whole.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, stamping a red 满分 seal onto paper. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY his two arms and the red seal stamp, exactly as in the sticker: pressing the stamp down onto the paper. Each arm (or leg) ends where it joins his body in a soft ROUNDED end of plain black fur, with no outline, so it can sit over his shoulder (or hip) and turn there without a gap. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
-  "file": "out/raw/mo-nightowl-arm.png",
-  "group": "layers3",
+  "file": "out/raw/m6-flawless-paper.png",
+  "group": "rig6",
   "size": "1024x1024",
   "refs": [
-   "out/raw/mo-nightowl-limb.png"
+   "out/raw/mo-flawless.png",
+   "refs/ref-rig-idle.png"
   ],
-  "prompt": "The attached image is a layer of Bùbù's arm holding a paper lantern, from an app sticker. EDIT it into ONE piece for animation: keep ONLY the arm, on its own (no lantern), EXACTLY as it is - same size, same place on the canvas, same angle - and remove everything else, leaving flat magenta. Where the lantern was in front of it, draw that part of the arm in. The paw is closed in a loose fist, as if gripping a handle; the arm ends at the shoulder in a soft rounded end of black fur.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, stamping a red 满分 seal onto paper. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY the sheet of paper on the ground, with the red 满分 seal print on it (copy the characters exactly).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-flawless-paper-blank.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-flawless.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, stamping a red 满分 seal onto paper. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY the sheet of paper on the ground, blank, with no print.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-kungfu-ready.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-kungfu.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, doing a high kung-fu kick. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: Bùbù in a READY stance instead of kicking: both feet on the ground, knees slightly bent, both fists up in front of him, a determined grin - the same size and position as in the sticker, the same face. Bùbù has exactly two round black ears. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-kungfu-whoosh.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-kungfu.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, doing a high kung-fu kick. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY one curved white swoosh arc tracing the path of the kicking foot, from low at his hip sweeping up to where the foot is in the sticker.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-sweep-body.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-sweep.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, sweeping with a little bamboo broom. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: Bùbù's body and head only, as in the sticker, with NO arms and NO broom: his chest and sides whole, smooth rounded black shoulders. Bùbù has exactly two round black ears. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-sweep-arms-broom.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-sweep.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, sweeping with a little bamboo broom. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY his two arms and the broom: both paws holding the broom handle close together near its top, in front of his chest, the broom angled down to the floor as in the sticker. Each arm (or leg) ends where it joins his body in a soft ROUNDED end of plain black fur, with no outline, so it can sit over his shoulder (or hip) and turn there without a gap. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-nightowl-body.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-nightowl.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, in pyjamas holding up a glowing paper lantern. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: Bùbù in his pyjamas and nightcap with his arm raised as in the sticker, its paw closed in a fist as if holding a handle, but with NO lantern (draw whatever the lantern covered). Bùbù has exactly two round black ears. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-nightowl-lantern.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-nightowl.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, in pyjamas holding up a glowing paper lantern. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY the glowing paper lantern with its little loop handle at the top and its tassel, hanging straight down from where his paw is in the sticker.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-earlybird-body.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-earlybird.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, sitting with a cup of tea. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: Bùbù's body and head only, sitting as in the sticker, with NO arms and NO cup: his chest and belly whole, smooth rounded black shoulders, his face as in the sticker. Bùbù has exactly two round black ears. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-earlybird-arms-lap.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-earlybird.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, sitting with a cup of tea. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY his two arms and the tea cup, exactly as in the sticker: the cup held in both paws in front of his belly. Each arm (or leg) ends where it joins his body in a soft ROUNDED end of plain black fur, with no outline, so it can sit over his shoulder (or hip) and turn there without a gap. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-earlybird-arms-sip.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-earlybird.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, sitting with a cup of tea. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY his two arms and the tea cup, the cup lifted up to where his mouth is in the sticker, tilted a little as if sipping. Each arm (or leg) ends where it joins his body in a soft ROUNDED end of plain black fur, with no outline, so it can sit over his shoulder (or hip) and turn there without a gap. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-brain-body.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-brain.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, balancing a stack of books on his head. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: Bùbù's body and head only, as in the sticker, with NO arms and NO books: the top of his head whole with both ears, smooth rounded black shoulders. Bùbù has exactly two round black ears. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-brain-arm-left.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-brain.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, balancing a stack of books on his head. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY his arm on the picture's left, held out for balance as in the sticker. Each arm (or leg) ends where it joins his body in a soft ROUNDED end of plain black fur, with no outline, so it can sit over his shoulder (or hip) and turn there without a gap. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-brain-arm-right.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-brain.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, balancing a stack of books on his head. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY his arm on the picture's right, held out for balance as in the sticker. Each arm (or leg) ends where it joins his body in a soft ROUNDED end of plain black fur, with no outline, so it can sit over his shoulder (or hip) and turn there without a gap. \n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/m6-brain-books.png",
+  "group": "rig6",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/mo-brain.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished sticker from the app: Bùbù the panda, balancing a stack of books on his head. Draw ONLY the piece described below - nothing else on the canvas - at EXACTLY the size, position and angle it has in the sticker, so it can be stacked back onto the other pieces. Square canvas, the same framing as the sticker.\n\nThe piece: ONLY the stack of books, exactly as in the sticker, its bottom book flat (it rests on his head).\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
