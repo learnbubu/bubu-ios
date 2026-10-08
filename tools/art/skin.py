@@ -17,18 +17,19 @@ from scipy import ndimage
 HERE = os.path.dirname(os.path.abspath(__file__))
 RIG = os.path.join(HERE, "out", "rig")
 PAD = 128
-G = 33                    # grid points across and down
-MOMENTS = {"flawless": 1, "sweep": 1, "earlybird": 1, "brain": 2}
+G = 49                    # grid points across and down (finer: smoother bends)
+MOMENTS = {"flawless": 1, "sweep": 1, "earlybird": 1, "brain": 2, "kungfu": 1}
 
 
 ARMS = {"flawless": ["m6-flawless-arms-down"], "sweep": ["m6-sweep-arms-broom"], "earlybird": ["m6-earlybird-arms-lap"],
-        "brain": ["m6-brain-arm-left", "m6-brain-arm-right"]}
+        "brain": ["m6-brain-arm-left", "m6-brain-arm-right"], "kungfu": ["mo-kungfu-limb-placed"]}
 
 
 def arm_mask(k):
     """The arm areas: the clean arm pieces drawn for rig6 (placed over this sticker), where Bùbù is."""
     orig = np.asarray(Image.open(os.path.join(RIG, f"mo-{k}-bubu-placed.png")).convert("RGBA"))
     body = np.asarray(Image.open(os.path.join(RIG, f"mo-{k}-body-placed.png")).convert("RGBA"))
+    if k == "kungfu": body = orig.copy()
     oa, ba = orig[:, :, 3] > 128, body[:, :, 3] > 128
     ms = []
     for n in ARMS[k]:
@@ -52,10 +53,13 @@ if __name__ == "__main__":
             piv = [float(ox[sel].mean()) - PAD, float(oy[sel].mean()) - PAD]
             # weights: 1 in the arm, easing to 0 over ~40 px into the body round the shoulder
             dist_out = ndimage.distance_transform_edt(~bm)
-            w = np.clip(1 - dist_out / 40, 0, 1) ** 1.5
+            u = np.clip(1 - dist_out / 70, 0, 1); w = u * u * (3 - 2 * u)
+            w = ndimage.gaussian_filter(w, 6)
             gx = np.linspace(x0, x1 - 1, G); gy = np.linspace(y0, y1 - 1, G)
             W = w[np.ix_(gy.astype(int), gx.astype(int))]
             bones.append({"pivot": piv, "w": [round(float(v), 3) for v in W.ravel()]})
-        out[k] = {"grid": G, "box": [float(x0 - PAD), float(y0 - PAD), float(x1 - PAD), float(y1 - PAD)], "bones": bones}
+        if k == "kungfu":            # the leg turns at the hip (where it joins him, low)
+            piv = json.load(open(os.path.join(RIG, "pivots.json")))["kungfu-limb"]; bones[0]["pivot"] = piv
+        out[k] = {"layer": "kick" if k == "kungfu" else "bubu", "grid": G, "box": [float(x0 - PAD), float(y0 - PAD), float(x1 - PAD), float(y1 - PAD)], "bones": bones}
         print(k, "bones", [b["pivot"] for b in bones])
     json.dump(out, open(os.path.join(RIG, "skin.json"), "w"))
