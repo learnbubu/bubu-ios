@@ -25,6 +25,20 @@ ARMS = {"flawless": ["m6-flawless-arms-down"], "sweep": ["m6-sweep-arms-broom"],
         "brain": ["m6-brain-arm-left", "m6-brain-arm-right"], "kungfu": ["mo-kungfu-limb-placed"]}
 
 
+# each head (an ellipse over the face and crown, in placed-image px: centre x, y, radius x, y). Nothing
+# here may bend: the blend round an arm stops at the head, so only the arm itself moves over his face
+HEADS = {"flawless": (688, 368, 245, 195), "sweep": (646, 448, 262, 176), "earlybird": (688, 464, 256, 176),
+         "brain": (640, 592, 192, 134), "kungfu": (730, 422, 250, 186)}
+
+
+def head_keep(k, shape):
+    """1 where the head is (softened over ~20 px at its edge), 0 elsewhere."""
+    cx, cy, rx, ry = HEADS[k]
+    yy, xx = np.mgrid[:shape[0], :shape[1]]
+    d = np.hypot((xx - cx) / rx, (yy - cy) / ry)
+    return np.clip((1.08 - d) / 0.16, 0, 1)
+
+
 def arm_mask(k):
     """The arm areas: the clean arm pieces drawn for rig6 (placed over this sticker), where Bùbù is."""
     orig = np.asarray(Image.open(os.path.join(RIG, f"mo-{k}-bubu-placed.png")).convert("RGBA"))
@@ -55,6 +69,7 @@ if __name__ == "__main__":
             dist_out = ndimage.distance_transform_edt(~bm)
             u = np.clip(1 - dist_out / 70, 0, 1); w = u * u * (3 - 2 * u)
             w = ndimage.gaussian_filter(w, 6)
+            w = np.maximum(w * (1 - head_keep(k, w.shape)), bm.astype(float))   # the head stays put
             gx = np.linspace(x0, x1 - 1, G); gy = np.linspace(y0, y1 - 1, G)
             W = w[np.ix_(gy.astype(int), gx.astype(int))]
             bones.append({"pivot": piv, "w": [round(float(v), 3) for v in W.ravel()]})
