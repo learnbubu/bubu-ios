@@ -6,7 +6,14 @@ do; SpriteKit's SKWarpGeometryGrid does the same in the app).
 
 The arm regions are where the original Bùbù differs from Codex's armless body (as limbs_cut.py); each
 bone's pivot is its shoulder. Writes out/rig/skin.json: per moment, the grid size, the layer's box and,
-per bone, its pivot and the weights at the grid points."""
+per bone, its pivot and the weights at the grid points.
+
+Masked, not bent whole (owner, 8 Oct: the bend still pulled his face): two images per moment. The STILL
+layer is Bùbù never bent, with Codex's armless body filling in where the arm was (so nothing is missing
+when it swings away); the ARM layer is the arm alone, cut by its mask, fading out a little way into the
+shoulder. Only the arm layer goes through the grid; the face always comes from the still layer."""
+import base64
+import io
 import json
 import os
 
@@ -43,19 +50,45 @@ def arm_mask(k):
     """The arm areas: the clean arm pieces drawn for rig6 (placed over this sticker), where Bùbù is."""
     orig = np.asarray(Image.open(os.path.join(RIG, f"mo-{k}-bubu-placed.png")).convert("RGBA"))
     body = np.asarray(Image.open(os.path.join(RIG, f"mo-{k}-body-placed.png")).convert("RGBA"))
-    if k == "kungfu": body = orig.copy()
     oa, ba = orig[:, :, 3] > 128, body[:, :, 3] > 128
     ms = []
     for n in ARMS[k]:
         a = np.asarray(Image.open(os.path.join(RIG, n + ".png")).convert("RGBA"))[:, :, 3] > 128
         ms.append(ndimage.binary_dilation(a, iterations=6) & oa)
-    return ms, ba, oa
+    return ms, ba, oa, orig, body
+
+
+def uri(a):
+    b = io.BytesIO(); Image.fromarray(a).save(b, "WEBP", quality=92, method=6)
+    return "data:image/webp;base64," + base64.b64encode(b.getvalue()).decode()
+
+
+def layers(k, masks, orig, body, crop):
+    """The still layer (the arm swapped for the armless body) and the arm layer (the arm cut out, fading
+    over ~24 px into the shoulder, never into the head)."""
+    x0, y0, x1, y1 = crop
+    anym = np.zeros(orig.shape[:2], bool)
+    keep = head_keep(k, orig.shape[:2])
+    for bm in masks: anym |= bm
+    # swap in the body where the arm was, plus any of the old arm round it that the body hasn't got (its
+    # soft outline, a sleeve root, a cup's rim)
+    near = ndimage.binary_dilation(anym, iterations=60) & (keep < 0.5)
+    differs = np.abs(orig[:, :, :3].astype(int) - body[:, :, :3]).mean(2) > 70
+    swap = ndimage.binary_dilation(anym, iterations=4) | (near & (body[:, :, 3] < 128) & (orig[:, :, 3] > 0)) |         ndimage.binary_opening(near & differs, iterations=2)
+    still = orig.copy(); still[swap] = body[swap]
+    # the arm layer covers ALL of what was swapped (so at rest he is exactly the original), then fades
+    # over ~24 px into the shoulder, never into the head
+    fade = np.clip(1 - ndimage.distance_transform_edt(~swap) / 24, 0, 1)
+    alpha = np.maximum(fade * (1 - keep), swap)
+    arm = orig.copy(); arm[:, :, 3] = (orig[:, :, 3] * alpha).astype(np.uint8)
+    return uri(still[y0:y1, x0:x1]), uri(arm[y0:y1, x0:x1])
 
 
 if __name__ == "__main__":
     out = {}
     for k, nb in MOMENTS.items():
-        masks, body, whole = arm_mask(k)
+        masks, body, whole, orig, bodyim = arm_mask(k)
+        if k == "kungfu": body = whole            # the legless body is a different shape; pivot from pivots.json
         ys, xs = np.where(whole); x0, y0, x1, y1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
         bones = []
         for bm in masks:
@@ -75,6 +108,8 @@ if __name__ == "__main__":
             bones.append({"pivot": piv, "w": [round(float(v), 3) for v in W.ravel()]})
         if k == "kungfu":            # the leg turns at the hip (where it joins him, low)
             piv = json.load(open(os.path.join(RIG, "pivots.json")))["kungfu-limb"]; bones[0]["pivot"] = piv
-        out[k] = {"layer": "kick" if k == "kungfu" else "bubu", "grid": G, "box": [float(x0 - PAD), float(y0 - PAD), float(x1 - PAD), float(y1 - PAD)], "bones": bones}
+        M = 140; crop = (max(0, x0 - M), max(0, y0 - M), min(whole.shape[1], x1 + M), min(whole.shape[0], y1 + M))
+        still, arm = layers(k, masks, orig, bodyim, crop)
+        out[k] = {"layer": "kick" if k == "kungfu" else "bubu", "still": still, "arm": arm, "at": [int(crop[0]) - PAD, int(crop[1]) - PAD], "grid": G, "box": [float(x0 - PAD), float(y0 - PAD), float(x1 - PAD), float(y1 - PAD)], "bones": bones}
         print(k, "bones", [b["pivot"] for b in bones])
     json.dump(out, open(os.path.join(RIG, "skin.json"), "w"))
