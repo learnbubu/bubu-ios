@@ -34,8 +34,9 @@ ARMS = {"flawless": ["m6-flawless-arms-down"], "sweep": ["m6-sweep-arms-broom"],
 
 # each head (an ellipse over the face and crown, in placed-image px: centre x, y, radius x, y). Nothing
 # here may bend: the blend round an arm stops at the head, so only the arm itself moves over his face
+# (brain gains: after its 1.25 scale-up)
 HEADS = {"flawless": (688, 368, 245, 195), "sweep": (646, 448, 262, 176), "earlybird": (688, 464, 256, 176),
-         "brain": (640, 592, 192, 134), "kungfu": (730, 422, 250, 186)}
+         "brain": (641, 474, 240, 168), "kungfu": (730, 422, 250, 186)}
 
 
 # both arms drawn as one piece: the shoulders (stage px) are pinned, and the hands either swing about the
@@ -78,6 +79,29 @@ def arm_mask(k):
     return ms, ba, oa, orig, body
 
 
+def still_layer(k, orig, body, arm):
+    """The original art, with its own arms masked out and the armless body filled in there (plus any of
+    the old arm round them the body hasn't got: a soft outline, a sleeve root, a cup's rim)."""
+    am = arm[:, :, 3] > 128
+    near = ndimage.binary_dilation(am, iterations=50) & (head_keep(k, am.shape) < 0.5)
+    oa = orig[:, :, 3] > 128
+    dark = orig[:, :, :3].mean(2) < 90
+    differs = np.abs(orig[:, :, :3].astype(int) - body[:, :, :3]).mean(2) > 70
+    old = near & oa & (dark & (body[:, :, :3].mean(2) >= 90) | differs)      # the original's arm, held thing
+    swap = ndimage.binary_dilation(am | ndimage.binary_opening(old, iterations=2), iterations=4) |         (near & (body[:, :, 3] < 128) & (orig[:, :, 3] > 0))
+    # the original's strap ends tucked under the arm would show (cut square) once the arm lifts: the body's
+    redo = ndimage.binary_dilation((orig[:, :, 0].astype(int) - orig[:, :, 2] > 40) & (orig[:, :, 3] > 0), iterations=3)
+    swap |= ndimage.binary_dilation(am, iterations=30) & redo & ~am & (head_keep(k, am.shape) < 0.5)
+    still = orig.copy(); still[swap] = body[swap]
+    # the armless body has strap stubs of its own where its arm would join: fill them from the nearest fur
+    bred = ndimage.binary_dilation((body[:, :, 0].astype(int) - body[:, :, 2] > 40) & (body[:, :, 3] > 128), iterations=3)
+    stub = swap & bred & ndimage.binary_dilation(am, iterations=12)
+    if stub.any():
+        _, (iy, ix) = ndimage.distance_transform_edt(stub | (still[:, :, 3] < 128), return_indices=True)
+        still[stub] = still[iy[stub], ix[stub]]
+    return still
+
+
 def uri(a):
     b = io.BytesIO(); Image.fromarray(a).save(b, "WEBP", quality=92, method=6)
     return "data:image/webp;base64," + base64.b64encode(b.getvalue()).decode()
@@ -87,10 +111,31 @@ if __name__ == "__main__":
     out = {}
     for k, nb in MOMENTS.items():
         body = scaled(k, np.asarray(Image.open(os.path.join(RIG, f"mo-{k}-body-placed.png")).convert("RGBA")))
-        pieces = [scaled(k, np.asarray(Image.open(os.path.join(RIG, n + ".png")).convert("RGBA"))) for n in ARMS[k]]
+        orig = scaled(k, np.asarray(Image.open(os.path.join(RIG, f"mo-{k}-bubu-placed.png")).convert("RGBA")))
+        # the arm pieces as lined up with the original art by arms_fit.py (kung fu's leg is cut from it)
+        src = lambda n: os.path.join(RIG, "fit", n + ".png") if os.path.exists(os.path.join(RIG, "fit", n + ".png")) else os.path.join(RIG, n + ".png")
+        pieces = [scaled(k, np.asarray(Image.open(src(n)).convert("RGBA"))) for n in ARMS[k]]
+        # straps: the pieces carry scraps of strap at the shoulder, which would ride on the arm; cut them out,
+        # and draw the original's strap there on top (still), so the straps sit in front of the arms
+        red = lambda a: (a[:, :, 0] > 170) & (a[:, :, 1] < 150) & (a[:, :, 2] < 130) & (a[:, :, 3] > 128)
+        front = np.zeros(body.shape[:2], bool); cut = []
+        for pc in pieces:
+            lab, nl = ndimage.label(red(pc)); area = (pc[:, :, 3] > 128).sum()
+            sizes = ndimage.sum(np.ones_like(lab), lab, range(1, nl + 1))
+            scraps = np.isin(lab, [i + 1 for i, z in enumerate(sizes) if z < 0.04 * area])
+            pc = pc.copy()
+            yy, xx = np.mgrid[:pc.shape[0], :pc.shape[1]]
+            sh = [np.array(a) + PAD for a in SHOULDERS.get(k, [])] or [np.array(np.where(pc[:, :, 3] > 128))[::-1].mean(1)]
+            by_shoulder = np.min([np.hypot(xx - a[0], yy - a[1]) for a in sh], axis=0) < 120
+            scraps &= by_shoulder                        # a strap is at the shoulder; red further down is the stamp
+            pc[ndimage.binary_dilation(scraps, iterations=2), 3] = 0
+            front |= ndimage.binary_dilation(scraps, iterations=8) & red(orig)
+            cut.append(pc)
+        pieces = cut
         arm = Image.new("RGBA", body.shape[1::-1], (0, 0, 0, 0))
         for pc in pieces: arm.alpha_composite(Image.fromarray(pc))
         arm = np.asarray(arm); ba = body[:, :, 3] > 128
+        still = still_layer(k, orig, body, arm)
         whole = ba | (arm[:, :, 3] > 128)
         ys, xs = np.where(whole); x0, y0, x1, y1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
         gx = np.linspace(x0, x1 - 1, G); gy = np.linspace(y0, y1 - 1, G)
@@ -117,7 +162,8 @@ if __name__ == "__main__":
             if k in SHIFT: bones[-1]["shift"] = SHIFT[k]
         M = 140; crop = (max(0, x0 - M), max(0, y0 - M), min(whole.shape[1], x1 + M), min(whole.shape[0], y1 + M))
         cx0, cy0, cx1, cy1 = crop
-        out[k] = {"layer": "kick" if k == "kungfu" else "bubu", "still": uri(body[cy0:cy1, cx0:cx1]), "arm": uri(arm[cy0:cy1, cx0:cx1]),
+        out[k] = {"layer": "kick" if k == "kungfu" else "bubu", "still": uri(still[cy0:cy1, cx0:cx1]), "arm": uri(arm[cy0:cy1, cx0:cx1]),
+                  "front": uri(np.where(front[..., None], orig, 0).astype(np.uint8)[cy0:cy1, cx0:cx1]) if front.any() else None,
                   "at": [int(cx0) - PAD, int(cy0) - PAD], "grid": G,
                   "box": [float(x0 - PAD), float(y0 - PAD), float(x1 - PAD), float(y1 - PAD)], "bones": bones}
         print(k, "bones", [b["pivot"] for b in bones])
