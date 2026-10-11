@@ -16,6 +16,13 @@ struct DoneView: View {
     @State private var splash = Launch.screen != "donenext"
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let course = Course.shared
+    /// the sticker moment (made in the effects studio) plays only if its player has loaded; else
+    /// the usual splash and Bùbù
+    @State private var playerReady = MomentPlayer.shared.ready
+    @State private var stickerBox: CGRect = .zero
+    @State private var stageOrigin: CGPoint = .zero
+    @State private var momentStarted = false
+    private var moment: ResultMoment? { playerReady ? session.result?.moment : nil }
 
     static let milestoneWords: [Int: String] = [
         3: "Three days. It's a habit now.", 7: "A whole week on fire.", 14: "Two weeks. Unstoppable.",
@@ -29,7 +36,7 @@ struct DoneView: View {
         // centred) and the buttons stay pinned at the foot
         VStack(spacing: 0) {
             Group {
-                if !r.simple.isEmpty { simple(r) } else if splash && stage == 0 { splashView(r) } else {
+                if !r.simple.isEmpty { simple(r) } else if splash && stage == 0 && moment == nil { splashView(r) } else {
                 switch stage {
                 case 0: stageOne(r)
                 case 1: stageTwo(r)
@@ -41,13 +48,25 @@ struct DoneView: View {
             .id(stage)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             buttons(r).padding(.top, 12)
-                .opacity(splash && r.simple.isEmpty && stage == 0 ? 0 : 1)
+                .opacity(splash && r.simple.isEmpty && stage == 0 && moment == nil ? 0 : 1)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 18)
         .background(Color.panel, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
         .padding(.top, 8).padding(.bottom, 8)
+        // the moment's sticker plays over the whole screen (it can fly in from off it), lined up with
+        // its place on the first stage
+        .overlay {
+            if let m = moment, stage == 0 {
+                MomentStage()
+                    .background(GeometryReader { g in Color.clear.preference(key: MomentStageOrigin.self, value: g.frame(in: .global).origin) })
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+                    .onPreferenceChange(MomentStageOrigin.self) { stageOrigin = $0; place(m) }
+            }
+        }
+        .onPreferenceChange(MomentStickerBox.self) { stickerBox = $0; if let m = moment { place(m) } }
         .sensoryFeedback(.success, trigger: stage) { _, n in n == 1 }
         .onAppear {
             guard splash else { return }
@@ -55,6 +74,14 @@ struct DoneView: View {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) { splash = false }
             }
         }
+    }
+
+    /// Starts the moment once its sticker's place is known, and keeps it lined up after.
+    private func place(_ m: ResultMoment) {
+        guard stickerBox.width > 20, stickerBox.height > 20 else { return }
+        let side = min(stickerBox.width, stickerBox.height)
+        let box = CGRect(x: stickerBox.midX - side / 2 - stageOrigin.x, y: stickerBox.midY - side / 2 - stageOrigin.y, width: side, height: side)
+        if momentStarted { MomentPlayer.shared.move(to: box) } else { momentStarted = true; MomentPlayer.shared.play(m.key, in: box) }
     }
 
     /// The opening splash: a tilted band, Bùbù big and pleased, the title, confetti.
@@ -94,11 +121,24 @@ struct DoneView: View {
         return VStack(spacing: 0) {
             // Bùbù takes whatever height is spare, so the card is filled from the top rather than
             // centred with empty room above (the owner, 4 Oct 2026)
-            Image("done-panda").resizable().scaledToFit()
-                .frame(minHeight: 120, maxHeight: recap.isEmpty ? 300 : 260)
-                .layoutPriority(-1)
-            Text(r.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).multilineTextAlignment(.center)
-                .padding(.top, 2)
+            if let m = moment {
+                // the moment's sticker (drawn by the player over this space), its title and line
+                Color.clear
+                    .frame(minHeight: 120, maxHeight: recap.isEmpty ? 300 : 260)
+                    .frame(maxWidth: .infinity)
+                    .background(GeometryReader { g in Color.clear.preference(key: MomentStickerBox.self, value: g.frame(in: .global)) })
+                    .layoutPriority(-1)
+                Text(m.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color(UIColor(hex: m.color)))
+                    .multilineTextAlignment(.center).padding(.top, 2)
+                Text(m.line).font(.nunito(15, .bold)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                    .padding(.top, 2)
+            } else {
+                Image("done-panda").resizable().scaledToFit()
+                    .frame(minHeight: 120, maxHeight: recap.isEmpty ? 300 : 260)
+                    .layoutPriority(-1)
+                Text(r.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).multilineTextAlignment(.center)
+                    .padding(.top, 2)
+            }
             if r.steps > 1 {
                 // a step of a longer lesson: how far through it you are, and what's next
                 StepSegments(done: r.step, total: r.steps, width: 34, height: 7).padding(.top, 8)
@@ -521,4 +561,14 @@ struct WordRecap: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.panel, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
+}
+
+/// The done screen's moment: where its sticker sits, and where the player's layer starts (both global).
+struct MomentStickerBox: PreferenceKey {
+    static var defaultValue: CGRect = .zero
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) { let n = nextValue(); if n != .zero { value = n } }
+}
+struct MomentStageOrigin: PreferenceKey {
+    static var defaultValue: CGPoint = .zero
+    static func reduce(value: inout CGPoint, nextValue: () -> CGPoint) { value = nextValue() }
 }

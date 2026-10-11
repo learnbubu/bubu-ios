@@ -137,6 +137,8 @@ struct RootView: View {
                 .tabItem { Label("Settings", systemImage: "gearshape") }.tag(Router.Tab.settings)
         }
         .sensoryFeedback(.selection, trigger: router.tab)
+        // the done screen's moment player: loaded a little after launch, so it's ready by a lesson's end
+        .task { try? await Task.sleep(for: .seconds(2)); MomentPlayer.shared.warm() }
         .overlay {
             if let lesson = router.lesson {
                 LessonSheet(lesson: lesson) { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { router.lesson = nil } }

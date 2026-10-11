@@ -110,6 +110,8 @@ final class StudySession: Identifiable {
     private(set) var xpComboExtra = 0
     private(set) var xpDoubled = 0
     private(set) var combo = 0
+    /// the longest run of right answers this session (for the done screen's moment)
+    private(set) var bestRun = 0
     private(set) var mistakes = 0
     private(set) var fixedCount = 0
     /// The match on screen: the words paired so far, and whether it pairs sounds with characters.
@@ -154,6 +156,8 @@ final class StudySession: Identifiable {
         /// of `xp`: the extra runs earned, and what double XP added (the rest is the lesson's own)
         var xpCombo = 0
         var xpDouble = 0
+        /// the sticker moment the done screen opens on (nil: its usual splash)
+        var moment: ResultMoment?
     }
 
     // the skip test's tally
@@ -393,7 +397,7 @@ final class StudySession: Identifiable {
         }
         progress.recordReview()
         rightInSession[c.id, default: 0] += 1
-        combo += 1
+        combo += 1; bestRun = max(bestRun, combo)
         if combo == Self.comboAt { DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { Sounds.shared.play("combo") } }
         let mark = progress.xpCounter
         gain(combo >= Self.comboAt ? Self.xpCombo : Self.xpCorrect, comboExtra: combo >= Self.comboAt ? Self.xpCombo - Self.xpCorrect : 0)
@@ -973,7 +977,7 @@ final class StudySession: Identifiable {
         // XP for the answer, more on a run
         var xp = 0
         if correct {
-            combo += 1
+            combo += 1; bestRun = max(bestRun, combo)
             if combo == Self.comboAt { DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { Sounds.shared.play("combo") } }
             let mark = progress.xpCounter
             gain(combo >= Self.comboAt ? Self.xpCombo : Self.xpCorrect, comboExtra: combo >= Self.comboAt ? Self.xpCombo - Self.xpCorrect : 0)
@@ -1104,6 +1108,13 @@ final class StudySession: Identifiable {
         result?.xpCombo = xpComboExtra
         result?.xpDouble = xpDoubled
         if isPractice { result?.practised = practisedWords }
+        if !idle {
+            let hour = Calendar.current.component(.hour, from: Date(timeIntervalSince1970: progress.now() / 1000))
+            result?.moment = ResultMoment.pick(.init(mode: mode, answered: answeredCount, accuracy: accuracy, perfect: perfect,
+                                                     seconds: seconds, bestRun: bestRun, mistakes: mistakes, fixed: fixedCount,
+                                                     learned: learnedWords.count, hour: hour, streak: fire?.streak ?? progress.streak,
+                                                     milestone: fire?.milestone ?? false))
+        }
         if !idle { Coach.sessionFinished() }
     }
 
