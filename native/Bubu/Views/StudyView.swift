@@ -624,6 +624,10 @@ struct MascotPrompt<Content: View>: View {
             Spacer(minLength: 0)
         }
         .frame(minHeight: long || compact ? 78 : 140)
+        // never squeezed shorter than what it holds: on a full screen the bubble was cut off under the
+        // first answer (a two-line gap sentence, the owner's phone, 12 Oct 2026)
+        .fixedSize(horizontal: false, vertical: true)
+        .layoutPriority(1)
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: compact)
         // above what follows it, so a word's hint hanging down covers the answer line (it ran through)
         .zIndex(1)
@@ -1115,7 +1119,8 @@ struct ChoiceView: View {
         let big: CGFloat = w.hanzi.count > 3 ? 30 : w.hanzi.count == 3 ? 36 : 44
         VStack(spacing: 0) {
             MascotPrompt(mood: answered && !skipped ? (picked == ex.answer) : nil, sentence: ex.dir == "gap",
-                         long: ex.dir == "gap" && (ex.sentence?.words.map(\.hanzi).joined().count ?? 0) > 9) {
+                         // (a gap sentence of 6+ characters gets the smaller Bùbù, so it fits the bubble on one line)
+                         long: ex.dir == "gap" && (ex.sentence?.words.map(\.hanzi).joined().count ?? 0) > 5) {
                 if isNew { NewBadge() }
                 switch ex.dir {
                 case "picture":
