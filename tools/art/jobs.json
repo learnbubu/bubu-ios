@@ -2711,5 +2711,25 @@
    "out/raw/streak-lantern-unlit.png"
   ],
   "prompt": "The first attached image is a lit red lantern, one layer of an animation. EDIT it into the SAME lantern NOT lit, so the two can crossfade: keep EXACTLY the same size, position and shapes - pixel for pixel the same outline, ribs, caps, pattern and tassel - and change only the colours, to match the unlit lantern in the second image: dull, muted dusty grey-brown paper with no light inside, the gold parts a dull khaki-brass. No glow anywhere.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/panda-spare-lantern-scarf.png",
+  "group": "sparescarf",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/panda-spare-lantern.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished picture from the app: Bùbù the panda in a red scarf, holding up a lit lantern. EDIT it to make ONE LAYER of it for animation: keep ONLY his red scarf: the part wrapped round his neck and over his shoulders, and its end hanging down at the side with its fringe. Where his arms, the lantern or his head covered part of the scarf, draw that part in, whole and continuous, so the scarf is complete round his neck and shoulders. Keep it EXACTLY as it is - the SAME size, the SAME place on the canvas (do not move, re-centre or resize it), the same shapes, colours and lighting - and remove everything else, leaving flat magenta (#FF00FF) where it was. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/panda-spare-lantern-arms2.png",
+  "group": "sparescarf",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/panda-spare-lantern.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is a finished picture from the app: Bùbù the panda in a red scarf, holding up a lit lantern. EDIT it to make ONE LAYER of it for animation: keep ONLY his two arms, WITHOUT the lantern and WITHOUT the scarf: each arm from where it comes out from under the scarf at the shoulder, down to the paw, the paws still curled in the same holding shape (round a lantern that is no longer there), with the warm glow on the fur as in the picture. Draw each arm continuing a little way up under where the scarf was, ending in a soft ROUNDED end of plain black fur, so it can turn at the shoulder under the scarf without a gap. Keep them EXACTLY as it is - the SAME size, the SAME place on the canvas (do not move, re-centre or resize it), the same shapes, colours and lighting - and remove everything else, leaving flat magenta (#FF00FF) where it was. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
