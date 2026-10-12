@@ -2660,5 +2660,16 @@
    "out/raw/streak-lantern-unlit.png"
   ],
   "prompt": "The first attached image is the app's lit lantern icon. EDIT it into the SAME icon NOT lit: keep EXACTLY the same size, position and shapes - pixel for pixel the same outline, ribs, caps and tassel - and change only the colours, to match the unlit lantern in the second image: dull, muted dusty grey-brown paper with no light inside, the gold parts a dull khaki-brass. No glow anywhere.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/panda-spare-lantern.png",
+  "group": "sparelantern",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/panda-shivering-with-an-ember.png",
+   "out/raw/panda-lantern-festival.png",
+   "out/raw/lantern-icon-lit.png"
+  ],
+  "prompt": "The attached images are art from the same app: Bùbù the panda (black and cream, pink cheeks, a red backpack) in two poses, and the app's small red lantern. Draw Bùbù for the moment a missed day was saved by a spare lantern: he stands in a soft, dim evening light (a gentle cool blue-grey wash on him, nothing dark or scary), holding up in both paws a small round red lantern that has just been lit, like the third image, glowing warm gold. Its warm light falls on his face and chest, so the side towards the lantern is warmly lit. His expression: relieved and happy, a big soft smile, eyes bright, as if saying \"phew, that was close\". A few tiny warm sparkles round the lantern. Full body, standing, centred, filling about 80% of the canvas height. No background scene, no ground shadow, nothing else on the canvas.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
