@@ -80,7 +80,7 @@ struct OnboardingView: View {
                     Text("One lesson a day").font(.nunitoXB(24)).foregroundStyle(Color.ink)
                     Text("Finish one session each day to keep your streak going. A lesson, a review, practice or a story all count.")
                         .font(.nunito(16)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
-                    Text("Miss a day and an ember can relight your fire. You earn them as your streak grows.")
+                    Text("Miss a day and a spare lantern saves your streak. You earn them as your streak grows.")
                         .font(.nunito(14)).foregroundStyle(Color.muted).multilineTextAlignment(.center).padding(.top, 4)
                 }
                 .tag(2)

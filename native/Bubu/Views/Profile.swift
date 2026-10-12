@@ -54,7 +54,7 @@ struct ProfileView: View {
                 hero(lv)
                 stats(lv, out: out)
                 if out != nil {
-                    Button(progress.embers < 1 ? "No embers to relight" : "Relight the fire") {
+                    Button(progress.embers < 1 ? "No spare lanterns left" : "Use a spare lantern") {
                         if let o = out { Moments.shared.show(.askRelight(lost: o.lost, embers: progress.embers)) }
                     }
                     .buttonStyle(WideButton()).disabled(progress.embers < 1)
@@ -253,7 +253,7 @@ struct ProfileView: View {
                     ZStack {
                         Circle().fill(goal ? Color.gold : lit ? Color.good : .clear)
                         if isToday { Circle().strokeBorder(Color.accent, style: StrokeStyle(lineWidth: 2, dash: lit ? [] : [3, 3])) }
-                        if relit { Image(systemName: "flame.fill").font(.system(size: 12)).foregroundStyle(.white) }
+                        if relit { LanternMark(lit: true, size: 15) }
                         else { Text("\(d)").font(.nunito(12.5, .bold)).foregroundStyle(lit || goal ? Color.white : isToday ? Color.accent : Color.ink) }
                     }
                     .frame(height: 30)
@@ -261,7 +261,7 @@ struct ProfileView: View {
                 }
             }
             HStack {
-                Label("\(progress.embers) ember\(progress.embers == 1 ? "" : "s")", systemImage: "flame").font(.nunitoXB(12.5)).foregroundStyle(Color.gold)
+                Label { Text("\(progress.embers) spare lantern\(progress.embers == 1 ? "" : "s")") } icon: { LanternMark(size: 15) }.font(.nunitoXB(12.5)).foregroundStyle(Color.gold)
                 Spacer()
                 HStack(spacing: 8) {
                     legend("done", .good); legend("relit", .good)

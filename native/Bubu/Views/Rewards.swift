@@ -268,8 +268,8 @@ struct PlusCard: View {
                     Text("∞").font(.nunito(20, .black)).foregroundStyle(Color.accent)
                 }
                 perk("A red pocket for every lesson, not just the first each day") { CoinIcon(size: 20) }
-                perk("Hold up to 3 embers, and buy more in the shop") {
-                    Image(systemName: "flame.fill").font(.system(size: 17)).foregroundStyle(Color.ember)
+                perk("Hold up to 3 spare lanterns, and buy more in the shop") {
+                    LanternMark(size: 22)
                 }
             }
             .multilineTextAlignment(.leading)
@@ -319,10 +319,10 @@ struct ShopCard: View {
                         BunIcon(width: 36)
                     }
                     section("Streak")
-                    ShopRow("Ember", sub: "Relights a missed day · you have \(ne) of \(cap)",
+                    ShopRow("Spare lantern", sub: "Saves your streak on a missed day · you have \(ne) of \(cap)",
                             price: ProgressStore.ShopItem.ember.price, disabled: ne >= cap,
-                            action: { buy(.ember, "An ember, ready to relight a missed day.") }) {
-                        Image(systemName: "flame.fill").font(.system(size: 22)).foregroundStyle(Color.ember)
+                            action: { buy(.ember, "A spare lantern, ready to save a missed day.") }) {
+                        LanternMark(size: 28)
                     }
                     section("Boosts")
                     ShopRow("Double XP", sub: boost ? "Double XP is on now" : "For the next 15 minutes",
@@ -335,7 +335,7 @@ struct ShopCard: View {
                         Image(systemName: "person.fill").font(.system(size: 21))
                     }
                     if progress.offersPlus {
-                        ShopRow("Bùbù Plus", sub: "Unlimited buns, more pockets, embers", plus: true,
+                        ShopRow("Bùbù Plus", sub: "Unlimited buns, more pockets, spare lanterns", plus: true,
                                 action: { Moments.shared.replace(with: .plus) }) {
                             Text("∞")
                         }

@@ -25,7 +25,7 @@ struct DoneView: View {
     private var moment: ResultMoment? { playerReady ? session.result?.moment : nil }
 
     static let milestoneWords: [Int: String] = [
-        3: "Three days. It's a habit now.", 7: "A whole week on fire.", 14: "Two weeks. Unstoppable.",
+        3: "Three days. It's a habit now.", 7: "A whole week, lantern lit.", 14: "Two weeks. Unstoppable.",
         30: "A month. Seriously impressive.", 50: "Fifty days of Chinese.", 100: "One hundred days.",
         200: "Two hundred days.", 365: "A full year. 太厉害了!",
     ]
@@ -181,7 +181,7 @@ struct DoneView: View {
                     HStack {
                         Text("THIS WEEK").font(.nunitoXB(10.9)).tracking(1.1).foregroundStyle(Color.muted)
                         Spacer()
-                        Label("\(progress.streak) day\(progress.streak == 1 ? "" : "s")", systemImage: "flame.fill")
+                        Label { Text("\(progress.streak) day\(progress.streak == 1 ? "" : "s")") } icon: { LanternMark(lit: true, size: 14) }
                             .font(.nunitoXB(12)).foregroundStyle(Color.gold)
                     }
                     WeekStrip()
@@ -223,9 +223,9 @@ struct DoneView: View {
     private func stageTwo(_ r: StudySession.Result) -> some View {
         let streak = progress.streak, lit = progress.litOn(progress.today)
         let msg: String = r.fireJustLit
-            ? (streak == 1 ? "Fire lit. Come back tomorrow to make it two."
-               : Self.milestoneWords[streak] ?? "Fire lit. Keep it going tomorrow.")
-            : lit ? "Already lit today. Keep it going tomorrow." : "Finish a session to light today's fire."
+            ? (streak == 1 ? "Lantern lit. Come back tomorrow to make it two."
+               : Self.milestoneWords[streak] ?? "Lantern lit. Keep it going tomorrow.")
+            : lit ? "Already lit today. Keep it going tomorrow." : "Finish a session to light today's lantern."
         return VStack(spacing: 0) {
             FlameIcon(lit: lit, size: 110)
                 .shadow(color: lit ? Color(UIColor(hex: 0xF08A7A)).opacity(0.6) : .clear, radius: 16)
@@ -234,8 +234,8 @@ struct DoneView: View {
             heading("day streak").padding(.top, 4)
             WeekStrip().frame(maxWidth: 330).padding(.top, 14)
             Group {
-                Label((r.fire?.ember == true ? "You earned an ember · " : "") + "\(progress.embers) ember\(progress.embers == 1 ? "" : "s") protecting it",
-                      systemImage: "flame.fill")
+                Label { Text((r.fire?.ember == true ? "You earned a spare lantern · " : "") + "\(progress.embers) spare lantern\(progress.embers == 1 ? "" : "s") protecting it") }
+                      icon: { LanternMark(size: 15) }
                     .font(.nunito(13, .bold)).foregroundStyle(Color.gold)
                     .padding(.horizontal, 12).padding(.vertical, 5).background(Color.accentSoft, in: Capsule())
                     .padding(.top, 10)
@@ -312,15 +312,22 @@ struct WideButton: ButtonStyle {
     }
 }
 
-/// The web's two-tone flame; grey until the day is lit.
+/// The streak's lantern: lit once the day's session is done, unlit (brown paper) until then.
 struct FlameIcon: View {
     var lit: Bool
     var size: CGFloat
     var body: some View {
-        Image("flame").resizable().scaledToFit()
+        Image(lit ? "lantern-lit" : "lantern-unlit").resizable().scaledToFit()
             .frame(width: size, height: size)
-            .saturation(lit ? 1 : 0.15)
-            .opacity(lit ? 1 : 0.6)
+    }
+}
+
+/// A small lantern for labels and rows: lit for the streak, unlit for a spare lantern.
+struct LanternMark: View {
+    var lit = false
+    var size: CGFloat = 15
+    var body: some View {
+        Image(lit ? "licon-lit" : "licon-unlit").resizable().scaledToFit().frame(width: size, height: size)
     }
 }
 

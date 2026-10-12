@@ -82,12 +82,12 @@ enum ReminderPlan {
             ("Bùbù's hungry for a lesson 🥟", "One short lesson keeps your \(n)-day streak going."),
             ("你好! Got 5 minutes?", "Your \(n)-day streak would love a lesson today."),
             ("Time for a little Chinese 🐼", "Day \(n + 1) of your streak is one lesson away."),
-            ("Bùbù saved you a seat", "A quick lesson keeps your \(n)-day fire lit 🔥"),
+            ("Bùbù saved you a seat", "A quick lesson keeps your \(n)-day lantern lit 🏮"),
         ] : [
             ("Bùbù's hungry for a lesson 🥟", "Five minutes of Chinese today? Bùbù will be right there with you."),
-            ("5 minutes of Chinese?", "你好 is waiting. One short lesson lights today's fire."),
+            ("5 minutes of Chinese?", "你好 is waiting. One short lesson lights today's lantern."),
             ("Time for a little Chinese 🐼", "A few words a day add up. 一步一步, step by step."),
-            ("Bùbù has new words for you", "Pop in for a quick lesson and light today's fire 🔥"),
+            ("Bùbù has new words for you", "Pop in for a quick lesson and light today's lantern 🏮"),
         ]
         return pick(list, seed: seed)
     }
@@ -95,7 +95,7 @@ enum ReminderPlan {
     static func risk(streak n: Int, seed: String) -> (title: String, body: String) {
         pick([
             ("Your \(n)-day streak ends at midnight", "One lesson keeps it alive. Bùbù believes in you 🐼"),
-            ("Still time to keep your \(n)-day streak 🔥", "One short lesson before midnight keeps the fire lit."),
+            ("Still time to keep your \(n)-day streak 🏮", "One short lesson before midnight keeps the lantern lit."),
             ("\(n) days and counting 🔥", "Your streak ends at midnight. A quick lesson keeps it going."),
         ], seed: seed)
     }

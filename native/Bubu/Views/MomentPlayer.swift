@@ -10,6 +10,9 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     let web: WKWebView
     /// the page has its pictures decoded and can play
     private(set) var ready = false
+    /// the page is loaded at all (not under the tests)
+    var loaded: Bool { web.url != nil }
+    static let readyNote = Notification.Name("bubuMomentPlayerReady")
     private var pending: (key: String, box: CGRect)?
 
     override init() {
@@ -37,6 +40,7 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     func userContentController(_ c: WKUserContentController, didReceive m: WKScriptMessage) {
         DispatchQueue.main.async {
             self.ready = true
+            NotificationCenter.default.post(name: Self.readyNote, object: nil)
             if let p = self.pending { self.pending = nil; self.play(p.key, in: p.box) }
         }
     }
@@ -61,6 +65,37 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     private static func js(_ s: String) -> String { "\"" + s.filter { $0.isLetter || $0.isNumber } + "\"" }
     private static func js(_ b: CGRect) -> String {
         String(format: "{x:%.1f,y:%.1f,size:%.1f}", b.minX, b.minY, b.width)
+    }
+}
+
+/// A square where a moment plays (the player's layer must be on screen, over it: `MomentStage`).
+/// The still picture shows until the player is ready, and if it never is.
+struct StickerMoment: View {
+    let key: String
+    let still: String
+    var side: CGFloat = 220
+    @State private var ready = MomentPlayer.shared.ready
+    @State private var box: CGRect = .zero
+    @State private var started = false
+
+    var body: some View {
+        Color.clear
+            .frame(width: side, height: side)
+            .overlay { if !ready { Image(still).resizable().scaledToFit().padding(side * 0.12) } }
+            .background(GeometryReader { g in
+                Color.clear
+                    .onAppear { box = g.frame(in: .global); place() }
+                    .onChange(of: g.frame(in: .global)) { _, f in box = f; place() }
+            })
+            .onReceive(NotificationCenter.default.publisher(for: MomentPlayer.readyNote)) { _ in ready = true; place() }
+            .onDisappear { started = false }
+    }
+
+    private func place() {
+        guard ready, box.width > 20 else { return }
+        // (the player's layer covers the whole window, so its origin is the screen's)
+        let b = box
+        if started { MomentPlayer.shared.move(to: b) } else { started = true; MomentPlayer.shared.play(key, in: b) }
     }
 }
 

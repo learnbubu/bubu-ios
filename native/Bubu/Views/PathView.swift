@@ -367,7 +367,7 @@ struct GuidePill: View {
 }
 
 /// Streak, coins and buns in one bar across the top of the path (web: .hud-bar).
-/// The flame opens Profile, the coins the shop, the buns the buns sheet.
+/// The lantern opens Profile, the coins the shop, the buns the buns sheet.
 struct HUD: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
@@ -375,7 +375,7 @@ struct HUD: View {
         let lit = progress.litOn(progress.today), plus = progress.isPlus, n = progress.buns
         HStack(spacing: 0) {
             segment("Streak, view progress") { router.tab = .profile } label: {
-                Image(systemName: "flame.fill").font(.system(size: 16))
+                LanternMark(lit: lit, size: 18).opacity(lit ? 1 : 0.75)
                 Text("\(progress.streak)")
             }
             .foregroundStyle(lit ? Color.ember : Color.muted)

@@ -76,7 +76,7 @@ struct SettingsView: View {
 
 
                 section {
-                    toggle("Embers relight automatically", "Miss a day and an ember is spent for you overnight. Off means you choose each time.", $p.prefs.autoRelight)
+                    toggle("Spare lanterns save your streak automatically", "Miss a day and a spare lantern is used for you overnight. Off means you choose each time.", $p.prefs.autoRelight)
                     divider
                     toggle("Sound effects", "Chimes for right and wrong, and the end of a session.", $p.prefs.sound)
                     divider
@@ -255,7 +255,7 @@ struct HelpPage: View {
                 h("Buttons you'll see")
                 p("• The speaker plays a word; the tortoise (or **½×**) plays it slowly.\n• Tap a dotted word for its meaning, or a character to see how it's built.\n• The pencil opens a writing sheet.\n• The microphone checks what you say.")
                 h("Streaks and XP")
-                p("Finish a session to light the day's fire. Miss a day and an ember can relight it; you earn embers at 3, 7, 14, 30, 60 and 100 days. Finish one session a day — a lesson, a review, practice or a story — to keep your streak. XP counts toward your level and your daily quests.")
+                p("Finish a session to light the day's lantern. Miss a day and a spare lantern can save your streak; you earn them at 3, 7, 14, 30, 60 and 100 days. Finish one session a day — a lesson, a review, practice or a story — to keep your streak. XP counts toward your level and your daily quests.")
             }
             .padding(20)
         }

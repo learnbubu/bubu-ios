@@ -770,7 +770,7 @@ final class ProgressStore {
         if all {
             earnXP(Self.chestXP)
             let pocket = Moments.Moment.pocket(.init(kind: .jade, reward: Self.chestXP, title: "All 3 daily quests done!",
-                                                     sub: ember ? "A lucky pocket, full of XP, and an ember" : "A lucky pocket, full of XP"))
+                                                     sub: ember ? "A lucky pocket, full of XP, and a spare lantern" : "A lucky pocket, full of XP"))
             // mid-lesson it waits for the end, as the level-up does
             if holdLevelUps { heldPocket = pocket } else { Moments.shared.show(pocket) }
         } else if !holdLevelUps {

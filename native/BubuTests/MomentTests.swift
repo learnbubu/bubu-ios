@@ -59,6 +59,6 @@ final class MomentTests: XCTestCase {
                                 ?? Bundle.main.url(forResource: "moments-player", withExtension: "html"))
         let page = try String(contentsOf: url, encoding: .utf8)
         XCTAssertTrue(page.contains("window.BUBU_PLAYER="))
-        for k in ["speedy", "flawless", "kungfu", "sweep", "nightowl", "earlybird", "brain", "onfire"] { XCTAssertTrue(page.contains("\"\(k)\""), k) }
+        for k in ["speedy", "flawless", "kungfu", "sweep", "nightowl", "earlybird", "brain", "onfire", "spare"] { XCTAssertTrue(page.contains("\"\(k)\""), k) }
     }
 }

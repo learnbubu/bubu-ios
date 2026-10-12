@@ -60,7 +60,7 @@ final class Moments {
         switch m {
         case .level: Sounds.shared.play("levelup")
         case .milestone: Sounds.shared.play("milestone")
-        case .relit: DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { Sounds.shared.play("relight") }
+        case .relit: DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { Sounds.shared.play("relight") }      // (as the lantern lights)
         default: break
         }
     }
@@ -174,6 +174,11 @@ struct MomentCard: View {
             .scaleEffect(shown ? 1 : 0.85)
             .padding(wide ? 16 : 24)
             if confettiCount > 0 { Confetti(count: confettiCount).allowsHitTesting(false) }
+            if case .relit = moment, MomentPlayer.shared.loaded {
+                MomentStage()
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            }
         }
         .onAppear { withAnimation(.spring(response: 0.45, dampingFraction: 0.62)) { shown = true } }
         .sensoryFeedback(.success, trigger: shown) { _, n in n }
@@ -184,7 +189,7 @@ struct MomentCard: View {
         case .level: return 100
         case .pocket: return pocketOpened ? 60 : 0
         case .milestone: return 120
-        case .relit: return 70
+        case .relit: return 0
         default: return 0
         }
     }
@@ -195,7 +200,7 @@ struct MomentCard: View {
         Text("\(n)").font(.nunito(small ? 44 : 64, .black)).tracking(-1.5).foregroundStyle(Color.ink)
     }
     private func note(_ t: String) -> some View {
-        Label(t, systemImage: "flame.fill").font(.nunito(14, .bold)).foregroundStyle(Color.gold)
+        Label { Text(t) } icon: { LanternMark(size: 16) }.font(.nunito(14, .bold)).foregroundStyle(Color.gold)
             .padding(.horizontal, 12).padding(.vertical, 5).background(Color.accentSoft, in: Capsule())
             .padding(.top, 4)
     }
@@ -221,11 +226,11 @@ struct MomentCard: View {
         case .shop:
             ShopCard(progress: progress, close: close)
         case .milestone(let s, let ember, let coins):
-            Image("panda-streak-fire").resizable().scaledToFit().frame(height: 120)
+            Image("panda-spare-lantern").resizable().scaledToFit().frame(height: 130)
             big(s)
             title("day streak!")
-            sub(DoneView.milestoneWords[s] ?? "Keep the fire lit.")
-            if ember { note("You earned an ember") }
+            sub(DoneView.milestoneWords[s] ?? "Keep the lantern lit.")
+            if ember { note("You earned a spare lantern") }
             if coins > 0 {
                 HStack(spacing: 6) {
                     CoinIcon(size: 20)
@@ -237,28 +242,28 @@ struct MomentCard: View {
             }
             button("Keep going", close).padding(.top, 10)
         case .relit(let streak, let left):
-            Image("panda-shivering-with-an-ember").resizable().scaledToFit().frame(height: 120)
-            title("Your ember kept the fire lit")
-            big(streak, small: true)
-            sub("day streak carries on")
-            note("\(left) ember\(left == 1 ? "" : "s") left")
+            // the studio's Streak saved moment: an ember flies round the spare lantern and lights it
+            StickerMoment(key: "spare", still: "panda-spare-lantern", side: 230)
+            Text("Streak saved!").font(.nunito(26, .black)).foregroundStyle(Color(UIColor(hex: 0xE0574A)))
+            sub("A spare lantern kept your \(streak)-day streak.")
+            note("\(left) spare lantern\(left == 1 ? "" : "s") left")
             button("Keep going", close).padding(.top, 10)
         case .fireOut(let lost):
             FlameIcon(lit: false, size: 90)
-            title("Your fire went out")
-            sub("\(lost)-day streak. No ember was left to relight it.")
+            title("Your lantern went out")
+            sub("\(lost)-day streak. No spare lantern was left to save it.")
             note("Reach 3 days to earn one")
             button("Start fresh", close).padding(.top, 10)
         case .askRelight(let lost, let n):
             FlameIcon(lit: false, size: 90)
-            title("Your fire went out")
-            sub("\(lost)-day streak. Use an ember to relight it?")
-            note("You have \(n) ember\(n == 1 ? "" : "s")")
-            button("Relight the fire") {
+            title("Your lantern went out")
+            sub("\(lost)-day streak. Use a spare lantern to save it?")
+            note("You have \(n) spare lantern\(n == 1 ? "" : "s")")
+            button("Use a spare lantern") {
                 close()
                 if progress.relight() {
                     Sounds.shared.play("complete")
-                    Moments.shared.toast("Relit! \(progress.streak)-day streak carries on.")
+                    Moments.shared.toast("Saved! \(progress.streak)-day streak carries on.")
                 }
             }
             .padding(.top, 10)

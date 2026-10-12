@@ -103,7 +103,7 @@ struct HomeView: View {
         let hoursLeft = 24 - Calendar.current.component(.hour, from: Date())
         let risk = out == nil && !lit && streak > 0 && hoursLeft <= 6
         let askable = out != nil && progress.embers > 0 && !progress.prefs.autoRelight
-        let bubble = out != nil ? (askable ? "Relight it?" : "Went out")
+        let bubble = out != nil ? (askable ? "Save it?" : "Went out")
             : risk ? "\(hoursLeft)h left to keep it" : lit ? "Done for today!"
             : streak > 0 ? "Keep it lit!" : "Let's start!"
         return VStack(spacing: 0) {
@@ -114,7 +114,7 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 5) {
                         Text("\(out?.lost ?? streak)").font(.nunitoXB(34)).tracking(-0.6).foregroundStyle(out != nil ? Color.muted : Color.ink)
                         Text("day streak").font(.nunito(14, .bold)).foregroundStyle(Color.muted)
-                        Label("\(progress.embers)", systemImage: "flame").font(.nunitoXB(11.5)).foregroundStyle(Color.gold)
+                        Label { Text("\(progress.embers) spare") } icon: { LanternMark(size: 14) }.font(.nunitoXB(11.5)).foregroundStyle(Color.gold)
                             .padding(.top, 2)
                     }
                     Spacer()
