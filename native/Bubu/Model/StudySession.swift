@@ -1245,6 +1245,11 @@ final class StudySession: Identifiable {
         retries = []
         next()
     }
+    /// The debug finish with a sticker moment (night owl), to see the player on the done screen.
+    func debugFinishWithMoment() {
+        debugFinish()
+        result?.moment = .init(key: "nightowl", title: "Night owl!", line: "Learning by lantern light.", color: 0x8B9BFF)
+    }
     #endif
 
     /// The same words again (web: Practice again).

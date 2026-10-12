@@ -16,6 +16,8 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     /// a moment's first frame is on screen (a still picture standing in for it can go)
     static let playingNote = Notification.Name("bubuMomentPlaying")
     private var pending: (key: String, box: CGRect)?
+    /// counts plays, so a late fallback belongs to the play that set it
+    private var plays = 0
 
     override init() {
         let cfg = WKWebViewConfiguration()
@@ -60,6 +62,13 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     func play(_ key: String, in box: CGRect) {
         guard ready else { pending = (key, box); return }
         web.evaluateJavaScript("bubuPlay(\(Self.js(key)), \(Self.js(box))); 0", completionHandler: nil)
+        // (if the page's "playing" never comes, it's shown anyway: a moment must never go unseen)
+        plays += 1
+        let n = plays
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
+            guard let self, self.plays == n, self.pending == nil else { return }
+            self.web.alpha = 1
+        }
     }
 
     /// The sticker's box moved (the layout settled): it plays on, from there.
@@ -69,6 +78,7 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     }
 
     func stop() {
+        plays += 1
         pending = nil
         web.alpha = 0
         web.evaluateJavaScript("window.bubuStop && bubuStop(); 0", completionHandler: nil)

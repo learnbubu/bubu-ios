@@ -92,6 +92,10 @@ struct DoneView: View {
             }
         }
         .onPreferenceChange(MomentStickerBox.self) { stickerBox = $0; if let m = moment { place(m) } }
+        // the player finished loading while the opening splash is still up: the moment takes over
+        .onReceive(NotificationCenter.default.publisher(for: MomentPlayer.readyNote)) { _ in
+            if stage == 0 && !momentStarted && splash { playerReady = true }
+        }
         .sensoryFeedback(.success, trigger: stage) { _, n in n == 1 }
         .onAppear {
             guard splash else { return }

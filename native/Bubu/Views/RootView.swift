@@ -93,7 +93,7 @@ struct RootView: View {
             }
             return
         }
-        guard let screen = Launch.screen, ["study", "meet", "tip", "practicerun", "quiz", "sentence", "sentencedrag", "gap", "hear", "type", "picture", "build", "inarow", "speak", "write", "done", "donefinal", "donenext", "char", "buns", "pairs", "sentencegood", "donecombo", "levelheld", "burst"].contains(screen) else { return }
+        guard let screen = Launch.screen, ["study", "meet", "tip", "practicerun", "quiz", "sentence", "sentencedrag", "gap", "hear", "type", "picture", "build", "inarow", "speak", "write", "done", "donefinal", "donenext", "donemoment", "char", "buns", "pairs", "sentencegood", "donecombo", "levelheld", "burst"].contains(screen) else { return }
         if screen == "practicerun", let pr = Course.shared.lessons.first(where: { $0.isPractice }) {
             router.tab = .learn
             router.study = StudySession.lesson(pr.id, progress)
@@ -113,6 +113,15 @@ struct RootView: View {
         case "speak": s.debugShow(dir: "speak")
         case "write": s.debugShow(dir: "write")
         case "done", "donefinal", "donenext": s.debugFinish()
+        case "donemoment":
+            // once the moment player has loaded (a few seconds from a cold launch), as after a real lesson
+            s.debugFinishWithMoment()
+            func whenReady(_ n: Int) {
+                if MomentPlayer.shared.ready || n > 60 { router.study = s; return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { whenReady(n + 1) }
+            }
+            whenReady(0)
+            return
         default: break
         }
         router.study = s
