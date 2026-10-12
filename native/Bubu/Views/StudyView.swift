@@ -391,8 +391,9 @@ struct StudyView: View {
         let ready = session.answered || (isSentence && !placed.isEmpty) || (isChoice && pick.canCheck)
             || (isType && !typed.trimmingCharacters(in: .whitespaces).isEmpty)
             || (isBuild && built.count == (ex?.answer.components(separatedBy: "|").count ?? 0))
-        let fill = !ready ? Color.accent.opacity(0.38) : feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent
-        let ink = !ready ? Color.onAccent.opacity(0.7) : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
+        // (not ready: flat and grey, as Duolingo's Check; ready: raised, in colour)
+        let fill = !ready ? Color.line : feedback.map { $0.correct ? Color.good : Color.again } ?? Color.accent
+        let ink = !ready ? Color.muted : feedback.map { $0.correct ? Color.onAccent : Color.white } ?? Color.onAccent
         return ZStack(alignment: .bottom) {
             // a short slot, so the exercise keeps its room; the feedback slides up over its foot
             // as an overlay, taking no room (the owner's choice: nothing moves or shrinks)
@@ -413,7 +414,7 @@ struct StudyView: View {
             } label: {
                 Text(checks ? "Check" : session.isQuiz ? "Next →" : "Continue")
             }
-            .buttonStyle(RaisedButton(fill: fill, ink: ink, sweep: ready))
+            .buttonStyle(RaisedButton(fill: fill, ink: ink, sweep: ready, lip: ready ? 5 : 0))
             .disabled(!ready)
             .padding(.bottom, 14)
         }

@@ -295,13 +295,14 @@ struct RaisedButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         configuration.label
-            .font(.nunitoXB(16.8)).lineLimit(1).minimumScaleFactor(0.8)
+            // capitals, spaced a little, as Duolingo's buttons
+            .font(.nunito(17, .black)).textCase(.uppercase).tracking(0.9).lineLimit(1).minimumScaleFactor(0.8)
             .foregroundStyle(ink)
             .frame(maxWidth: .infinity).padding(15)
             .background(fill, in: shape)
             .overlay { if let edge { shape.strokeBorder(edge, lineWidth: 2) } }
             .modifier(IdleSweep(on: sweep, radius: radius))
-            .offset(y: configuration.isPressed ? lip - 1 : 0)
+            .offset(y: configuration.isPressed ? max(0, lip - 1) : 0)
             .padding(.bottom, lip)
             .background {
                 ZStack {
