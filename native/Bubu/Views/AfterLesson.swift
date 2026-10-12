@@ -123,23 +123,27 @@ struct StreakStage: View {
 
     private var lantern: some View {
         ZStack {
+            Image("lantern-unlit").resizable().scaledToFit()
+                .opacity(lit ? 0 : 1)
+            Image("lantern-lit").resizable().scaledToFit()
+                .opacity(lit ? 1 : 0)
+        }
+        .frame(height: 170)
+        // its glow, behind (it doesn't make the lantern's box any bigger)
+        .background {
             Circle()
                 .fill(RadialGradient(colors: [Color(UIColor(hex: 0xFFB347)).opacity(0.55), .clear], center: .center, startRadius: 0, endRadius: 130))
                 .frame(width: 260, height: 260)
                 .opacity(lit ? (flare ? 1 : 0.7) : 0)
                 .scaleEffect(flare ? 1.15 : 1)
-            Image("lantern-unlit").resizable().scaledToFit().frame(height: 170)
-                .opacity(lit ? 0 : 1)
-            Image("lantern-lit").resizable().scaledToFit().frame(height: 170)
-                .opacity(lit ? 1 : 0)
         }
-        .scaleEffect(flare ? 1.08 : 1)
-        // the cord it hangs from, fading out above
+        // the string it hangs from, fading out above, joining the little cord at the top of the picture
         .overlay(alignment: .top) {
             Rectangle().fill(LinearGradient(colors: [Color(UIColor(hex: 0xC9A05A)).opacity(0), Color(UIColor(hex: 0xC9A05A))], startPoint: .top, endPoint: .bottom))
-                .frame(width: 2.5, height: 120).offset(y: -120 + 8)
+                .frame(width: 2.5, height: 120).offset(y: -120 + 2)
         }
-        .frame(height: 200)
+        .scaleEffect(flare ? 1.08 : 1, anchor: .top)
+        .padding(.top, 20)
     }
 
     private func weekRow(_ week: [String], today: String) -> some View {

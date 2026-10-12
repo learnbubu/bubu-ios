@@ -245,25 +245,25 @@ struct MomentCard: View {
             // the studio's Streak saved moment: an ember flies round the spare lantern and lights it
             StickerMoment(key: "spare", still: "panda-spare-lantern", side: 230)
             Text("Streak saved!").font(.nunito(26, .black)).foregroundStyle(Color(UIColor(hex: 0xE0574A)))
-            sub("A spare lantern kept your \(streak)-day streak.")
+            sub("A spare lantern kept your \(streak)\u{2011}day streak.")
             note("\(left) spare lantern\(left == 1 ? "" : "s") left")
             button("Keep going", close).padding(.top, 10)
         case .fireOut(let lost):
             FlameIcon(lit: false, size: 90)
             title("Your lantern went out")
-            sub("\(lost)-day streak. No spare lantern was left to save it.")
+            sub("\(lost)\u{2011}day streak. No spare lantern was left to save it.")
             note("Reach 3 days to earn one")
             button("Start fresh", close).padding(.top, 10)
         case .askRelight(let lost, let n):
             FlameIcon(lit: false, size: 90)
             title("Your lantern went out")
-            sub("\(lost)-day streak. Use a spare lantern to save it?")
+            sub("\(lost)\u{2011}day streak. Use a spare lantern to save it?")
             note("You have \(n) spare lantern\(n == 1 ? "" : "s")")
             button("Use a spare lantern") {
                 close()
                 if progress.relight() {
                     Sounds.shared.play("complete")
-                    Moments.shared.toast("Saved! \(progress.streak)-day streak carries on.")
+                    Moments.shared.toast("Saved! \(progress.streak)\u{2011}day streak carries on.")
                 }
             }
             .padding(.top, 10)

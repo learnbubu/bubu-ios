@@ -13,6 +13,8 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     /// the page is loaded at all (not under the tests)
     var loaded: Bool { web.url != nil }
     static let readyNote = Notification.Name("bubuMomentPlayerReady")
+    /// a moment's first frame is on screen (a still picture standing in for it can go)
+    static let playingNote = Notification.Name("bubuMomentPlaying")
     private var pending: (key: String, box: CGRect)?
 
     override init() {
@@ -38,6 +40,10 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     func warm() {}
 
     func userContentController(_ c: WKUserContentController, didReceive m: WKScriptMessage) {
+        if (m.body as? String) == "playing" {
+            DispatchQueue.main.async { NotificationCenter.default.post(name: Self.playingNote, object: nil) }
+            return
+        }
         DispatchQueue.main.async {
             self.ready = true
             NotificationCenter.default.post(name: Self.readyNote, object: nil)
@@ -69,25 +75,30 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
 }
 
 /// A square where a moment plays (the player's layer must be on screen, over it: `MomentStage`).
-/// The still picture shows until the player is ready, and if it never is.
+/// The still picture shows until the moment's first frame is drawn, and if it never is.
 struct StickerMoment: View {
     let key: String
     let still: String
     var side: CGFloat = 220
     @State private var ready = MomentPlayer.shared.ready
+    @State private var drawn = false
     @State private var box: CGRect = .zero
     @State private var started = false
 
     var body: some View {
         Color.clear
             .frame(width: side, height: side)
-            .overlay { if !ready { Image(still).resizable().scaledToFit().padding(side * 0.12) } }
+            .overlay { Image(still).resizable().scaledToFit().padding(side * 0.12).opacity(drawn ? 0 : 1) }
             .background(GeometryReader { g in
                 Color.clear
                     .onAppear { box = g.frame(in: .global); place() }
                     .onChange(of: g.frame(in: .global)) { _, f in box = f; place() }
             })
             .onReceive(NotificationCenter.default.publisher(for: MomentPlayer.readyNote)) { _ in ready = true; place() }
+            .onReceive(NotificationCenter.default.publisher(for: MomentPlayer.playingNote)) { _ in
+                guard started else { return }
+                withAnimation(.easeOut(duration: 0.25)) { drawn = true }
+            }
             .onDisappear { started = false }
     }
 

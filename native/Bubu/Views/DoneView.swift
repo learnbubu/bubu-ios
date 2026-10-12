@@ -146,7 +146,7 @@ struct DoneView: View {
             if let m = moment {
                 // the moment's sticker (drawn by the player over this space), its title and line
                 Color.clear
-                    .frame(minHeight: 120, maxHeight: 300)
+                    .frame(minHeight: 120, maxHeight: 360)
                     .frame(maxWidth: .infinity)
                     .background(GeometryReader { g in Color.clear.preference(key: MomentStickerBox.self, value: g.frame(in: .global)) })
                     .layoutPriority(-1)
@@ -156,7 +156,7 @@ struct DoneView: View {
                     .padding(.top, 2)
             } else {
                 Image("done-panda").resizable().scaledToFit()
-                    .frame(minHeight: 120, maxHeight: 300)
+                    .frame(minHeight: 120, maxHeight: 360)
                     .layoutPriority(-1)
                 Text(r.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).multilineTextAlignment(.center)
                     .padding(.top, 2)
@@ -194,7 +194,6 @@ struct DoneView: View {
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
                 .padding(.top, 12)
             }
-            Spacer(minLength: 0)
         }
     }
 

@@ -3537,7 +3537,10 @@ if (PLAYER) {
   window.bubuPlay = async (k, box) => {
     await ready; if (!MO[k]) return false;
     if (box) PLAYER.box = box; S.moments.mo = k; S.moments.place = false;
-    buildMoments(); t = 0; last = 0; lastT = -1; playing = true; render(); return true;
+    buildMoments(); t = 0; last = 0; lastT = -1; playing = true; render();
+    // (once a frame has really been drawn: the app swaps its still picture for this)
+    requestAnimationFrame(() => requestAnimationFrame(() => { try { window.webkit.messageHandlers.bubu.postMessage("playing"); } catch (e) {} }));
+    return true;
   };
   window.bubuStop = () => { playing = false; phone.innerHTML = ""; MB = null; };
   window.bubuMove = box => {      // (the sticker's box moved: the layout settled; it plays on from where it is)
