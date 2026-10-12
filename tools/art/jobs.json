@@ -2641,5 +2641,24 @@
    "out/raw/streak-lantern-lit.png"
   ],
   "prompt": "The attached image is the app's lit red streak lantern. EDIT it into the SAME lantern NOT lit, for an animation that crossfades between the two: keep EXACTLY the same size, position, outline, ribs, caps, cord, tassel and pattern - pixel for pixel the same shapes - and change only the colours: no light inside at all, the paper a dull, muted dusty grey-brown (it is the same red paper, unlit and in shadow), the gold caps, pattern and tassel a dull muted khaki-brass, the ribs a little darker than the paper. Keep the soft shading and paper grain so it still looks like a real paper lantern, just dark and unlit. No glow anywhere.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/lantern-icon-lit.png",
+  "group": "lanternicon",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/streak-lantern-lit.png"
+  ],
+  "prompt": "The attached image is the app's red streak lantern. Draw it again as a small APP ICON, to be shown tiny (24 to 40 pixels) in the app's header and in a row of day badges, so it must read at a glance at that size: the same red lantern, lit and glowing warmly from inside, simplified - a bold, chunky, slightly squat round red body, only 2 to 3 soft vertical ribs, a simple gold top cap and bottom cap, and a short gold tassel; NO cord, no loop, no cloud motif or small pattern, no fine detail. Strong simple silhouette, the glow a soft lighter area in the middle of the red. Upright, centred, filling about 75% of the canvas height, even magenta all round, nothing else on the canvas.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/lantern-icon-unlit.png",
+  "group": "lanternicon",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/lantern-icon-lit.png",
+   "out/raw/streak-lantern-unlit.png"
+  ],
+  "prompt": "The first attached image is the app's lit lantern icon. EDIT it into the SAME icon NOT lit: keep EXACTLY the same size, position and shapes - pixel for pixel the same outline, ribs, caps and tassel - and change only the colours, to match the unlit lantern in the second image: dull, muted dusty grey-brown paper with no light inside, the gold parts a dull khaki-brass. No glow anywhere.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
