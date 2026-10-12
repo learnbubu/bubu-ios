@@ -359,7 +359,7 @@ final class LessonFlowTests: XCTestCase {
             XCTAssertEqual(NewArt.slabs[name]?.count, 10, name)
             XCTAssertNotNil(UIImage(named: name), name)
         }
-        for pose in ["panda-trophy", "panda-spare-lantern", "lantern-lit", "lantern-unlit", "licon-lit", "licon-unlit", "panda-idea", "panda-yawning-at-night"] {
+        for pose in ["panda-trophy", "panda-spare-lantern", "spare-still", "lantern-lit", "lantern-unlit", "licon-lit", "licon-unlit", "panda-idea", "panda-yawning-at-night"] {
             XCTAssertNotNil(UIImage(named: pose), pose)
         }
     }

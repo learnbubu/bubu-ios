@@ -243,7 +243,7 @@ struct MomentCard: View {
             button("Keep going", close).padding(.top, 10)
         case .relit(let streak, let left):
             // the studio's Streak saved moment: an ember flies round the spare lantern and lights it
-            StickerMoment(key: "spare", still: "panda-spare-lantern", side: 230)
+            StickerMoment(key: "spare", still: "spare-still", side: 230, stillInset: 0)
             Text("Streak saved!").font(.nunito(26, .black)).foregroundStyle(Color(UIColor(hex: 0xE0574A)))
             sub("A spare lantern kept your \(streak)\u{2011}day streak.")
             note("\(left) spare lantern\(left == 1 ? "" : "s") left")

@@ -96,6 +96,8 @@ struct StickerMoment: View {
     let key: String
     let still: String
     var side: CGFloat = 220
+    /// room round the still (none when it's the moment's own first frame, framed as the sticker)
+    var stillInset: CGFloat = 0.12
     @State private var ready = MomentPlayer.shared.ready
     @State private var drawn = false
     @State private var box: CGRect = .zero
@@ -104,7 +106,7 @@ struct StickerMoment: View {
     var body: some View {
         Color.clear
             .frame(width: side, height: side)
-            .overlay { Image(still).resizable().scaledToFit().padding(side * 0.12).opacity(drawn ? 0 : 1) }
+            .overlay { Image(still).resizable().scaledToFit().padding(side * stillInset).opacity(drawn ? 0 : 1) }
             .background(GeometryReader { g in
                 Color.clear
                     .onAppear { box = g.frame(in: .global); place() }
