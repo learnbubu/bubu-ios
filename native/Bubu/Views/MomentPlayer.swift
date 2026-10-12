@@ -30,6 +30,8 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
         web.scrollView.isScrollEnabled = false
         web.scrollView.contentInsetAdjustmentBehavior = .never
         web.isUserInteractionEnabled = false
+        // unseen until a moment has drawn its first frame (nothing of the page shows while it loads)
+        web.alpha = 0
         // (under the tests the page isn't loaded at all: it's never ready, and the done screen keeps its usual splash)
         if !Launch.underTests, let url = Bundle.main.url(forResource: "moments-player", withExtension: "html") {
             web.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
@@ -41,7 +43,10 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
 
     func userContentController(_ c: WKUserContentController, didReceive m: WKScriptMessage) {
         if (m.body as? String) == "playing" {
-            DispatchQueue.main.async { NotificationCenter.default.post(name: Self.playingNote, object: nil) }
+            DispatchQueue.main.async {
+                self.web.alpha = 1
+                NotificationCenter.default.post(name: Self.playingNote, object: nil)
+            }
             return
         }
         DispatchQueue.main.async {
@@ -65,6 +70,7 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
 
     func stop() {
         pending = nil
+        web.alpha = 0
         web.evaluateJavaScript("window.bubuStop && bubuStop(); 0", completionHandler: nil)
     }
 
