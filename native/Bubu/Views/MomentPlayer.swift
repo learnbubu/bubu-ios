@@ -25,7 +25,8 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
         web.scrollView.isScrollEnabled = false
         web.scrollView.contentInsetAdjustmentBehavior = .never
         web.isUserInteractionEnabled = false
-        if let url = Bundle.main.url(forResource: "moments-player", withExtension: "html") {
+        // (under the tests the page isn't loaded at all: it's never ready, and the done screen keeps its usual splash)
+        if !Launch.underTests, let url = Bundle.main.url(forResource: "moments-player", withExtension: "html") {
             web.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         }
     }

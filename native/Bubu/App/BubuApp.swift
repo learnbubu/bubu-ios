@@ -46,6 +46,8 @@ enum Launch {
     /// someone nearby is on a call: the owner, 4 Oct 2026).
     static let silent: Bool = ProcessInfo.processInfo.arguments.contains("-silent")
         || ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+    /// Running under XCTest (the unit tests' host app).
+    static let underTests: Bool = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     static let rewardScreens: Set<String> = ["hud", "buns", "shop", "pocket"]
     /// the lesson-step screenshots: the path with a step badge, and the done screens
     static let stepScreens: Set<String> = ["pathstep", "donefinal", "donenext", "pathpractice", "practice", "practicerun"]
