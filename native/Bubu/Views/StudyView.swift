@@ -610,8 +610,9 @@ struct MascotPrompt<Content: View>: View {
         HStack(alignment: .center, spacing: 10) {
             // Bùbù in parts, reacting to the answer (the owner, 7 Oct 2026)
             // (one size whatever the answer or the sentence's length: the owner, 13 Oct 2026)
-            BubuMascot(mood: mood, height: compact ? 78 : 116)
-                .frame(width: compact ? 64 : 96, height: compact ? 78 : 116, alignment: .bottom)
+            // (as big as Duolingo's characters beside the bubble, about 150 pt: the owner, 13 Oct 2026)
+            BubuMascot(mood: mood, height: compact ? 78 : 150)
+                .frame(width: compact ? 64 : 112, height: compact ? 78 : 150, alignment: .bottom)
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)
             SpeechBubbleBox(sentence: sentence) { content }
@@ -619,7 +620,7 @@ struct MascotPrompt<Content: View>: View {
                 .padding(.trailing, sentence ? 0 : 10)
             Spacer(minLength: 0)
         }
-        .frame(minHeight: compact ? 78 : 116)
+        .frame(minHeight: compact ? 78 : 150)
         // never squeezed shorter than what it holds: on a full screen the bubble was cut off under the
         // first answer (a two-line gap sentence, the owner's phone, 12 Oct 2026)
         .fixedSize(horizontal: false, vertical: true)
@@ -1295,8 +1296,6 @@ struct ChoiceView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { reveal() }
-        Text(sent.en).font(.nunito(14.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
-            .lineLimit(3).minimumScaleFactor(0.85).fixedSize(horizontal: false, vertical: true)
     }
 
     private func option(_ opt: String) -> some View {
@@ -1387,6 +1386,11 @@ struct FeedbackBanner: View {
                 } else if diff == nil {
                     // (with spot the difference, the right answer is in the box and in its green row)
                     wordAnswer(w)
+                }
+                if ex.dir == "gap", let sent = ex.sentence {
+                    // what the whole sentence means (it's not in the bubble while you answer)
+                    (Text("Meaning: ").font(.nunitoXB(14.5)) + Text(sent.en).font(.nunito(14.5, .semibold)))
+                        .fixedSize(horizontal: false, vertical: true).padding(.top, 4)
                 }
                 if let diff, let other = lookalike {
                     diffBlock(diff, other: other)
