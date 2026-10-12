@@ -77,8 +77,6 @@ struct DoneView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 18)
-        .background(Color.panel, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
         .padding(.top, 8).padding(.bottom, 8)
         // the moment's sticker plays over the whole screen (it can fly in from off it), lined up with
         // its place on the first stage
@@ -109,8 +107,13 @@ struct DoneView: View {
     private func place(_ m: ResultMoment) {
         guard stickerBox.width > 20, stickerBox.height > 20 else { return }
         let side = min(stickerBox.width, stickerBox.height)
-        let box = CGRect(x: stickerBox.midX - side / 2 - stageOrigin.x, y: stickerBox.midY - side / 2 - stageOrigin.y, width: side, height: side)
-        if momentStarted { MomentPlayer.shared.move(to: box) } else { momentStarted = true; MomentPlayer.shared.play(m.key, in: box) }
+        // (the web view's real place in the window: the stage's measured origin was off by the card's margin)
+        let o = MomentPlayer.shared.origin ?? stageOrigin
+        let box = CGRect(x: stickerBox.midX - side / 2 - o.x, y: stickerBox.midY - side / 2 - o.y, width: side, height: side)
+        if momentStarted { MomentPlayer.shared.move(to: box) } else {
+            momentStarted = true; MomentPlayer.shared.play(m.key, in: box)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { place(m) }
+        }
     }
 
     /// The opening splash: a tilted band, Bùbù big and pleased, the title, confetti.
@@ -230,18 +233,23 @@ struct DoneView: View {
 
     private func streakStage(_ r: StudySession.Result) -> some View {
         VStack(spacing: 0) {
-            StreakStage(streak: progress.streak) {
+            StreakStage(streak: progress.streak, milestone: r.fire?.milestone == true) {
                 withAnimation(.easeOut(duration: 0.3)) { held = false }
-                if let f = r.fire, f.milestone {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { Moments.shared.show(.milestone(f.streak, ember: f.ember, coins: f.coins)) }
+                if r.fire?.milestone == true { Sounds.shared.play("milestone") }
+            }
+            // what the day earned: a spare lantern, a milestone's coins
+            HStack(spacing: 8) {
+                if r.fire?.ember == true {
+                    Label { Text("A spare lantern") } icon: { LanternMark(size: 15) }
+                        .padding(.horizontal, 12).padding(.vertical, 6).background(Color.accentSoft, in: Capsule())
+                }
+                if let c = r.fire?.coins, c > 0 {
+                    Label { Text("+\(c) coins").monospacedDigit() } icon: { CoinIcon(size: 16) }
+                        .padding(.horizontal, 12).padding(.vertical, 6).background(Color.accentSoft, in: Capsule())
                 }
             }
-            if r.fire?.ember == true {
-                Label { Text("You earned a spare lantern · \(progress.embers) protecting your streak") } icon: { LanternMark(size: 15) }
-                    .font(.nunito(13, .bold)).foregroundStyle(Color.gold)
-                    .padding(.horizontal, 12).padding(.vertical, 5).background(Color.accentSoft, in: Capsule())
-                    .padding(.bottom, 8)
-            }
+            .font(.nunito(14, .bold)).foregroundStyle(Color.gold)
+            .padding(.bottom, 8)
         }
     }
 
@@ -256,39 +264,82 @@ struct DoneView: View {
                 Button(step(r) == .streak ? "Keep it up" : "Continue") { advance(r) }
                     .buttonStyle(WideButton())
             } else {
-                if r.wordsLeft > 0 {
-                    // the next step of this lesson, straight away
-                    Button("Next step →") { next(session.lessonId) }
-                        .buttonStyle(WideButton())
-                } else if let id = r.nextLessonId, let l = course.lessonById[id] {
-                    Button("Next: \(l.name) →") { next(id) }
-                        .buttonStyle(WideButton())
-                }
-                if !session.isQuiz {
-                    Button("Practice again", action: again)
-                        .buttonStyle(WideButton())
-                }
-                Button(session.mode == .lesson ? "← Back to path" : "← Back to home") { close() }
-                    .buttonStyle(WideButton(ghost: true))
-                    .padding(.top, 4)
+                // one button, as Duolingo's: back to the path (or home), where the next stone waits
+                Button("Continue") { close() }
+                    .buttonStyle(WideButton())
             }
         }
         .frame(maxWidth: 360)
     }
 }
 
-/// The web's full-width button: accent, or a ghost with a thin border.
+/// The full-width button: raised like the answer tiles (accent, or white with a grey lip for a
+/// ghost), the accent one with a sweep of light now and then.
 struct WideButton: ButtonStyle {
     var ghost = false
     func makeBody(configuration: Configuration) -> some View {
+        RaisedButton(fill: ghost ? Color.panel : Color.accent, ink: ghost ? Color.ink : Color.onAccent,
+                     edge: ghost ? Color.line : nil, sweep: !ghost).makeBody(configuration: configuration)
+    }
+}
+
+/// A big button with a lip under it, as the answer tiles: it presses down onto the lip.
+struct RaisedButton: ButtonStyle {
+    var fill: Color
+    var ink: Color
+    /// the lip's colour (nil: the fill, darkened)
+    var edge: Color? = nil
+    var sweep = true
+    var radius: CGFloat = 16
+    var lip: CGFloat = 5
+    func makeBody(configuration: Configuration) -> some View {
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         configuration.label
             .font(.nunitoXB(16.8)).lineLimit(1).minimumScaleFactor(0.8)
-            .foregroundStyle(ghost ? Color.ink : Color.onAccent)
-            .frame(maxWidth: .infinity).padding(14)
-            .background(ghost ? Color.clear : Color.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(ghost ? Color.line : .clear, lineWidth: 1))
-            .offset(y: configuration.isPressed ? 1 : 0)
+            .foregroundStyle(ink)
+            .frame(maxWidth: .infinity).padding(15)
+            .background(fill, in: shape)
+            .overlay { if let edge { shape.strokeBorder(edge, lineWidth: 2) } }
+            .modifier(IdleSweep(on: sweep, radius: radius))
+            .offset(y: configuration.isPressed ? lip - 1 : 0)
+            .padding(.bottom, lip)
+            .background {
+                ZStack {
+                    shape.fill(edge ?? fill)
+                    if edge == nil { shape.fill(Color.black.opacity(0.22)) }
+                }
+                .padding(.top, lip)
+            }
+            .animation(.spring(response: 0.18, dampingFraction: 0.7), value: configuration.isPressed)
             .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed)
+    }
+}
+
+/// Now and then a band of light sweeps across (a button inviting a tap).
+struct IdleSweep: ViewModifier {
+    var on = true
+    var radius: CGFloat = 16
+    func body(content: Content) -> some View {
+        content.overlay {
+            if on {
+                GeometryReader { g in
+                    LinearGradient(colors: [.white.opacity(0), .white.opacity(0.32), .white.opacity(0)], startPoint: .leading, endPoint: .trailing)
+                        .frame(width: max(40, g.size.width * 0.3), height: g.size.height * 2)
+                        .rotationEffect(.degrees(20))
+                        .position(x: 0, y: g.size.height / 2)
+                        .keyframeAnimator(initialValue: -0.4, repeating: true) { v, x in
+                            v.offset(x: x * g.size.width)
+                        } keyframes: { _ in
+                            KeyframeTrack {
+                                LinearKeyframe(-0.4, duration: 3.6)
+                                CubicKeyframe(1.4, duration: 0.85)
+                            }
+                        }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+                .allowsHitTesting(false)
+            }
+        }
     }
 }
 

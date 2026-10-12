@@ -66,6 +66,8 @@ struct LearnedStage: View {
 /// `finished` is called when it's all played (the button shows then).
 struct StreakStage: View {
     let streak: Int
+    /// a milestone day (3, 7, 14…): its line is told, not the week's
+    var milestone = false
     var finished: () -> Void
     @Environment(ProgressStore.self) private var progress
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -80,8 +82,9 @@ struct StreakStage: View {
 
     static let red = Color(UIColor(hex: 0xD9392F))
 
-    init(streak: Int, finished: @escaping () -> Void) {
+    init(streak: Int, milestone: Bool = false, finished: @escaping () -> Void) {
         self.streak = streak
+        self.milestone = milestone
         self.finished = finished
         _shown = State(initialValue: max(0, streak - 1))
     }
@@ -154,12 +157,17 @@ struct StreakStage: View {
                 let on = isToday ? todayTicked : progress.litOn(d)
                 VStack(spacing: 8) {
                     Text(names[i]).font(.nunitoXB(12)).foregroundStyle(isToday ? Self.red : Color.muted)
+                    let nextOn = i < 6 && (week[i + 1] == today ? todayTicked : week[i + 1] < today && progress.litOn(week[i + 1]))
                     ZStack {
                         Circle().fill(on ? Self.red : future ? Color.line.opacity(0.6) : Color.line.opacity(0.35))
                         if isToday && !on { Circle().strokeBorder(Self.red, style: StrokeStyle(lineWidth: 2, dash: [4, 3])) }
                         if on { Image(systemName: "checkmark").font(.system(size: 13, weight: .heavy)).foregroundStyle(.white) }
                     }
                     .frame(width: 32, height: 32)
+                    // days in a row join up into one pill, as Duolingo's
+                    .background(alignment: .leading) {
+                        if on && nextOn { Rectangle().fill(Self.red).frame(width: 42, height: 32).offset(x: 16) }
+                    }
                     .scaleEffect(isToday && todayTicked ? 1 : isToday ? 0.92 : 1)
                     .anchorPreference(key: SparkEnds.self, value: .center) { isToday ? SparkEnds(to: $0) : SparkEnds() }
                 }
@@ -172,7 +180,9 @@ struct StreakStage: View {
         let ti = week.firstIndex(of: today) ?? 0
         let allSoFar = (0..<ti).allSatisfy { progress.litOn(week[$0]) }
         let left = 6 - ti
-        if allSoFar && left == 0 {
+        if milestone, let m = DoneView.milestoneWords[streak] {
+            Text(m).font(.nunito(17, .heavy)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+        } else if allSoFar && left == 0 {
             Text("A perfect week!").font(.nunito(16, .bold)).foregroundStyle(Color.muted)
         } else if allSoFar {
             (Text("Practise ") + Text("\(left) more day\(left == 1 ? "" : "s")").foregroundColor(Self.red) + Text(" for a perfect week!"))

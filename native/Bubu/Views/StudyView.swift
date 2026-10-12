@@ -102,9 +102,7 @@ struct StudyView: View {
                     }
                     .frame(maxHeight: .infinity)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { cardHeight = $0 }
-                    .background(Color.panel, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Color.line, lineWidth: 1))
-                    .padding(.horizontal, 18)
+                    .padding(.horizontal, 6)
                 }
             }
             if let m = munch {
@@ -414,11 +412,8 @@ struct StudyView: View {
                 if !checks { advance() } else if isSentence { checkSentence() } else if isType { checkType() } else if isBuild { checkBuild() } else { checkChoice() }
             } label: {
                 Text(checks ? "Check" : session.isQuiz ? "Next →" : "Continue")
-                    .font(.nunitoXB(16.8)).foregroundStyle(ink)
-                    .frame(maxWidth: .infinity).padding(15)
-                    .background(fill, in: Capsule())
             }
-            .buttonStyle(PressDown(depth: 1))
+            .buttonStyle(RaisedButton(fill: fill, ink: ink, sweep: ready))
             .disabled(!ready)
             .padding(.bottom, 14)
         }
@@ -614,8 +609,9 @@ struct MascotPrompt<Content: View>: View {
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             // Bùbù in parts, reacting to the answer (the owner, 7 Oct 2026)
-            BubuMascot(mood: mood, height: long || compact ? 78 : 148)
-                .frame(width: long || compact ? 64 : 122, height: long || compact ? 78 : 148, alignment: .bottom)
+            // (one size whatever the answer or the sentence's length: the owner, 13 Oct 2026)
+            BubuMascot(mood: mood, height: compact ? 78 : 116)
+                .frame(width: compact ? 64 : 96, height: compact ? 78 : 116, alignment: .bottom)
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)
             SpeechBubbleBox(sentence: sentence) { content }
@@ -623,7 +619,7 @@ struct MascotPrompt<Content: View>: View {
                 .padding(.trailing, sentence ? 0 : 10)
             Spacer(minLength: 0)
         }
-        .frame(minHeight: long || compact ? 78 : 140)
+        .frame(minHeight: compact ? 78 : 116)
         // never squeezed shorter than what it holds: on a full screen the bubble was cut off under the
         // first answer (a two-line gap sentence, the owner's phone, 12 Oct 2026)
         .fixedSize(horizontal: false, vertical: true)
@@ -1267,8 +1263,9 @@ struct ChoiceView: View {
         let tint: Color = filled ? (picked == answer ? Color.good : Color.again) : Color.accent
         return Text(shown ?? "　")
             .font(.hanzi(24.8)).foregroundStyle(filled ? Color.good : Color.accent)
+            .lineLimit(1).fixedSize()
             .padding(.horizontal, 8).padding(.vertical, 2)
-            .frame(minWidth: 56)
+            .frame(minWidth: max(56, CGFloat(ex.options.map(\.count).max() ?? 1) * 25 + 16))
             .background(RoundedRectangle(cornerRadius: 9, style: .continuous)
                 .fill(filled ? Color.goodSoft : shown == nil ? Color.accentSoft.opacity(0.6) : Color.accentSoft))
             .overlay(RoundedRectangle(cornerRadius: 9, style: .continuous)

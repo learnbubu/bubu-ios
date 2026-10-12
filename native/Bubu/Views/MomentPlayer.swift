@@ -12,6 +12,8 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     private(set) var ready = false
     /// the page is loaded at all (not under the tests)
     var loaded: Bool { web.url != nil }
+    /// where the web view's top left is in the window (nil until it's in one)
+    var origin: CGPoint? { web.window == nil ? nil : web.convert(CGPoint.zero, to: nil) }
     static let readyNote = Notification.Name("bubuMomentPlayerReady")
     /// a moment's first frame is on screen (a still picture standing in for it can go)
     static let playingNote = Notification.Name("bubuMomentPlaying")
@@ -122,9 +124,13 @@ struct StickerMoment: View {
 
     private func place() {
         guard ready, box.width > 20 else { return }
-        // (the player's layer covers the whole window, so its origin is the screen's)
-        let b = box
-        if started { MomentPlayer.shared.move(to: b) } else { started = true; MomentPlayer.shared.play(key, in: b) }
+        let o = MomentPlayer.shared.origin ?? .zero
+        let b = CGRect(x: box.minX - o.x, y: box.minY - o.y, width: box.width, height: box.height)
+        if started { MomentPlayer.shared.move(to: b) } else {
+            started = true; MomentPlayer.shared.play(key, in: b)
+            // (once the web view has surely settled in its place)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { place() }
+        }
     }
 }
 
