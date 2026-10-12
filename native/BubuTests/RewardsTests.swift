@@ -395,6 +395,7 @@ final class RewardsTests: XCTestCase {
         let (p, _) = make(at: noon)
         let lesson = Course.shared.lessons[0].id
         var sessions = 0
+        var last: StudySession?
         while !p.isDone(lesson) && sessions < 8 {
             sessions += 1
             let s = StudySession(lessonId: lesson, progress: p)
@@ -404,8 +405,14 @@ final class RewardsTests: XCTestCase {
                 if s.card != nil { s.answer(true) }
                 s.next()
             }
+            last = s
         }
         XCTAssertTrue(p.isDone(lesson))
+        // the pocket is opened on the done screen, as its own screen
+        XCTAssertEqual(last?.result?.pocket?.kind, .red)
+        XCTAssertGreaterThan(last?.result?.pocket?.reward ?? 0, 0)
+        // and the quests' bars fill on from where they were
+        XCTAssertFalse(last?.result?.questsBefore.isEmpty ?? true)
         XCTAssertGreaterThanOrEqual(p.coins, 120)
         XCTAssertEqual(p.activity.pocketDay, p.today)
         XCTAssertEqual(p.buns, 5)                  // no mistakes, no buns eaten

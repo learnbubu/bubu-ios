@@ -375,6 +375,8 @@ struct PocketCard: View {
     let pocket: Moments.Pocket
     var opened: () -> Void
     var close: () -> Void
+    /// its own Nice button (the done screen has its own)
+    var button = true
     @State private var open = false
     @State private var amountIn = false
     // once their animations are over the pocket and the flying coins leave the view
@@ -451,8 +453,10 @@ struct PocketCard: View {
             .accessibilityLabel("Open the pocket")
             Text("Tap to open").font(.nunito(13.6, .heavy)).foregroundStyle(Color.muted)
                 .opacity(open ? 0 : 1)
-            Button("Nice", action: close).buttonStyle(WideButton()).padding(.top, 10)
-                .opacity(open ? 1 : 0).disabled(!open)
+            if button {
+                Button("Nice", action: close).buttonStyle(WideButton()).padding(.top, 10)
+                    .opacity(open ? 1 : 0).disabled(!open)
+            }
         }
         .sensoryFeedback(.success, trigger: open)
         .onAppear {

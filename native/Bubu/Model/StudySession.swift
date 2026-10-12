@@ -125,6 +125,10 @@ final class StudySession: Identifiable {
     private var metInSession: Set<String> = []
     /// the lesson step this session is, for a lesson: 1 of 2, 2 of 2 (0 otherwise)
     private(set) var stepAtStart = 0
+    /// today's quests' progress when the session began (the done screen fills the bars on from there)
+    private(set) var questsAtStart: [String: Int] = [:]
+    /// the lesson's red pocket, earned this session: opened on the done screen
+    private var earnedPocket: Moments.Pocket?
 
     /// Set when the session is over.
     private(set) var result: Result?
@@ -158,6 +162,10 @@ final class StudySession: Identifiable {
         var xpDouble = 0
         /// the sticker moment the done screen opens on (nil: its usual splash)
         var moment: ResultMoment?
+        /// today's quests' progress when the session began
+        var questsBefore: [String: Int] = [:]
+        /// the lesson's red pocket, to open on the done screen
+        var pocket: Moments.Pocket?
     }
 
     // the skip test's tally
@@ -216,6 +224,7 @@ final class StudySession: Identifiable {
         self.sessionTotal = items.filter { if case .meet = $0 { return false } else { return true } }.count
         self.onBuns = [.lesson, .listen, .write].contains(mode) && hasMeetLeft
         if mode == .lesson && !lessonId.isEmpty { stepAtStart = Self.lessonSteps(lessonId, progress).step }
+        questsAtStart = Dictionary(progress.todayQuests.map { ($0.id, progress.progress(of: $0)) }, uniquingKeysWith: { a, _ in a })
         next()
     }
 
@@ -1107,6 +1116,8 @@ final class StudySession: Identifiable {
         result?.learned = learnedWords
         result?.xpCombo = xpComboExtra
         result?.xpDouble = xpDoubled
+        result?.questsBefore = questsAtStart
+        result?.pocket = earnedPocket
         if isPractice { result?.practised = practisedWords }
         if !idle {
             let hour = Calendar.current.component(.hour, from: Date(timeIntervalSince1970: progress.now() / 1000))
@@ -1176,10 +1187,9 @@ final class StudySession: Identifiable {
         let got = progress.lessonPocket(chapterEnd: chapterEnd)
         guard got > 0 else { return }
         progress.addCoins(got)
-        let pocket = Moments.Pocket(kind: .red, reward: got, title: chapterEnd ? "Chapter complete!" : "Lesson complete!",
-                                    sub: chapterEnd ? "A fuller pocket for a whole chapter" : "Bùbù has something for you.")
-        // after the done screen's opening splash (about 1.35 s), not over it
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) { Moments.shared.show(.pocket(pocket)) }
+        // (opened on the done screen, as its own screen)
+        earnedPocket = Moments.Pocket(kind: .red, reward: got, title: chapterEnd ? "Chapter complete!" : "A red pocket!",
+                                      sub: chapterEnd ? "A fuller pocket for a whole chapter" : "For finishing the lesson.")
     }
 
     /// Finishing a chapter's last lesson unlocks its story (web: finishStudy's toast).

@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// The end of a session, in the web's three stages: what you earned, your fire,
-/// then today's quests with where to go next. All on one card, as on the web.
+/// The end of a session, a screen at a time (the after-lesson prototype, 12 Oct 2026): how it went,
+/// the words met, the streak's lantern lighting, a red pocket, the quests moving on, then where
+/// to go next. Screens with nothing to show are skipped.
 struct DoneView: View {
     let session: StudySession
     var close: () -> Void
@@ -9,8 +10,28 @@ struct DoneView: View {
     var next: (String) -> Void
     @Environment(ProgressStore.self) private var progress
     // the step screenshot opens on the last stage, where Next step is
-    @State private var stage = Launch.screen == "donenext" ? 2 : 0
-    @State private var flameIn = false
+    @State private var stage = Launch.screen == "donenext" ? 99 : 0
+    /// the button waits while the streak plays and until the pocket is opened
+    @State private var held = false
+
+    enum Step { case result, learned, streak, pocket, quests }
+    /// The screens this session gets, in order.
+    private func steps(_ r: StudySession.Result) -> [Step] {
+        guard r.simple.isEmpty else { return [.result] }
+        var out: [Step] = [.result]
+        if !(r.learned.isEmpty ? r.practised : r.learned).isEmpty { out.append(.learned) }
+        if r.fireJustLit { out.append(.streak) }
+        if r.pocket != nil { out.append(.pocket) }
+        if progress.todayQuests.contains(where: { progress.progress(of: $0) > (r.questsBefore[$0.id] ?? 0) }) || out.count == 1 { out.append(.quests) }
+        return out
+    }
+    private func step(_ r: StudySession.Result) -> Step { let s = steps(r); return s[min(stage, s.count - 1)] }
+    private func isLast(_ r: StudySession.Result) -> Bool { stage >= steps(r).count - 1 }
+    private func advance(_ r: StudySession.Result) {
+        let s = steps(r), n = min(stage + 1, s.count - 1)
+        held = (s[n] == .streak && !reduceMotion) || s[n] == .pocket
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { stage = n }
+    }
     /// the opening splash: the title over a tilted band with Bùbù and confetti, about a second
     /// (the owner's Duolingo recording, 6 Oct 2026); not on the debug screens past the first stage
     @State private var splash = Launch.screen != "donenext"
@@ -37,10 +58,13 @@ struct DoneView: View {
         VStack(spacing: 0) {
             Group {
                 if !r.simple.isEmpty { simple(r) } else if splash && stage == 0 && moment == nil { splashView(r) } else {
-                switch stage {
-                case 0: stageOne(r)
-                case 1: stageTwo(r)
-                default: stageThree(r)
+                switch step(r) {
+                case .result: stageOne(r)
+                case .learned: LearnedStage(title: r.learned.isEmpty ? "YOU PRACTISED" : "YOU LEARNED", cards: r.learned.isEmpty ? r.practised : r.learned)
+                case .streak: streakStage(r)
+                case .pocket: PocketCard(pocket: r.pocket!, opened: { DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { withAnimation { held = false } } }, close: { advance(r) }, button: false)
+                        .frame(maxHeight: .infinity)
+                case .quests: QuestStage(before: r.questsBefore)
                 }
                 }
             }
@@ -48,7 +72,8 @@ struct DoneView: View {
             .id(stage)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             buttons(r).padding(.top, 12)
-                .opacity(splash && r.simple.isEmpty && stage == 0 && moment == nil ? 0 : 1)
+                .opacity(splash && r.simple.isEmpty && stage == 0 && moment == nil || held ? 0 : 1)
+                .allowsHitTesting(!held)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 18)
@@ -115,16 +140,13 @@ struct DoneView: View {
     // MARK: stage 1: XP, time, accuracy
 
     private func stageOne(_ r: StudySession.Result) -> some View {
-        // a stone's new words (or a practice stone's words) take the place of "This week",
-        // which the fire stage shows next anyway
-        let recap = r.learned.isEmpty ? r.practised : r.learned
         return VStack(spacing: 0) {
             // Bùbù takes whatever height is spare, so the card is filled from the top rather than
             // centred with empty room above (the owner, 4 Oct 2026)
             if let m = moment {
                 // the moment's sticker (drawn by the player over this space), its title and line
                 Color.clear
-                    .frame(minHeight: 120, maxHeight: recap.isEmpty ? 300 : 260)
+                    .frame(minHeight: 120, maxHeight: 300)
                     .frame(maxWidth: .infinity)
                     .background(GeometryReader { g in Color.clear.preference(key: MomentStickerBox.self, value: g.frame(in: .global)) })
                     .layoutPriority(-1)
@@ -134,7 +156,7 @@ struct DoneView: View {
                     .padding(.top, 2)
             } else {
                 Image("done-panda").resizable().scaledToFit()
-                    .frame(minHeight: 120, maxHeight: recap.isEmpty ? 300 : 260)
+                    .frame(minHeight: 120, maxHeight: 300)
                     .layoutPriority(-1)
                 Text(r.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).multilineTextAlignment(.center)
                     .padding(.top, 2)
@@ -154,7 +176,7 @@ struct DoneView: View {
                 DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: Self.timeLabel(r), icon: "clock.fill", tint: .accent, delay: 0.42)
                 DoneTile(value: r.accuracy, format: { "\($0)%" }, label: Self.accuracyLabel(r.accuracy), icon: "scope", tint: .good, delay: 0.64)
             }
-            .padding(.top, recap.isEmpty ? 22 : 16).padding(.bottom, 4)
+            .padding(.top, 22).padding(.bottom, 4)
             // what this earned, as quiet rows rather than shouting pills
             let notes: [(String, String, Color)] = ([
                 r.perfect ? ("star.fill", "Perfect: no mistakes, +5 XP", Color.gold) : nil,
@@ -172,24 +194,7 @@ struct DoneView: View {
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
                 .padding(.top, 12)
             }
-            if !recap.isEmpty {
-                WordRecap(title: r.learned.isEmpty ? "YOU PRACTISED" : "YOU LEARNED", cards: recap)
-                    .padding(.top, 14)
-            } else {
-                // this week, so the streak is in view from the first screen
-                VStack(spacing: 10) {
-                    HStack {
-                        Text("THIS WEEK").font(.nunitoXB(10.9)).tracking(1.1).foregroundStyle(Color.muted)
-                        Spacer()
-                        Label { Text("\(progress.streak) day\(progress.streak == 1 ? "" : "s")") } icon: { LanternMark(lit: true, size: 14) }
-                            .font(.nunitoXB(12)).foregroundStyle(Color.gold)
-                    }
-                    WeekStrip()
-                }
-                .padding(.horizontal, 14).padding(.vertical, 12)
-                .background(Color.bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .padding(.top, 18)
-            }
+            Spacer(minLength: 0)
         }
     }
 
@@ -218,51 +223,23 @@ struct DoneView: View {
         }
     }
 
-    // MARK: stage 2: the fire
+    // MARK: the streak
 
-    private func stageTwo(_ r: StudySession.Result) -> some View {
-        let streak = progress.streak, lit = progress.litOn(progress.today)
-        let msg: String = r.fireJustLit
-            ? (streak == 1 ? "Lantern lit. Come back tomorrow to make it two."
-               : Self.milestoneWords[streak] ?? "Lantern lit. Keep it going tomorrow.")
-            : lit ? "Already lit today. Keep it going tomorrow." : "Finish a session to light today's lantern."
-        return VStack(spacing: 0) {
-            FlameIcon(lit: lit, size: 110)
-                .shadow(color: lit ? Color(UIColor(hex: 0xF08A7A)).opacity(0.6) : .clear, radius: 16)
-                .scaleEffect(flameIn ? 1 : 0.6)
-            Text("\(streak)").font(.nunito(57.6, .black)).tracking(-1.7).foregroundStyle(Color.ink).padding(.top, 6)
-            heading("day streak").padding(.top, 4)
-            WeekStrip().frame(maxWidth: 330).padding(.top, 14)
-            Group {
-                Label { Text((r.fire?.ember == true ? "You earned a spare lantern · " : "") + "\(progress.embers) spare lantern\(progress.embers == 1 ? "" : "s") protecting it") }
-                      icon: { LanternMark(size: 15) }
+    private func streakStage(_ r: StudySession.Result) -> some View {
+        VStack(spacing: 0) {
+            StreakStage(streak: progress.streak) {
+                withAnimation(.easeOut(duration: 0.3)) { held = false }
+                if let f = r.fire, f.milestone {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { Moments.shared.show(.milestone(f.streak, ember: f.ember, coins: f.coins)) }
+                }
+            }
+            if r.fire?.ember == true {
+                Label { Text("You earned a spare lantern · \(progress.embers) protecting your streak") } icon: { LanternMark(size: 15) }
                     .font(.nunito(13, .bold)).foregroundStyle(Color.gold)
                     .padding(.horizontal, 12).padding(.vertical, 5).background(Color.accentSoft, in: Capsule())
-                    .padding(.top, 10)
+                    .padding(.bottom, 8)
             }
-            Text(msg).font(.nunito(16)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
-                .padding(.top, 10).padding(.bottom, 14)
         }
-        .onAppear {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) { flameIn = true }
-            if let f = r.fire, f.milestone {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { Moments.shared.show(.milestone(f.streak, ember: f.ember, coins: f.coins)) }
-            } else if r.fireJustLit { Sounds.shared.play("goal") }
-        }
-    }
-
-    // MARK: stage 3: quests
-
-    private func stageThree(_ r: StudySession.Result) -> some View {
-        let quests = progress.todayQuests
-        let done = quests.filter { progress.progress(of: $0) >= $0.target }.count
-        return VStack(spacing: 4) {
-            heading("Daily quests")
-            Text(done == 3 ? "All three done. Lucky pocket opened!" : "\(done) of 3 done today")
-                .font(.nunito(16)).foregroundStyle(Color.muted)
-            QuestRows(animated: true).padding(.top, 6).padding(.bottom, 14)
-        }
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: buttons
@@ -272,8 +249,8 @@ struct DoneView: View {
         VStack(spacing: 8) {
             if !r.simple.isEmpty {
                 Button("← Back to path") { close() }.buttonStyle(WideButton())
-            } else if stage < 2 {
-                Button("Continue") { withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { stage += 1 } }
+            } else if !isLast(r) {
+                Button(step(r) == .streak ? "Keep it up" : "Continue") { advance(r) }
                     .buttonStyle(WideButton())
             } else {
                 if r.wordsLeft > 0 {
