@@ -1189,8 +1189,16 @@ struct ChoiceView: View {
                 }
             } else {
             Spacer(minLength: 18)
-            VStack(spacing: 10) {
-                ForEach(ex.options, id: \.self) { opt in option(opt) }
+            if ex.dir == "gap" {
+                // word tiles in a row, centred, wrapping as they need
+                FlowLayout(spacing: 12, lineSpacing: 14, center: true) {
+                    ForEach(ex.options, id: \.self) { opt in option(opt) }
+                }
+                .frame(maxWidth: .infinity)
+            } else {
+                VStack(spacing: 10) {
+                    ForEach(ex.options, id: \.self) { opt in option(opt) }
+                }
             }
             }
             if ex.dir == "listen", let skip {
@@ -1310,11 +1318,12 @@ struct ChoiceView: View {
         return Button { choose(opt) } label: {
             Group {
                 if ex.dir == "recall" || ex.dir == "gap" {
-                    VStack(spacing: 1) {
-                        Text(opt).font(.hanzi(20, .bold)).foregroundStyle(Color.ink)
+                    // the pinyin small over the characters, as Duolingo's tiles
+                    VStack(spacing: 2) {
                         if pinyinShown, let py = Course.wordPy[opt] {
-                            PinyinText(pinyin: py, size: 13.5, weight: .bold)
+                            PinyinText(pinyin: py, size: 12.5, weight: .semibold)
                         }
+                        Text(opt).font(.hanzi(ex.dir == "gap" ? 22 : 21, .medium)).foregroundStyle(Color.ink)
                     }
                 } else {
                     Text(opt).font(.nunito(18.4, .black))
@@ -1323,10 +1332,12 @@ struct ChoiceView: View {
                         .lineLimit(2).minimumScaleFactor(0.8)
                 }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 14).padding(.vertical, ex.dir == "recall" || ex.dir == "gap" ? 10 : 14)
+            // fill the gap: a word tile, as wide as its word (Duolingo's "Complete the sentence")
+            .frame(maxWidth: ex.dir == "gap" ? nil : .infinity)
+            .frame(minWidth: ex.dir == "gap" ? 48 : nil)
+            .padding(.horizontal, ex.dir == "gap" ? 16 : 14).padding(.vertical, ex.dir == "recall" || ex.dir == "gap" ? 10 : 14)
         }
-        .buttonStyle(Tile3D(fill: fill, edge: edge))
+        .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 16))
         // on the whole tile (face and lip), so the box and its text hop together (the owner, 5 Oct 2026)
         .modifier(SuccessShine(on: state == true && opt == picked, delay: 0.05, radius: 14))
         .disabled(answered)
@@ -1765,20 +1776,21 @@ struct SentenceView: View {
             // pinyin over a Chinese tile while its word is new (its place kept, so the tiles
             // stay one height); once strong, holding the tile shows it
             if let py = t.pinyin {
-                Text(py).font(.nunito(11.5)).foregroundStyle(Color.muted)
+                Text(py).font(.nunito(12.5, .semibold)).foregroundStyle(Color.muted)
                     .opacity(wheels.shows(hanzi: t.text) ? 1 : 0)
             }
-            Text(t.text).font(ex.toChinese ? .hanzi(20.8, .medium) : .nunito(16.8, .semibold))
+            Text(t.text).font(ex.toChinese ? .hanzi(22, .medium) : .nunito(18.4, .semibold))
         }
         .foregroundStyle(tint ?? Color.ink)
-        .padding(.horizontal, 12).padding(.vertical, 9)
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        // (as Duolingo's word tiles: rounder, with a deeper lip)
         .background {
             ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous).fill(tint ?? Color.line).offset(y: 2)
+                RoundedRectangle(cornerRadius: 14, style: .continuous).fill(tint ?? Color.line).offset(y: 3)
                 // green (or red) once answered, as the other answers fill (the owner: "it doesn't go green")
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(tint == .good ? Color.goodSoft : tint == .again ? Color.againSoft : Color.panel)
-                RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(tint ?? Color.line, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(tint ?? Color.line, lineWidth: 2)
             }
         }
     }
