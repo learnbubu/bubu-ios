@@ -270,7 +270,7 @@ struct StudyView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Close")
-                ProgressBarShine(value: session.progressFraction, height: 8, combo: session.combo)
+                ProgressBarShine(value: session.progressFraction, height: 16, combo: session.combo)
                     .background(GeometryReader { g in
                         Color.clear.onAppear { barFrame = g.frame(in: .global) }
                             .onChange(of: g.frame(in: .global)) { _, f in barFrame = f }
@@ -568,7 +568,9 @@ struct ProgressBarShine: View {
                 Capsule().fill(hot ? AnyShapeStyle(Self.gold) : AnyShapeStyle(Color.accent))
                     .frame(width: fillW)
                     .overlay(alignment: .top) {
-                        Capsule().fill(.white.opacity(0.3)).frame(height: 2).padding(.horizontal, 4).padding(.top, 1)
+                        Capsule().fill(.white.opacity(0.32)).frame(height: max(2, height * 0.26))
+                            .padding(.horizontal, height * 0.55).padding(.top, height * 0.2)
+                            .opacity(fillW > height * 1.4 ? 1 : 0)
                     }
                     .shadow(color: hot ? Color(UIColor(hex: 0xFFD54A)).opacity(0.55) : .clear, radius: 5)
                 // the flare at the tip
@@ -581,10 +583,10 @@ struct ProgressBarShine: View {
             }
             .overlay(alignment: .topLeading) {
                 if hot {
-                    Text("COMBO ×\(combo)").font(.nunito(10.5, .black)).italic()
+                    Text("COMBO ×\(combo)").font(.nunito(13.5, .black))
                         .foregroundStyle(Color(UIColor(hex: 0xE09A1F)))
                         .fixedSize()
-                        .offset(x: min(max(0, fillW - 62), g.size.width - 70), y: -15)
+                        .offset(x: min(max(0, fillW - 80), g.size.width - 90), y: -21)
                         .transition(.scale.combined(with: .opacity))
                         .id(combo)
                 }
@@ -807,8 +809,11 @@ struct SpeakerButton: View {
 /// tortoise under it for slowly.
 struct BubbleSound: View {
     let text: String
+    /// side by side (under the words) rather than stacked
+    var row = false
     var body: some View {
-        VStack(spacing: 2) {
+        let stack = row ? AnyLayout(HStackLayout(spacing: 4)) : AnyLayout(VStackLayout(spacing: 2))
+        stack {
             Button { Speech.shared.speak(text) } label: {
                 Image(systemName: "speaker.wave.2.fill").font(.system(size: 19, weight: .medium)).foregroundStyle(Color.accent)
                     .frame(width: 34, height: 30)
@@ -1644,10 +1649,9 @@ struct SentenceView: View {
                     // as JIC had it: the NEW WORD tag on top, the speaker at the sentence's left, and
                     // each word with its tone-coloured pinyin over it
                     if anyNew { NewBadge() }
-                    // as Duolingo has it: the sound at the bubble's left, the words beside it
-                    HStack(alignment: .center, spacing: 6) {
-                    BubbleSound(text: sent.hanzi)
-                    FlowLayout(spacing: 2, lineSpacing: 4) {
+                    // the words with the bubble's whole width, the sound under them side by side
+                    VStack(alignment: .trailing, spacing: 2) {
+                    FlowLayout(spacing: 2, lineSpacing: 4, center: true) {
                             ForEach(Array(sent.words.enumerated()), id: \.offset) { i, w in
                                 let new = isNew(w.hanzi)
                                 HintChip(hanzi: w.hanzi, pinyin: w.pinyin, phrase: Hints.phrase(sent.en, sent.words),
@@ -1665,8 +1669,10 @@ struct SentenceView: View {
                                 .padding(.horizontal, 3)
                             }
                     }
+                    .frame(maxWidth: .infinity)
                     .contentShape(Rectangle())
                     .onTapGesture { withAnimation { pinyinOpen.toggle() } }
+                    BubbleSound(text: sent.hanzi, row: true)
                     }
                 }
             }
