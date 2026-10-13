@@ -63,7 +63,9 @@ struct ClassroomPage: View {
         }
         // Bùbù leans on the row, his paws over its top edge
         .overlay(alignment: .topLeading) {
-            Image("class-peek").resizable().scaledToFit().frame(width: peekW)
+            // his full size given outright: the row (shorter than he is) offered its own height, which shrank him
+            Image("class-peek").resizable().scaledToFit().frame(width: peekW, height: peekW * 320 / 420)
+                .fixedSize()
                 .offset(x: peekX, y: peekY - peekW * 320 / 420)
                 .allowsHitTesting(false)
         }
