@@ -2886,5 +2886,56 @@
    "out/raw/tab-home.png"
   ],
   "prompt": "A small APP ICON of a Chinese lucky MONEY POUCH, shown at about 34 pixels beside 'Daily quests': a plump round red silk drawstring bag, gathered at the top with a gold cord tied in a small bow, the top frilled where it's drawn closed. On its front, a round gold patch with the Chinese character 福 in red - the ONE exception to 'no text': draw 福 clearly and correctly, nothing else written anywhere. Bold, chunky and simple like the attached icons: 2 to 3 soft tones, no small pattern, no fine detail. Upright, centred, filling about 75% of the canvas, even magenta all round.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. Apart from the 福 on the pouch, no text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/home-teacher-body.png",
+  "group": "home7",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/home-teacher-pose.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is Bùbù the panda teacher, a finished picture from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY his BODY: his torso and tummy down to the bottom edge, his shoulders, and his red backpack and its straps - WITHOUT his head, WITHOUT either arm, WITHOUT the book and WITHOUT the pointer. Where his head, arms or the book covered his body, draw that part in, whole and continuous (his white tummy and black shoulders, the backpack behind), so the body is complete under them. At the neck, continue the body a little way up under where the head was, in a soft rounded shape, so the head can tilt over it without a gap. At each shoulder, end the black fur in a soft rounded shape where the arm joined, so each arm can turn there without a gap. Keep it EXACTLY as it is in the picture - the SAME size, the SAME place on the canvas (do not move, re-centre or resize it), the same shapes, colours and lighting - and remove everything else, leaving flat magenta (#FF00FF) where it was. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/home-teacher-head.png",
+  "group": "home7",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/home-teacher-pose.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is Bùbù the panda teacher, a finished picture from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY his HEAD: his whole head with his ears, his round glasses, his face exactly as it is (eyes, cheeks, open smiling mouth) - WITHOUT his body, arms, book or pointer. Where the pointer or a paw covered part of his head, draw that part in, whole. Give the bottom of his head a soft rounded edge where it met his body. Keep it EXACTLY as it is in the picture - the SAME size, the SAME place on the canvas (do not move, re-centre or resize it), the same shapes, colours and lighting - and remove everything else, leaving flat magenta (#FF00FF) where it was. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/home-teacher-head-blink.png",
+  "group": "home7",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/home-teacher-pose.png",
+   "refs/ref-rig-idle.png",
+   "out/raw/home-teacher-head.png"
+  ],
+  "prompt": "The attached image is Bùbù the panda teacher, a finished picture from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY his HEAD, exactly as in the head on its own, but BLINKING: his eyes closed as two gentle downward-curved lines (happy closed eyes) behind the SAME glasses, everything else the same - ears, glasses, cheeks, open smiling mouth - WITHOUT his body, arms, book or pointer. Give the bottom of his head a soft rounded edge where it met his body. Keep it EXACTLY as it is in the picture - the SAME size, the SAME place on the canvas (do not move, re-centre or resize it), the same shapes, colours and lighting - and remove everything else, leaving flat magenta (#FF00FF) where it was. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/home-teacher-arm-pointer.png",
+  "group": "home7",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/home-teacher-pose.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is Bùbù the panda teacher, a finished picture from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY his RAISED ARM holding the POINTER (the arm on our right): from where it joins his shoulder to his paw, with the thin wooden pointer in his paw, exactly as it is - WITHOUT the rest of him. At the shoulder, draw the arm continuing a little way into where the body was, ending in a soft ROUNDED end of black fur, so it can swing there without a gap. Keep it EXACTLY as it is in the picture - the SAME size, the SAME place on the canvas (do not move, re-centre or resize it), the same shapes, colours and lighting - and remove everything else, leaving flat magenta (#FF00FF) where it was. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/home-teacher-arm-book.png",
+  "group": "home7",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/home-teacher-pose.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "The attached image is Bùbù the panda teacher, a finished picture from the app. EDIT it to make ONE LAYER of it for animation: keep ONLY his ARM HOLDING THE BOOK (the arm on our left) and the open green BOOK: from where the arm joins his shoulder, his paw and the book, exactly as they are - WITHOUT the rest of him. At the shoulder, draw the arm continuing a little way into where the body was, ending in a soft ROUNDED end of black fur. Keep it EXACTLY as it is in the picture - the SAME size, the SAME place on the canvas (do not move, re-centre or resize it), the same shapes, colours and lighting - and remove everything else, leaving flat magenta (#FF00FF) where it was. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
