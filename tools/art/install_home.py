@@ -55,7 +55,8 @@ def draw(frame, lib, L):
 
 def backpack(lib):
     """The backpack's top-left, from the finished picture: the body piece was cut short there, so the board's
-    wooden edge showed through it (the owner, 13 Oct 2026). Only the backpack's red and its dark lines, near it."""
+    wooden edge showed through it (the owner, 13 Oct 2026). Only the backpack's red and its dark lines, near it.
+    Now part of the body piece itself (out/rig/mo-classroom-body-placed.png, 14 Oct), so the studio has it too."""
     import numpy as np
     fin = dec(lib['final']['src']).resize((FW * SS, FH * SS), Image.LANCZOS)
     a = np.asarray(fin).astype(int); r, g, b, al = a[..., 0], a[..., 1], a[..., 2], a[..., 3]
@@ -84,9 +85,7 @@ def main(doc_p, art_p, home_p):
             it = lib['button']; w, h = it['w'] * L['s'], it['h'] * L['s']
             pieces.append(('button', L, (L['cx'] - X0 - w / 2, L['cy'] - Y0 - h / 2, w, h))); continue
         f = Image.new('RGBA', (FW * SS, FH * SS))
-        for l in g['layers']:
-            if l['ref'] == 'lib:body': f.alpha_composite(backpack(lib))
-            draw(f, lib, l)
+        for l in g['layers']: draw(f, lib, l)
         name = f'class-board-{i}'
         imageset(name, f, FW * SS)
         pieces.append((name, L, None))

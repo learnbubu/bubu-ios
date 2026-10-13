@@ -12,6 +12,8 @@ final class Router {
     var homePath: [Page] = []
     var learnPath: [Page] = []
     var profilePath: [Page] = []
+    /// a part of Profile to scroll to when it opens ("quests", from Home's Daily quests)
+    var profileFocus: String?
 
     /// Slide a page in on the tab you're on (Settings has none: it goes to Home's).
     func push(_ p: Page) {

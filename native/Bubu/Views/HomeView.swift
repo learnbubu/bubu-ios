@@ -7,27 +7,30 @@ import Observation
 struct HomeView: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
-    @State private var questsOpen = false
     private let course = Course.shared
 
     var body: some View {
         GeometryReader { geo in
-            let W = geo.size.width
-            ScrollView {
-                VStack(spacing: 13) {
-                    topBar
-                    VStack(spacing: 12) {
-                        upNext
-                        questCard
-                    }
-                    if progress.boostActive { BoostPill() }
-                    ClassroomBoard(width: W - 36 + 8) { router.push(.classroom) }
-                        .padding(.horizontal, -4).padding(.top, 2)
-                    wordOfTheDay.padding(.top, 8)
-                }
-                .padding(.horizontal, 18).padding(.top, 6).padding(.bottom, 24)
+            let W = geo.size.width, H = geo.size.height
+            // everything on one screen, no scrolling (the owner, 14 Oct 2026): the board takes what's left
+            let rest = H - 455 - (progress.boostActive ? 44 : 0)
+            let boardW = min(W - 28, max(180, rest * HomeArt.frame.width / HomeArt.frame.height))
+            VStack(spacing: 0) {
+                topBar
+                Spacer(minLength: 8).frame(maxHeight: 13)
+                upNext
+                Spacer(minLength: 8).frame(maxHeight: 12)
+                questCard
+                if progress.boostActive { BoostPill().padding(.top, 10) }
+                Spacer(minLength: 8).frame(maxHeight: 15)
+                ClassroomBoard(width: boardW) { router.push(.classroom) }
+                    .frame(maxWidth: .infinity)
+                Spacer(minLength: 6).frame(maxHeight: 21)
+                wordOfTheDay
+                Spacer(minLength: 0)
             }
-            .scrollIndicators(.hidden)
+            .padding(.horizontal, 18).padding(.top, 6)
+            .frame(width: W, height: H, alignment: .top)
             .background(Home.bg.ignoresSafeArea())
             .onAppear { progress.ensureQuests() }
         }
@@ -43,7 +46,6 @@ struct HomeView: View {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text("步步").font(.hanzi(23, .black)).foregroundStyle(Home.ink)
                 Text("Bùbù").font(.nunito(22, .black)).foregroundStyle(Home.teal)
-                    .overlay(alignment: .topTrailing) { Leaf().fill(Color(UIColor(hex: 0x5AAE84))).frame(width: 14, height: 14).offset(x: 10, y: -7) }
             }
             Spacer(minLength: 4)
             Button {
@@ -100,8 +102,8 @@ struct HomeView: View {
                 Text(action)
                     .font(.nunito(18, .black)).foregroundStyle(.white)
                     .frame(maxWidth: .infinity).frame(height: 52)
-                    .background(RoundedRectangle(cornerRadius: 17, style: .continuous).fill(Home.tealDark).offset(y: 4))
                     .background(Home.teal, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                    .background(RoundedRectangle(cornerRadius: 17, style: .continuous).fill(Home.tealDark).offset(y: 4))
                     .padding(.top, 15).padding(.bottom, 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -128,61 +130,38 @@ struct HomeView: View {
         .buttonStyle(PressDown(depth: 2))
     }
 
-    // MARK: Daily quests: the pouch, how many are done, the next one; tap for all three
+    // MARK: Daily quests: the pouch, how many are done, the next one; tap for all three, on Profile
     private var questCard: some View {
         let quests = progress.todayQuests
         let n = { (q: Quest) in min(q.target, progress.questDone(q) ? q.target : progress.progress(of: q)) }
         let done = quests.filter { n($0) >= $0.target }.count
         let next = quests.first { n($0) < $0.target }
-        return VStack(spacing: 0) {
-            Button { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { questsOpen.toggle() } } label: {
-                HStack(spacing: 13) {
-                    Image("quest-pouch").resizable().scaledToFit().frame(height: 50)
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(alignment: .firstTextBaseline) {
-                            Text("Daily quests").font(.nunito(17, .black)).foregroundStyle(Home.ink)
-                            Spacer()
-                            Text("\(done)/3").font(.nunito(15, .black)).foregroundStyle(Home.muted)
-                        }
-                        GeometryReader { g in
-                            ZStack(alignment: .leading) {
-                                Capsule().fill(Color(UIColor(hex: 0xE7E2D8)))
-                                Capsule().fill(Color(UIColor(hex: 0xF2B33D))).frame(width: g.size.width * Double(done) / 3)
-                            }
-                        }
-                        .frame(height: 10)
-                        Text(next.map { "Next: \($0.title) · \(n($0)) / \($0.target)" } ?? (progress.chestOpened ? "All done · pocket opened" : "All done · open your pocket!"))
-                            .font(.nunito(13, .bold)).foregroundStyle(Home.muted).lineLimit(1)
+        return Button { router.profileFocus = "quests"; router.tab = .profile } label: {
+            HStack(spacing: 13) {
+                Image("quest-pouch").resizable().scaledToFit().frame(height: 50)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("Daily quests").font(.nunito(17, .black)).foregroundStyle(Home.ink)
+                        Spacer()
+                        Text("\(done)/3").font(.nunito(15, .black)).foregroundStyle(Home.muted)
                     }
-                    Image(systemName: "chevron.right").font(.system(size: 15, weight: .heavy)).foregroundStyle(Home.muted)
-                        .rotationEffect(.degrees(questsOpen ? 90 : 0))
-                }
-            }
-            .buttonStyle(.plain)
-            if questsOpen {
-                VStack(spacing: 0) {
-                    ForEach(quests) { q in
-                        let k = n(q), ok = k >= q.target
-                        HStack(spacing: 10) {
-                            Image(systemName: ok ? "checkmark" : q.icon).font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(ok ? Color.good : Home.teal)
-                                .frame(width: 28, height: 28)
-                                .background(ok ? Color.goodSoft : Home.tealSoft, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                            Text(q.title).font(.nunito(14, .bold)).foregroundStyle(Home.ink).lineLimit(1)
-                            Spacer(minLength: 4)
-                            Text(ok ? "Done" : "\(k)/\(q.target)").font(.nunitoXB(13)).monospacedDigit().foregroundStyle(ok ? Color.good : Home.muted)
+                    GeometryReader { g in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(Color(UIColor(hex: 0xE7E2D8)))
+                            Capsule().fill(Color(UIColor(hex: 0xF2B33D))).frame(width: g.size.width * Double(done) / 3)
                         }
-                        .padding(.vertical, 7)
                     }
+                    .frame(height: 10)
+                    Text(next.map { "Next: \($0.title) · \(n($0)) / \($0.target)" } ?? (progress.chestOpened ? "All done · pocket opened" : "All done · open your pocket!"))
+                        .font(.nunito(13, .bold)).foregroundStyle(Home.muted).lineLimit(1)
                 }
-                .padding(.top, 10)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                Image(systemName: "chevron.right").font(.system(size: 15, weight: .heavy)).foregroundStyle(Home.muted)
             }
+            .padding(.leading, 12).padding(.trailing, 14).padding(.vertical, 12)
+            .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Home.line, lineWidth: 1))
         }
-        .padding(.leading, 12).padding(.trailing, 14).padding(.vertical, 12)
-        .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Home.line, lineWidth: 1))
-        .clipped()
+        .buttonStyle(PressDown(depth: 2))
     }
 
     // MARK: word of the day: one of your words, a new one each day
@@ -229,19 +208,6 @@ enum Home {
     static let teal = Color(UIColor(hex: 0x1F7A6C))
     static let tealDark = Color(UIColor(hex: 0x14594F))
     static let tealSoft = Color(UIColor(hex: 0xE3F1EB))
-}
-
-/// The leaf over Bùbù's name.
-private struct Leaf: Shape {
-    func path(in r: CGRect) -> Path {
-        Path { p in
-            p.move(to: .init(x: r.minX + r.width * 0.125, y: r.minY + r.height * 0.875))
-            p.addCurve(to: .init(x: r.maxX - r.width * 0.125, y: r.minY + r.height * 0.125),
-                       control1: .init(x: r.minX + r.width * 0.125, y: r.minY + r.height * 0.375), control2: .init(x: r.midX, y: r.minY + r.height * 0.125))
-            p.addCurve(to: .init(x: r.minX + r.width * 0.125, y: r.minY + r.height * 0.875),
-                       control1: .init(x: r.maxX - r.width * 0.125, y: r.minY + r.height * 0.56), control2: .init(x: r.minX + r.width * 0.56, y: r.minY + r.height * 0.875))
-        }
-    }
 }
 
 /// The Classroom board: Bùbù teaching at the chalkboard, as set up in the studio's Layer editor (HomeArt):
@@ -306,8 +272,8 @@ private struct PractiseButton: View {
         Text("Let's practise").font(.nunito(face * 36 / 74, .black)).foregroundStyle(Home.teal)
             .lineLimit(1).minimumScaleFactor(0.6)
             .frame(maxWidth: .infinity).frame(height: face)
-            .background(RoundedRectangle(cornerRadius: r, style: .continuous).fill(Color(UIColor(hex: 0xE2D3B4))).offset(y: height - face))
             .background(Color(UIColor(hex: 0xFFF7E6)), in: RoundedRectangle(cornerRadius: r, style: .continuous))
+            .background(RoundedRectangle(cornerRadius: r, style: .continuous).fill(Color(UIColor(hex: 0xE2D3B4))).offset(y: height - face))
             .frame(maxHeight: .infinity, alignment: .top)
     }
 }

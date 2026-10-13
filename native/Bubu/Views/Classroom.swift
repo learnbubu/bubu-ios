@@ -8,7 +8,8 @@ struct ClassroomPage: View {
     @Environment(Router.self) private var router
     @Environment(\.dismiss) private var dismiss
 
-    // the studio's save (tuning/classroom): Bùbù over the title (pt), the tiles' pictures (%) and height (pt)
+    // the studio's save (tuning/classroom): Bùbù leaning over the catch-up row (his left edge along it, how far
+    // his bottom comes down onto it, his width; pt), the tiles' pictures (%) and height (pt)
     private let peekX: CGFloat = 243, peekY: CGFloat = 5, peekW: CGFloat = 109, pic: CGFloat = 0.64, tileH: CGFloat = 106
 
     private struct Tile { let id: String; let title: String; let bg: UInt32 }
@@ -48,10 +49,6 @@ struct ClassroomPage: View {
             .buttonStyle(.plain)
             Text("Classroom").font(.nunito(34, .black)).tracking(-0.5).foregroundStyle(Home.ink)
                 .frame(maxHeight: .infinity, alignment: .bottom).padding(.leading, 2).padding(.bottom, 6)
-            Image("class-peek").resizable().scaledToFit().frame(width: peekW)
-                .shadow(color: .black.opacity(0.08), radius: 3, y: 4)
-                .offset(x: peekX, y: peekY)
-                .allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .frame(height: 92)
@@ -64,6 +61,13 @@ struct ClassroomPage: View {
             cell("\(due)", "Words to review", ink: 0x1F7A6C) { router.start(StudySession.review(progress)) }
             cell("\(weak)", "Weak words", ink: 0xB7822E) { router.start(StudySession.trouble(progress)) }
         }
+        // Bùbù leans on the row, his paws over its top edge
+        .overlay(alignment: .topLeading) {
+            Image("class-peek").resizable().scaledToFit().frame(width: peekW)
+                .offset(x: peekX, y: peekY - peekW * 320 / 420)
+                .allowsHitTesting(false)
+        }
+        .zIndex(1)
     }
 
     private func cell(_ n: String, _ label: String, ink: UInt32, hot: Bool = false, go: @escaping () -> Void) -> some View {

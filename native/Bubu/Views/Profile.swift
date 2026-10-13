@@ -38,6 +38,7 @@ struct ProfileView: View {
     var body: some View {
         let lv = progress.level
         let out = progress.outSince
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
@@ -59,6 +60,7 @@ struct ProfileView: View {
                     }
                     .buttonStyle(WideButton()).disabled(progress.embers < 1)
                 }
+                quests.id("quests")
                 pathCard
                 achievements
                 quote
@@ -70,7 +72,60 @@ struct ProfileView: View {
         }
         .scrollIndicators(.hidden)
         .background(Color.bg.ignoresSafeArea())
-        .onAppear { stamp() }
+        .onAppear { stamp(); progress.ensureQuests(); focus(proxy) }
+        .onChange(of: router.profileFocus) { _, _ in focus(proxy) }
+        }
+    }
+
+    /// Home's Daily quests open Profile here, at the quests.
+    private func focus(_ proxy: ScrollViewProxy) {
+        guard let f = router.profileFocus else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.easeInOut(duration: 0.35)) { proxy.scrollTo(f, anchor: .top) }
+            router.profileFocus = nil
+        }
+    }
+
+    // MARK: today's quests (from Home's Daily quests)
+    private var quests: some View {
+        let list = progress.todayQuests
+        let n = { (q: Quest) in min(q.target, progress.questDone(q) ? q.target : progress.progress(of: q)) }
+        let done = list.filter { n($0) >= $0.target }.count
+        let opened = done == 3 && progress.chestOpened
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Daily quests").font(.nunitoXB(17)).foregroundStyle(Color.ink)
+                Spacer()
+                Text(done == 3 ? (opened ? "Pocket opened" : "3/3") : "\(done)/3").font(.nunitoXB(12.5)).foregroundStyle(done == 3 ? Color.gold : Color.muted)
+                    .padding(.horizontal, 10).padding(.vertical, 3)
+                    .background(Color.accentSoft, in: Capsule())
+            }
+            HStack(spacing: 12) {
+                Image("quest-pouch").resizable().scaledToFit().frame(width: 52)
+                VStack(spacing: 0) {
+                    ForEach(Array(list.enumerated()), id: \.offset) { i, q in
+                        let k = n(q), ok = k >= q.target
+                        HStack(spacing: 10) {
+                            Image(systemName: ok ? "checkmark" : q.icon).font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(ok ? Color.good : Color.accent)
+                                .frame(width: 28, height: 28)
+                                .background(ok ? Color.goodSoft : Color.accentSoft, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(q.title).font(.nunito(14, .bold)).foregroundStyle(Color.ink).lineLimit(1).minimumScaleFactor(0.85)
+                                Bar(value: Double(k) / Double(q.target), fill: ok ? .good : .accent)
+                            }
+                            Text(ok ? "Done" : "\(k)/\(q.target)").font(.nunitoXB(13)).monospacedDigit()
+                                .foregroundStyle(ok ? Color.good : Color.muted)
+                                .frame(minWidth: 40, alignment: .trailing)
+                        }
+                        .padding(.vertical, 8)
+                        .overlay(alignment: .top) { if i > 0 { Rectangle().fill(Color.line).frame(height: 1) } }
+                    }
+                }
+            }
+            .padding(.horizontal, 14).padding(.vertical, 6)
+            .panel(radius: 18)
+        }
     }
 
     /// The day each achievement was first earned, for ordering.
