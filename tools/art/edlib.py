@@ -12,7 +12,7 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__))
 RIG = os.path.join(HERE, "out", "rig")
 PAD = 128
-MOMENTS = ["speedy", "flawless", "kungfu", "sweep", "nightowl", "earlybird", "brain", "onfire", "spare"]
+MOMENTS = ["speedy", "flawless", "kungfu", "sweep", "nightowl", "earlybird", "brain", "onfire", "spare", "classroom"]
 
 
 def item(path):
