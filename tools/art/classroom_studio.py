@@ -21,7 +21,7 @@ def layer_of(n):
     return placed(im.resize((round(im.width * k), round(im.height * k)), Image.LANCZOS), X0, Y0)
 
 
-parts = {n: layer_of(n) for n in ['final', 'base', 'head', 'head-blink', 'eyes-shut', 'arm', 'front']}
+parts = {n: layer_of(n) for n in ['final', 'board', 'body', 'base', 'head', 'head-blink', 'eyes-shut', 'arm', 'front']}
 # the chalk marks, each at a modest size above his pointer (to be moved by hand)
 for i, n in enumerate(['sparks', 'star-gold', 'star', 'heart', 'sparkles', 'smiley']):
     im = Image.open(os.path.join(RIG, f'chalk-{n}.png')).convert('RGBA'); s = 90 / max(im.size)
