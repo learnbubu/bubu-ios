@@ -53,6 +53,19 @@ def draw(frame, lib, L):
     frame.alpha_composite(im, (round((L['cx'] - X0) * SS - im.width / 2), round((L['cy'] - Y0) * SS - im.height / 2)))
 
 
+def backpack(lib):
+    """The backpack's top-left, from the finished picture: the body piece was cut short there, so the board's
+    wooden edge showed through it (the owner, 13 Oct 2026). Only the backpack's red and its dark lines, near it."""
+    import numpy as np
+    fin = dec(lib['final']['src']).resize((FW * SS, FH * SS), Image.LANCZOS)
+    a = np.asarray(fin).astype(int); r, g, b, al = a[..., 0], a[..., 1], a[..., 2], a[..., 3]
+    m = (((r - g > 70) & (r > 120)) | ((r < 110) & (g < 80) & (b < 80) & (r >= g))) & (al > 200)
+    near = np.zeros_like(m); near[(607 - Y0) * SS:(707 - Y0) * SS, 0:(112 - X0) * SS] = True
+    mi = Image.fromarray(((m & near) * 255).astype('uint8')).filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5)).filter(ImageFilter.GaussianBlur(1))
+    fin.putalpha(mi)
+    return fin
+
+
 def main(doc_p, art_p, home_p):
     doc = json.load(open(doc_p, encoding='utf-8')); layers = [L for L in json.loads(doc['layers']) if L.get('vis')]
     lib = json.load(open(os.path.join(RIG, 'edlib.json')))['classroom']
@@ -71,7 +84,9 @@ def main(doc_p, art_p, home_p):
             it = lib['button']; w, h = it['w'] * L['s'], it['h'] * L['s']
             pieces.append(('button', L, (L['cx'] - X0 - w / 2, L['cy'] - Y0 - h / 2, w, h))); continue
         f = Image.new('RGBA', (FW * SS, FH * SS))
-        for l in g['layers']: draw(f, lib, l)
+        for l in g['layers']:
+            if l['ref'] == 'lib:body': f.alpha_composite(backpack(lib))
+            draw(f, lib, l)
         name = f'class-board-{i}'
         imageset(name, f, FW * SS)
         pieces.append((name, L, None))
