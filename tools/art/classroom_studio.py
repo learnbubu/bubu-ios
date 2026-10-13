@@ -27,7 +27,7 @@ def bubu_part(n):
     return placed(im.resize((round(im.width * k), round(im.height * k)), Image.LANCZOS), BX, BY)
 
 
-parts = {'board': placed(board, BOARD[0], BOARD[1]), 'bubu': bubu_part('pose'), 'head': bubu_part('head'), 'armbook': bubu_part('arm-book')}
+parts = {'board': placed(board, BOARD[0], BOARD[1]), 'bubu': bubu_part('pose'), 'head': bubu_part('head'), 'armbook': bubu_part('arm-book'), 'headopen': bubu_part('head-open')}
 for n, im in parts.items(): im.save(os.path.join(RIG, f'mo-classroom-{n}-placed.png'))
 
 
