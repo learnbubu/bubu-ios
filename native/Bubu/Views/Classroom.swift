@@ -99,17 +99,22 @@ struct ClassroomPage: View {
         .buttonStyle(.plain)
     }
 
+    /// A tile: its picture above, its name on a pale band along the bottom (the owner's pick, 14 Oct 2026).
     private func tile(_ t: Tile) -> some View {
-        ZStack(alignment: .top) {
-            Text(t.title).font(.nunito(15.5, .black)).foregroundStyle(Home.ink).padding(.top, 9)
+        let shape = RoundedRectangle(cornerRadius: 20, style: .continuous)
+        return VStack(spacing: 0) {
             Image("class-\(t.id)").resizable().scaledToFit()
-                .frame(height: tileH * pic)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                .padding(.bottom, tileH * 0.08).padding(.horizontal, 10)
+                .frame(height: tileH * pic * 0.86)
+                .padding(.top, tileH * 0.07).padding(.horizontal, 10)
+            Spacer(minLength: 0)
+            Text(t.title).font(.nunito(14.5, .black)).foregroundStyle(Home.ink).lineLimit(1)
+                .frame(maxWidth: .infinity).padding(.top, 6).padding(.bottom, 7)
+                .background(Color(UIColor(hex: 0xFFFDF8)).opacity(0.62))
         }
         .frame(maxWidth: .infinity).frame(height: tileH)
-        .background(Color(UIColor(hex: t.bg)), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(.black.opacity(0.08)).offset(y: 4))
-        .contentShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(Color(UIColor(hex: t.bg)))
+        .clipShape(shape)
+        .background(shape.fill(.black.opacity(0.08)).offset(y: 4))
+        .contentShape(shape)
     }
 }
