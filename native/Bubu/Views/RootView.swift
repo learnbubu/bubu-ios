@@ -133,17 +133,17 @@ struct RootView: View {
             NavigationStack(path: $router.homePath) {
                 HomeView().toolbar(.hidden, for: .navigationBar).pageDestinations()
             }
-            .tabItem { Label("Home", systemImage: "house") }.tag(Router.Tab.home)
+            .tabItem { tabIcon(.home) }.tag(Router.Tab.home)
             NavigationStack(path: $router.learnPath) {
                 PathView().toolbar(.hidden, for: .navigationBar).pageDestinations()
             }
-            .tabItem { Label("Learn", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }.tag(Router.Tab.learn)
+            .tabItem { tabIcon(.learn) }.tag(Router.Tab.learn)
             NavigationStack(path: $router.profilePath) {
                 ProfileView().toolbar(.hidden, for: .navigationBar).pageDestinations()
             }
-            .tabItem { Label("Profile", systemImage: "person") }.tag(Router.Tab.profile)
+            .tabItem { tabIcon(.profile) }.tag(Router.Tab.profile)
             NavigationStack { SettingsView().toolbar(.hidden, for: .navigationBar) }
-                .tabItem { Label("Settings", systemImage: "gearshape") }.tag(Router.Tab.settings)
+                .tabItem { tabIcon(.settings) }.tag(Router.Tab.settings)
         }
         .sensoryFeedback(.selection, trigger: router.tab)
         // the done screen's moment player: loaded a little after launch, so it's ready by a lesson's end
@@ -193,6 +193,26 @@ struct RootView: View {
         }
     }
 }
+
+extension RootView {
+    /// A tab's icon, the studio's drawn ones: in colour on the tab you're on, grey and faded on the others;
+    /// no words under them (the owner, 13 Oct 2026).
+    func tabIcon(_ t: Router.Tab) -> Image {
+        let name = "tab2-\(t.rawValue)" + (router.tab == t ? "" : "-off")
+        return Image(uiImage: Self.icon(name))
+    }
+
+    /// Drawn at 30 points tall, kept in its own colours (a tab bar otherwise tints it as a template).
+    static func icon(_ name: String) -> UIImage {
+        if let c = iconCache[name] { return c }
+        guard let im = UIImage(named: name) else { return UIImage() }
+        let h: CGFloat = 30, size = CGSize(width: h * im.size.width / im.size.height, height: h)
+        let out = UIGraphicsImageRenderer(size: size).image { _ in im.draw(in: CGRect(origin: .zero, size: size)) }.withRenderingMode(.alwaysOriginal)
+        iconCache[name] = out
+        return out
+    }
+}
+private var iconCache: [String: UIImage] = [:]
 
 struct ComingSoon: View {
     let title: String

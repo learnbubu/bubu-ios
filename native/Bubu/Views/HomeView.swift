@@ -1,375 +1,314 @@
 import SwiftUI
 import Observation
 
-/// Home, as the web has it: greeting over the temple scenery, the streak card
-/// with Bùbù peeking up, daily quests, Continue learning, and practice.
+/// Home as the studio has it (the owner's Home tab, 13 Oct 2026): the lantern, coins and buns along the top,
+/// Up next over the hills, Daily quests with the pouch, the Classroom board (Bùbù teaching, placed in the
+/// Layer editor) whose button opens the Classroom, and the word of the day. Light only for now.
 struct HomeView: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
-    @State private var scroll = HomeScroll()
+    @State private var questsOpen = false
     private let course = Course.shared
 
     var body: some View {
         GeometryReader { geo in
-            let W = geo.size.width, top = geo.safeAreaInsets.top
-            ZStack(alignment: .top) {
-                Color.bg.ignoresSafeArea()
-                HomeScenery(scroll: scroll, W: W, top: top)
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        header
-                        streakCard.padding(.top, 14)
-                        questCard.padding(.top, 8)
-                        if progress.boostActive { BoostPill().padding(.top, 14) }
-                        continueSection
-                        Text("Practice").font(.nunitoXB(17)).foregroundStyle(Color.ink)
-                            .padding(.top, 20).padding(.bottom, 10).padding(.horizontal, 2)
-                        hub
-                        tiles.padding(.top, 10)
-                        Button { router.push(.studyChoice) } label: {
-                            HStack {
-                                Text("What to study").font(.nunito(17)).foregroundStyle(Color.ink)
-                                Spacer()
-                                let nL = progress.selectedLessons.count, nF = progress.selectedFocuses.count
-                                Text("\(nL == Course.shared.lessons.count ? "all lessons" : "\(nL) lesson\(nL == 1 ? "" : "s")"), \(nF) focus\(nF == 1 ? "" : "es")")
-                                    .font(.nunito(13)).foregroundStyle(Color.muted)
-                                Image(systemName: "chevron.down").font(.system(size: 10, weight: .bold)).foregroundStyle(Color.muted)
-                            }
-                            .padding(.horizontal, 16).padding(.vertical, 15).panel(radius: 16)
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.top, 10)
-                        // the foliage along the foot of the page, at its end (fixed to the screen,
-                        // it showed through the gaps between the practice tiles)
-                        Image("home-bottom").resizable()
-                            .frame(width: W * 1.5, height: W * 1.5 * 338 / 1200)
-                            .frame(width: W, height: max(150, W * 1.5 * 338 / 1200), alignment: .bottom)
-                            .clipped()
-                            .padding(.horizontal, -18)
-                            .allowsHitTesting(false)
+            let W = geo.size.width
+            ScrollView {
+                VStack(spacing: 13) {
+                    topBar
+                    VStack(spacing: 12) {
+                        upNext
+                        questCard
                     }
-                    .padding(.horizontal, 18)
-                    // the scenery drifts as the page scrolls: the offset goes to a box that only the
-                    // scenery reads, so scrolling redraws the scenery each frame, not all of Home.
-                    // (A preference from a GeometryReader never updated while scrolling, so the
-                    // scenery sat pinned.)
-                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("home")).minY } action: { y in
-                        let up = min(0, y)
-                        if scroll.up != up { scroll.up = up }
-                    }
+                    if progress.boostActive { BoostPill() }
+                    ClassroomBoard(width: W - 36 + 8) { router.push(.classroom) }
+                        .padding(.horizontal, -4).padding(.top, 2)
+                    wordOfTheDay.padding(.top, 8)
                 }
-                .coordinateSpace(name: "home")
-                .onAppear { progress.ensureQuests() }
-                .scrollIndicators(.hidden)
+                .padding(.horizontal, 18).padding(.top, 6).padding(.bottom, 24)
             }
-            .overlay(alignment: .top) {
-                // the status bar: the cards fade out under it, so nothing sits behind the clock
-                LinearGradient(stops: [.init(color: .bg, location: 0), .init(color: .bg, location: 0.7),
-                                       .init(color: .bg.opacity(0), location: 1)], startPoint: .top, endPoint: .bottom)
-                    .frame(height: top + 14)
-                    .offset(y: -top)
-                    .allowsHitTesting(false)
-            }
+            .scrollIndicators(.hidden)
+            .background(Home.bg.ignoresSafeArea())
+            .onAppear { progress.ensureQuests() }
         }
+        .environment(\.colorScheme, .light)
     }
 
-    // MARK: greeting
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 6) {
-                Text("步步").font(.hanzi(20, .heavy)).foregroundStyle(Color.ink)
-                Text("Bùbù").font(.nunitoXB(19)).foregroundStyle(Color.accent)
-            }
-            .padding(.top, 6).padding(.bottom, 18)
-            Text(greeting).font(.nunitoXB(28)).tracking(-0.3).foregroundStyle(Color.ink)
-            Text("A little progress goes a long way.").font(.nunito(15, .semibold)).foregroundStyle(Color.muted)
-                .padding(.top, 4)
-        }
-        .padding(.horizontal, 2)
-    }
-
-    private var greeting: String {
-        let h = Calendar.current.component(.hour, from: Date())
-        let part = h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"
-        return progress.name.isEmpty ? "\(part)!" : "\(part), \(progress.name)!"
-    }
-
-    // MARK: streak
-    private var streakCard: some View {
-        let streak = progress.streak
+    // MARK: the top bar: the wordmark, then the lantern (the streak), coins and buns
+    private var topBar: some View {
         let out = progress.outSince
         let lit = progress.litOn(progress.today) && out == nil
-        // from six in the evening an unlit day with a streak behind it is at risk
-        let hoursLeft = 24 - Calendar.current.component(.hour, from: Date())
-        let risk = out == nil && !lit && streak > 0 && hoursLeft <= 6
         let askable = out != nil && progress.embers > 0 && !progress.prefs.autoRelight
-        let bubble = out != nil ? (askable ? "Save it?" : "Went out")
-            : risk ? "\(hoursLeft)h left to keep it" : lit ? "Done for today!"
-            : streak > 0 ? "Keep it lit!" : "Let's start!"
-        return VStack(spacing: 0) {
-            ZStack(alignment: .topTrailing) {
-                HStack(spacing: 13) {
-                    FlameIcon(lit: lit, size: 42)
-                        .shadow(color: lit ? Color(UIColor(hex: 0xF08A7A)).opacity(0.55) : .clear, radius: 10)
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("\(out?.lost ?? streak)").font(.nunitoXB(34)).tracking(-0.6).foregroundStyle(out != nil ? Color.muted : Color.ink)
-                        Text("day streak").font(.nunito(14, .bold)).foregroundStyle(Color.muted)
-                        Label { Text("\(progress.embers) spare") } icon: { LanternMark(size: 14) }.font(.nunitoXB(11.5)).foregroundStyle(Color.gold)
-                            .padding(.top, 2)
-                    }
-                    Spacer()
-                }
-                .frame(minHeight: 118)
-                .padding(.top, 12).padding(.horizontal, 2)
-
-                Image("home-peek").resizable().scaledToFit().frame(height: 92)
-                    .offset(x: -64, y: 118 + 12 - 92 + 6)
-                    .allowsHitTesting(false)
-                Button {
-                    if askable, let o = out { Moments.shared.show(.askRelight(lost: o.lost, embers: progress.embers)) }
-                    else if risk, let id = progress.currentLessonId { router.start(StudySession.lesson(id, progress)) }
-                } label: {
-                    SpeechBubble(text: bubble, hot: askable || risk)
-                        .phaseAnimator(risk ? [0.0, -3.0] : [0.0]) { v, y in v.offset(y: y) } animation: { _ in .easeInOut(duration: 1.1) }
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 13).padding(.trailing, 16)
+        return HStack(spacing: 6) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("步步").font(.hanzi(23, .black)).foregroundStyle(Home.ink)
+                Text("Bùbù").font(.nunito(22, .black)).foregroundStyle(Home.teal)
+                    .overlay(alignment: .topTrailing) { Leaf().fill(Color(UIColor(hex: 0x5AAE84))).frame(width: 14, height: 14).offset(x: 10, y: -7) }
             }
-            .clipped()
-            WeekStrip()
-                .padding(.top, 10)
-                .overlay(alignment: .top) { Rectangle().fill(Color.line).frame(height: 1) }
+            Spacer(minLength: 4)
+            Button {
+                if askable, let o = out { Moments.shared.show(.askRelight(lost: o.lost, embers: progress.embers)) }
+                else { router.tab = .profile }
+            } label: {
+                chip(lit ? "chip-lantern-lit" : "chip-lantern-unlit", "\(out?.lost ?? progress.streak)",
+                     ink: lit ? 0xD9392F : 0xB9B0A1, bg: lit ? 0xFCE9E3 : 0xF3ECDF, edge: lit ? 0xF5D3C8 : 0xEADFCB)
+            }
+            .buttonStyle(.plain)
+            chip("coin", "\(progress.coins)", ink: 0xA86D16)
+            chip("bun", progress.isPlus ? "∞" : "\(progress.buns)", ink: 0x9A6B3A)
         }
-        .padding(.horizontal, 14).padding(.bottom, 12)
-        .panel().panelShadow()
     }
 
-    // MARK: quests
+    private func chip(_ image: String, _ text: String, ink: UInt32, bg: UInt32 = 0xF3ECDF, edge: UInt32 = 0xEADFCB) -> some View {
+        HStack(spacing: 4) {
+            Image(image).resizable().scaledToFit().frame(height: 24)
+            Text(text).font(.nunito(16, .black)).monospacedDigit().foregroundStyle(Color(UIColor(hex: ink)))
+        }
+        .padding(.leading, 6).padding(.trailing, 10).frame(height: 36)
+        .background(Color(UIColor(hex: bg)), in: Capsule())
+        .overlay(Capsule().stroke(Color(UIColor(hex: edge)), lineWidth: 1))
+    }
+
+    // MARK: Up next: the lesson you're on, over the hills
+    @ViewBuilder
+    private var upNext: some View {
+        let id = progress.currentLessonId
+        let lesson = id.flatMap { course.lessonById[$0] }
+        let ci = id.flatMap { course.chapterOf[$0] }
+        let cards = id.map { course.cards(in: $0) } ?? []
+        let learned = cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
+        let started = learned > 0
+        let chapter = ci.map { course.chapterLabel($0).components(separatedBy: " · ").last ?? "" } ?? ""
+        let kicker = lesson == nil ? "Course complete" : "Up next · \(chapter)"
+        let progressShare: Double = cards.isEmpty ? 0 : Double(learned) / Double(cards.count)
+        let action = lesson == nil ? "Review your words →" : started ? "Continue lesson →" : "Start lesson →"
+        Button {
+            if let lesson { router.start(StudySession.lesson(lesson.id, progress)) } else { router.start(StudySession.review(progress)) }
+        } label: {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(kicker)
+                    .font(.nunito(12, .black)).tracking(1.4).textCase(.uppercase).foregroundStyle(Home.teal)
+                Text(lesson?.nameParts.hanzi ?? "复习").font(.hanzi(27, .black)).foregroundStyle(Home.ink).padding(.top, 4)
+                Text(lesson.map { $0.nameParts.en } ?? "Keep your words sharp with a review").font(.nunito(15.5, .bold)).foregroundStyle(Home.muted)
+                GeometryReader { g in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color(UIColor(hex: 0xD3DED8)))
+                        Capsule().fill(Home.teal).frame(width: g.size.width * progressShare)
+                    }
+                }
+                .frame(height: 10).padding(.top, 13)
+                Text(action)
+                    .font(.nunito(18, .black)).foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).frame(height: 52)
+                    .background(RoundedRectangle(cornerRadius: 17, style: .continuous).fill(Home.tealDark).offset(y: 4))
+                    .background(Home.teal, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                    .padding(.top, 15).padding(.bottom, 4)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 17).padding(.top, 15).padding(.bottom, 17)
+            .background(alignment: .topTrailing) {
+                // the hills, as placed in the studio: to the right, faded out towards the bottom
+                GeometryReader { g in
+                    Image("home-hills").resizable().scaledToFit()
+                        .frame(width: g.size.width * 0.59)
+                        .scaleEffect(x: 1, y: 0.9, anchor: .bottom)
+                        .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black, location: 0.55), .init(color: .clear, location: 1)],
+                                             startPoint: .top, endPoint: .bottom))
+                        .opacity(0.6)
+                        .offset(x: 2, y: -3)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+                .allowsHitTesting(false)
+            }
+            .background(LinearGradient(colors: [Color(UIColor(hex: 0xEEF7F2)), Color(UIColor(hex: 0xE2EFE8))], startPoint: .topLeading, endPoint: .bottomTrailing))
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color(UIColor(hex: 0xD7E8DF)), lineWidth: 1))
+            .shadow(color: Color(UIColor(hex: 0x1E463C)).opacity(0.08), radius: 8, y: 6)
+        }
+        .buttonStyle(PressDown(depth: 2))
+    }
+
+    // MARK: Daily quests: the pouch, how many are done, the next one; tap for all three
     private var questCard: some View {
         let quests = progress.todayQuests
-        let done = quests.filter { progress.questDone($0) || progress.progress(of: $0) >= $0.target }.count
-        let opened = done == 3 && progress.chestOpened
+        let n = { (q: Quest) in min(q.target, progress.questDone(q) ? q.target : progress.progress(of: q)) }
+        let done = quests.filter { n($0) >= $0.target }.count
+        let next = quests.first { n($0) < $0.target }
         return VStack(spacing: 0) {
-            HStack {
-                Text("Daily quests").font(.nunitoXB(15)).foregroundStyle(Color.ink)
-                Spacer()
-                Text(done == 3 ? (opened ? "Pocket opened" : "3/3") : "\(done)/3").font(.nunitoXB(12.5)).foregroundStyle(done == 3 ? Color.gold : Color.muted)
-                    .padding(.horizontal, 10).padding(.vertical, 3)
-                    .background(Color.accentSoft, in: Capsule())
-            }
-            .padding(.bottom, opened ? 8 : 2)
-            if !opened { ForEach(Array(quests.enumerated()), id: \.offset) { i, q in
-                let n = min(q.target, progress.progress(of: q)), ok = n >= q.target
-                HStack(spacing: 10) {
-                    Image(systemName: ok ? "checkmark" : q.icon).font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(ok ? Color.good : Color.accent)
-                        .frame(width: 30, height: 30)
-                        .background(ok ? Color.goodSoft : Color.accentSoft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(q.title).font(.nunito(14, .bold)).foregroundStyle(Color.ink).lineLimit(1)
-                        Bar(value: Double(n) / Double(q.target), fill: ok ? .good : .accent)
+            Button { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { questsOpen.toggle() } } label: {
+                HStack(spacing: 13) {
+                    Image("quest-pouch").resizable().scaledToFit().frame(height: 50)
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text("Daily quests").font(.nunito(17, .black)).foregroundStyle(Home.ink)
+                            Spacer()
+                            Text("\(done)/3").font(.nunito(15, .black)).foregroundStyle(Home.muted)
+                        }
+                        GeometryReader { g in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(Color(UIColor(hex: 0xE7E2D8)))
+                                Capsule().fill(Color(UIColor(hex: 0xF2B33D))).frame(width: g.size.width * Double(done) / 3)
+                            }
+                        }
+                        .frame(height: 10)
+                        Text(next.map { "Next: \($0.title) · \(n($0)) / \($0.target)" } ?? (progress.chestOpened ? "All done · pocket opened" : "All done · open your pocket!"))
+                            .font(.nunito(13, .bold)).foregroundStyle(Home.muted).lineLimit(1)
                     }
-                    Text(ok ? "Done" : "\(n)/\(q.target)").font(.nunitoXB(13)).monospacedDigit()
-                        .foregroundStyle(ok ? Color.good : Color.muted)
-                        .frame(minWidth: 40, alignment: .trailing)
+                    Image(systemName: "chevron.right").font(.system(size: 15, weight: .heavy)).foregroundStyle(Home.muted)
+                        .rotationEffect(.degrees(questsOpen ? 90 : 0))
                 }
-                .padding(.vertical, 8)
-                .overlay(alignment: .top) { if i > 0 { Rectangle().fill(Color.line).frame(height: 1) } }
-            } }
-        }
-        .padding(.horizontal, 14).padding(.top, 12).padding(.bottom, 4)
-        .panel()
-    }
-
-    // MARK: continue
-    @ViewBuilder
-    private var continueSection: some View {
-        Button { router.tab = .learn } label: {
-            HStack {
-                Text("Continue learning").font(.nunitoXB(17)).foregroundStyle(Color.ink)
-                Spacer()
-                Image(systemName: "chevron.right").font(.system(size: 15, weight: .semibold)).foregroundStyle(Color.muted)
             }
-        }
-        .buttonStyle(.plain)
-        .padding(.top, 20).padding(.horizontal, 2)
-
-        if progress.currentLessonId == nil {
-            // every lesson done: the card starts a review instead
-            Button { router.start(StudySession.review(progress)) } label: {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("COURSE COMPLETE").font(.nunito(12.5, .bold)).foregroundStyle(Color.muted)
-                    Text("You've finished every lesson").font(.nunitoXB(20)).foregroundStyle(Color.ink)
-                    Text("Keep your words sharp with a review.").font(.nunito(13.5, .semibold)).foregroundStyle(Color.muted)
-                    Text("Review your words").font(.nunito(13, .bold)).foregroundStyle(Color.accent).padding(.top, 8)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading).padding(16)
-                .overlay(alignment: .bottomTrailing) {
-                    Image(systemName: "checkmark").font(.system(size: 19, weight: .bold)).foregroundStyle(Color.onAccent)
-                        .frame(width: 46, height: 46).background(Color.accent, in: Circle()).padding(14)
-                }
-                .panel().panelShadow()
-            }
-            .buttonStyle(PressDown(depth: 2)).padding(.top, 10)
-        }
-        if let id = progress.currentLessonId, let lesson = course.lessonById[id], let ci = course.chapterOf[id] {
-            let cards = course.cards(in: id)
-            let learned = cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
-            let parts = lesson.nameParts
-            Button { router.tab = .learn; router.start(StudySession.lesson(lesson.id, progress)) } label: {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(course.chapterLabel(ci).uppercased()).font(.nunito(12.5, .bold)).foregroundStyle(Color.muted)
-                    Text(parts.hanzi).font(.hanzi(21, .heavy)).foregroundStyle(Color.ink)
-                        .shadow(color: Color.panel, radius: 6).padding(.top, 3).padding(.bottom, 1)
-                    if !parts.en.isEmpty {
-                        Text(parts.en).font(.nunito(13.5, .semibold)).foregroundStyle(Color.muted)
-                    }
-                    Bar(value: lesson.isPractice || cards.isEmpty ? 0 : Double(learned) / Double(cards.count), height: 8)
-                        .padding(.top, 12).padding(.bottom, 7)
-                    Text(lesson.isPractice ? "No new words · practise what you know" : "\(learned) / \(cards.count) words learned")
-                        .font(.nunito(13, .bold)).foregroundStyle(Color.muted)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.trailing, 110)
-                .padding(.horizontal, 16).padding(.top, 16).padding(.bottom, 14)
-                .background(alignment: .trailing) {
-                    GeometryReader { g in
-                        Image("home-card").resizable().scaledToFill()
-                            .frame(height: g.size.height * 1.53)
-                            .frame(width: g.size.width * 0.67, height: g.size.height, alignment: .trailing)
-                            .offset(x: 19)
-                            .clipped()
-                            .mask(LinearGradient(stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.7)],
-                                                 startPoint: .leading, endPoint: .trailing))
-                            .frame(maxWidth: .infinity, alignment: .trailing)
+            .buttonStyle(.plain)
+            if questsOpen {
+                VStack(spacing: 0) {
+                    ForEach(quests) { q in
+                        let k = n(q), ok = k >= q.target
+                        HStack(spacing: 10) {
+                            Image(systemName: ok ? "checkmark" : q.icon).font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(ok ? Color.good : Home.teal)
+                                .frame(width: 28, height: 28)
+                                .background(ok ? Color.goodSoft : Home.tealSoft, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                            Text(q.title).font(.nunito(14, .bold)).foregroundStyle(Home.ink).lineLimit(1)
+                            Spacer(minLength: 4)
+                            Text(ok ? "Done" : "\(k)/\(q.target)").font(.nunitoXB(13)).monospacedDigit().foregroundStyle(ok ? Color.good : Home.muted)
+                        }
+                        .padding(.vertical, 7)
                     }
                 }
-                .overlay(alignment: .bottomTrailing) {
-                    Image(systemName: "chevron.right").font(.system(size: 19, weight: .bold)).foregroundStyle(Color.onAccent)
-                        .frame(width: 46, height: 46)
-                        .background(Color.accent, in: Circle())
-                        .shadow(color: .black.opacity(0.35), radius: 8, y: 6)
-                        .padding(14)
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .panel().panelShadow()
-            }
-            .buttonStyle(PressDown(depth: 2))
-            .padding(.top, 10)
-        }
-    }
-
-    // MARK: practice
-    private var hub: some View {
-        let mistakes = progress.mistakeCount, due = progress.dueCount, weak = progress.weakCount
-        return VStack(spacing: 0) {
-            Button { router.start(StudySession.mistakes(progress)) } label: {
-                hubRow("xmark", "Fix your mistakes",
-                       mistakes > 0 ? "\(mistakes) word\(mistakes == 1 ? "" : "s") to get right again" : "Nothing to fix. Mistakes you make land here",
-                       mistakes, ink: .again, soft: .againSoft)
-            }
-            Button { router.start(StudySession.review(progress)) } label: {
-                hubRow("arrow.counterclockwise", "Review",
-                       due > 0 ? "\(due) word\(due == 1 ? "" : "s") ready to review" : "All caught up",
-                       due, ink: .accent, soft: .accentSoft, first: false)
-            }
-            Button { router.start(StudySession.trouble(progress)) } label: {
-                hubRow("scope", "Weak words", weak > 0 ? "\(weak) word\(weak == 1 ? "" : "s") you often miss" : "No weak words yet",
-                       weak, ink: .gold, soft: Color.gold.opacity(0.18), first: false)
+                .padding(.top, 10)
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .buttonStyle(.plain)
-        .panel(radius: 18).panelShadow()
+        .padding(.leading, 12).padding(.trailing, 14).padding(.vertical, 12)
+        .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Home.line, lineWidth: 1))
+        .clipped()
     }
 
-    private func hubRow(_ icon: String, _ title: String, _ sub: String, _ n: Int, ink: Color, soft: Color, first: Bool = true) -> some View {
-        let empty = n == 0
-        return HStack(spacing: 12) {
-            Image(systemName: icon).font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(empty ? Color.muted : ink)
-                .frame(width: 36, height: 36)
-                .background(empty ? Color.muted.opacity(0.12) : soft, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+    // MARK: word of the day: one of your words, a new one each day
+    private var wordOfTheDay: some View {
+        let w = dailyWord
+        return HStack(spacing: 13) {
+            Text(w.hanzi).font(.hanzi(44, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.5)
+                .padding(.trailing, 13)
+                .overlay(alignment: .trailing) { Rectangle().fill(Home.line).frame(width: 1) }
             VStack(alignment: .leading, spacing: 1) {
-                Text(title).font(.nunitoXB(15)).foregroundStyle(empty ? Color.muted : Color.ink)
-                Text(sub).font(.nunito(12, .semibold)).foregroundStyle(Color.muted).lineLimit(1)
+                Text("WORD OF THE DAY").font(.nunito(11, .black)).tracking(1.2).foregroundStyle(Color(UIColor(hex: 0xA86D16)))
+                Text(w.pinyin).font(.nunito(18, .black)).foregroundStyle(Home.teal)
+                Text(w.gloss).font(.nunito(15, .bold)).foregroundStyle(Home.muted).lineLimit(1)
             }
-            Spacer(minLength: 0)
-            if n > 0 {
-                Text("\(n)").font(.nunito(11.5, .black)).foregroundStyle(.white)
-                    .padding(.horizontal, 6).frame(minWidth: 22, minHeight: 22)
-                    .background(ink, in: Capsule())
+            Spacer(minLength: 4)
+            Button { Speech.shared.speak(w.hanzi) } label: {
+                Image(systemName: "speaker.wave.2.fill").font(.system(size: 19, weight: .semibold)).foregroundStyle(Home.teal)
+                    .frame(width: 48, height: 48).background(Home.tealSoft, in: Circle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Hear it")
         }
-        .padding(.horizontal, 14).padding(.vertical, 11)
-        .overlay(alignment: .top) { if !first { Rectangle().fill(Color.line).frame(height: 1) } }
+        .padding(.vertical, 12).padding(.horizontal, 2)
+        .overlay(alignment: .top) { Rectangle().fill(Home.line).frame(height: 1) }
+        .overlay(alignment: .bottom) { Rectangle().fill(Home.line).frame(height: 1) }
     }
 
-    private struct Tile: Identifiable { let id: String; let icon: String; let title: String; let sub: String; let color: String }
+    /// One of the words you've learned (else from the lesson you're on), the same all day; 加油 to begin with.
+    private var dailyWord: Word {
+        let learned = course.cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.map(\.word)
+        let pool = learned.isEmpty ? (progress.currentLessonId.map { course.cards(in: $0).map(\.word) } ?? []) : learned
+        guard !pool.isEmpty, learned.count >= 3 else { return Word(hanzi: "加油", pinyin: "jiāyóu", pos: nil, en: "Keep going!") }
+        let day = Int(Date().timeIntervalSince1970 / 86400)
+        return pool[(day * 7919) % pool.count]
+    }
+}
 
-    private var tiles: some View {
-        let fresh = course.data.readings.filter { progress.chapterDone($0.chapter) && !progress.readDone($0.id) }.count
-        let known = Set(progress.srs.filter { ($0.value.reps ?? 0) > 0 }.keys.compactMap { course.cardById[$0] }
-            .flatMap { $0.word.hanzi.filter(Course.isHan) }).count
-        let list = [
-            Tile(id: "listen", icon: "headphones", title: "Listening", sub: "Train your ear", color: "red"),
-            Tile(id: "pick", icon: "square.stack.3d.up", title: "Vocabulary", sub: "Build your words", color: "blue"),
-            Tile(id: "speak", icon: "mic", title: "Speaking", sub: "Practice out loud", color: "green"),
-            Tile(id: "write", icon: "pencil", title: "Writing", sub: "Master the strokes", color: "yellow"),
-            Tile(id: "quiz", icon: "checklist", title: "Quiz", sub: "Multiple choice", color: "purple"),
-            Tile(id: "chars", icon: "字", title: "Characters", sub: "\(known) known", color: "teal"),
-            Tile(id: "read", icon: "book", title: "Reading", sub: fresh > 0 ? "\(fresh) new \(fresh > 1 ? "stories" : "story")" : "Chapter stories", color: "orange"),
-            Tile(id: "tones", icon: "music.note", title: "Tones", sub: "Hear the pairs", color: "pink"),
-        ]
-        return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-            ForEach(list) { t in
-                let c = Color.tiles[t.color]!
-                Button { router.practice(t.id, progress) } label: {
-                    HStack(spacing: 10) {
-                        Group {
-                            if t.icon == "字" { Text("字").font(.hanzi(22, .bold)) }
-                            else { Image(systemName: t.icon).font(.system(size: 22, weight: .medium)) }
-                        }
-                        .foregroundStyle(c.ink).frame(width: 28)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(t.title).font(.nunitoXB(15)).foregroundStyle(Color.ink)
-                            Text(t.sub).font(.nunito(11, .semibold)).foregroundStyle(Color.muted).lineLimit(1)
-                        }
-                        Spacer(minLength: 0)
-                    }
-                    .padding(.leading, 12).padding(.trailing, 10).padding(.vertical, 12)
-                    .frame(minHeight: 66)
-                    .background(c.bg, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                }
-                .buttonStyle(PressDown(depth: 2))
-            }
+/// Home's and the Classroom's colours (the studio's; light only for now).
+enum Home {
+    static let bg = Color(UIColor(hex: 0xF8F4EC))
+    static let ink = Color(UIColor(hex: 0x1B2A33))
+    static let muted = Color(UIColor(hex: 0x5F6E7E))
+    static let line = Color(UIColor(hex: 0xE7E1D5))
+    static let teal = Color(UIColor(hex: 0x1F7A6C))
+    static let tealDark = Color(UIColor(hex: 0x14594F))
+    static let tealSoft = Color(UIColor(hex: 0xE3F1EB))
+}
+
+/// The leaf over Bùbù's name.
+private struct Leaf: Shape {
+    func path(in r: CGRect) -> Path {
+        Path { p in
+            p.move(to: .init(x: r.minX + r.width * 0.125, y: r.minY + r.height * 0.875))
+            p.addCurve(to: .init(x: r.maxX - r.width * 0.125, y: r.minY + r.height * 0.125),
+                       control1: .init(x: r.minX + r.width * 0.125, y: r.minY + r.height * 0.375), control2: .init(x: r.midX, y: r.minY + r.height * 0.125))
+            p.addCurve(to: .init(x: r.minX + r.width * 0.125, y: r.minY + r.height * 0.875),
+                       control1: .init(x: r.maxX - r.width * 0.125, y: r.minY + r.height * 0.56), control2: .init(x: r.minX + r.width * 0.56, y: r.minY + r.height * 0.875))
         }
     }
 }
 
-/// How far Home has scrolled up from its top (0 or less, in points). A class, so writing it
-/// redraws only the scenery that reads it, not all of Home.
-@Observable
-final class HomeScroll {
-    var up: CGFloat = 0
-}
+/// The Classroom board: Bùbù teaching at the chalkboard, as set up in the studio's Layer editor (HomeArt):
+/// his head and pointer swing, he blinks, the chalk mark twinkles, and the button opens the Classroom.
+struct ClassroomBoard: View {
+    let width: CGFloat
+    let open: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var still
 
-/// The scenery behind Home, drifting slower than the page as on the web.
-private struct HomeScenery: View {
-    let scroll: HomeScroll
-    let W: CGFloat
-    let top: CGFloat
     var body: some View {
-        let up = scroll.up
-        ZStack(alignment: .topLeading) {
-            Image("home-cloud-a").resizable().frame(width: W * 0.42, height: W * 0.42 * 0.3855)
-                .offset(x: W * 0.133, y: top - 62 + up * 0.1)
-            Image("home-temple").resizable().frame(width: W * 0.70, height: W * 0.70 * 0.5869)
-                .opacity(0.95)
-                .offset(x: W * 0.329, y: top - 24 + up * 0.28)
+        let k = width / HomeArt.frame.width, h = HomeArt.frame.height * k
+        TimelineView(.animation(paused: still)) { tl in
+            let t = still ? 0 : tl.date.timeIntervalSinceReferenceDate
+            ZStack(alignment: .topLeading) {
+                ForEach(Array(HomeArt.pieces.enumerated()), id: \.offset) { _, p in
+                    if Self.shows(p, t) {
+                        Image(p.image).resizable().interpolation(.high)
+                            .frame(width: width, height: h)
+                            .rotationEffect(.degrees(p.swing * sin(2 * .pi * (t / p.period + p.phase))),
+                                            anchor: UnitPoint(x: p.pivot.x / HomeArt.frame.width, y: p.pivot.y / HomeArt.frame.height))
+                            .offset(y: -abs(p.bob * sin(.pi * (t / p.period + p.phase))) * k)
+                    }
+                }
+                ForEach(Array(HomeArt.marks.enumerated()), id: \.offset) { _, m in
+                    let tw = 0.5 - 0.5 * cos(2 * .pi * t / 2.2)
+                    Image(m.image).resizable().scaledToFit()
+                        .frame(width: width * m.w / 100)
+                        .scaleEffect(0.9 + 0.18 * tw)
+                        .rotationEffect(.degrees(m.r))
+                        .opacity(0.55 + 0.45 * tw)
+                        .offset(x: width * m.x / 100, y: h * m.y / 100)
+                        .allowsHitTesting(false)
+                }
+            }
+            .frame(width: width, height: h, alignment: .topLeading)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .ignoresSafeArea(edges: .top)
-        .allowsHitTesting(false)
+        .overlay(alignment: .topLeading) {
+            let b = HomeArt.button
+            Button(action: open) { PractiseButton(height: b.height * k) }
+                .buttonStyle(PressDown(depth: 3))
+                .frame(width: b.width * k, height: b.height * k)
+                .offset(x: b.minX * k, y: b.minY * k)
+        }
+        .frame(width: width, height: h)
+        .accessibilityElement(children: .contain)
+    }
+
+    /// A piece that blinks: a positive blink hides it for the blink, a negative one shows it only then (the studio's edBlinkOn).
+    static func shows(_ p: HomeArt.Piece, _ t: Double) -> Bool {
+        guard p.blink != 0 else { return true }
+        let every = abs(p.blink), n = floor(t / every), u = t - n * every, d = 0.15
+        let open = !(u < d) && !(Int(n) % 3 == 2 && u > 0.26 && u < 0.26 + d)
+        return p.blink > 0 ? open : !open
+    }
+}
+
+/// "Let's practise": our buttons' shape (a rounded box on a lip) in the board's cream and teal.
+private struct PractiseButton: View {
+    let height: CGFloat
+    var body: some View {
+        let face = height * 74 / 83, r = height * 22 / 83
+        Text("Let's practise").font(.nunito(face * 36 / 74, .black)).foregroundStyle(Home.teal)
+            .lineLimit(1).minimumScaleFactor(0.6)
+            .frame(maxWidth: .infinity).frame(height: face)
+            .background(RoundedRectangle(cornerRadius: r, style: .continuous).fill(Color(UIColor(hex: 0xE2D3B4))).offset(y: height - face))
+            .background(Color(UIColor(hex: 0xFFF7E6)), in: RoundedRectangle(cornerRadius: r, style: .continuous))
+            .frame(maxHeight: .infinity, alignment: .top)
     }
 }
 
