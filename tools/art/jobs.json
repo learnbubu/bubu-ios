@@ -2731,5 +2731,57 @@
    "refs/ref-rig-idle.png"
   ],
   "prompt": "The attached image is a finished picture from the app: Bùbù the panda in a red scarf, holding up a lit lantern. EDIT it to make ONE LAYER of it for animation: keep ONLY his two arms, WITHOUT the lantern and WITHOUT the scarf: each arm from where it comes out from under the scarf at the shoulder, down to the paw, the paws still curled in the same holding shape (round a lantern that is no longer there), with the warm glow on the fur as in the picture. Draw each arm continuing a little way up under where the scarf was, ending in a soft ROUNDED end of plain black fur, so it can turn at the shoulder under the scarf without a gap. Keep them EXACTLY as it is - the SAME size, the SAME place on the canvas (do not move, re-centre or resize it), the same shapes, colours and lighting - and remove everything else, leaving flat magenta (#FF00FF) where it was. No text, no letters.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/home-classroom-island.png",
+  "group": "home",
+  "size": "1536x1024",
+  "refs": [
+   "refs/ref-land-hall.png",
+   "refs/ref-land-pavilion.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "A small floating garden island for the app's home screen: the CLASSROOM, a little traditional Chinese schoolhouse (a 学堂) on a rounded grassy island with a soft earthy underside, like the path's landmark islands in the attached images. The schoolhouse is a single-storey hall with a curved teal tiled roof, red pillars and wide-open red doors showing a warm lit room inside with two little desks; a small wooden easel with a blank board stands by the steps; a stack of books and a brush pot sit on the top step; one round paper lantern hangs from the eave. A pine and a small flowering tree frame it, with a few rounded stones and grass tufts. Bùbù the panda (as in the third image, same proportions and face) stands at the open door, small, waving hello with a book under his other arm. Calm, inviting, slightly whimsical. Seen from slightly above and in front, centred, the island filling about 80% of the width, even magenta all round. Leave the board on the easel completely blank.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/tab-home.png",
+  "group": "tabicons",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/lantern-icon-lit.png",
+   "refs/ref-land-hall.png"
+  ],
+  "prompt": "An APP TAB-BAR ICON, to be shown tiny (24 to 30 pixels) along the bottom of the app, so it must read at a glance at that size: a small cosy traditional Chinese house: a curved teal tiled roof with upturned eaves, cream walls and one round red door, nothing else. Bold, chunky, simple silhouette with only 2 to 3 soft tones; no fine detail, no small pattern, no outline. The same simplified look as the attached lantern icon (first image), from the same set. Upright, centred, filling about 75% of the canvas, even magenta all round, nothing else on the canvas.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/tab-learn.png",
+  "group": "tabicons",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/lantern-icon-lit.png",
+   "refs/ref-land-hall.png"
+  ],
+  "prompt": "An APP TAB-BAR ICON, to be shown tiny (24 to 30 pixels) along the bottom of the app, so it must read at a glance at that size: a winding path of four round stepping stones curving up towards a small red pennant flag on a pole, the stones jade green, nothing else. Bold, chunky, simple silhouette with only 2 to 3 soft tones; no fine detail, no small pattern, no outline. The same simplified look as the attached lantern icon (first image), from the same set. Upright, centred, filling about 75% of the canvas, even magenta all round, nothing else on the canvas.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/tab-profile.png",
+  "group": "tabicons",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/lantern-icon-lit.png",
+   "refs/ref-land-hall.png",
+   "refs/ref-rig-idle.png"
+  ],
+  "prompt": "An APP TAB-BAR ICON, to be shown tiny (24 to 30 pixels) along the bottom of the app, so it must read at a glance at that size: Bùbù the panda's head only, front on, smiling with closed happy eyes and pale blush cheeks, his own round ears. Bold, chunky, simple silhouette with only 2 to 3 soft tones; no fine detail, no small pattern, no outline. The same simplified look as the attached lantern icon (first image), from the same set. Upright, centred, filling about 75% of the canvas, even magenta all round, nothing else on the canvas.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/tab-settings.png",
+  "group": "tabicons",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/lantern-icon-lit.png",
+   "refs/ref-land-hall.png"
+  ],
+  "prompt": "An APP TAB-BAR ICON, to be shown tiny (24 to 30 pixels) along the bottom of the app, so it must read at a glance at that size: a chunky rounded gear wheel with eight short teeth, jade green, with a small round brass centre, nothing else. Bold, chunky, simple silhouette with only 2 to 3 soft tones; no fine detail, no small pattern, no outline. The same simplified look as the attached lantern icon (first image), from the same set. Upright, centred, filling about 75% of the canvas, even magenta all round, nothing else on the canvas.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
