@@ -38,9 +38,9 @@ struct BunRow: View {
     /// One bun and the count, as Duolingo shows its hearts: × 5, red when it's down to one.
     var body: some View {
         HStack(spacing: 4) {
-            BunIcon(width: 24, gone: !plus && n == 0)
-            Text(plus ? "∞" : "×\(n)")
-                .font(.nunito(16, .black)).monospacedDigit()
+            BunIcon(width: 30, gone: !plus && n == 0)
+            Text(plus ? "∞" : "\(n)")
+                .font(.nunito(19, .black)).monospacedDigit()
                 .foregroundStyle(!plus && n <= 1 ? Color.again : Color.bunBrown)
                 .contentTransition(.numericText(value: Double(n)))
                 .animation(.spring(response: 0.35), value: n)

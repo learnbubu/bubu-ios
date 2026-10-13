@@ -257,16 +257,16 @@ struct StudyView: View {
 
     // MARK: chrome
 
-    /// The top of a session, as Duolingo has it: close, the progress bar and the buns
-    /// in one row; the session's name, the combo and double XP in a slim row under it.
+    /// The top of a session, as Duolingo has it: close, the progress bar, then double XP and the
+    /// buns, in one row (a quiz's name in a row under it, as its title).
     private var topBar: some View {
         VStack(spacing: 6) {
             HStack(spacing: 12) {
                 Button {
                     if session.nothingAnswered { close() } else { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = true } }
                 } label: {
-                    Image(systemName: "xmark").font(.system(size: 17, weight: .bold)).foregroundStyle(Color.muted)
-                        .frame(width: 34, height: 34).contentShape(Rectangle())
+                    Image(systemName: "xmark").font(.system(size: 22, weight: .heavy)).foregroundStyle(Color.muted)
+                        .frame(width: 36, height: 36).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Close")
@@ -275,6 +275,16 @@ struct StudyView: View {
                         Color.clear.onAppear { barFrame = g.frame(in: .global) }
                             .onChange(of: g.frame(in: .global)) { _, f in barFrame = f }
                     })
+                // double XP on: a small gold badge (its minutes are on Home)
+                if progress.boostActive {
+                    HStack(spacing: 1) {
+                        Image(systemName: "bolt.fill").font(.system(size: 12, weight: .black))
+                        Text("2×").font(.nunito(14, .black))
+                    }
+                    .foregroundStyle(Color.white)
+                    .padding(.horizontal, 7).padding(.vertical, 4)
+                    .background(Color.gold, in: Capsule())
+                }
                 // buns in a lesson, and in a review while they're being earned back
                 if session.onBuns || (session.earnsBuns && progress.buns < ProgressStore.bunsMax) {
                     BunRow(n: progress.isPlus ? ProgressStore.bunsMax : progress.bunState.n, plus: progress.isPlus, bump: session.bunsEarned)
@@ -285,29 +295,14 @@ struct StudyView: View {
                         })
                 }
             }
-            HStack(spacing: 8) {
-                // a quiz's name is the screen's title ("Quiz · 20 questions"); else a small label
-                if session.isQuiz {
-                    Text(session.title).font(.nunitoXB(15)).foregroundStyle(Color.ink).lineLimit(1)
-                } else {
-                    Text(session.title).font(.nunito(13, .bold)).foregroundStyle(Color.muted)
-                }
-                Spacer()
-                if progress.boostActive {
-                    TimelineView(.periodic(from: .now, by: 1)) { _ in
-                        let left = max(0, Int((progress.boostUntil - progress.now()) / 1000))
-                        (Text("2×").font(.nunito(12, .black)) + Text(" XP · \(left / 60):\(String(format: "%02d", left % 60))").font(.nunito(12, .bold)))
-                            .monospacedDigit()
-                            .foregroundStyle(Color.gold)
-                            .padding(.horizontal, 8).padding(.vertical, 2)
-                            .background(Color.accentSoft, in: Capsule())
-                    }
-                }
+            // a quiz's name is the screen's title ("Quiz · 20 questions"); other sessions have none, as Duolingo's
+            if session.isQuiz {
+                Text(session.title).font(.nunitoXB(15)).foregroundStyle(Color.ink).lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading).padding(.leading, 48)
             }
-            .padding(.leading, 46)
-            .frame(height: session.isQuiz ? 22 : 20)
         }
-        .padding(.leading, 10).padding(.trailing, 18).padding(.top, 2).padding(.bottom, 10)
+        // (room above the bar for COMBO over its end)
+        .padding(.leading, 10).padding(.trailing, 18).padding(.top, 14).padding(.bottom, 10)
         .animation(.spring(response: 0.3), value: session.combo)
     }
 
