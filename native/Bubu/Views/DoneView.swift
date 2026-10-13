@@ -298,7 +298,8 @@ struct RaisedButton: ButtonStyle {
             // capitals, spaced a little, as Duolingo's buttons
             .font(.nunito(17, .black)).textCase(.uppercase).tracking(0.9).lineLimit(1).minimumScaleFactor(0.8)
             .foregroundStyle(ink)
-            .frame(maxWidth: .infinity).padding(15)
+            // (about 46 pt tall with its lip, as Duolingo's)
+            .frame(maxWidth: .infinity).padding(.vertical, 12).padding(.horizontal, 15)
             .background(fill, in: shape)
             .overlay { if let edge { shape.strokeBorder(edge, lineWidth: 2) } }
             .modifier(IdleSweep(on: sweep, radius: radius))

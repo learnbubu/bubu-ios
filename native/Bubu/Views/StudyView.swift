@@ -310,8 +310,10 @@ struct StudyView: View {
         VStack(alignment: .leading, spacing: 0) {
             // a word missed earlier this session, back in the end-of-lesson mistakes stretch
             if session.previousMistake { PreviousMistakeTag() }
-            Text(promptLabel).font(.nunitoXB(19.2)).tracking(-0.2).foregroundStyle(Color.ink)
-                .padding(.top, 4).padding(.bottom, 14)
+            // the instruction big and bold, with room above, as Duolingo's (about 26 pt on theirs)
+            Text(promptLabel).font(.nunito(25, .black)).tracking(-0.4).foregroundStyle(Color.ink)
+                .lineLimit(1).minimumScaleFactor(0.75)
+                .padding(.top, 14).padding(.bottom, 18)
             Group {
                 if tonesIntro {
                     TonesIntroCard { dismissTonesIntro() }
