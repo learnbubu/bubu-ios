@@ -402,8 +402,13 @@ struct StudyView: View {
                     if let fb = feedback, let ex, ex.kind != .speak, ex.kind != .write {
                         FeedbackBanner(ex: ex, correct: fb.correct, chosen: fb.chosen, placed: placed.map(\.text), wheels: wheels,
                                        inARow: fb.correct && session.combo >= StudySession.comboAt && session.combo % StudySession.comboAt == 0 ? session.combo : nil)
-                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
-                                .shadow(color: Color.panel, radius: 12, y: -10))
+                            // a full-width sheet in the answer's colour, from the banner's top down past
+                            // the button to the screen's foot, as Duolingo's (the button sits in it)
+                            .background(alignment: .top) {
+                                Rectangle().fill(fb.correct ? Color.goodSoft : Color.againSoft)
+                                    .padding(.horizontal, -30).padding(.bottom, -260)
+                                    .ignoresSafeArea(edges: .bottom)
+                            }
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.bottom, 79)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -1383,15 +1388,16 @@ struct FeedbackBanner: View {
         // what was different about a wrong answer, in one short line: the tones, or the meaning
         let note: String? = correct || diff != nil ? nil : Correction.line(ex, chosen: chosen)
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: correct ? "checkmark" : "xmark").font(.system(size: 20, weight: .heavy))
-                .frame(width: 24, height: 24).padding(.top, 1)
+            Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill").font(.system(size: 28, weight: .bold))
+                .symbolRenderingMode(.palette).foregroundStyle(Color.white, tint)
+                .frame(width: 30, height: 30)
             VStack(alignment: .leading, spacing: 0) {
                 if let note {
                     Text(note).font(.nunitoXB(15.5)).fixedSize(horizontal: false, vertical: true)
                 } else {
                     Text(ex.kind == .sentence ? (correct ? "Nicely done!" : "Correct solution:")
                          : correct ? praise : diff != nil ? "So close: those two look alike!" : "Correct answer:")
-                        .font(.nunitoXB(18.4))
+                        .font(.nunito(23, .black)).padding(.top, 1).padding(.bottom, 2)
                 }
                 if ex.kind == .sentence, let sent = ex.sentence {
                     sentenceAnswer(sent)
@@ -1413,8 +1419,8 @@ struct FeedbackBanner: View {
             Spacer(minLength: 0)
         }
         .foregroundStyle(tint)
-        .padding(.horizontal, 14).padding(.vertical, 12)
-        .background(correct ? Color.goodSoft : Color.againSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        // (no box of its own: it's on the sheet behind it, which runs the screen's width)
+        .padding(.horizontal, 2).padding(.top, 16).padding(.bottom, 6)
         .overlay(alignment: .topTrailing) {
             if let n = inARow {
                 HStack(spacing: 4) {
