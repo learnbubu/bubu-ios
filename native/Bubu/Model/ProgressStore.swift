@@ -342,13 +342,15 @@ final class ProgressStore {
     @ObservationIgnored private(set) var xpCounter = 0
 
     @discardableResult
-    func earnXP(_ n: Int) -> (earned: Int, goalReached: Bool) {
+    /// `counted: false` for XP that isn't the session's own (the quest pocket): it isn't added to what the
+    /// session reads off xpCounter, so the done screen's XP is the lesson's (the Mac's check of 0.1.83)
+    func earnXP(_ n: Int, counted: Bool = true) -> (earned: Int, goalReached: Bool) {
         guard n > 0 else { return (0, false) }
         holdSaves(); defer { releaseSaves() }
         let mult = boostActive ? 2 : 1, t = today
         activity.xpDays[t, default: 0] += n * mult
         let total = n * mult, reached = false
-        xpCounter += total
+        if counted { xpCounter += total }
         save()
         checkQuests()
         let lv = level.level
@@ -768,7 +770,7 @@ final class ProgressStore {
         activity.quests = q
         save()
         if all {
-            earnXP(Self.chestXP)
+            earnXP(Self.chestXP, counted: false)
             let pocket = Moments.Moment.pocket(.init(kind: .jade, reward: Self.chestXP, title: "All 3 daily quests done!",
                                                      sub: ember ? "A lucky pocket, full of XP, and a spare lantern" : "A lucky pocket, full of XP"))
             // mid-lesson it waits for the end, as the level-up does

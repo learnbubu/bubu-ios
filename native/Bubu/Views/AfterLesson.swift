@@ -275,9 +275,11 @@ struct QuestStage: View {
                         .frame(width: 40, height: 40)
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(alignment: .firstTextBaseline) {
-                                Text(q.title).font(.nunito(15.5, .heavy)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.8)
+                                // one size whatever the state (it shrank to fit beside "Done"): a long title wraps instead
+                                Text(q.title).font(.nunito(15.5, .heavy)).foregroundStyle(Home.ink).lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
                                 Spacer(minLength: 6)
-                                Text(ok ? "Done" : "\(n) / \(q.target)").font(.nunito(13.5, .black)).monospacedDigit()
+                                Text(ok ? "Done" : "\(n) / \(q.target)").font(.nunito(13.5, .black)).monospacedDigit().fixedSize()
                                     .foregroundStyle(ok ? Color.good : Home.muted)
                                     .contentTransition(.numericText(value: Double(n)))
                             }
