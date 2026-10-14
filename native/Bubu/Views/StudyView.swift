@@ -1389,6 +1389,7 @@ struct FeedbackBanner: View {
         let diff = lookalike.flatMap { CharData.shared.difference(w.hanzi, $0.word.hanzi) }
         // what was different about a wrong answer, in one short line: the tones, or the meaning
         let note: String? = correct || diff != nil ? nil : Correction.line(ex, chosen: chosen)
+        VStack(alignment: .leading, spacing: 0) {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: correct ? "checkmark.circle.fill" : "xmark.circle.fill").font(.system(size: 28, weight: .bold))
                 .symbolRenderingMode(.palette).foregroundStyle(Color.white, tint)
@@ -1412,13 +1413,28 @@ struct FeedbackBanner: View {
                     (Text("Meaning: ").font(.nunitoXB(14.5)) + Text(sent.en).font(.nunito(14.5, .semibold)))
                         .fixedSize(horizontal: false, vertical: true).padding(.top, 4)
                 }
-                if let diff, let other = lookalike {
-                    diffBlock(diff, other: other)
-                } else if note == nil, ex.kind != .sentence, Coach.sessions < 3, w.hanzi.contains(where: { CharData.shared.chars[String($0)] != nil }) {
+                if diff == nil, note == nil, ex.kind != .sentence, Coach.sessions < 3, w.hanzi.contains(where: { CharData.shared.chars[String($0)] != nil }) {
                     Text("Tap a character to see how it's built").font(.nunito(11.5, .bold)).opacity(0.75).padding(.top, 6)
                 }
             }
             Spacer(minLength: 0)
+            // report the clip: one tap and a reason (kept for Settings → Reported audio), level with the title
+            Menu {
+                Section("Report this audio: \(said)") {
+                    ForEach(AudioReports.reasons, id: \.self) { r in
+                        Button(r) { AudioReports.add(said, reason: r); reported = true }
+                    }
+                }
+            } label: {
+                Image(systemName: reported ? "flag.fill" : "flag").font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(tint.opacity(0.75)).padding(8).contentShape(Rectangle())
+            }
+            .accessibilityLabel("Report this audio")
+            .onAppear { reported = AudioReports.has(said) }
+            .padding(.top, -2)
+        }
+        // spot the difference: the sheet's full width, under the title (it was tucked in beside the icon)
+        if let diff, let other = lookalike { diffBlock(diff, other: other).padding(.top, 4) }
         }
         .foregroundStyle(tint)
         // (no box of its own: it's on the sheet behind it, which runs the screen's width)
@@ -1437,21 +1453,6 @@ struct FeedbackBanner: View {
                 .offset(x: -10, y: -12)
                 .onAppear { withAnimation(.spring(response: 0.35, dampingFraction: 0.45)) { bounce = true } }
             }
-        }
-        // report the clip: one tap and a reason (kept for Settings → Reported audio)
-        .overlay(alignment: .bottomTrailing) {
-            Menu {
-                Section("Report this audio: \(said)") {
-                    ForEach(AudioReports.reasons, id: \.self) { r in
-                        Button(r) { AudioReports.add(said, reason: r); reported = true }
-                    }
-                }
-            } label: {
-                Image(systemName: reported ? "flag.fill" : "flag").font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(tint.opacity(0.75)).padding(10).contentShape(Rectangle())
-            }
-            .accessibilityLabel("Report this audio")
-            .onAppear { reported = AudioReports.has(said) }
         }
     }
 
@@ -1550,6 +1551,7 @@ struct FeedbackBanner: View {
             Text(d.note).font(.nunito(13.4)).foregroundStyle(Color.ink).fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 10).padding(.vertical, 7)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.panel, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .padding(.top, 6)
     }

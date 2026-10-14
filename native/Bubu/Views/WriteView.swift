@@ -47,15 +47,16 @@ struct WriteView: View {
                                 .background(Color.accentSoft, in: Capsule())
                         }
                     }
-                    Text(w.en + (chars.count > 1 ? " · \(index + 1)/\(chars.count)" : ""))
-                        .font(.nunito(13.5)).foregroundStyle(Color.muted).lineLimit(2)
+                    // the short meaning, on one line (the long one, with its asides, pushed the buttons off the screen)
+                    Text(FeedbackBanner.brief(w) + (chars.count > 1 ? " · \(index + 1)/\(chars.count)" : ""))
+                        .font(.nunito(13.5)).foregroundStyle(Color.muted).lineLimit(1)
                 }
                 Spacer(minLength: 0)
                 SpeakerButton(text: w.hanzi)
             }
             .padding(.horizontal, 4)
             GeometryReader { g in
-                let side = min(g.size.width - 8, 304)
+                let side = min(g.size.width - 8, Self.boxMax - 8)
                 WritingBox(char: ch, size: side, level: level, checking: progress.prefs.checkStrokes, replay: replay,
                            animate: clears == 0, ghost: Self.ghost, minimalGrid: true) {
                     progress.recordWritten(ch)
@@ -66,38 +67,30 @@ struct WriteView: View {
                 .frame(maxWidth: .infinity)
             }
             .aspectRatio(1, contentMode: .fit)
-            .frame(maxWidth: 312)
-            // the hint, one small centred line; "Show me" and Clear as bordered pills under it
+            .frame(maxWidth: Self.boxMax)
+            // the hint, one small centred line, then the buttons as the app's others (raised on a lip):
+            // Show me and Clear while writing, Next character once it's written
             Text(level.note).font(.nunito(12.5)).foregroundStyle(Color.muted)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.85)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 2)
-            HStack(spacing: 10) {
-                Button { replay += 1 } label: {
-                    pill(Label("Show me", systemImage: "play.fill"), ink: Color.accent)
-                }
-                .buttonStyle(PressDown(depth: 1))
-                // start the character again (the strokes aren't played again)
-                Button { clears += 1 } label: {
-                    pill(Label("Clear", systemImage: "arrow.counterclockwise"), ink: Color.ink)
-                }
-                .buttonStyle(PressDown(depth: 1))
-                .disabled(finished || answered)
-                .opacity(finished || answered ? 0.45 : 1)
-            }
-            .fixedSize()
             if finished && index < chars.count - 1 {
                 Button { withAnimation { clears = 0; index += 1 } } label: {
-                    Text("Next character (\(index + 1)/\(chars.count)) →")
-                        .font(.nunitoXB(15.6)).lineLimit(1).minimumScaleFactor(0.8)
-                        .foregroundStyle(Color.onAccent)
-                        .padding(.horizontal, 22).padding(.vertical, 13)
-                        .frame(minWidth: 196)
-                        .background(Color.accent, in: Capsule())
+                    Text("Next character (\(index + 2)/\(chars.count)) →")
                 }
-                .buttonStyle(PressDown(depth: 1))
-                .padding(.top, 8)
+                .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent, sweep: false, radius: 14, lip: 4))
+                .padding(.horizontal, 24)
+            } else {
+                HStack(spacing: 10) {
+                    Button { replay += 1 } label: { Label("Show me", systemImage: "play.fill") }
+                        .buttonStyle(RaisedButton(fill: Color.panel, ink: Color.accent, edge: Color.line, sweep: false, radius: 14, lip: 4))
+                    // start the character again (the strokes aren't played again)
+                    Button { clears += 1 } label: { Label("Clear", systemImage: "arrow.counterclockwise") }
+                        .buttonStyle(RaisedButton(fill: Color.panel, ink: Color.ink, edge: Color.line, sweep: false, radius: 14, lip: 4))
+                        .disabled(finished || answered)
+                        .opacity(finished || answered ? 0.45 : 1)
+                }
+                .padding(.horizontal, 24)
             }
         }
         .onAppear {
@@ -113,15 +106,13 @@ struct WriteView: View {
     /// at 85% on the panel), a soft stone grey by day.
     static let ghost = Color(light: 0xD8D4CA, dark: 0xDBDEE0)
 
-    /// A small bordered pill, as the JIC edition's "↺ Clear".
-    private func pill<L: View>(_ label: L, ink: Color) -> some View {
-        label
-            .font(.nunito(14.4, .bold)).foregroundStyle(ink)
-            .padding(.horizontal, 16).padding(.vertical, 9)
-            .background(Color.panel, in: Capsule())
-            .overlay(Capsule().strokeBorder(Color.line, lineWidth: 1.5))
-            .contentShape(Capsule())
+    /// The box as big as fits: smaller on a shorter screen, so the buttons and Continue aren't cut off
+    /// below (the page scrolls, so it can't take the height that's left: it's measured off the screen).
+    static var boxMax: CGFloat {
+        let h = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.bounds.height ?? 852
+        return min(312, max(200, h - 545))
     }
+
 }
 
 /// A 田字格 practice square: dashed centre lines and diagonals. `minimal` is the JIC

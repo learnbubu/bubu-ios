@@ -1343,9 +1343,14 @@ struct Exercise {
         let cards = inScope.isEmpty ? words : inScope
         let answer = field(c.word, dir)
         var distractors: [String] = []
+        // hearing it, a word that sounds exactly the same can't be told apart (tā: 他 he, 她 she, 它 it),
+        // so in listening it's never offered as a wrong answer (the owner, 14 Oct 2026)
+        let sound = { (w: Word) in w.pinyin.lowercased().filter { $0.isLetter } }
+        let sameSound: Set<String> = dir == "listen"
+            ? Set(words.filter { sound($0.word) == sound(c.word) }.map { field($0.word, dir) }).subtracting([answer]) : []
         let others = { (exclude: [String]) -> [String] in
             var seen = Set<String>(), out: [String] = []
-            for x in cards { let v = field(x.word, dir); if v != answer && !exclude.contains(v) && seen.insert(v).inserted { out.append(v) } }
+            for x in cards { let v = field(x.word, dir); if v != answer && !exclude.contains(v) && !sameSound.contains(v) && seen.insert(v).inserted { out.append(v) } }
             return out.shuffled()
         }
         switch dir {
@@ -1357,7 +1362,8 @@ struct Exercise {
         case "listen":
             let bare = Pinyin.toneless(c.word.pinyin)
             var near: [String] = []
-            for x in cards.shuffled() where Pinyin.toneless(x.word.pinyin) == bare && x.word.gloss != answer && !near.contains(x.word.gloss) { near.append(x.word.gloss) }
+            for x in cards.shuffled() where Pinyin.toneless(x.word.pinyin) == bare && x.word.gloss != answer && !near.contains(x.word.gloss)
+                && !sameSound.contains(x.word.gloss) { near.append(x.word.gloss) }
             distractors = Array(near.prefix(3))
             distractors += others(distractors).prefix(3 - distractors.count)
         default:
@@ -1371,7 +1377,7 @@ struct Exercise {
         // a lesson with very few words borrows from the words nearest it in the course (not
         // "portion, serving" beside 你 on day one), so there are always four options
         if distractors.count < 3 {
-            var seen = Set(distractors + [answer])
+            var seen = Set(distractors + [answer]).union(sameSound)
             let here = course.lessonOrder[c.lessonId] ?? 0
             let nearest = words.sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
             for x in nearest.prefix(40).filter({ abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby }).shuffled() + nearest.shuffled()

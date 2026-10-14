@@ -13,7 +13,7 @@ struct HomeView: View {
         GeometryReader { geo in
             let W = geo.size.width, H = geo.size.height
             // everything on one screen, no scrolling (the owner, 14 Oct 2026): the board takes what's left
-            let rest = H - 455 - (progress.boostActive ? 44 : 0)
+            let rest = H - 455
             let boardW = min(W - 28, max(180, rest * HomeArt.frame.width / HomeArt.frame.height))
             VStack(spacing: 0) {
                 topBar
@@ -21,7 +21,6 @@ struct HomeView: View {
                 upNext
                 Spacer(minLength: 8).frame(maxHeight: 12)
                 questCard
-                if progress.boostActive { BoostPill().padding(.top, 10) }
                 Spacer(minLength: 8).frame(maxHeight: 15)
                 ClassroomBoard(width: boardW) { router.push(.classroom) }
                     .frame(maxWidth: .infinity)
@@ -125,6 +124,8 @@ struct HomeView: View {
             .background(LinearGradient(colors: [Color(UIColor(hex: 0xEEF7F2)), Color(UIColor(hex: 0xE2EFE8))], startPoint: .topLeading, endPoint: .bottomTrailing))
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color(UIColor(hex: 0xD7E8DF)), lineWidth: 1))
+            // double XP after a lesson: a badge in the card's corner (it pushed the page down as a row), gone at 0:00
+            .overlay(alignment: .topTrailing) { BoostBadge().padding(12) }
             .shadow(color: Color(UIColor(hex: 0x1E463C)).opacity(0.08), radius: 8, y: 6)
         }
         .buttonStyle(PressDown(depth: 2))
@@ -290,6 +291,25 @@ struct SpeechBubble: View {
             .overlay(alignment: .bottomLeading) {
                 Triangle().fill(bg).frame(width: 12, height: 6).offset(x: 15, y: 5)
             }
+    }
+}
+
+/// Double XP, counting down, as a badge in Up next's corner; nothing once it runs out.
+private struct BoostBadge: View {
+    @Environment(ProgressStore.self) private var progress
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            let left = Int((progress.boostUntil - progress.now()) / 1000)
+            if left > 0 {
+                HStack(spacing: 3) {
+                    Image(systemName: "bolt.fill").font(.system(size: 11, weight: .heavy))
+                    Text("2× · \(left / 60):\(String(format: "%02d", left % 60))").font(.nunito(13, .black)).monospacedDigit()
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 9).padding(.vertical, 5)
+                .background(Color(UIColor(hex: 0xB7822E)), in: Capsule())
+            }
+        }
     }
 }
 
