@@ -207,7 +207,11 @@ struct StudyChoicePage: View {
                                 .frame(height: 5).padding(.top, 3)
                             }
                             VStack(alignment: .trailing, spacing: 2) {
-                                Text("\(on)/\(ids.count)").font(.nunito(13, .black)).monospacedDigit().foregroundStyle(Home.muted)
+                                // the tick says it's chosen; a count only when part of it is (an "n/n" beside
+                                // the bar read as progress: the Mac's check of 0.1.81)
+                                if on > 0 && on < ids.count {
+                                    Text("\(on) of \(ids.count)").font(.nunito(13, .black)).monospacedDigit().foregroundStyle(Home.muted)
+                                }
                                 if due > 0 { Text("\(due) due").font(.nunito(12, .heavy)).foregroundStyle(Color(UIColor(hex: 0xB7822E))) }
                                 else if ahead { Text("Ahead").font(.nunito(12, .heavy)).foregroundStyle(Home.muted.opacity(0.7)) }
                             }
