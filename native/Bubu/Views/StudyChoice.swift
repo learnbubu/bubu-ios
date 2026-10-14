@@ -176,7 +176,8 @@ struct StudyChoicePage: View {
         let ids = ch.lessons, on = ids.filter(s.contains).count
         let cards = ids.flatMap { course.cards(in: $0) }
         let due = cards.filter { (progress.srs[$0.id]?.due).map { $0 <= progress.now() } ?? false }.count
-        let mastered = cards.filter { progress.isMastered($0.id) }.count
+        // words learned (met at least once): "mastered" (a week's interval, and produced) left every bar empty
+        let mastered = cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
         let ahead = ci > currentChapter
         let isOpen = open.contains(ci)
         let label = course.chapterLabel(ci)

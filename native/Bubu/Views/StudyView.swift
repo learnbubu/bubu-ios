@@ -1399,7 +1399,7 @@ struct FeedbackBanner: View {
                     Text(note).font(.nunitoXB(15.5)).fixedSize(horizontal: false, vertical: true)
                 } else {
                     Text(ex.kind == .sentence ? (correct ? "Nicely done!" : "Correct solution:")
-                         : correct ? praise : diff != nil ? "So close: those two look alike!" : "Correct answer:")
+                         : correct ? praise : diff != nil ? "So close: look-alikes!" : "Correct answer:")
                         .font(.nunito(23, .black)).padding(.top, 1).padding(.bottom, 2)
                 }
                 if ex.kind == .sentence, let sent = ex.sentence {
@@ -1542,8 +1542,9 @@ struct FeedbackBanner: View {
     }
 
     private func diffBlock(_ d: (right: String, wrong: String, note: String), other: Card) -> some View {
+        // kept short, so the sheet doesn't cover the answer you picked (the Mac's check of 0.1.79):
+        // the title says what it is, and each character sits beside its meaning
         VStack(alignment: .leading, spacing: 6) {
-            Text("SPOT THE DIFFERENCE").font(.nunito(11.2, .black)).tracking(1.1).foregroundStyle(Color.again)
             HStack(spacing: 8) {
                 cell(ex.card.word.hanzi, mark: d.right, en: Self.brief(ex.card.word), good: true)
                 cell(other.word.hanzi, mark: d.wrong, en: Self.brief(other.word), good: false)
@@ -1564,11 +1565,11 @@ struct FeedbackBanner: View {
             else { a.foregroundColor = Color.ink }
             s += a
         }
-        return VStack(spacing: 2) {
+        return HStack(spacing: 6) {
             Text(s).font(.hanzi(22, .bold))
-            Text(en).font(.nunito(11.5, .bold)).foregroundStyle(Color.muted).lineLimit(1)
+            Text(en).font(.nunito(11.5, .bold)).foregroundStyle(Color.muted).lineLimit(2).minimumScaleFactor(0.85)
         }
-        .frame(maxWidth: .infinity).padding(.vertical, 4).padding(.horizontal, 4)
+        .frame(maxWidth: .infinity).padding(.vertical, 3).padding(.horizontal, 6)
         .background(Color.bg, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }

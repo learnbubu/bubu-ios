@@ -1248,7 +1248,12 @@ final class StudySession: Identifiable {
     /// The debug finish with a sticker moment (night owl), to see the player on the done screen.
     func debugFinishWithMoment() {
         debugFinish()
-        result?.moment = .init(key: "nightowl", title: "Night owl!", line: "Learning by lantern light.", color: 0x8B9BFF)
+        // `-moment <key>` picks which (the Mac's checks: kung fu's swooshes, 14 Oct 2026); night owl otherwise
+        let a = ProcessInfo.processInfo.arguments
+        let key = a.firstIndex(of: "-moment").flatMap { $0 + 1 < a.count ? a[$0 + 1] : nil } ?? "nightowl"
+        let titles = ["onfire": "On fire!", "sweep": "Clean sweep!", "flawless": "满分! Flawless", "kungfu": "Kung fu master!",
+                      "speedy": "嗖! Lightning fast", "brain": "Brain gains!", "nightowl": "Night owl!", "earlybird": "Early bird!"]
+        result?.moment = .init(key: key, title: titles[key] ?? key, line: key == "nightowl" ? "Learning by lantern light." : "A test of the moment.", color: 0x8B9BFF)
     }
     #endif
 
