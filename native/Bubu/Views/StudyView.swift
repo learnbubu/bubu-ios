@@ -148,7 +148,7 @@ struct StudyView: View {
         .onChange(of: session.result != nil) { _, done in
             guard done else { return }
             progress.holdLevelUps = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.9) { progress.showHeldLevelUp() }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.9) { progress.showHeldLevelUp(pocket: false) }
         }
         .onChange(of: session.bunsEaten) { _, n in
             guard n > 0 else { return }

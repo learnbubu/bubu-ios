@@ -366,8 +366,10 @@ final class ProgressStore {
     @ObservationIgnored var holdLevelUps = false
     @ObservationIgnored private var heldLevelUp: (level: Int, next: Int)?
     @ObservationIgnored private var heldPocket: Moments.Moment?
-    func showHeldLevelUp() {
-        if let p = heldPocket { heldPocket = nil; Moments.shared.show(p) }
+    /// `pocket: false` keeps the quest pocket for later: at a session's end it waits until the done
+    /// screens are closed, after the quest stage has filled (the Mac's check of 0.1.84)
+    func showHeldLevelUp(pocket: Bool = true) {
+        if pocket, let p = heldPocket { heldPocket = nil; Moments.shared.show(p) }
         guard let h = heldLevelUp else { return }
         heldLevelUp = nil
         Moments.shared.show(.level(h.level, next: h.next))
