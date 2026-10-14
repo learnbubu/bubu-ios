@@ -232,44 +232,90 @@ private struct SparkEnds: PreferenceKey {
     }
 }
 
-/// "Quest progress!": today's quests, each bar filling from where it was when the session began.
+/// Today's quests after a session (the owner, 14 Oct 2026: "more professional"): the pouch, how many
+/// are done, and the three on one card, each bar filling from where it was when the session began;
+/// a done one gets its tick, and all three, the lucky pocket.
 struct QuestStage: View {
     let before: [String: Int]
     @Environment(ProgressStore.self) private var progress
     @State private var filled = -1
+    @State private var bob = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private let gold = Color(UIColor(hex: 0xF2B33D)), goldInk = Color(UIColor(hex: 0xB7822E))
 
     var body: some View {
         let quests = progress.todayQuests
-        VStack(spacing: 14) {
-            Text("Quest progress!").font(.nunito(26, .black)).foregroundStyle(Color(UIColor(hex: 0xB7822E)))
-                .padding(.bottom, 6)
-            ForEach(Array(quests.enumerated()), id: \.offset) { i, q in
-                let now = min(q.target, progress.progress(of: q)), was = min(q.target, before[q.id] ?? now)
-                let n = i <= filled ? now : was, ok = n >= q.target
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        Text(q.title).font(.nunito(15, .heavy)).foregroundStyle(Color.ink).lineLimit(1).minimumScaleFactor(0.8)
-                        Spacer()
-                        Text("\(n) / \(q.target)").font(.nunitoXB(13)).monospacedDigit().foregroundStyle(Color.muted)
-                            .contentTransition(.numericText(value: Double(n)))
+        let shown = quests.enumerated().map { i, q -> Int in
+            let now = min(q.target, progress.progress(of: q)), was = min(q.target, before[q.id] ?? now)
+            return i <= filled ? now : was
+        }
+        let done = zip(quests, shown).filter { $1 >= $0.target }.count
+        VStack(spacing: 0) {
+            Image("quest-pouch").resizable().scaledToFit().frame(height: 104)
+                .offset(y: bob ? -4 : 2)
+                .shadow(color: goldInk.opacity(0.25), radius: 12, y: 8)
+                .padding(.top, 6)
+            Text("Daily quests").font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Home.ink).padding(.top, 14)
+            Text(done == 3 ? "All three done today!" : "\(done) of 3 done today")
+                .font(.nunito(15.5, .bold)).foregroundStyle(done == 3 ? goldInk : Home.muted)
+                .contentTransition(.numericText(value: Double(done)))
+                .padding(.top, 2)
+            VStack(spacing: 0) {
+                ForEach(Array(quests.enumerated()), id: \.offset) { i, q in
+                    let n = shown[i], ok = n >= q.target
+                    let was = min(q.target, before[q.id] ?? min(q.target, progress.progress(of: q)))
+                    if i > 0 { Rectangle().fill(Home.line).frame(height: 1).padding(.leading, 66) }
+                    HStack(spacing: 14) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous).fill(ok ? Color.goodSoft : gold.opacity(0.18))
+                            Image(systemName: ok ? "checkmark" : q.icon).font(.system(size: 17, weight: .heavy))
+                                .foregroundStyle(ok ? Color.good : goldInk)
+                                .contentTransition(.symbolEffect(.replace))
+                        }
+                        .frame(width: 40, height: 40)
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(q.title).font(.nunito(15.5, .heavy)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.8)
+                                Spacer(minLength: 6)
+                                Text(ok ? "Done" : "\(n) / \(q.target)").font(.nunito(13.5, .black)).monospacedDigit()
+                                    .foregroundStyle(ok ? Color.good : Home.muted)
+                                    .contentTransition(.numericText(value: Double(n)))
+                            }
+                            GeometryReader { g in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(Color(UIColor(hex: 0xEFE9DD)))
+                                    Capsule().fill(ok ? Color.good : gold).frame(width: g.size.width * Double(n) / Double(q.target))
+                                }
+                            }
+                            .frame(height: 9)
+                        }
                     }
-                    HStack(spacing: 12) {
-                        Bar(value: Double(n) / Double(q.target), fill: Color(UIColor(hex: 0xF2B33D)))
-                        Image("pocket-jade").resizable().scaledToFit().frame(width: 30, height: 34)
-                            .opacity(ok ? 1 : 0.55)
-                    }
+                    .padding(.horizontal, 16).padding(.vertical, 15)
+                    .modifier(SuccessShine(on: ok && i <= filled && was < q.target, delay: 0.3))
                 }
-                .padding(.horizontal, 14).padding(.vertical, 12)
-                .background(Color.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .strokeBorder(ok ? Color(UIColor(hex: 0xF2B33D)) : Color.line, lineWidth: ok ? 2.5 : 1.5))
-                .modifier(SuccessShine(on: ok && i <= filled && was < q.target, delay: 0.3))
+            }
+            .homeCard(radius: 22)
+            .padding(.top, 22)
+            if done == 3 {
+                HStack(spacing: 12) {
+                    Image("pocket-jade").resizable().scaledToFit().frame(width: 34, height: 40)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("Lucky pocket earned!").font(.nunito(16, .black)).foregroundStyle(Home.ink)
+                        Text("Full of XP, for all three").font(.nunito(13, .bold)).foregroundStyle(Home.muted)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(14)
+                .background(gold.opacity(0.16), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(gold.opacity(0.6), lineWidth: 1.5))
+                .padding(.top, 14)
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
             }
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity)
         .task {
+            if !reduceMotion { withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { bob = true } }
             if reduceMotion { filled = 2; return }
             try? await Task.sleep(for: .milliseconds(450))
             for i in 0..<3 {

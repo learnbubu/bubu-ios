@@ -30,10 +30,7 @@ struct StudyChoicePage: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Button { dismiss() } label: {
-                    Text("‹ Classroom").font(.nunito(14, .black)).foregroundStyle(Home.teal).padding(.vertical, 4)
-                }
-                .buttonStyle(.plain)
+                BackPill(label: "Classroom") { dismiss() }
                 Text("What to study").font(.nunito(32, .black)).tracking(-0.5).foregroundStyle(Home.ink)
                     .padding(.top, -4)
                 heading("Practise")

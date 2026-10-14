@@ -43,15 +43,12 @@ struct ClassroomPage: View {
 
     private var header: some View {
         ZStack(alignment: .topLeading) {
-            Button { dismiss() } label: {
-                Text("‹ Home").font(.nunito(14, .black)).foregroundStyle(Home.teal).padding(.vertical, 4)
-            }
-            .buttonStyle(.plain)
+            BackPill(label: "Home") { dismiss() }
             Text("Classroom").font(.nunito(34, .black)).tracking(-0.5).foregroundStyle(Home.ink)
                 .frame(maxHeight: .infinity, alignment: .bottom).padding(.leading, 2).padding(.bottom, 6)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .frame(height: 92)
+        .frame(height: 100)
     }
 
     private var catchUp: some View {

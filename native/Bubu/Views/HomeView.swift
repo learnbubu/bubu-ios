@@ -83,10 +83,7 @@ struct HomeView: View {
         let kicker = lesson == nil ? "Course complete" : "Up next · \(chapter)"
         let progressShare: Double = cards.isEmpty ? 0 : Double(learned) / Double(cards.count)
         let action = lesson == nil ? "Review your words →" : started ? "Continue lesson →" : "Start lesson →"
-        Button {
-            if let lesson { router.start(StudySession.lesson(lesson.id, progress)) } else { router.start(StudySession.review(progress)) }
-        } label: {
-            VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 0) {
                 Text(kicker)
                     .font(.nunito(12, .black)).tracking(1.4).textCase(.uppercase).foregroundStyle(Home.teal)
                 Text(lesson?.nameParts.hanzi ?? "复习").font(.hanzi(27, .black)).foregroundStyle(Home.ink).padding(.top, 4)
@@ -98,12 +95,15 @@ struct HomeView: View {
                     }
                 }
                 .frame(height: 10).padding(.top, 13)
-                Text(action)
-                    .font(.nunito(18, .black)).foregroundStyle(.white)
-                    .frame(maxWidth: .infinity).frame(height: 52)
-                    .background(Home.teal, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
-                    .background(RoundedRectangle(cornerRadius: 17, style: .continuous).fill(Home.tealDark).offset(y: 4))
-                    .padding(.top, 15).padding(.bottom, 4)
+                // the card's one button: it presses down onto its lip, as the app's others (the whole card did)
+                Button {
+                    if let lesson { router.start(StudySession.lesson(lesson.id, progress)) } else { router.start(StudySession.review(progress)) }
+                } label: {
+                    Text(action).font(.nunito(18, .black)).foregroundStyle(.white)
+                }
+                .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 17, depth: 4))
+                .frame(height: 56)
+                .padding(.top, 15)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 17).padding(.top, 15).padding(.bottom, 17)
@@ -127,8 +127,6 @@ struct HomeView: View {
             // double XP after a lesson: a badge in the card's corner (it pushed the page down as a row), gone at 0:00
             .overlay(alignment: .topTrailing) { BoostBadge().padding(12) }
             .shadow(color: Color(UIColor(hex: 0x1E463C)).opacity(0.08), radius: 8, y: 6)
-        }
-        .buttonStyle(PressDown(depth: 2))
     }
 
     // MARK: Daily quests: the pouch, how many are done, the next one; tap for all three, on Profile
@@ -162,7 +160,7 @@ struct HomeView: View {
             .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Home.line, lineWidth: 1))
         }
-        .buttonStyle(PressDown(depth: 2))
+        .buttonStyle(CardPress())
     }
 
     // MARK: word of the day: one of your words, a new one each day
@@ -247,8 +245,12 @@ struct ClassroomBoard: View {
         }
         .overlay(alignment: .topLeading) {
             let b = HomeArt.button
-            Button(action: open) { PractiseButton(height: b.height * k) }
-                .buttonStyle(PressDown(depth: 3))
+            let h = b.height * k
+            Button(action: open) {
+                Text("Let's practise").font(.nunito(h * 74 / 83 * 36 / 74, .black)).foregroundStyle(Home.teal)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+            }
+            .buttonStyle(LipButton(face: Color(UIColor(hex: 0xFFF7E6)), lip: Color(UIColor(hex: 0xE2D3B4)), radius: h * 22 / 83, depth: h * 9 / 83))
                 .frame(width: b.width * k, height: b.height * k)
                 .offset(x: b.minX * k, y: b.minY * k)
         }
@@ -262,20 +264,6 @@ struct ClassroomBoard: View {
         let every = abs(p.blink), n = floor(t / every), u = t - n * every, d = 0.15
         let open = !(u < d) && !(Int(n) % 3 == 2 && u > 0.26 && u < 0.26 + d)
         return p.blink > 0 ? open : !open
-    }
-}
-
-/// "Let's practise": our buttons' shape (a rounded box on a lip) in the board's cream and teal.
-private struct PractiseButton: View {
-    let height: CGFloat
-    var body: some View {
-        let face = height * 74 / 83, r = height * 22 / 83
-        Text("Let's practise").font(.nunito(face * 36 / 74, .black)).foregroundStyle(Home.teal)
-            .lineLimit(1).minimumScaleFactor(0.6)
-            .frame(maxWidth: .infinity).frame(height: face)
-            .background(Color(UIColor(hex: 0xFFF7E6)), in: RoundedRectangle(cornerRadius: r, style: .continuous))
-            .background(RoundedRectangle(cornerRadius: r, style: .continuous).fill(Color(UIColor(hex: 0xE2D3B4))).offset(y: height - face))
-            .frame(maxHeight: .infinity, alignment: .top)
     }
 }
 

@@ -25,9 +25,9 @@ struct Achievement: Identifiable {
     }()
 }
 
-/// Profile, as the web's: you and your avatar, your numbers, where you are on the
-/// path, achievements, this month's fire, this week's XP, your characters, and
-/// how much of each chapter you've mastered.
+/// Profile, cleaner (the owner, 14 Oct 2026: "needs a full revamp"): you and your level, four numbers,
+/// today's quests, where you are on the path, achievements, and your activity. In the Home look,
+/// light only for now. The avatar waits for the character system to be redone: for now, your initial.
 struct ProfileView: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
@@ -40,20 +40,21 @@ struct ProfileView: View {
         let out = progress.outSince
         ScrollViewReader { proxy in
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 18) {
                 HStack {
-                    Text("Profile").font(.nunitoXB(28)).foregroundStyle(Color.ink)
+                    Text("Profile").font(.nunito(32, .black)).tracking(-0.5).foregroundStyle(Home.ink)
                     Spacer()
                     Button { router.tab = .settings } label: {
-                        Image(systemName: "gearshape.fill").font(.system(size: 17)).foregroundStyle(Color.accent)
-                            .frame(width: 38, height: 38).background(Color.panel, in: Circle()).overlay(Circle().strokeBorder(Color.line, lineWidth: 2))
+                        Image(systemName: "gearshape.fill").font(.system(size: 18, weight: .bold)).foregroundStyle(Home.teal)
+                            .frame(width: 44, height: 44).homeCard(radius: 22)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(CardPress())
+                    .accessibilityLabel("Settings")
                 }
                 .padding(.top, 8)
 
-                hero(lv)
-                stats(lv, out: out)
+                you(lv)
+                numbers(out: out)
                 if out != nil {
                     Button(progress.embers < 1 ? "No spare lanterns left" : "Use a spare lantern") {
                         if let o = out { Moments.shared.show(.askRelight(lost: o.lost, embers: progress.embers)) }
@@ -63,18 +64,22 @@ struct ProfileView: View {
                 quests.id("quests")
                 pathCard
                 achievements
-                quote
                 activity
-                mastery
                 Color.clear.frame(height: 90)
             }
             .padding(.horizontal, 18)
         }
         .scrollIndicators(.hidden)
-        .background(Color.bg.ignoresSafeArea())
+        .background(Home.bg.ignoresSafeArea())
+        .environment(\.colorScheme, .light)
         .onAppear { stamp(); progress.ensureQuests(); focus(proxy) }
         .onChange(of: router.profileFocus) { _, _ in focus(proxy) }
         }
+    }
+
+    /// The day each achievement was first earned, for ordering.
+    private func stamp() {
+        for a in Achievement.all where progress.activity.achv[a.id] == nil && a.test(progress) { progress.stampAchievement(a.id) }
     }
 
     /// Home's Daily quests open Profile here, at the quests.
@@ -86,126 +91,160 @@ struct ProfileView: View {
         }
     }
 
+    private func heading(_ t: String) -> some View {
+        Text(t.uppercased()).font(.nunito(12, .black)).tracking(1.3).foregroundStyle(Home.teal).padding(.leading, 4)
+    }
+
+    // MARK: you: your initial (the avatar's place for now), your name, your level
+
+    private func you(_ lv: (level: Int, into: Int, span: Int, next: Int)) -> some View {
+        let name = progress.name.trimmingCharacters(in: .whitespaces)
+        let gold = Color(UIColor(hex: 0xF2B33D))
+        return HStack(spacing: 16) {
+            ZStack {
+                Circle().fill(LinearGradient(colors: [Color(UIColor(hex: 0x2A8B7C)), Home.teal], startPoint: .topLeading, endPoint: .bottomTrailing))
+                if let c = name.first { Text(String(c).uppercased()).font(.nunito(34, .black)).foregroundStyle(.white) }
+                else { Text("步").font(.hanzi(30, .black)).foregroundStyle(.white) }
+            }
+            .frame(width: 76, height: 76)
+            .overlay(alignment: .bottomTrailing) {
+                Text("\(lv.level)").font(.nunito(14, .black)).foregroundStyle(.white)
+                    .frame(minWidth: 28, minHeight: 28).padding(.horizontal, 2)
+                    .background(gold, in: Capsule())
+                    .overlay(Capsule().stroke(Color(UIColor(hex: 0xFFFDF8)), lineWidth: 3))
+                    .offset(x: 4, y: 4)
+            }
+            VStack(alignment: .leading, spacing: 6) {
+                Text(name.isEmpty ? "Learner" : name).font(.nunito(23, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.7)
+                Text("Level \(lv.level)").font(.nunito(14, .heavy)).foregroundStyle(Color(UIColor(hex: 0xB7822E)))
+                GeometryReader { g in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color(UIColor(hex: 0xEFE9DD)))
+                        Capsule().fill(gold).frame(width: g.size.width * Double(lv.into) / Double(max(1, lv.span)))
+                    }
+                }
+                .frame(height: 8)
+                Text("\(lv.next) XP to level \(lv.level + 1)").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted)
+            }
+        }
+        .padding(16)
+        .homeCard(radius: 22)
+    }
+
+    // MARK: four numbers
+
+    private func numbers(out: (date: String, lost: Int)?) -> some View {
+        let learned = course.cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
+        let lit = out == nil && progress.streak > 0
+        return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+            number(out.map { "\($0.lost)" } ?? "\(progress.streak)", out != nil ? "Streak went out" : "Day streak",
+                   icon: lit ? "chip-lantern-lit" : "chip-lantern-unlit")
+            number(progress.xpTotal.formatted(), "Total XP", symbol: "bolt.fill", tint: 0xF2B33D)
+            Button { router.push(.chars) } label: { number("\(progress.charsKnown)", "Characters", han: true) }.buttonStyle(CardPress())
+            number("\(learned)", "Words learned", symbol: "leaf.fill", tint: 0x1F8A6D)
+        }
+    }
+
+    private func number(_ value: String, _ label: String, icon: String? = nil, symbol: String? = nil, tint: UInt32 = 0x1F7A6C, han: Bool = false) -> some View {
+        HStack(spacing: 12) {
+            Group {
+                if let icon { Image(icon).resizable().scaledToFit().frame(height: 30) }
+                else if han { Text("字").font(.hanzi(20, .black)).foregroundStyle(Home.teal) }
+                else if let symbol { Image(systemName: symbol).font(.system(size: 19, weight: .bold)).foregroundStyle(Color(UIColor(hex: tint))) }
+            }
+            .frame(width: 34)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(value).font(.nunito(21, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.6)
+                Text(label).font(.nunito(12.5, .bold)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.8)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 12)
+        .homeCard()
+    }
+
     // MARK: today's quests (from Home's Daily quests)
+
     private var quests: some View {
         let list = progress.todayQuests
         let n = { (q: Quest) in min(q.target, progress.questDone(q) ? q.target : progress.progress(of: q)) }
         let done = list.filter { n($0) >= $0.target }.count
         let opened = done == 3 && progress.chestOpened
-        return VStack(alignment: .leading, spacing: 10) {
+        let gold = Color(UIColor(hex: 0xF2B33D)), goldInk = Color(UIColor(hex: 0xB7822E))
+        return VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Daily quests").font(.nunitoXB(17)).foregroundStyle(Color.ink)
+                heading("Daily quests")
                 Spacer()
-                Text(done == 3 ? (opened ? "Pocket opened" : "3/3") : "\(done)/3").font(.nunitoXB(12.5)).foregroundStyle(done == 3 ? Color.gold : Color.muted)
-                    .padding(.horizontal, 10).padding(.vertical, 3)
-                    .background(Color.accentSoft, in: Capsule())
+                Text(done == 3 ? (opened ? "Pocket opened" : "3/3") : "\(done)/3").font(.nunito(13, .black))
+                    .foregroundStyle(done == 3 ? goldInk : Home.muted)
             }
-            HStack(spacing: 12) {
-                Image("quest-pouch").resizable().scaledToFit().frame(width: 52)
-                VStack(spacing: 0) {
-                    ForEach(Array(list.enumerated()), id: \.offset) { i, q in
-                        let k = n(q), ok = k >= q.target
-                        HStack(spacing: 10) {
-                            Image(systemName: ok ? "checkmark" : q.icon).font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(ok ? Color.good : Color.accent)
-                                .frame(width: 28, height: 28)
-                                .background(ok ? Color.goodSoft : Color.accentSoft, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text(q.title).font(.nunito(14, .bold)).foregroundStyle(Color.ink).lineLimit(1).minimumScaleFactor(0.85)
-                                Bar(value: Double(k) / Double(q.target), fill: ok ? .good : .accent)
+            VStack(spacing: 0) {
+                ForEach(Array(list.enumerated()), id: \.offset) { i, q in
+                    let k = n(q), ok = k >= q.target
+                    if i > 0 { Rectangle().fill(Home.line).frame(height: 1).padding(.leading, 60) }
+                    HStack(spacing: 12) {
+                        Image(systemName: ok ? "checkmark" : q.icon).font(.system(size: 15, weight: .heavy))
+                            .foregroundStyle(ok ? Color.good : goldInk)
+                            .frame(width: 34, height: 34)
+                            .background(ok ? Color.goodSoft : gold.opacity(0.18), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(q.title).font(.nunito(14.5, .heavy)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.85)
+                                Spacer(minLength: 6)
+                                Text(ok ? "Done" : "\(k)/\(q.target)").font(.nunito(13, .black)).monospacedDigit().foregroundStyle(ok ? Color.good : Home.muted)
                             }
-                            Text(ok ? "Done" : "\(k)/\(q.target)").font(.nunitoXB(13)).monospacedDigit()
-                                .foregroundStyle(ok ? Color.good : Color.muted)
-                                .frame(minWidth: 40, alignment: .trailing)
+                            GeometryReader { g in
+                                ZStack(alignment: .leading) {
+                                    Capsule().fill(Color(UIColor(hex: 0xEFE9DD)))
+                                    Capsule().fill(ok ? Color.good : gold).frame(width: g.size.width * Double(k) / Double(q.target))
+                                }
+                            }
+                            .frame(height: 7)
                         }
-                        .padding(.vertical, 8)
-                        .overlay(alignment: .top) { if i > 0 { Rectangle().fill(Color.line).frame(height: 1) } }
                     }
+                    .padding(.horizontal, 14).padding(.vertical, 12)
                 }
             }
-            .padding(.horizontal, 14).padding(.vertical, 6)
-            .panel(radius: 18)
+            .homeCard()
         }
     }
 
-    /// The day each achievement was first earned, for ordering.
-    private func stamp() {
-        for a in Achievement.all where progress.activity.achv[a.id] == nil && a.test(progress) { progress.stampAchievement(a.id) }
-    }
+    // MARK: the chapter you're in, and how far through it
 
-    private func hero(_ lv: (level: Int, into: Int, span: Int, next: Int)) -> some View {
-        ZStack(alignment: .bottom) {
-            // the picture fills the card without setting its width
-            Color.clear.frame(maxWidth: .infinity).frame(height: 285)
-                .overlay { Image("profile-hero").resizable().scaledToFill() }
-                .clipped()
-            AvatarView(config: progress.avatar).frame(width: 310, height: 310).offset(y: 8)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(progress.name.isEmpty ? "Learner" : progress.name).font(.nunitoXB(24)).foregroundStyle(Color.ink)
-                Text("Level \(lv.level) · \(lv.next) XP to go").font(.nunito(13.6, .semibold)).foregroundStyle(Color.muted)
-                    .frame(maxWidth: 110, alignment: .leading)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).padding(16).padding(.top, -4)
-            Button { router.push(.avatar) } label: {
-                Label("Edit", systemImage: "pencil").font(.nunitoXB(14)).foregroundStyle(Color.ink)
-                    .padding(.horizontal, 17).padding(.vertical, 9).background(Color.panel.opacity(0.92), in: Capsule())
-            }
-            .buttonStyle(.plain)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing).padding(14)
-        }
-        .frame(height: 285)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(Color.line))
-    }
-
-    private func stats(_ lv: (level: Int, into: Int, span: Int, next: Int), out: (date: String, lost: Int)?) -> some View {
-        HStack(spacing: 8) {
-            stat(out.map { "\($0.lost)" } ?? "\(progress.streak)", out != nil ? "Went out" : "Day streak", muted: out != nil)
-            stat(lv.level > 0 ? progress.xpTotal.formatted() : "0", "Total XP")
-            Button { router.push(.chars) } label: { stat("\(progress.charsKnown)", "Characters", han: true) }.buttonStyle(.plain)
-            stat("\(lv.level)", "Level")
-        }
-    }
-
-    private func stat(_ value: String, _ label: String, muted: Bool = false, han: Bool = false) -> some View {
-        VStack(spacing: 2) {
-            if han { Text("字").font(.hanzi(13, .bold)).foregroundStyle(Color.accent) }
-            Text(value).font(.nunitoXB(20)).foregroundStyle(muted ? Color.muted : Color.ink).lineLimit(1).minimumScaleFactor(0.6)
-            Text(label).font(.nunito(11.5, .bold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.8)
-        }
-        .frame(maxWidth: .infinity).padding(.vertical, 12).panel(radius: 16)
-    }
-
-    /// The chapter you're in, and how far through it.
     private var pathCard: some View {
         let cur = progress.currentLessonId
         let ci = cur.flatMap { course.chapterOf[$0] } ?? course.chapters.count - 1
         let ch = course.chapters[ci]
         let done = ch.lessons.filter(progress.isDone).count
-        return Button { router.tab = .learn } label: {
-            VStack(alignment: .leading, spacing: 0) {
-                Text("LEARNING PATH").font(.nunito(12.5, .bold)).foregroundStyle(Color.muted)
-                Text(course.chapterLabel(ci)).font(.nunitoXB(20)).foregroundStyle(Color.ink).padding(.top, 3)
-                Text(ch.title).font(.nunito(13.5, .semibold)).foregroundStyle(Color.muted)
-                Bar(value: Double(done) / Double(max(1, ch.lessons.count)), height: 8).frame(maxWidth: 200).padding(.top, 12).padding(.bottom, 7)
-                Text("\(done) / \(ch.lessons.count) lessons").font(.nunito(13, .bold)).foregroundStyle(Color.muted)
-                    .padding(.horizontal, 6).padding(.vertical, 3).background(Color.panel, in: RoundedRectangle(cornerRadius: 8))
+        return VStack(alignment: .leading, spacing: 8) {
+            heading("Learning path")
+            Button { router.tab = .learn } label: {
+                HStack(spacing: 14) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(course.chapterLabel(ci).uppercased()).font(.nunito(11.5, .black)).tracking(1).foregroundStyle(Home.muted)
+                        Text(ch.title).font(.nunito(18, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.8)
+                        GeometryReader { g in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(Color(UIColor(hex: 0xEFE9DD)))
+                                Capsule().fill(Home.teal).frame(width: g.size.width * Double(done) / Double(max(1, ch.lessons.count)))
+                            }
+                        }
+                        .frame(height: 8).padding(.top, 6)
+                        Text("\(done) of \(ch.lessons.count) lessons").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted).padding(.top, 2)
+                    }
+                    Image(systemName: "chevron.right").font(.system(size: 16, weight: .heavy)).foregroundStyle(.white)
+                        .frame(width: 40, height: 40).background(Home.teal, in: Circle())
+                }
+                .padding(16)
+                .background(alignment: .trailing) {
+                    Image("home-hills").resizable().scaledToFit().frame(width: 190).opacity(0.25).offset(x: 30, y: 14)
+                        .allowsHitTesting(false)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .homeCard()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(16)
-            .background {
-                Color.clear.overlay { Image("profile-path").resizable().scaledToFill() }.clipped()
-                    .mask(LinearGradient(stops: [.init(color: .clear, location: 0.3), .init(color: .black, location: 0.9)], startPoint: .leading, endPoint: .trailing))
-            }
-            .background(Color.panel)
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay(alignment: .bottomTrailing) {
-                Image(systemName: "chevron.right").font(.system(size: 19, weight: .bold)).foregroundStyle(Color.onAccent)
-                    .frame(width: 46, height: 46).background(Color.accent, in: Circle()).padding(14)
-            }
-            .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Color.line))
+            .buttonStyle(CardPress())
         }
-        .buttonStyle(PressDown(depth: 2))
     }
 
     private var achievements: some View {
@@ -215,7 +254,7 @@ struct ProfileView: View {
         let list = allAch ? earned + locked : Array((earned + locked).prefix(4))
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Recent achievements").font(.nunitoXB(17)).foregroundStyle(Color.ink)
+                heading("Achievements")
                 Spacer()
                 Button(allAch ? "Show fewer" : "See all ›") { withAnimation { allAch.toggle() } }
                     .font(.nunitoXB(14)).foregroundStyle(Color.accent)
@@ -230,7 +269,7 @@ struct ProfileView: View {
                         Text(a.sub).font(.nunito(9.6, .semibold)).foregroundStyle(Color.muted).multilineTextAlignment(.center).lineLimit(2)
                     }
                     .frame(maxWidth: .infinity).padding(.vertical, 12).padding(.horizontal, 4)
-                    .panel(radius: 16)
+                    .homeCard(radius: 16)
                     .opacity(got ? 1 : 0.55)
                     .saturation(got ? 1 : 0)
                 }
@@ -239,32 +278,12 @@ struct ProfileView: View {
         .padding(.top, 6)
     }
 
-    private var quote: some View {
-        HStack(spacing: 14) {
-            Text("“").font(.nunitoXB(38)).opacity(0.5).frame(maxHeight: .infinity, alignment: .top)
-            Text("A little progress\ngoes a long way.").font(.nunito(15.2, .semibold))
-            Spacer()
-            VStack(spacing: 0) {
-                Text("步步").font(.hanzi(23, .bold)).foregroundStyle(Color.ink)
-                Text("Bùbù").font(.nunito(11, .semibold)).foregroundStyle(Color.ink)
-            }
-        }
-        .foregroundStyle(Color.accent)
-        .padding(18).frame(minHeight: 106)
-        .background(alignment: .bottomTrailing) {
-            Image("profile-foliage").resizable().scaledToFit().frame(width: 120, height: 120).offset(x: -37, y: 10)
-        }
-        .background(Color.panel)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Color.line))
-    }
-
     // MARK: activity
 
     private var activity: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Activity").font(.nunitoXB(17)).foregroundStyle(Color.ink)
+                heading("Activity")
                 Spacer()
                 Segments(options: [("month", "Month"), ("week", "Week"), ("chars", "字")], value: $tab).frame(width: 200)
             }
@@ -275,9 +294,8 @@ struct ProfileView: View {
                 default: month
                 }
             }
-            .padding(16).panel(radius: 18)
+            .padding(16).homeCard()
         }
-        .padding(.top, 6)
     }
 
     /// This month: lit days filled, goal days gold, relit days marked (web: renderStreakCal).
@@ -373,33 +391,6 @@ struct ProfileView: View {
             }
             .frame(height: CGFloat((rows.count + 39) / 40) * ((UIScreen.main.bounds.width - 68) / 40))
             Text("\(strong) strong · \(learning) learning · \(due) due").font(.nunito(12.5, .bold)).foregroundStyle(Color.muted)
-        }
-    }
-
-    // MARK: mastery by chapter
-
-    private var mastery: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Mastered by chapter").font(.nunitoXB(17)).foregroundStyle(Color.ink).padding(.top, 6)
-            VStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(course.chapters.enumerated()), id: \.offset) { ci, ch in
-                    if ci == 0 || course.chapters[ci - 1].unit != ch.unit {
-                        Text(ch.unit).font(.nunito(12, .black)).tracking(0.8).foregroundStyle(Color.accent).padding(.top, ci == 0 ? 0 : 12).padding(.bottom, 4)
-                    }
-                    let cards = course.chapterCards[ci]
-                    let m = cards.filter { progress.isMastered($0.id) }.count
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(ch.title).font(.nunito(13.5, .semibold)).foregroundStyle(Color.ink).lineLimit(1)
-                            Spacer()
-                            Text("\(m) / \(cards.count)").font(.nunito(12.5, .bold)).monospacedDigit().foregroundStyle(m == cards.count && m > 0 ? Color.good : Color.muted)
-                        }
-                        Bar(value: cards.isEmpty ? 0 : Double(m) / Double(cards.count), height: 5, fill: .good)
-                    }
-                    .padding(.vertical, 5)
-                }
-            }
-            .padding(16).panel(radius: 18)
         }
     }
 }
