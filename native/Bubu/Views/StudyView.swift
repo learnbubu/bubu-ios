@@ -42,6 +42,11 @@ struct StudyView: View {
 
     /// the study card's height, to tell a phone where a multiple-choice exercise fits
     @State private var cardHeight: CGFloat = 0
+    /// The feedback sheet's top and the picked option's foot (in "study"), and how far the exercise is
+    /// lifted so a tall sheet (spot the difference) doesn't cover the answer you picked (the Mac's check of 0.1.80)
+    @State private var sheetTop: CGFloat = .infinity
+    @State private var pickedBottom: CGFloat = 0
+    @State private var lift: CGFloat = 0
     /// the exercise's visible height, so the answers sit low in the card
     @State private var scrollHeight: CGFloat = 0
     /// the combo burst on screen (its count), and the cheer between parts of a lesson
@@ -77,16 +82,19 @@ struct StudyView: View {
                                 // scrolled (the Mac's measure of 0.1.49)
                                 VStack(spacing: 0) {
                                     content.padding(.horizontal, 12).padding(.top, 15)
+                                        .offset(y: -lift)
                                         .padding(.bottom, 12 + bannerRoom)
                                         .frame(minHeight: scrollHeight, alignment: .top)
                                     Color.clear.frame(height: 1).id("exercise-end")
                                 }
                             }
                             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { scrollHeight = max(0, $0 - 1) }
+                            .onPreferenceChange(PickedBottomKey.self) { pickedBottom = $0; relift() }
                             .scrollIndicators(.hidden)
                             .scrollBounceBehavior(.basedOnSize)
                             // the feedback takes room from the exercise: keep the answers in view
                             .onChange(of: feedback != nil) { _, shown in
+                                if !shown { lift = 0 }
                                 guard shown, !fixed else { return }
                                 // once the feedback has taken its room (it springs in), not before:
                                 // until then there's nothing to scroll
@@ -358,6 +366,14 @@ struct StudyView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.9), value: exerciseKey)
     }
 
+    /// Lift the exercise just enough that the answer you picked shows above the feedback sheet: once the
+    /// sheet is up, never while answering (pickedBottom is measured after the lift, so it's added back).
+    private func relift() {
+        guard feedback != nil, pickedBottom > 0, sheetTop.isFinite else { if feedback == nil, lift != 0 { lift = 0 }; return }
+        let need = pickedBottom + lift + 10 - sheetTop
+        if need > lift + 1 { withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { lift = need } }
+    }
+
     /// Room kept at a multiple-choice exercise's foot from the start, so the feedback pops up
     /// over it as an overlay and nothing moves (the owner, 4 Oct 2026: not "sliding up again").
     private var bannerRoom: CGFloat {
@@ -407,6 +423,8 @@ struct StudyView: View {
                                     .ignoresSafeArea(edges: .bottom)
                             }
                             .fixedSize(horizontal: false, vertical: true)
+                            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).minY } action: { sheetTop = $0; relift() }
+                            .onDisappear { sheetTop = .infinity }
                             .padding(.bottom, 79)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
@@ -1095,6 +1113,21 @@ struct PinyinHint: View {
     }
 }
 
+/// The foot of the option you picked (in "study"), so StudyView can lift the exercise clear of the feedback sheet.
+struct PickedBottomKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
+struct PickedMark: ViewModifier {
+    let on: Bool
+    func body(content: Content) -> some View {
+        content.background(GeometryReader { g in
+            Color.clear.preference(key: PickedBottomKey.self, value: on ? g.frame(in: .named("study")).maxY : 0)
+        })
+    }
+}
+
 struct ChoiceView: View {
     let ex: Exercise
     let picked: String?
@@ -1192,19 +1225,19 @@ struct ChoiceView: View {
             if ex.dir == "picture" {
                 Spacer(minLength: 18)
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                    ForEach(ex.options, id: \.self) { opt in pictureCard(opt) }
+                    ForEach(ex.options, id: \.self) { opt in pictureCard(opt).modifier(PickedMark(on: opt == picked)) }
                 }
             } else {
             Spacer(minLength: 18)
             if ex.dir == "gap" {
                 // word tiles in a row, centred, wrapping as they need
                 FlowLayout(spacing: 12, lineSpacing: 14, center: true) {
-                    ForEach(ex.options, id: \.self) { opt in option(opt) }
+                    ForEach(ex.options, id: \.self) { opt in option(opt).modifier(PickedMark(on: opt == picked)) }
                 }
                 .frame(maxWidth: .infinity)
             } else {
                 VStack(spacing: 10) {
-                    ForEach(ex.options, id: \.self) { opt in option(opt) }
+                    ForEach(ex.options, id: \.self) { opt in option(opt).modifier(PickedMark(on: opt == picked)) }
                 }
             }
             }

@@ -178,6 +178,10 @@ struct StudyChoicePage: View {
         let due = cards.filter { (progress.srs[$0.id]?.due).map { $0 <= progress.now() } ?? false }.count
         // words learned (met at least once): "mastered" (a week's interval, and produced) left every bar empty
         let mastered = cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
+        // how far through the chapter: its words learned, or its lessons done when that's further
+        // (a chapter skipped past by a placement has its lessons done but no words met yet)
+        let share = max(cards.isEmpty ? 0 : Double(mastered) / Double(cards.count),
+                        Double(ids.filter(progress.isDone).count) / Double(max(1, ids.count)))
         let ahead = ci > currentChapter
         let isOpen = open.contains(ci)
         let label = course.chapterLabel(ci)
@@ -197,7 +201,7 @@ struct StudyChoicePage: View {
                                 GeometryReader { g in
                                     ZStack(alignment: .leading) {
                                         Capsule().fill(Color(UIColor(hex: 0xE7E2D8)))
-                                        Capsule().fill(Color.good).frame(width: g.size.width * (cards.isEmpty ? 0 : Double(mastered) / Double(cards.count)))
+                                        Capsule().fill(Color.good).frame(width: g.size.width * share)
                                     }
                                 }
                                 .frame(height: 5).padding(.top, 3)
