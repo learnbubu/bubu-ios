@@ -28,7 +28,7 @@ struct AvatarStage: UIViewRepresentable {
         v.backgroundColor = .clear
         v.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         v.colorPixelFormat = .bgra8Unorm
-        v.preferredFramesPerSecond = 30   // (the animations are baked at 30)
+        v.preferredFramesPerSecond = 60   // (baked at 30: every other frame drawn between two, so it moves smoothly)
         if let rig = AvatarRig.load(name), let r = AvatarRenderer(rig: rig, view: v) {
             context.coordinator.renderer = r
             v.delegate = r
@@ -66,6 +66,8 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     private var idleLoops = 1
     private var last: String?
     private var restedAt: CFTimeInterval?
+    /// how much quicker than in Studio the other animations play (Idle plays as made)
+    private let reactionSpeed = 1.25
 
     init?(rig: AvatarRig, view: MTKView) {
         guard let device = view.device, let queue = device.makeCommandQueue(), let lib = try? device.makeLibrary(source: Self.shaders, options: nil),
@@ -167,12 +169,12 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
 
     // MARK: directing
 
-    /// One of the other animations, now (tapped), if it's idling.
     /// Resting (off screen) and back: the time away doesn't count, so it carries on just where it stopped.
     func rest(_ on: Bool) {
         let now = CACurrentMediaTime()
         if on { if restedAt == nil { restedAt = now } } else if let t = restedAt { started += now - t; restedAt = nil }
     }
+    /// One of the other animations, now (tapped), if it's idling.
     func react() { if playing == idle { startReaction(CACurrentMediaTime()) } }
 
     private func startReaction(_ now: CFTimeInterval) {
@@ -184,7 +186,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     /// What plays now, and how far in (ms): Idle for one or two of its loops, then another once, then Idle again (both
     /// start and end at rest, so they meet without a jump).
     private func direct(_ now: CFTimeInterval) -> (AvatarRig.Anim, Double) {
-        var e = (now - started) * 1000
+        var e = (now - started) * 1000 * (playing == idle ? 1 : reactionSpeed)
         if playing == idle, let a = rig.anims[idle], e >= a.duration * Double(idleLoops), !reactions.isEmpty {
             startReaction(now); e = 0
         } else if playing != idle, let a = rig.anims[playing], e >= a.duration {
