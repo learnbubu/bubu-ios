@@ -68,6 +68,12 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     private var restedAt: CFTimeInterval?
     /// how much quicker than in Studio the other animations play (Idle plays as made)
     private let reactionSpeed = 1.25
+    /// what played before the last change, and how far in it was then: for a moment after a change the two are blended,
+    /// so one animation flows into the next even where their poses don't meet (Idle doesn't start at rest; a tap
+    /// interrupts it anywhere)
+    private var before: (name: String, at: Double)?
+    private var changedAt: CFTimeInterval = 0
+    private let blendTime = 0.3
 
     init?(rig: AvatarRig, view: MTKView) {
         guard let device = view.device, let queue = device.makeCommandQueue(), let lib = try? device.makeLibrary(source: Self.shaders, options: nil),
@@ -172,25 +178,38 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     /// Resting (off screen) and back: the time away doesn't count, so it carries on just where it stopped.
     func rest(_ on: Bool) {
         let now = CACurrentMediaTime()
-        if on { if restedAt == nil { restedAt = now } } else if let t = restedAt { started += now - t; restedAt = nil }
+        if on { if restedAt == nil { restedAt = now } } else if let t = restedAt { started += now - t; changedAt += now - t; restedAt = nil }
     }
     /// One of the other animations, now (tapped), if it's idling.
     func react() { if playing == idle { startReaction(CACurrentMediaTime()) } }
 
+    private func speed(_ name: String) -> Double { name == idle ? 1 : reactionSpeed }
+    private func elapsed(_ now: CFTimeInterval) -> Double { (now - started) * 1000 * speed(playing) }
+
+    private func change(to name: String, _ now: CFTimeInterval) {
+        var at = elapsed(now)
+        if playing != idle, let a = rig.anims[playing] { at = min(at, a.duration - 0.01) }   // (a reaction ends where it ends)
+        before = (playing, at); changedAt = now
+        playing = name; started = now
+    }
+
     private func startReaction(_ now: CFTimeInterval) {
         guard !reactions.isEmpty else { return }
         let pick = reactions.filter { $0 != last }.randomElement() ?? reactions[0]
-        last = pick; playing = pick; started = now
+        last = pick; change(to: pick, now)
     }
 
     /// What plays now, and how far in (ms): Idle for one or two of its loops, then another once, then Idle again (both
     /// start and end at rest, so they meet without a jump).
     private func direct(_ now: CFTimeInterval) -> (AvatarRig.Anim, Double) {
-        var e = (now - started) * 1000 * (playing == idle ? 1 : reactionSpeed)
+        // (for checking against Studio: launched with -avatarAt Name:ms it holds that frame)
+        if let hold = UserDefaults.standard.string(forKey: "avatarAt"), let c = hold.lastIndex(of: ":"),
+           let a = rig.anims[String(hold[..<c])], let ms = Double(hold[hold.index(after: c)...]) { before = nil; return (a, ms) }
+        var e = elapsed(now)
         if playing == idle, let a = rig.anims[idle], e >= a.duration * Double(idleLoops), !reactions.isEmpty {
             startReaction(now); e = 0
         } else if playing != idle, let a = rig.anims[playing], e >= a.duration {
-            playing = idle; started = now; e = 0; idleLoops = Int.random(in: 1...2)
+            change(to: idle, now); e = 0; idleLoops = Int.random(in: 1...2)
         }
         guard let a = rig.anims[playing] ?? rig.anims.values.first else { return (AvatarRig.Anim(duration: 1, loop: true, frames: 1, mats: [], opacity: []), 0) }
         return (a, e)
@@ -214,9 +233,20 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
 
     func draw(in view: MTKView) {
         guard let rpd = view.currentRenderPassDescriptor, let drawable = view.currentDrawable, let cb = queue.makeCommandBuffer() else { return }
-        let (anim, ms) = direct(CACurrentMediaTime())
+        let now = CACurrentMediaTime()
+        let (anim, ms) = direct(now)
         guard anim.frames > 0, !anim.mats.isEmpty else { return }
-        let (mats, op) = rig.sample(anim, at: ms)
+        var (mats, op) = rig.sample(anim, at: ms)
+        // just after a change: blended from what played before (it carrying on, eased out as the new one eases in)
+        if let b = before, let ba = rig.anims[b.name] {
+            let t = (now - changedAt) / blendTime
+            if t >= 1 { before = nil } else {
+                var at = b.at + (now - changedAt) * 1000 * speed(b.name)
+                if b.name != idle { at = min(at, ba.duration - 0.01) }
+                let old = rig.sample(ba, at: at).mats, w = Float(t * t * (3 - 2 * t))
+                for k in 0..<mats.count { mats[k] = old[k] * (1 - w) + mats[k] * w }
+            }
+        }
         let parts = rig.parts, n = parts.count
         // every part bent to this pose
         for i in 0..<n {
