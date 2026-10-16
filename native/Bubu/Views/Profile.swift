@@ -95,40 +95,26 @@ struct ProfileView: View {
         Text(t.uppercased()).font(.nunito(12, .black)).tracking(1.3).foregroundStyle(Home.teal).padding(.leading, 4)
     }
 
-    // MARK: you: your initial (the avatar's place for now), your name, your level
+    // MARK: you: your avatar (alive: it idles, and now and then waves, thinks or cheers; tap it), your name, your level
 
     private func you(_ lv: (level: Int, into: Int, span: Int, next: Int)) -> some View {
         let name = progress.name.trimmingCharacters(in: .whitespaces)
         let gold = Color(UIColor(hex: 0xF2B33D))
-        return HStack(spacing: 16) {
-            ZStack {
-                Circle().fill(LinearGradient(colors: [Color(UIColor(hex: 0x2A8B7C)), Home.teal], startPoint: .topLeading, endPoint: .bottomTrailing))
-                if let c = name.first { Text(String(c).uppercased()).font(.nunito(34, .black)).foregroundStyle(.white) }
-                else { Text("步").font(.hanzi(30, .black)).foregroundStyle(.white) }
-            }
-            .frame(width: 76, height: 76)
-            .overlay(alignment: .bottomTrailing) {
-                Text("\(lv.level)").font(.nunito(14, .black)).foregroundStyle(.white)
-                    .frame(minWidth: 28, minHeight: 28).padding(.horizontal, 2)
-                    .background(gold, in: Capsule())
-                    .overlay(Capsule().stroke(Color(UIColor(hex: 0xFFFDF8)), lineWidth: 3))
-                    .offset(x: 4, y: 4)
-            }
-            VStack(alignment: .leading, spacing: 6) {
-                Text(name.isEmpty ? "Learner" : name).font(.nunito(23, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.7)
-                Text("Level \(lv.level)").font(.nunito(14, .heavy)).foregroundStyle(Color(UIColor(hex: 0xB7822E)))
-                GeometryReader { g in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(Color(UIColor(hex: 0xEFE9DD)))
-                        Capsule().fill(gold).frame(width: g.size.width * Double(lv.into) / Double(max(1, lv.span)))
-                    }
+        return VStack(spacing: 6) {
+            AvatarStage(name: "relaxed").frame(width: 250, height: 250)
+            Text(name.isEmpty ? "Learner" : name).font(.nunito(26, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.7)
+            Text("Level \(lv.level)").font(.nunito(15, .heavy)).foregroundStyle(Color(UIColor(hex: 0xB7822E)))
+            GeometryReader { g in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color(UIColor(hex: 0xEFE9DD)))
+                    Capsule().fill(gold).frame(width: g.size.width * Double(lv.into) / Double(max(1, lv.span)))
                 }
-                .frame(height: 8)
-                Text("\(lv.next) XP to level \(lv.level + 1)").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted)
             }
+            .frame(width: 200, height: 8)
+            .padding(.top, 2)
+            Text("\(lv.next) XP to level \(lv.level + 1)").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted)
         }
-        .padding(16)
-        .homeCard(radius: 22)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: four numbers
