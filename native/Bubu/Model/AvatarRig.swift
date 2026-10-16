@@ -5,6 +5,8 @@ import Foundation
 /// The player bends each part by its bones and draws them bottom up, shaded in the light, as Studio draws them.
 struct AvatarRig: Decodable {
     struct Light: Decodable { let x: Float; let y: Float; let distance: Float; let strength: Float; let softness: Float }
+    /// points with their bones: x y pairs where they rest, four bones each (-1 none) and how much each pulls
+    struct Points: Decodable { let verts: [Float]; let bones: [Int]; let weights: [Float] }
     struct Part: Decodable {
         let name: String
         /// its picture (a png in the bundle), and its grid: points where they rest (document units, x y pairs), the
@@ -16,6 +18,9 @@ struct AvatarRig: Decodable {
         /// four bones a point (an index into `bones`, -1 none) and how much each pulls it
         let bones: [Int]
         let weights: [Float]
+        /// the whole bend grid's outline (only the cells round the picture are drawn): a shadow is moved away from the
+        /// light from its middle, as in Studio
+        let edge: Points?
         /// in the light: whether it throws a shadow, whether shadows fall on it, the parts its shadow never falls on
         /// (they meet at a joint), the parts in its shadow's way wherever they are, and a part it's shaded as (-1 none)
         let cast: Bool
@@ -62,14 +67,17 @@ struct AvatarRig: Decodable {
 
     /// A part's points at a pose (document units, x y pairs): each its bones' moves, weighed.
     func points(_ p: Part, mats: [Float], into out: inout [Float]) {
-        let n = p.verts.count / 2
+        bend(p.verts, p.bones, p.weights, mats: mats, into: &out)
+    }
+    func bend(_ verts: [Float], _ bones: [Int], _ weights: [Float], mats: [Float], into out: inout [Float]) {
+        let n = verts.count / 2
         if out.count != n * 2 { out = [Float](repeating: 0, count: n * 2) }
         for v in 0..<n {
-            let x = p.verts[v * 2], y = p.verts[v * 2 + 1]
+            let x = verts[v * 2], y = verts[v * 2 + 1]
             var px: Float = 0, py: Float = 0, ws: Float = 0
             for k in 0..<4 {
-                let b = p.bones[v * 4 + k]; if b < 0 { continue }
-                let w = p.weights[v * 4 + k], m = b * 6
+                let b = bones[v * 4 + k]; if b < 0 { continue }
+                let w = weights[v * 4 + k], m = b * 6
                 px += w * (mats[m] * x + mats[m + 2] * y + mats[m + 4])
                 py += w * (mats[m + 1] * x + mats[m + 3] * y + mats[m + 5])
                 ws += w

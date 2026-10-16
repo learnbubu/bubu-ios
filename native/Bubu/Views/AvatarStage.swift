@@ -53,6 +53,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     private var textures: [MTLTexture] = []
     private var uvBufs: [MTLBuffer] = [], idxBufs: [MTLBuffer] = [], posBufs: [MTLBuffer] = []
     private var pts: [[Float]]
+    private var edgePts: [Float] = []
     private let none: MTLTexture
     private var masks: [MTLTexture] = [], softened: [MTLTexture] = [], stencil: MTLTexture?, maskSize = (w: 0, h: 0)
     /// the part of the document it shows (every pose of every animation fits)
@@ -266,15 +267,19 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
             let shows = (0..<n).map { op[$0] > 0.01 }
             var shift = [SIMD2<Float>](repeating: .zero, count: n)
             for c in 0..<n where parts[c].cast && shows[c] {
+                // (its middle: of its whole grid's outline, as Studio measures it)
+                if let e = parts[c].edge { rig.bend(e.verts, e.bones, e.weights, mats: mats, into: &edgePts) } else { edgePts = pts[c] }
                 var x0 = Float.greatestFiniteMagnitude, y0 = x0, x1 = -x0, y1 = -x0
-                for k in stride(from: 0, to: pts[c].count, by: 2) { x0 = min(x0, pts[c][k]); x1 = max(x1, pts[c][k]); y0 = min(y0, pts[c][k + 1]); y1 = max(y1, pts[c][k + 1]) }
+                for k in stride(from: 0, to: edgePts.count, by: 2) { x0 = min(x0, edgePts[k]); x1 = max(x1, edgePts[k]); y0 = min(y0, edgePts[k + 1]); y1 = max(y1, edgePts[k + 1]) }
                 let dx = (x0 + x1) / 2 - L.x, dy = (y0 + y1) / 2 - L.y, d = max(1e-3, (dx * dx + dy * dy).squareRoot())
                 shift[c] = SIMD2(dx / d * L.distance, dy / d * L.distance)
             }
             var jobs: [(Int, [Int])] = []
             for i in 0..<n where parts[i].receive && shows[i] {
-                let ref = parts[i].as >= 0 ? parts[i].as : i
-                let casters = ((ref + 1)..<max(ref + 1, n)).filter { c in c != i && parts[c].cast && shows[c] && !parts[c].skip.contains(i) && !parts[c].skip.contains(ref) }
+                // (part of another: shaded as one surface with it, but only by what's above both, so an ear's flap
+                // over the hair takes no shadow from the hair it covers)
+                let ref = parts[i].as >= 0 ? parts[i].as : i, above = max(ref, i) + 1
+                let casters = (above..<max(above, n)).filter { c in c != i && parts[c].cast && shows[c] && !parts[c].skip.contains(i) && !parts[c].skip.contains(ref) }
                 if !casters.isEmpty { jobs.append((i, casters)) }
             }
             let mw = max(1, Int(W) / 2), mh = max(1, Int(H) / 2)
