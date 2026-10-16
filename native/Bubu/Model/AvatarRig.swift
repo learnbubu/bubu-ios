@@ -4,7 +4,8 @@ import Foundation
 /// bones), its light, and every animation baked a frame at a time (each bone's move from rest, each part's opacity).
 /// The player bends each part by its bones and draws them bottom up, shaded in the light, as Studio draws them.
 struct AvatarRig: Decodable {
-    struct Light: Decodable { let x: Float; let y: Float; let distance: Float; let strength: Float; let softness: Float }
+    /// a lamp; one after the first falls only on its parts (`only`), there instead of the first or as well
+    struct Light: Decodable { let x: Float; let y: Float; let distance: Float; let strength: Float; let softness: Float; var only: [Int]? = nil; var instead: Bool? = nil }
     /// points with their bones: x y pairs where they rest, four bones each (-1 none) and how much each pulls
     struct Points: Decodable { let verts: [Float]; let bones: [Int]; let weights: [Float] }
     struct Part: Decodable {
@@ -43,8 +44,16 @@ struct AvatarRig: Decodable {
     let fps: Double
     let bones: [String]
     let light: Light?
+    let lights: [Light]?
     let parts: [Part]
     let anims: [String: Anim]
+
+    /// Every lamp (the first first, if it's on), and whether lamp `l` falls on part `i`.
+    var lamps: [(light: Light, first: Bool)] { (light.map { [($0, true)] } ?? []) + (lights ?? []).map { ($0, false) } }
+    func falls(_ l: (light: Light, first: Bool), on i: Int) -> Bool {
+        if l.first { return !(lights ?? []).contains { $0.instead == true && ($0.only ?? []).contains(i) } }
+        return l.light.only.map { $0.contains(i) } ?? true
+    }
 
     static func load(_ name: String) -> AvatarRig? {
         guard let url = Bundle.main.url(forResource: name, withExtension: "json"),

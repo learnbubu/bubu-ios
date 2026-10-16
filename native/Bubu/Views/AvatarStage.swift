@@ -262,31 +262,36 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
         var frame = Frame(scale: SIMD2(2 * s / W, -2 * s / H), offset: SIMD2(ox / W * 2 - 1, 1 - oy / H * 2), shift: .zero)
 
         // the shadows: a mask a part that receives, from the parts above it that cast
-        var maskOf = [MTLTexture?](repeating: nil, count: n)
-        if let L = rig.light {
+        // (two at most on a part: each with how dark it is)
+        var maskOf = [[(MTLTexture, Float)]](repeating: [], count: n)
+        let lamps = rig.lamps
+        if !lamps.isEmpty {
             let shows = (0..<n).map { op[$0] > 0.01 }
-            var shift = [SIMD2<Float>](repeating: .zero, count: n)
+            var middle = [SIMD2<Float>](repeating: .zero, count: n)
             for c in 0..<n where parts[c].cast && shows[c] {
                 // (its middle: of its whole grid's outline, as Studio measures it)
                 if let e = parts[c].edge { rig.bend(e.verts, e.bones, e.weights, mats: mats, into: &edgePts) } else { edgePts = pts[c] }
                 var x0 = Float.greatestFiniteMagnitude, y0 = x0, x1 = -x0, y1 = -x0
                 for k in stride(from: 0, to: edgePts.count, by: 2) { x0 = min(x0, edgePts[k]); x1 = max(x1, edgePts[k]); y0 = min(y0, edgePts[k + 1]); y1 = max(y1, edgePts[k + 1]) }
-                let dx = (x0 + x1) / 2 - L.x, dy = (y0 + y1) / 2 - L.y, d = max(1e-3, (dx * dx + dy * dy).squareRoot())
-                shift[c] = SIMD2(dx / d * L.distance, dy / d * L.distance)
+                middle[c] = SIMD2((x0 + x1) / 2, (y0 + y1) / 2)
             }
-            var jobs: [(Int, [Int])] = []
-            for i in 0..<n where parts[i].receive && shows[i] {
+            // each caster's shadow moved away from a lamp, from its middle
+            func shift(_ c: Int, _ L: AvatarRig.Light) -> SIMD2<Float> {
+                let dx = middle[c].x - L.x, dy = middle[c].y - L.y, d = max(1e-3, (dx * dx + dy * dy).squareRoot())
+                return SIMD2(dx / d * L.distance, dy / d * L.distance)
+            }
+            var jobs: [(Int, Int, [Int])] = []
+            for (li, lamp) in lamps.enumerated() { for i in 0..<n where parts[i].receive && shows[i] && rig.falls(lamp, on: i) {
                 // (part of another: shaded as one surface with it, but only by what's above both, so an ear's flap
                 // over the hair takes no shadow from the hair it covers)
                 let ref = parts[i].as >= 0 ? parts[i].as : i, above = max(ref, i) + 1
                 let casters = (above..<max(above, n)).filter { c in c != i && parts[c].cast && shows[c] && !parts[c].skip.contains(i) && !parts[c].skip.contains(ref) }
-                if !casters.isEmpty { jobs.append((i, casters)) }
-            }
+                if !casters.isEmpty && maskOf[i].count + jobs.filter({ $0.0 == i }).count < 2 { jobs.append((i, li, casters)) }
+            } }
             let mw = max(1, Int(W) / 2), mh = max(1, Int(H) / 2)
             ensureMasks(mw, mh, count: jobs.count)
-            let sigma = L.softness * s * 0.25
             for (k, job) in jobs.enumerated() where k < masks.count {
-                let (i, casters) = job
+                let (i, li, casters) = job, L = lamps[li].light, sigma = L.softness * s * 0.25
                 let pd = MTLRenderPassDescriptor()
                 pd.colorAttachments[0].texture = masks[k]; pd.colorAttachments[0].loadAction = .clear
                 pd.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0); pd.colorAttachments[0].storeAction = .store
@@ -303,14 +308,14 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                         enc.setDepthStencilState(outside)
                     } else { enc.setDepthStencilState(noStencil) }
                     enc.setRenderPipelineState(maskPipe); enc.setStencilReferenceValue(ref)
-                    frame.shift = shift[c]
+                    frame.shift = shift(c, L)
                     draw(enc, c, &frame)
                 }
                 enc.endEncoding()
                 if sigma > 0.3 {
                     MPSImageGaussianBlur(device: device, sigma: sigma).encode(commandBuffer: cb, sourceTexture: masks[k], destinationTexture: softened[k])
-                    maskOf[i] = softened[k]
-                } else { maskOf[i] = masks[k] }
+                    maskOf[i].append((softened[k], L.strength))
+                } else { maskOf[i].append((masks[k], L.strength)) }
             }
         }
 
@@ -319,8 +324,10 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
         enc.setRenderPipelineState(partPipe)
         frame.shift = .zero
         for i in 0..<n where op[i] > 0.01 {
-            var paint = Paint(opacity: op[i], strength: maskOf[i] == nil ? 0 : (rig.light?.strength ?? 0), viewport: SIMD2(W, H))
-            enc.setFragmentTexture(maskOf[i] ?? none, index: 1)
+            let m = maskOf[i]
+            var paint = Paint(opacity: op[i], strength: m.count > 0 ? m[0].1 : 0, strength2: m.count > 1 ? m[1].1 : 0, viewport: SIMD2(W, H))
+            enc.setFragmentTexture(m.count > 0 ? m[0].0 : none, index: 1)
+            enc.setFragmentTexture(m.count > 1 ? m[1].0 : none, index: 2)
             enc.setFragmentBytes(&paint, length: MemoryLayout<Paint>.stride, index: 0)
             draw(enc, i, &frame)
         }
@@ -348,7 +355,7 @@ using namespace metal;
 /// document units -> clip space; `shift` moves a caster's shape away from the lamp (document units)
 struct AvatarFrame { float2 scale; float2 offset; float2 shift; };
 /// a part's opacity, how dark its shadow is, and the drawable's size (to find its place in the shadow mask)
-struct AvatarPaint { float opacity; float strength; float2 viewport; };
+struct AvatarPaint { float opacity; float strength; float strength2; float2 viewport; };
 
 struct AvatarVOut { float4 pos [[position]]; float2 uv; };
 
@@ -362,11 +369,11 @@ vertex AvatarVOut avatar_vertex(const device float2 *pos [[buffer(0)]], const de
 
 /// a part: its picture (premultiplied), darkened where the shadow mask says, at its opacity
 fragment float4 avatar_part(AvatarVOut in [[stage_in]], texture2d<float> tex [[texture(0)]], texture2d<float> mask [[texture(1)]],
-                            constant AvatarPaint &p [[buffer(0)]]) {
+                            texture2d<float> mask2 [[texture(2)]], constant AvatarPaint &p [[buffer(0)]]) {
     constexpr sampler s(filter::linear, mip_filter::linear, address::clamp_to_edge);
     float4 c = tex.sample(s, in.uv);
-    float m = mask.sample(s, in.pos.xy / p.viewport).r;
-    c.rgb *= 1.0 - p.strength * m;
+    float2 at = in.pos.xy / p.viewport;
+    c.rgb *= (1.0 - p.strength * mask.sample(s, at).r) * (1.0 - p.strength2 * mask2.sample(s, at).r);   // (each light's shadow over the last)
     return c * p.opacity;
 }
 
@@ -387,5 +394,5 @@ fragment float4 avatar_blocker(AvatarVOut in [[stage_in]], texture2d<float> tex 
 
     /// (as the shaders' AvatarFrame and AvatarPaint)
     private struct Frame { var scale: SIMD2<Float>; var offset: SIMD2<Float>; var shift: SIMD2<Float> }
-    private struct Paint { var opacity: Float; var strength: Float; var viewport: SIMD2<Float> }
+    private struct Paint { var opacity: Float; var strength: Float; var strength2: Float; var viewport: SIMD2<Float> }
 }
