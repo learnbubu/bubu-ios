@@ -15,7 +15,11 @@ struct AvatarStage: UIViewRepresentable {
 
     /// (draws only while it's on screen: off it, under another tab or a cover, it rests)
     final class View: MTKView {
-        override func didMoveToWindow() { super.didMoveToWindow(); isPaused = window == nil || delegate == nil }
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            isPaused = window == nil || delegate == nil
+            (delegate as? AvatarRenderer)?.rest(isPaused)
+        }
     }
 
     func makeUIView(context: Context) -> MTKView {
@@ -61,6 +65,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     private var started = CACurrentMediaTime()
     private var idleLoops = 1
     private var last: String?
+    private var restedAt: CFTimeInterval?
 
     init?(rig: AvatarRig, view: MTKView) {
         guard let device = view.device, let queue = device.makeCommandQueue(), let lib = try? device.makeLibrary(source: Self.shaders, options: nil),
@@ -163,6 +168,11 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     // MARK: directing
 
     /// One of the other animations, now (tapped), if it's idling.
+    /// Resting (off screen) and back: the time away doesn't count, so it carries on just where it stopped.
+    func rest(_ on: Bool) {
+        let now = CACurrentMediaTime()
+        if on { if restedAt == nil { restedAt = now } } else if let t = restedAt { started += now - t; restedAt = nil }
+    }
     func react() { if playing == idle { startReaction(CACurrentMediaTime()) } }
 
     private func startReaction(_ now: CFTimeInterval) {
