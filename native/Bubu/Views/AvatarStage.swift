@@ -13,13 +13,18 @@ struct AvatarStage: UIViewRepresentable {
     }
     func makeCoordinator() -> Coordinator { Coordinator() }
 
+    /// (draws only while it's on screen: off it, under another tab or a cover, it rests)
+    final class View: MTKView {
+        override func didMoveToWindow() { super.didMoveToWindow(); isPaused = window == nil || delegate == nil }
+    }
+
     func makeUIView(context: Context) -> MTKView {
-        let v = MTKView(frame: .zero, device: MTLCreateSystemDefaultDevice())
+        let v = View(frame: .zero, device: MTLCreateSystemDefaultDevice())
         v.isOpaque = false
         v.backgroundColor = .clear
         v.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         v.colorPixelFormat = .bgra8Unorm
-        v.preferredFramesPerSecond = 60
+        v.preferredFramesPerSecond = 30   // (the animations are baked at 30)
         if let rig = AvatarRig.load(name), let r = AvatarRenderer(rig: rig, view: v) {
             context.coordinator.renderer = r
             v.delegate = r
