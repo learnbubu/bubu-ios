@@ -314,7 +314,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
             let mw = max(1, Int(W)), mh = max(1, Int(H))   // (as sharp as the screen: at half, a shadow's edge stepped, and slivers showed at the armpits)
             ensureMasks(mw, mh, count: jobs.count)
             for (k, job) in jobs.enumerated() where k < masks.count {
-                let (i, li, casters) = job, L = lamps[li].light, sigma = L.softness * s * 0.5
+                let (i, li, casters) = job, L = lamps[li].light, sigma = L.softness * s * 1.8   // (as soft as they looked at half resolution, before)
                 let pd = MTLRenderPassDescriptor()
                 pd.colorAttachments[0].texture = masks[k]; pd.colorAttachments[0].loadAction = .clear
                 pd.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0); pd.colorAttachments[0].storeAction = .store
