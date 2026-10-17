@@ -74,7 +74,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     /// interrupts it anywhere)
     private var before: (name: String, at: Double)?
     private var changedAt: CFTimeInterval = 0
-    private let blendTime = 0.3
+    private let blendTime = 0.6
 
     init?(rig: AvatarRig, view: MTKView) {
         guard let device = view.device, let queue = device.makeCommandQueue(), let lib = try? device.makeLibrary(source: Self.shaders, options: nil),
@@ -387,7 +387,7 @@ fragment float4 avatar_silhouette(AvatarVOut in [[stage_in]], texture2d<float> t
 /// a part in a caster's way: only marks the stencil where it's drawn
 fragment float4 avatar_blocker(AvatarVOut in [[stage_in]], texture2d<float> tex [[texture(0)]]) {
     constexpr sampler s(filter::linear, mip_filter::linear, address::clamp_to_edge);
-    if (tex.sample(s, in.uv).a < 0.5) discard_fragment();
+    if (tex.sample(s, in.uv).a < 0.03) discard_fragment();   // (all of it, to its faintest edge: else a sliver of shadow showed past it, at the armpits)
     return float4(0);
 }
 """#
