@@ -308,7 +308,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                 // (part of another: shaded as one surface with it, but only by what's above both, so an ear's flap
                 // over the hair takes no shadow from the hair it covers)
                 let ref = parts[i].as >= 0 ? parts[i].as : i, above = max(ref, i) + 1
-                let casters = (above..<max(above, n)).filter { c in c != i && parts[c].cast && shows[c] && !parts[c].skip.contains(i) && !parts[c].skip.contains(ref) }
+                let casters = (Array(above..<max(above, n)) + (parts[i].from ?? []).filter { $0 < i }).filter { c in c != i && parts[c].cast && shows[c] && !parts[c].skip.contains(i) && !parts[c].skip.contains(ref) }
                 if !casters.isEmpty && maskOf[i].count + jobs.filter({ $0.0 == i }).count < 2 { jobs.append((i, li, casters)) }
             } }
             let mw = max(1, Int(W)), mh = max(1, Int(H))   // (as sharp as the screen: at half, a shadow's edge stepped, and slivers showed at the armpits)

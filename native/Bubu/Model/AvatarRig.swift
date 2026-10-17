@@ -28,6 +28,8 @@ struct AvatarRig: Decodable {
         let receive: Bool
         let skip: [Int]
         let block: [Int]
+        /// parts under it whose shadows fall on it all the same (a sleeve drawn under a belly)
+        var from: [Int]? = nil
         let `as`: Int
     }
     /// a colour the learner chooses (hair, skin, a sweater's): the parts it recolours, its swatches, and each part's
