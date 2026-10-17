@@ -101,7 +101,11 @@ struct ProfileView: View {
         let name = progress.name.trimmingCharacters(in: .whitespaces)
         let gold = Color(UIColor(hex: 0xF2B33D))
         return VStack(spacing: 6) {
-            AvatarStage(name: "relaxed").frame(width: 250, height: 250)
+            ZStack {
+                AvatarBackdrop().frame(width: 236, height: 236)
+                AvatarStage(name: "relaxed").frame(width: 250, height: 250)
+            }
+            .frame(width: 250, height: 250)
             Text(name.isEmpty ? "Learner" : name).font(.nunito(26, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.7)
             Text("Level \(lv.level)").font(.nunito(15, .heavy)).foregroundStyle(Color(UIColor(hex: 0xB7822E)))
             GeometryReader { g in
