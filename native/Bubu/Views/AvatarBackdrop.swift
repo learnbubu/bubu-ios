@@ -15,9 +15,11 @@ struct AvatarBackdrop: View {
         ("Lilac", "ECE4F7", 0xB9A3E0),
         ("Butter", "FBF0CF", 0xE8C766),
     ]
-    /// where the sparkles sit (a fraction of the disc, from its middle), how big, and when each twinkles
-    private static let sparkles: [(x: CGFloat, y: CGFloat, size: CGFloat, phase: Double)] = [
-        (-0.38, -0.02, 0.10, 0.0), (0.37, 0.05, 0.11, 1.3), (0.30, 0.27, 0.07, 2.4), (-0.30, -0.33, 0.06, 3.1),
+    /// where the sparkles sit (a fraction of the disc, from its middle), how big, how long each one's twinkle takes
+    /// (s), and where in it each starts (0-1: so they don't twinkle together)
+    private static let sparkles: [(x: CGFloat, y: CGFloat, size: CGFloat, period: Double, phase: Double)] = [
+        (-0.38, -0.02, 0.10, 2.6, 0.0), (0.37, 0.05, 0.11, 3.1, 0.45), (0.30, 0.29, 0.07, 2.2, 0.7),
+        (-0.30, -0.33, 0.06, 2.8, 0.25), (0.33, -0.30, 0.05, 2.4, 0.85), (-0.36, 0.28, 0.05, 3.4, 0.6),
     ]
 
     var body: some View {
@@ -30,14 +32,17 @@ struct AvatarBackdrop: View {
                     Circle().fill(Color(UIColor(hex: UInt32(c.hex, radix: 16) ?? 0xDFF1E6)))
                     ForEach(Self.sparkles.indices, id: \.self) { i in
                         let s = Self.sparkles[i]
-                        // (a slow breath, and every few seconds a brighter twinkle)
-                        let k = still ? 1 : 0.8 + 0.2 * sin(now * 1.1 + s.phase) + 0.25 * max(0, sin(now * 0.7 + s.phase * 2) - 0.85) / 0.15
+                        // (each twinkles in turn: grows from small, turning a little, bright at its biggest, and
+                        // shrinks away again; and drifts gently up and down)
+                        let u = (now / s.period + s.phase).truncatingRemainder(dividingBy: 1)
+                        let pop = still ? 1 : pow(sin(.pi * u), 2)
                         Sparkle()
                             .fill(Color(UIColor(hex: c.sparkle)))
                             .frame(width: d * s.size, height: d * s.size)
-                            .scaleEffect(k)
-                            .opacity(0.65 + 0.35 * min(1, k))
-                            .offset(x: s.x * d, y: s.y * d)
+                            .scaleEffect(still ? 1 : 0.35 + 0.85 * pop)
+                            .rotationEffect(.degrees(still ? 0 : 40 * (u - 0.5)))
+                            .opacity(still ? 0.9 : 0.25 + 0.75 * pop)
+                            .offset(x: s.x * d, y: s.y * d + (still ? 0 : CGFloat(sin(now * 0.9 + s.phase * 6)) * d * 0.012))
                     }
                 }
                 .frame(width: d, height: d)
