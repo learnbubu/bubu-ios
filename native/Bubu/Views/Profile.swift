@@ -33,6 +33,8 @@ struct ProfileView: View {
     @Environment(Router.self) private var router
     @State private var tab = "month"
     @State private var allAch = false
+    @State private var dressing = false
+    @State private var look = AvatarLook.load()
     private let course = Course.shared
 
     var body: some View {
@@ -102,10 +104,23 @@ struct ProfileView: View {
         let gold = Color(UIColor(hex: 0xF2B33D))
         return VStack(spacing: 6) {
             ZStack {
-                AvatarBackdrop().frame(width: 236, height: 236)
-                AvatarStage(name: "relaxed").frame(width: 250, height: 250)
+                AvatarBackdrop(hex: look.backdrop).frame(width: 236, height: 236)
+                AvatarStage(name: "relaxed", look: look.colours).frame(width: 250, height: 250)
             }
             .frame(width: 250, height: 250)
+            .overlay(alignment: .bottomTrailing) {
+                // (dress him)
+                Button { dressing = true } label: {
+                    Image(systemName: "pencil").font(.system(size: 17, weight: .bold)).foregroundStyle(Home.teal)
+                        .frame(width: 46, height: 46).homeCard(radius: 23)
+                }
+                .buttonStyle(CardPress())
+                .accessibilityLabel("Change your avatar")
+                .offset(x: -14, y: -14)
+            }
+            .fullScreenCover(isPresented: $dressing, onDismiss: { look = AvatarLook.load() }) {
+                AvatarEditor { dressing = false }
+            }
             Text(name.isEmpty ? "Learner" : name).font(.nunito(26, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.7)
             Text("Level \(lv.level)").font(.nunito(15, .heavy)).foregroundStyle(Color(UIColor(hex: 0xB7822E)))
             GeometryReader { g in

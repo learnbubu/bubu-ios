@@ -1,10 +1,10 @@
 import SwiftUI
 
 /// What the avatar stands in front of on Profile: a soft disc of colour, and a few four-pointed sparkles that twinkle
-/// now and then. The colour is the learner's (the avatar editor will offer the others); the sparkles are a deeper
-/// shade of it.
+/// now and then. The colour is the learner's (chosen in the avatar editor); the sparkles are a deeper shade of it.
 struct AvatarBackdrop: View {
-    @AppStorage("avatarBackdrop") private var hex = AvatarBackdrop.colours[0].hex
+    /// its colour (one of `colours`, by hex)
+    var hex: String
     @Environment(\.accessibilityReduceMotion) private var still
 
     /// the colours to choose from: each a pale disc and its sparkles

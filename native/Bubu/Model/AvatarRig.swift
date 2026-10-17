@@ -30,6 +30,9 @@ struct AvatarRig: Decodable {
         let block: [Int]
         let `as`: Int
     }
+    /// a colour the learner chooses (hair, skin, a sweater's): the parts it recolours, its swatches, and each part's
+    /// picture in each swatch (tex[swatch][k] for parts[k]; the first swatch is as drawn)
+    struct Channel: Decodable { let name: String; let parts: [Int]; let swatches: [String]; let tex: [[String]] }
     struct Anim: Decodable {
         let duration: Double
         let loop: Bool
@@ -46,6 +49,7 @@ struct AvatarRig: Decodable {
     let light: Light?
     let lights: [Light]?
     let parts: [Part]
+    let channels: [Channel]?
     let anims: [String: Anim]
 
     /// Every lamp (the first first, if it's on), and whether lamp `l` falls on part `i`.

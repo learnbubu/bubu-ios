@@ -6,6 +6,8 @@ import MetalPerformanceShaders
 /// other animations once before idling again.
 struct AvatarStage: UIViewRepresentable {
     var name = "relaxed"
+    /// the colours worn: a swatch for each of the rig's colours, by name (the first, as drawn, where it's not said)
+    var look: [String: Int] = [:]
 
     final class Coordinator: NSObject {
         var renderer: AvatarRenderer?
@@ -31,6 +33,7 @@ struct AvatarStage: UIViewRepresentable {
         v.preferredFramesPerSecond = 60   // (baked at 30: every other frame drawn between two, so it moves smoothly)
         if let rig = AvatarRig.load(name), let r = AvatarRenderer(rig: rig, view: v) {
             context.coordinator.renderer = r
+            r.wear(look)
             v.delegate = r
         }
         v.addGestureRecognizer(UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tap)))
@@ -38,7 +41,7 @@ struct AvatarStage: UIViewRepresentable {
         v.accessibilityLabel = "Your avatar"
         return v
     }
-    func updateUIView(_ v: MTKView, context: Context) {}
+    func updateUIView(_ v: MTKView, context: Context) { context.coordinator.renderer?.wear(look) }
     static func dismantleUIView(_ v: MTKView, coordinator: Coordinator) { v.isPaused = true; v.delegate = nil }
 }
 
@@ -50,7 +53,10 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     private let device: MTLDevice, queue: MTLCommandQueue
     private let partPipe: MTLRenderPipelineState, maskPipe: MTLRenderPipelineState, blockPipe: MTLRenderPipelineState
     private let noStencil: MTLDepthStencilState, mark: MTLDepthStencilState, outside: MTLDepthStencilState
-    private var textures: [MTLTexture] = []
+    private var textures: [MTLTexture] = [], drawn: [MTLTexture] = []
+    /// the colours' pictures, loaded when first worn
+    private var swatchTex: [String: MTLTexture] = [:]
+    private var worn: [String: Int] = [:]
     private var uvBufs: [MTLBuffer] = [], idxBufs: [MTLBuffer] = [], posBufs: [MTLBuffer] = []
     private var pts: [[Float]]
     private var edgePts: [Float] = []
@@ -133,8 +139,25 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                   let ps = device.makeBuffer(length: max(4, p.verts.count * 4), options: .storageModeShared) else { return nil }
             textures.append(t); uvBufs.append(uv); idxBufs.append(ix); posBufs.append(ps)
         }
+        drawn = textures
         frameRect = fitAll()
         view.depthStencilPixelFormat = .invalid
+    }
+
+    /// Wear colours: each colour's parts drawn in its chosen swatch.
+    func wear(_ look: [String: Int]) {
+        guard look != worn else { return }
+        worn = look
+        textures = drawn
+        for c in rig.channels ?? [] {
+            let k = look[c.name] ?? 0
+            guard k > 0, k < c.tex.count else { continue }
+            for (j, i) in c.parts.enumerated() where i < textures.count && j < c.tex[k].count {
+                let name = c.tex[k][j]
+                if swatchTex[name] == nil { swatchTex[name] = Self.texture(name, device: device, queue: queue) }
+                if let t = swatchTex[name] { textures[i] = t }
+            }
+        }
     }
 
     /// A png from the bundle, premultiplied, with mipmaps (it's drawn smaller than it was made).
