@@ -104,10 +104,10 @@ struct ProfileView: View {
         let gold = Color(UIColor(hex: 0xF2B33D))
         return VStack(spacing: 6) {
             ZStack {
-                AvatarBackdrop(hex: look.backdrop).frame(width: 236, height: 236)
-                AvatarStage(name: "relaxed", look: look.colours).frame(width: 250, height: 250)
+                AvatarBackdrop(hex: look.backdrop).frame(width: 290, height: 290)
+                AvatarStage(name: "relaxed", look: look.colours).frame(width: 316, height: 316)
             }
-            .frame(width: 250, height: 250)
+            .frame(width: 316, height: 316)
             .overlay(alignment: .bottomTrailing) {
                 // (dress him)
                 Button { dressing = true } label: {
@@ -116,7 +116,7 @@ struct ProfileView: View {
                 }
                 .buttonStyle(CardPress())
                 .accessibilityLabel("Change your avatar")
-                .offset(x: -14, y: -14)
+                .offset(x: -20, y: -20)
             }
             .fullScreenCover(isPresented: $dressing, onDismiss: { look = AvatarLook.load() }) {
                 AvatarEditor { dressing = false }
