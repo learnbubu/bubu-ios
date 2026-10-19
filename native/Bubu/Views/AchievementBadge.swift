@@ -89,7 +89,7 @@ struct AchievementBadge: View {
     }
 
     static let cream = Color(UIColor(hex: 0xFFF7E2))
-    static func short(_ n: Int) -> String { n >= 100_000 ? "\(n / 1000)K" : "\(n)" }
+    static func short(_ n: Int) -> String { n >= 100_000 ? "\(n / 1000)K" : n.formatted() }
     /// the colour darker (k < 1) or lighter (k > 1)
     static func tone(_ c: UIColor, _ k: CGFloat) -> Color {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -117,7 +117,7 @@ struct AchievementCell: View {
             AchievementBadge(family: family, number: family.tiers[max(0, tier - 1)], isNew: tier > 0 && progress.isNew(family),
                              locked: tier == 0, width: width)
             Text(family.name).font(.nunito(14, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.75)
-            Text(tier == 0 ? "Next: \(family.tiers[0]) \(family.unit)" : maxed ? "All \(tier) done" : "\(tier) of \(family.tiers.count)")
+            Text(tier == 0 ? "Next: \(family.amount(family.tiers[0]))" : maxed ? "All \(tier) done" : "\(tier) of \(family.tiers.count)")
                 .font(.nunito(12, .bold)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.7)
         }
         .frame(width: width)

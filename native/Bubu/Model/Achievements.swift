@@ -16,6 +16,14 @@ struct AchievementFamily: Identifiable {
     let count: (ProgressStore) -> Int
 
     var image: String { "achv-\(id)" }
+    /// "7 days", "1 story": the count and what it counts
+    func amount(_ n: Int) -> String {
+        let one: [String: String] = ["days": "day", "lessons": "lesson", "words": "word", "characters": "character", "stories": "story",
+                                     "chapters": "chapter", "red pockets": "red pocket", "quests": "quest", "days relit": "day relit",
+                                     "flawless lessons": "flawless lesson", "late lessons": "late lesson", "early lessons": "early lesson",
+                                     "quick lessons": "quick lesson", "long runs": "long run"]
+        return "\(n.formatted()) \(n == 1 ? one[unit] ?? unit : unit)"
+    }
     /// How many tiers are reached (0: none yet).
     func tier(_ p: ProgressStore) -> Int { let n = count(p); return tiers.filter { n >= $0 }.count }
 
@@ -26,9 +34,9 @@ struct AchievementFamily: Identifiable {
               symbol: "figure.walk") { $0.done.count },
         .init(id: "word-garden", name: "Word Garden", unit: "words", tiers: [50, 250, 750, 1500, 3000], colour: 0x6FA35A,
               symbol: "leaf.fill") { $0.wordsLearned },
-        .init(id: "brush-and-ink", name: "Brush and Ink", unit: "characters", tiers: [25, 100, 300, 700, 1500], colour: 0x7D7A74,
+        .init(id: "brush-and-ink", name: "Brush and Ink", unit: "characters", tiers: [25, 100, 300, 700, 1500], colour: 0x34507A,
               symbol: "paintbrush.pointed.fill") { $0.charsKnown },
-        .init(id: "copybook", name: "Copybook", unit: "characters written", tiers: [10, 100, 300, 1000, 3000], colour: 0xC9A15E,
+        .init(id: "copybook", name: "Copybook", unit: "characters", tiers: [10, 100, 300, 1000, 3000], colour: 0xC9A15E,
               symbol: "pencil.and.scribble") { ($0.activity.written ?? [:]).values.reduce(0, +) },
         .init(id: "mountain-climber", name: "Mountain Climber", unit: "XP", tiers: [1000, 5000, 15000, 40000, 100_000], colour: 0x3E8E6E,
               symbol: "mountain.2.fill") { $0.xpTotal },
@@ -44,7 +52,7 @@ struct AchievementFamily: Identifiable {
               symbol: "sparkles") { $0.activity.relit.values.filter { $0 }.count },
         .init(id: "flawless", name: "Flawless", unit: "flawless lessons", tiers: [1, 10, 50], colour: 0x4FA58C,
               symbol: "checkmark.seal.fill") { $0.moments("flawless") },
-        .init(id: "night-owl", name: "Night Owl", unit: "late lessons", tiers: [1, 10, 50], colour: 0x4A5F9E,
+        .init(id: "night-owl", name: "Night Owl", unit: "late lessons", tiers: [1, 10, 50], colour: 0x7A62A8,
               symbol: "moon.stars.fill") { $0.moments("nightowl") },
         .init(id: "early-bird", name: "Early Bird", unit: "early lessons", tiers: [1, 10, 50], colour: 0xEE8A3E,
               symbol: "sunrise.fill") { $0.moments("earlybird") },
