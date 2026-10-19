@@ -270,6 +270,11 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
 
     // MARK: drawing
 
+    /// (the Mac's checks: `-noCull` draws every caster into a part's shadow, `-noScissor` draws and softens a shadow
+    /// over the whole view, so either shortcut can be ruled in or out against Studio)
+    private static let noCull = ProcessInfo.processInfo.arguments.contains("-noCull")
+    private static let noScissor = ProcessInfo.processInfo.arguments.contains("-noScissor")
+
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
 
     private func ensureMasks(_ w: Int, _ h: Int, count: Int) {
@@ -345,6 +350,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                 let L = lamp.light, reach = L.softness * 1.8 * 3, r = boxes[i]
                 let casters = (Array(above..<max(above, n)) + (parts[i].from ?? []).filter { $0 < i }).filter { c in
                     guard c != i && parts[c].cast && shows[c] && !parts[c].skip.contains(i) && !parts[c].skip.contains(ref) else { return false }
+                    if Self.noCull { return true }
                     let d = shift(c, L), b = boxes[c]
                     return b.x + d.x - reach < r.z && b.z + d.x + reach > r.x && b.y + d.y - reach < r.w && b.w + d.y + reach > r.y
                 }
@@ -364,7 +370,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                 let px0 = max(0, Int((r.x * s + ox - pad).rounded(.down))), py0 = max(0, Int((r.y * s + oy - pad).rounded(.down)))
                 let px1 = min(mw, Int((r.z * s + ox + pad).rounded(.up))), py1 = min(mh, Int((r.w * s + oy + pad).rounded(.up)))
                 guard px1 > px0, py1 > py0 else { enc.endEncoding(); continue }
-                enc.setScissorRect(MTLScissorRect(x: px0, y: py0, width: px1 - px0, height: py1 - py0))
+                if !Self.noScissor { enc.setScissorRect(MTLScissorRect(x: px0, y: py0, width: px1 - px0, height: py1 - py0)) }
                 for (ci, c) in casters.enumerated() {
                     let blocks = parts[c].block.filter { $0 >= 0 && $0 < n && shows[$0] }
                     let ref = UInt32(ci % 255 + 1)
@@ -382,7 +388,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                 enc.endEncoding()
                 if sigma > 0.3 {
                     let blur = MPSImageGaussianBlur(device: device, sigma: sigma)
-                    blur.clipRect = MTLRegionMake2D(px0, py0, px1 - px0, py1 - py0)
+                    if !Self.noScissor { blur.clipRect = MTLRegionMake2D(px0, py0, px1 - px0, py1 - py0) }
                     blur.encode(commandBuffer: cb, sourceTexture: masks[k], destinationTexture: softened[k])
                     maskOf[i].append((softened[k], L.strength))
                 } else { maskOf[i].append((masks[k], L.strength)) }
