@@ -48,6 +48,8 @@ struct AvatarStage: UIViewRepresentable {
         v.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         v.colorPixelFormat = .bgra8Unorm
         v.preferredFramesPerSecond = 60   // (baked at 30: every other frame drawn between two, so it moves smoothly)
+        // (two pixels a point, not three: soft art looks the same, and every shadow pass is a little over half the work)
+        v.contentScaleFactor = min(UIScreen.main.nativeScale, 2)
         if still { v.isPaused = true; v.enableSetNeedsDisplay = true; v.isUserInteractionEnabled = false }
         else { v.addGestureRecognizer(UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tap))) }
         dress(v, context.coordinator)
@@ -233,7 +235,8 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     /// One of the other animations, now (tapped), if it's idling.
     func react() { if playing == idle { startReaction(CACurrentMediaTime()) } }
 
-    private func speed(_ name: String) -> Double { name == idle ? 1 : reactionSpeed }
+    /// (a dance plays at the tempo it was made to: it's timed to a beat)
+    private func speed(_ name: String) -> Double { name == idle || name.lowercased().contains("dance") ? 1 : reactionSpeed }
     private func elapsed(_ now: CFTimeInterval) -> Double { (now - started) * 1000 * speed(playing) }
 
     private func change(to name: String, _ now: CFTimeInterval) {
@@ -298,10 +301,14 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
             }
         }
         let parts = rig.parts, n = parts.count
-        // every part bent to this pose
+        // every part bent to this pose, and the box it's in
+        var boxes = [SIMD4<Float>](repeating: .zero, count: n)
         for i in 0..<n {
             rig.points(parts[i], mats: mats, into: &pts[i])
             pts[i].withUnsafeBytes { posBufs[i].contents().copyMemory(from: $0.baseAddress!, byteCount: $0.count) }
+            var x0 = Float.greatestFiniteMagnitude, y0 = x0, x1 = -x0, y1 = -x0
+            for k in stride(from: 0, to: pts[i].count, by: 2) { x0 = min(x0, pts[i][k]); x1 = max(x1, pts[i][k]); y0 = min(y0, pts[i][k + 1]); y1 = max(y1, pts[i][k + 1]) }
+            boxes[i] = SIMD4(x0, y0, x1, y1)
         }
         // the document's box, fitted in the view
         let W = Float(view.drawableSize.width), H = Float(view.drawableSize.height)
@@ -334,7 +341,13 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                 // (part of another: shaded as one surface with it, but only by what's above both, so an ear's flap
                 // over the hair takes no shadow from the hair it covers)
                 let ref = parts[i].as >= 0 ? parts[i].as : i, above = max(ref, i) + 1
-                let casters = (Array(above..<max(above, n)) + (parts[i].from ?? []).filter { $0 < i }).filter { c in c != i && parts[c].cast && shows[c] && !parts[c].skip.contains(i) && !parts[c].skip.contains(ref) }
+                // (only the casters whose shadow, moved and softened, reaches it: a shoe's never reaches the hood)
+                let L = lamp.light, reach = L.softness * 1.8 * 3, r = boxes[i]
+                let casters = (Array(above..<max(above, n)) + (parts[i].from ?? []).filter { $0 < i }).filter { c in
+                    guard c != i && parts[c].cast && shows[c] && !parts[c].skip.contains(i) && !parts[c].skip.contains(ref) else { return false }
+                    let d = shift(c, L), b = boxes[c]
+                    return b.x + d.x - reach < r.z && b.z + d.x + reach > r.x && b.y + d.y - reach < r.w && b.w + d.y + reach > r.y
+                }
                 if !casters.isEmpty && maskOf[i].count + jobs.filter({ $0.0 == i }).count < 2 { jobs.append((i, li, casters)) }
             } }
             let mw = max(1, Int(W)), mh = max(1, Int(H))   // (as sharp as the screen: at half, a shadow's edge stepped, and slivers showed at the armpits)
@@ -346,6 +359,12 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                 pd.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0); pd.colorAttachments[0].storeAction = .store
                 pd.stencilAttachment.texture = stencil; pd.stencilAttachment.loadAction = .clear; pd.stencilAttachment.clearStencil = 0; pd.stencilAttachment.storeAction = .dontCare
                 guard let enc = cb.makeRenderCommandEncoder(descriptor: pd) else { continue }
+                // (drawn, and softened, only round the part it falls on: the rest of the mask is never read)
+                let r = boxes[i], pad = sigma * 3 + 2
+                let px0 = max(0, Int((r.x * s + ox - pad).rounded(.down))), py0 = max(0, Int((r.y * s + oy - pad).rounded(.down)))
+                let px1 = min(mw, Int((r.z * s + ox + pad).rounded(.up))), py1 = min(mh, Int((r.w * s + oy + pad).rounded(.up)))
+                guard px1 > px0, py1 > py0 else { enc.endEncoding(); continue }
+                enc.setScissorRect(MTLScissorRect(x: px0, y: py0, width: px1 - px0, height: py1 - py0))
                 for (ci, c) in casters.enumerated() {
                     let blocks = parts[c].block.filter { $0 >= 0 && $0 < n && shows[$0] }
                     let ref = UInt32(ci % 255 + 1)
@@ -362,7 +381,9 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                 }
                 enc.endEncoding()
                 if sigma > 0.3 {
-                    MPSImageGaussianBlur(device: device, sigma: sigma).encode(commandBuffer: cb, sourceTexture: masks[k], destinationTexture: softened[k])
+                    let blur = MPSImageGaussianBlur(device: device, sigma: sigma)
+                    blur.clipRect = MTLRegionMake2D(px0, py0, px1 - px0, py1 - py0)
+                    blur.encode(commandBuffer: cb, sourceTexture: masks[k], destinationTexture: softened[k])
                     maskOf[i].append((softened[k], L.strength))
                 } else { maskOf[i].append((masks[k], L.strength)) }
             }

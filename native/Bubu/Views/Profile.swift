@@ -25,9 +25,10 @@ struct Achievement: Identifiable {
     }()
 }
 
-/// Profile (the owner's mock, 19 Oct 2026): your avatar big on his disc, your name and level, four numbers in a row,
-/// achievements, and your learning activity a tap away. The hanger, top right, dresses him (settings is in the tab
-/// bar); today's quests are on a page of their own, behind Home's Daily quests.
+/// Profile (the owner's pick, 19 Oct 2026: Duolingo's order, a small overview): your avatar big on his disc, your
+/// name, when you joined and your level, Invite friends, an overview of four numbers, achievements, and your learning
+/// activity a tap away. The hanger, top right, dresses him (settings is in the tab bar); today's quests are on a page
+/// of their own, behind Home's Daily quests.
 struct ProfileView: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
@@ -54,7 +55,8 @@ struct ProfileView: View {
                 .padding(.top, 8)
 
                 you(lv)
-                numbers(out: out)
+                invite(lv)
+                overview(out: out)
                 if out != nil {
                     Button(progress.embers < 1 ? "No spare lanterns left" : "Use a spare lantern") {
                         if let o = out { Moments.shared.show(.askRelight(lost: o.lost, embers: progress.embers)) }
@@ -82,8 +84,17 @@ struct ProfileView: View {
         for a in Achievement.all where progress.activity.achv[a.id] == nil && a.test(progress) { progress.stampAchievement(a.id) }
     }
 
-    private func title(_ t: String) -> some View {
-        Text(t).font(.nunito(20, .black)).foregroundStyle(Home.ink)
+    /// a section's name, small and quiet
+    private func heading(_ t: String) -> some View {
+        Text(t.uppercased()).font(.nunito(13, .black)).tracking(1.4).foregroundStyle(Home.muted)
+    }
+
+    /// The month you started: the first day anything was done.
+    private var joined: String? {
+        let a = progress.activity
+        guard let first = (Array(a.days.keys) + Array(a.xpDays.keys) + Array(a.lit.keys)).min() else { return nil }
+        let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "yyyy-MM-dd"
+        return f.date(from: first)?.formatted(.dateTime.month(.wide).year())
     }
 
     // MARK: you: your avatar (alive: it idles, and now and then plays one of its outfit's moves; tap it), your name,
@@ -91,7 +102,6 @@ struct ProfileView: View {
 
     private func you(_ lv: (level: Int, into: Int, span: Int, next: Int)) -> some View {
         let name = progress.name.trimmingCharacters(in: .whitespaces)
-        let gold = Color(UIColor(hex: 0xF2B33D)), goldInk = Color(UIColor(hex: 0xA8741F))
         return VStack(alignment: .leading, spacing: 6) {
             ZStack {
                 AvatarBackdrop(hex: look.backdrop).frame(width: 290, height: 290)
@@ -99,61 +109,71 @@ struct ProfileView: View {
             }
             .frame(width: 316, height: 316)
             .frame(maxWidth: .infinity)
-            HStack(alignment: .center, spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(name.isEmpty ? "Learner" : name).font(.nunito(28, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.7)
-                Text("Level \(lv.level)").font(.nunito(14, .black)).foregroundStyle(goldInk)
-                    .padding(.horizontal, 11).padding(.vertical, 4)
-                    .background(gold.opacity(0.3), in: Capsule())
-            }
-            .padding(.top, 4)
-            GeometryReader { g in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color(UIColor(hex: 0xEFE9DD)))
-                    Capsule().fill(gold).frame(width: g.size.width * Double(lv.into) / Double(max(1, lv.span)))
+                HStack(spacing: 8) {
+                    if let j = joined { Text("Joined \(j)").font(.nunito(13.5, .bold)).foregroundStyle(Home.muted).lineLimit(1) }
+                    Text("Level \(lv.level)").font(.nunito(12.5, .black)).foregroundStyle(Home.teal)
+                        .padding(.horizontal, 9).padding(.vertical, 3)
+                        .background(Home.teal.opacity(0.12), in: Capsule())
                 }
             }
-            .frame(height: 8)
-            .padding(.trailing, 70).padding(.top, 4)
-            Text("\(lv.next) XP to level \(lv.level + 1)").font(.nunito(13, .bold)).foregroundStyle(Home.muted)
+            .padding(.top, 4)
         }
     }
 
-    // MARK: four numbers, in a row
+    // MARK: invite friends (the share sheet: there are no accounts to follow yet), and share how you're doing
 
-    private func numbers(out: (date: String, lost: Int)?) -> some View {
+    private func invite(_ lv: (level: Int, into: Int, span: Int, next: Int)) -> some View {
+        let mine = "I'm on level \(lv.level) in Bùbù 步步 and I can read \(progress.charsKnown) Chinese characters!"
+        return HStack(spacing: 10) {
+            ShareLink(item: "I'm learning Chinese with Bùbù 步步. Come and learn with me!") {
+                HStack(spacing: 8) {
+                    Image(systemName: "person.badge.plus").font(.system(size: 16, weight: .bold))
+                    Text("INVITE FRIENDS").font(.nunito(14, .black)).tracking(0.6).lineLimit(1)
+                }
+                .foregroundStyle(Home.teal)
+                .frame(maxWidth: .infinity).frame(height: 46)
+                .homeCard(radius: 15)
+            }
+            .buttonStyle(CardPress())
+            ShareLink(item: mine) {
+                Image(systemName: "square.and.arrow.up").font(.system(size: 16, weight: .bold)).foregroundStyle(Home.teal)
+                    .frame(width: 46, height: 46).homeCard(radius: 15)
+            }
+            .buttonStyle(CardPress())
+            .accessibilityLabel("Share your progress")
+        }
+    }
+
+    // MARK: overview: four numbers, small, two by two
+
+    private func overview(out: (date: String, lost: Int)?) -> some View {
         let learned = course.cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
         let lit = out == nil && progress.streak > 0
-        return HStack(spacing: 0) {
-            number(out.map { "\($0.lost)" } ?? "\(progress.streak)", out != nil ? "Went out" : "Streak",
-                   icon: lit ? "chip-lantern-lit" : "chip-lantern-unlit")
-            divider
-            number(progress.xpTotal.formatted(), "XP", symbol: "bolt.fill", tint: 0xF2B33D)
-            divider
-            Button { router.push(.chars) } label: { number("\(progress.charsKnown)", "Characters", han: true) }.buttonStyle(CardPress())
-            divider
-            number("\(learned)", "Words", symbol: "leaf.fill", tint: 0x1F8A6D)
+        let days = out?.lost ?? progress.streak
+        return VStack(alignment: .leading, spacing: 12) {
+            heading("Overview")
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10, alignment: .leading), GridItem(.flexible(), alignment: .leading)], alignment: .leading, spacing: 14) {
+                stat("\(days) day\(days == 1 ? "" : "s")\(out != nil ? " (out)" : "")", icon: lit ? "chip-lantern-lit" : "chip-lantern-unlit")
+                stat("\(progress.xpTotal.formatted()) XP", symbol: "bolt.fill", tint: 0xF2B33D)
+                Button { router.push(.chars) } label: { stat("\(progress.charsKnown) characters", han: true) }.buttonStyle(CardPress())
+                stat("\(learned) words", symbol: "leaf.fill", tint: 0x1F8A6D)
+            }
         }
-        .padding(.vertical, 14)
-        .overlay(alignment: .top) { Rectangle().fill(Home.line).frame(height: 1.5) }
-        .overlay(alignment: .bottom) { Rectangle().fill(Home.line).frame(height: 1.5) }
+        .padding(.top, 4)
     }
 
-    private var divider: some View { Rectangle().fill(Home.line).frame(width: 1.5, height: 34) }
-
-    private func number(_ value: String, _ label: String, icon: String? = nil, symbol: String? = nil, tint: UInt32 = 0x1F7A6C, han: Bool = false) -> some View {
-        HStack(spacing: 6) {
+    private func stat(_ value: String, icon: String? = nil, symbol: String? = nil, tint: UInt32 = 0x1F7A6C, han: Bool = false) -> some View {
+        HStack(spacing: 8) {
             Group {
-                if let icon { Image(icon).resizable().scaledToFit().frame(height: 26) }
-                else if han { Text("字").font(.hanzi(19, .black)).foregroundStyle(Home.teal) }
-                else if let symbol { Image(systemName: symbol).font(.system(size: 18, weight: .bold)).foregroundStyle(Color(UIColor(hex: tint))) }
+                if let icon { Image(icon).resizable().scaledToFit().frame(height: 22) }
+                else if han { Text("字").font(.hanzi(17, .black)).foregroundStyle(Home.teal) }
+                else if let symbol { Image(systemName: symbol).font(.system(size: 16, weight: .bold)).foregroundStyle(Color(UIColor(hex: tint))) }
             }
-            .frame(width: 24)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(value).font(.nunito(17, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.6)
-                Text(label).font(.nunito(11.5, .bold)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.7)
-            }
+            .frame(width: 22)
+            Text(value).font(.nunito(16, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.8)
         }
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: achievements: a row of medals, the newest first; See all for every one
@@ -164,17 +184,16 @@ struct ProfileView: View {
         let locked = Achievement.all.filter { achv[$0.id] == nil }
         let list = allAch ? earned + locked : Array((earned + locked).prefix(5))
         return VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                title("Achievements")
-                Spacer()
-                Button { withAnimation { allAch.toggle() } } label: {
-                    HStack(spacing: 2) {
-                        Text(allAch ? "Show fewer" : "See all")
-                        if !allAch { Image(systemName: "chevron.right").font(.system(size: 12, weight: .heavy)) }
-                    }
-                    .font(.nunito(15, .black)).foregroundStyle(Home.teal)
+            Button { withAnimation { allAch.toggle() } } label: {
+                HStack {
+                    heading("Achievements")
+                    Spacer()
+                    Image(systemName: allAch ? "chevron.up" : "chevron.right").font(.system(size: 14, weight: .heavy)).foregroundStyle(Home.muted)
                 }
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(allAch ? "Show fewer achievements" : "See all achievements")
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 5), spacing: 14) {
                 ForEach(list) { a in
                     let got = achv[a.id] != nil
