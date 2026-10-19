@@ -18,6 +18,7 @@ enum Page: Hashable {
     case classroom               // the practice tiles, behind Home's board
     case quests                  // today's three, behind Home's Daily quests
     case activity                // your learning activity, from Profile
+    case achievements            // every achievement, from Profile
 }
 
 extension View {
@@ -51,6 +52,7 @@ struct PageView: View {
         case .classroom: ClassroomPage()
         case .quests: QuestsPage()
         case .activity: ActivityPage()
+        case .achievements: AchievementsPage()
         default: ComingSoon(title: "Coming soon", icon: "hammer")
         }
     }

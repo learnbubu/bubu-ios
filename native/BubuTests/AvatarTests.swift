@@ -27,8 +27,12 @@ final class AvatarTests: XCTestCase {
 
     func testEveryAchievementCanBeChecked() {
         let p = ProgressStore(course: Course.shared, url: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json"))
-        XCTAssertEqual(Achievement.all.filter { $0.test(p) }.count, 0)
-        XCTAssertEqual(Achievement.all.count, 9 + Course.shared.chapters.count)
+        XCTAssertEqual(AchievementFamily.all.filter { $0.tier(p) > 0 }.count, 0)
+        XCTAssertEqual(Set(AchievementFamily.all.map(\.id)).count, AchievementFamily.all.count)
+        for f in AchievementFamily.all { XCTAssertEqual(f.tiers, f.tiers.sorted(), f.id) }
+        p.countMoment("flawless")
+        XCTAssertEqual(p.moments("flawless"), 1)
+        XCTAssertEqual(AchievementFamily.all.first { $0.id == "flawless" }?.tier(p), 1)
     }
 
     func testEveryOutfitLoadsWithTheColoursThatCarry() throws {

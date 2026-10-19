@@ -1,30 +1,5 @@
 import SwiftUI
 
-/// Achievements, worked out from what's already tracked (web: achievementDefs).
-struct Achievement: Identifiable {
-    let id: String, icon: String, tint: Color, title: String, sub: String
-    let test: (ProgressStore) -> Bool
-
-    static let all: [Achievement] = {
-        let learned = { (p: ProgressStore) in Course.shared.cards.filter { (p.srs[$0.id]?.reps ?? 0) >= 1 }.count }
-        var a: [Achievement] = [
-            .init(id: "streak-7", icon: "flame.fill", tint: .again, title: "7-day streak", sub: "Keep it going!") { $0.streak >= 7 },
-            .init(id: "streak-30", icon: "flame.fill", tint: .again, title: "30-day streak", sub: "A whole month") { $0.streak >= 30 },
-            .init(id: "words-50", icon: "leaf.fill", tint: .good, title: "First words", sub: "Learned 50 words") { learned($0) >= 50 },
-            .init(id: "words-200", icon: "leaf.fill", tint: .good, title: "Growing", sub: "Learned 200 words") { learned($0) >= 200 },
-            .init(id: "lessons-10", icon: "flag.fill", tint: Color.tiles["teal"]!.ink, title: "On a roll", sub: "10 lessons") { $0.done.count >= 10 },
-            .init(id: "level-5", icon: "crown.fill", tint: .gold, title: "Level 5", sub: "1,000 XP") { $0.level.level >= 5 },
-            .init(id: "level-10", icon: "crown.fill", tint: .gold, title: "Level 10", sub: "5,500 XP") { $0.level.level >= 10 },
-            .init(id: "quests-20", icon: "scope", tint: Color.tiles["teal"]!.ink, title: "Quest month", sub: "20 quests in a month") { $0.activity.questMonths.values.contains { $0 >= 20 } },
-            .init(id: "chests-10", icon: "gift.fill", tint: .gold, title: "Lucky panda", sub: "10 lucky pockets opened") { $0.activity.chests >= 10 },
-        ]
-        for (i, ch) in Course.shared.chapters.enumerated() {
-            a.append(.init(id: "chapter-\(i)", icon: "book.fill", tint: Color.tiles["blue"]!.ink, title: "Chapter \(i + 1) complete", sub: ch.title) { $0.chapterDone(i) })
-        }
-        return a
-    }()
-}
-
 /// Profile (the owner's pick, 19 Oct 2026: Duolingo's order, a small overview): your avatar big on his disc, your
 /// name, when you joined and your level, Invite friends, an overview of four numbers, achievements, and your learning
 /// activity a tap away. The hanger, top right, dresses him (settings is in the tab bar); today's quests are on a page
@@ -32,7 +7,6 @@ struct Achievement: Identifiable {
 struct ProfileView: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
-    @State private var allAch = false
     @State private var dressing = false
     @State private var look = AvatarLook.load()
     private let course = Course.shared
@@ -75,14 +49,15 @@ struct ProfileView: View {
         .onAppear { stamp() }
         .fullScreenCover(isPresented: $dressing) {
             // (the saved look on him now, as the editor goes, not once it's gone)
-            AvatarEditor { saved in if let saved { look = saved }; dressing = false }
+            AvatarEditor { saved in
+                if let saved { look = saved; if saved.outfit != Outfit.all[0].id { progress.dressUp() } }
+                dressing = false
+            }
         }
     }
 
-    /// The day each achievement was first earned, for ordering.
-    private func stamp() {
-        for a in Achievement.all where progress.activity.achv[a.id] == nil && a.test(progress) { progress.stampAchievement(a.id) }
-    }
+    /// Every achievement tier reached, stamped with the day (for "NEW" and the newest first).
+    private func stamp() { progress.stampAchievements() }
 
     /// a section's name, small and quiet
     private func heading(_ t: String) -> some View {
@@ -176,43 +151,23 @@ struct ProfileView: View {
         }
     }
 
-    // MARK: achievements: a row of medals, the newest first; See all for every one
+    // MARK: achievements: three badges, the newest earned first; the rest on their own page
 
     private var achievements: some View {
-        let achv = progress.activity.achv
-        let earned = Achievement.all.filter { achv[$0.id] != nil }.sorted { achv[$0.id]! > achv[$1.id]! }
-        let locked = Achievement.all.filter { achv[$0.id] == nil }
-        let list = allAch ? earned + locked : Array((earned + locked).prefix(5))
+        let w = (UIScreen.main.bounds.width - 36 - 24) / 3
         return VStack(alignment: .leading, spacing: 12) {
-            Button { withAnimation { allAch.toggle() } } label: {
+            Button { router.push(.achievements) } label: {
                 HStack {
                     heading("Achievements")
                     Spacer()
-                    Image(systemName: allAch ? "chevron.up" : "chevron.right").font(.system(size: 14, weight: .heavy)).foregroundStyle(Home.muted)
+                    Image(systemName: "chevron.right").font(.system(size: 14, weight: .heavy)).foregroundStyle(Home.muted)
                 }
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(allAch ? "Show fewer achievements" : "See all achievements")
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 5), spacing: 14) {
-                ForEach(list) { a in
-                    let got = achv[a.id] != nil
-                    VStack(spacing: 6) {
-                        Image(systemName: a.icon).font(.system(size: 22)).foregroundStyle(got ? a.tint : Color.muted)
-                            .frame(width: 56, height: 56).background((got ? a.tint : Color.muted).opacity(0.15), in: Circle())
-                            .overlay(alignment: .bottomTrailing) {
-                                if !got {
-                                    Image(systemName: "lock.fill").font(.system(size: 9, weight: .bold)).foregroundStyle(.white)
-                                        .frame(width: 20, height: 20).background(Color.muted, in: Circle())
-                                }
-                            }
-                        Text(a.title).font(.nunito(11.5, .bold)).foregroundStyle(Home.muted).multilineTextAlignment(.center).lineLimit(2)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .saturation(got ? 1 : 0)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityHint(a.sub)
-                }
+            .accessibilityLabel("See all achievements")
+            HStack(alignment: .top, spacing: 12) {
+                ForEach(progress.achievementsInOrder.prefix(3)) { f in AchievementCell(family: f, width: w) }
             }
         }
         .padding(.top, 4)

@@ -29,6 +29,8 @@ struct Activity: Codable, Equatable {
     var buns: Buns?                          // nil means a full five
     var pocketDay: String?                   // the day the daily red pocket was given
     var plus = false                         // Bùbù Plus
+    var moments: [String: Int]?              // a lesson-end moment's key, and how many lessons ended on it
+    var dressedUp: String?                   // the day an outfit other than Everyday was first saved
     var written: [String: Int]?              // character → times written to the end (writing guidance)
 
     /// n buns as of `at` (ms), one growing back every four hours; `t` is when
@@ -57,6 +59,8 @@ struct Activity: Codable, Equatable {
         coinsIn = get(.coinsIn, [:]); coinsOut = get(.coinsOut, [:]); buns = try? c.decode(Buns.self, forKey: .buns)
         pocketDay = try? c.decode(String.self, forKey: .pocketDay); plus = get(.plus, false)
         written = try? c.decode([String: Int].self, forKey: .written)
+        moments = try? c.decode([String: Int].self, forKey: .moments)
+        dressedUp = try? c.decode(String.self, forKey: .dressedUp)
     }
 }
 
@@ -787,6 +791,18 @@ final class ProgressStore {
     func stampAchievement(_ id: String) {
         guard activity.achv[id] == nil else { return }
         activity.achv[id] = today; save()
+    }
+
+    /// A lesson ended on this moment (flawless, night owl...): one more of them.
+    func countMoment(_ key: String) {
+        var m = activity.moments ?? [:]; m[key, default: 0] += 1
+        activity.moments = m; save()
+    }
+
+    /// An outfit other than Everyday saved, the first time.
+    func dressUp() {
+        guard activity.dressedUp == nil else { return }
+        activity.dressedUp = today; save()
     }
 }
 
