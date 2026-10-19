@@ -3,22 +3,37 @@ import MetalKit
 import MetalPerformanceShaders
 
 /// The avatar, alive: Studio's rig drawn natively (Metal), idling, and now and then (or when tapped) playing one of its
-/// other animations once before idling again.
+/// other animations once before idling again. Changing outfit swaps the rig in place, at once. Held `still`, it draws
+/// one frame (an outfit's tile) and leaves taps to what it's in.
 struct AvatarStage: UIViewRepresentable {
-    var name = "relaxed"
+    var name = Outfit.all[0].id
     /// the colours worn: a swatch for each of the rig's colours, by name (the first, as drawn, where it's not said)
     var look: [String: Int] = [:]
+    /// the part of the document it shows (every outfit the same: AvatarRig.stageBox), and how far past it each way it
+    /// draws besides (a share of its size: the view is that much bigger than the box - see AvatarFigure)
+    var box: AvatarRig.Box = AvatarRig.stageBox
+    var bleed: Float = 0
+    var still = false
 
     final class Coordinator: NSObject {
         var renderer: AvatarRenderer?
+        var name = ""
         @objc func tap() { renderer?.react() }
     }
     func makeCoordinator() -> Coordinator { Coordinator() }
 
-    /// (draws only while it's on screen: off it, under another tab or a cover, it rests)
+    /// (draws only while it's on screen: off it, under another tab or a cover, it rests; held still, once when shown)
     final class View: MTKView {
+        var still = false
+        /// (taps only on the box itself: what's drawn round it lies over the buttons near it)
+        var bleed: CGFloat = 0
+        override func point(inside p: CGPoint, with e: UIEvent?) -> Bool {
+            let k = bleed / (1 + 2 * bleed)
+            return bounds.insetBy(dx: bounds.width * k, dy: bounds.height * k).contains(p)
+        }
         override func didMoveToWindow() {
             super.didMoveToWindow()
+            if still { isPaused = true; if window != nil { setNeedsDisplay() }; return }
             isPaused = window == nil || delegate == nil
             (delegate as? AvatarRenderer)?.rest(isPaused)
         }
@@ -26,23 +41,52 @@ struct AvatarStage: UIViewRepresentable {
 
     func makeUIView(context: Context) -> MTKView {
         let v = View(frame: .zero, device: MTLCreateSystemDefaultDevice())
+        v.still = still
+        v.bleed = CGFloat(bleed)
         v.isOpaque = false
         v.backgroundColor = .clear
         v.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         v.colorPixelFormat = .bgra8Unorm
         v.preferredFramesPerSecond = 60   // (baked at 30: every other frame drawn between two, so it moves smoothly)
-        if let rig = AvatarRig.load(name), let r = AvatarRenderer(rig: rig, view: v) {
-            context.coordinator.renderer = r
-            r.wear(look)
-            v.delegate = r
-        }
-        v.addGestureRecognizer(UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tap)))
-        v.isAccessibilityElement = true
+        if still { v.isPaused = true; v.enableSetNeedsDisplay = true; v.isUserInteractionEnabled = false }
+        else { v.addGestureRecognizer(UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tap))) }
+        dress(v, context.coordinator)
+        v.isAccessibilityElement = !still
         v.accessibilityLabel = "Your avatar"
         return v
     }
-    func updateUIView(_ v: MTKView, context: Context) { context.coordinator.renderer?.wear(look) }
+    func updateUIView(_ v: MTKView, context: Context) {
+        if context.coordinator.name != name { dress(v, context.coordinator) }
+        context.coordinator.renderer?.wear(look)
+        if still { v.setNeedsDisplay() }
+    }
     static func dismantleUIView(_ v: MTKView, coordinator: Coordinator) { v.isPaused = true; v.delegate = nil }
+
+    /// The outfit's rig on the view (anew when the outfit changes).
+    private func dress(_ v: MTKView, _ c: Coordinator) {
+        c.name = name
+        let b = (x: box.x - box.w * bleed, y: box.y - box.h * bleed, w: box.w * (1 + 2 * bleed), h: box.h * (1 + 2 * bleed))
+        guard let rig = AvatarRig.load(name), let r = AvatarRenderer(rig: rig, view: v, box: b) else { return }
+        c.renderer = r
+        r.wear(look)
+        v.delegate = r
+        if !still { v.isPaused = v.window == nil } else { v.setNeedsDisplay() }
+    }
+}
+
+/// The avatar `size` points square, drawn as on Profile wherever it is (the editor too): every outfit framed alike,
+/// what goes past the frame (horns, a tail, a wave) drawn round it rather than cut off.
+struct AvatarFigure: View {
+    var outfit: String
+    var look: [String: Int]
+    var size: CGFloat
+    private let bleed: Float = 0.16
+
+    var body: some View {
+        AvatarStage(name: outfit, look: look, bleed: bleed)
+            .frame(width: size * CGFloat(1 + 2 * bleed), height: size * CGFloat(1 + 2 * bleed))
+            .frame(width: size, height: size)
+    }
 }
 
 /// Draws an AvatarRig, as Studio does: each part bent by its bones, bottom up; in the light, each part's shadow (the
@@ -82,7 +126,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     private var changedAt: CFTimeInterval = 0
     private let blendTime = 0.6
 
-    init?(rig: AvatarRig, view: MTKView) {
+    init?(rig: AvatarRig, view: MTKView, box: AvatarRig.Box) {
         guard let device = view.device, let queue = device.makeCommandQueue(), let lib = try? device.makeLibrary(source: Self.shaders, options: nil),
               let vfn = lib.makeFunction(name: "avatar_vertex"), let part = lib.makeFunction(name: "avatar_part"),
               let sil = lib.makeFunction(name: "avatar_silhouette"), let blk = lib.makeFunction(name: "avatar_blocker") else { return nil }
@@ -140,7 +184,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
             textures.append(t); uvBufs.append(uv); idxBufs.append(ix); posBufs.append(ps)
         }
         drawn = textures
-        frameRect = fitAll()
+        frameRect = box
         view.depthStencilPixelFormat = .invalid
     }
 
@@ -177,24 +221,6 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
             blit.generateMipmaps(for: t); blit.endEncoding(); cb.commit(); cb.waitUntilCompleted()
         }
         return t
-    }
-
-    /// The box every pose of every animation fits in, a little room round it.
-    private func fitAll() -> (x: Float, y: Float, w: Float, h: Float) {
-        var x0 = Float.greatestFiniteMagnitude, y0 = x0, x1 = -x0, y1 = -x0
-        var buf: [Float] = []
-        for a in rig.anims.values {
-            for f in stride(from: 0, to: a.frames, by: 3) {
-                let s = rig.sample(a, at: Double(f) * 1000 / rig.fps)
-                for p in rig.parts {
-                    rig.points(p, mats: s.mats, into: &buf)
-                    for k in stride(from: 0, to: buf.count, by: 2) { x0 = min(x0, buf[k]); x1 = max(x1, buf[k]); y0 = min(y0, buf[k + 1]); y1 = max(y1, buf[k + 1]) }
-                }
-            }
-        }
-        guard x1 > x0, y1 > y0 else { return (0, 0, rig.size.first ?? 1, rig.size.last ?? 1) }
-        let m = max(x1 - x0, y1 - y0) * 0.03
-        return (x0 - m, y0 - m, x1 - x0 + 2 * m, y1 - y0 + 2 * m)
     }
 
     // MARK: directing

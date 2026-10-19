@@ -30,4 +30,23 @@ final class AvatarTests: XCTestCase {
         XCTAssertEqual(Achievement.all.filter { $0.test(p) }.count, 0)
         XCTAssertEqual(Achievement.all.count, 9 + Course.shared.chapters.count)
     }
+
+    func testEveryOutfitLoadsWithTheColoursThatCarry() throws {
+        for o in Outfit.all {
+            let rig = try XCTUnwrap(AvatarRig.load(o.id), o.id)
+            XCTAssertNotNil(rig.anims["Idle"], o.id)
+            let names = Set((rig.channels ?? []).map(\.name))
+            XCTAssertTrue(names.isSuperset(of: ["Skin", "Hair colour"]), "\(o.id): \(names)")
+            for c in rig.channels ?? [] { for t in c.tex.flatMap({ $0 }) { XCTAssertNotNil(Bundle.main.url(forResource: t, withExtension: nil), t) } }
+            for p in rig.parts { XCTAssertNotNil(Bundle.main.url(forResource: p.tex, withExtension: nil), p.tex) }
+        }
+    }
+
+    func testALookSavedBeforeOutfitsWearsEveryday() throws {
+        let old = try JSONDecoder().decode(AvatarLook.self, from: Data(#"{"colours":{"Skin":2},"backdrop":"#D9EEE6"}"#.utf8))
+        XCTAssertEqual(old.outfit, Outfit.all[0].id)
+        XCTAssertEqual(old.colours["Skin"], 2)
+        let gone = try JSONDecoder().decode(AvatarLook.self, from: Data(#"{"outfit":"no-such-outfit"}"#.utf8))
+        XCTAssertEqual(gone.outfit, Outfit.all[0].id)
+    }
 }

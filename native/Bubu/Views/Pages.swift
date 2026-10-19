@@ -16,6 +16,8 @@ enum Page: Hashable {
     case studyChoice             // "What to study"
     case writingSheet(String)    // a word's 字帖
     case classroom               // the practice tiles, behind Home's board
+    case quests                  // today's three, behind Home's Daily quests
+    case activity                // your learning activity, from Profile
 }
 
 extension View {
@@ -47,6 +49,8 @@ struct PageView: View {
         case .flash(let ids): FlashPage(ids: ids)
         case .match(let ids): MatchPage(ids: ids)
         case .classroom: ClassroomPage()
+        case .quests: QuestsPage()
+        case .activity: ActivityPage()
         default: ComingSoon(title: "Coming soon", icon: "hammer")
         }
     }

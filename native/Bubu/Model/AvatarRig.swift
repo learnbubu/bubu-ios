@@ -61,10 +61,42 @@ struct AvatarRig: Decodable {
         return l.light.only.map { $0.contains(i) } ?? true
     }
 
+    /// (each read once: changing outfit, or opening the editor, doesn't read it again)
+    private static var loaded: [String: AvatarRig] = [:]
     static func load(_ name: String) -> AvatarRig? {
+        if let r = loaded[name] { return r }
         guard let url = Bundle.main.url(forResource: name, withExtension: "json"),
-              let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(AvatarRig.self, from: data)
+              let data = try? Data(contentsOf: url), let r = try? JSONDecoder().decode(AvatarRig.self, from: data) else { return nil }
+        loaded[name] = r
+        return r
+    }
+
+    /// A box in the document (x, y, w, h).
+    typealias Box = (x: Float, y: Float, w: Float, h: Float)
+
+    /// The box every outfit is shown in: the one every pose of the everyday outfit fits (all are on its skeleton, in
+    /// its document's place), so he's the same size whatever he wears; what's bigger (a hood's horns, a tail) draws
+    /// past it, into the stage's bleed.
+    static let stageBox: Box = load(Outfit.all[0].id)?.fitAll() ?? (0, 0, 1254, 1454)
+    /// Head and shoulders, for an outfit's tile: the same for every outfit, room for the dragon's horns.
+    static let tileBox: Box = (168, 104, 922, 922)
+
+    /// The box every pose of every animation fits in, a little room round it.
+    func fitAll() -> Box {
+        var x0 = Float.greatestFiniteMagnitude, y0 = x0, x1 = -x0, y1 = -x0
+        var buf: [Float] = []
+        for a in anims.values {
+            for f in stride(from: 0, to: a.frames, by: 3) {
+                let s = sample(a, at: Double(f) * 1000 / fps)
+                for p in parts {
+                    points(p, mats: s.mats, into: &buf)
+                    for k in stride(from: 0, to: buf.count, by: 2) { x0 = min(x0, buf[k]); x1 = max(x1, buf[k]); y0 = min(y0, buf[k + 1]); y1 = max(y1, buf[k + 1]) }
+                }
+            }
+        }
+        guard x1 > x0, y1 > y0 else { return (0, 0, size.first ?? 1, size.last ?? 1) }
+        let m = max(x1 - x0, y1 - y0) * 0.03
+        return (x0 - m, y0 - m, x1 - x0 + 2 * m, y1 - y0 + 2 * m)
     }
 
     /// The bones' moves and the parts' opacity `ms` into an animation: between its two nearest frames (opacity steps,

@@ -129,13 +129,13 @@ struct HomeView: View {
             .shadow(color: Color(UIColor(hex: 0x1E463C)).opacity(0.08), radius: 8, y: 6)
     }
 
-    // MARK: Daily quests: the pouch, how many are done, the next one; tap for all three, on Profile
+    // MARK: Daily quests: the pouch, how many are done, the next one; tap for all three, on a page of their own
     private var questCard: some View {
         let quests = progress.todayQuests
         let n = { (q: Quest) in min(q.target, progress.questDone(q) ? q.target : progress.progress(of: q)) }
         let done = quests.filter { n($0) >= $0.target }.count
         let next = quests.first { n($0) < $0.target }
-        return Button { router.profileFocus = "quests"; router.tab = .profile } label: {
+        return Button { router.push(.quests) } label: {
             HStack(spacing: 13) {
                 Image("quest-pouch").resizable().scaledToFit().frame(height: 50)
                 VStack(alignment: .leading, spacing: 6) {
