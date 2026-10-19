@@ -43,7 +43,7 @@ final class AvatarTests: XCTestCase {
     }
 
     func testALookSavedBeforeOutfitsWearsEveryday() throws {
-        let old = try JSONDecoder().decode(AvatarLook.self, from: Data(#"{"colours":{"Skin":2},"backdrop":"#D9EEE6"}"#.utf8))
+        let old = try JSONDecoder().decode(AvatarLook.self, from: Data(##"{"colours":{"Skin":2},"backdrop":"#D9EEE6"}"##.utf8))
         XCTAssertEqual(old.outfit, Outfit.all[0].id)
         XCTAssertEqual(old.colours["Skin"], 2)
         let gone = try JSONDecoder().decode(AvatarLook.self, from: Data(#"{"outfit":"no-such-outfit"}"#.utf8))
