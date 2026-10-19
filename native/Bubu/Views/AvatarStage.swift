@@ -388,7 +388,12 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                 enc.endEncoding()
                 if sigma > 0.3 {
                     let blur = MPSImageGaussianBlur(device: device, sigma: sigma)
-                    if !Self.noScissor { blur.clipRect = MTLRegionMake2D(px0, py0, px1 - px0, py1 - py0) }
+                    if !Self.noScissor {
+                        // (only round the part; the source read from the same place: MPS takes the clip's origin in the
+                        // source from `offset`, else from the source's corner, which moved the shadow and cut it square)
+                        blur.clipRect = MTLRegionMake2D(px0, py0, px1 - px0, py1 - py0)
+                        blur.offset = MPSOffset(x: px0, y: py0, z: 0)
+                    }
                     blur.encode(commandBuffer: cb, sourceTexture: masks[k], destinationTexture: softened[k])
                     maskOf[i].append((softened[k], L.strength))
                 } else { maskOf[i].append((masks[k], L.strength)) }
