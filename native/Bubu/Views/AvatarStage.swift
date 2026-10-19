@@ -443,10 +443,14 @@ vertex AvatarVOut avatar_vertex(const device float2 *pos [[buffer(0)]], const de
     return o;
 }
 
+// (pictures are sampled clamp-to-zero: a part's grid reaches past its cropped picture, and clamped to the edge, the
+// edge's pixels smeared over the rest of the cell once the picture was drawn small (its shrunk copies have no clear
+// margin left): specks round the parts, and shadows cut to the cells' rectangles)
+
 /// a part: its picture (premultiplied), darkened where the shadow mask says, at its opacity
 fragment float4 avatar_part(AvatarVOut in [[stage_in]], texture2d<float> tex [[texture(0)]], texture2d<float> mask [[texture(1)]],
                             texture2d<float> mask2 [[texture(2)]], constant AvatarPaint &p [[buffer(0)]]) {
-    constexpr sampler s(filter::linear, mip_filter::linear, address::clamp_to_edge);
+    constexpr sampler s(filter::linear, mip_filter::linear, address::clamp_to_zero);
     float4 c = tex.sample(s, in.uv);
     float2 at = in.pos.xy / p.viewport;
     c.rgb *= (1.0 - p.strength * mask.sample(s, at).r) * (1.0 - p.strength2 * mask2.sample(s, at).r);   // (each light's shadow over the last)
@@ -455,14 +459,14 @@ fragment float4 avatar_part(AvatarVOut in [[stage_in]], texture2d<float> tex [[t
 
 /// a caster's shape, white where it's drawn (into a shadow mask)
 fragment float4 avatar_silhouette(AvatarVOut in [[stage_in]], texture2d<float> tex [[texture(0)]]) {
-    constexpr sampler s(filter::linear, mip_filter::linear, address::clamp_to_edge);
+    constexpr sampler s(filter::linear, mip_filter::linear, address::clamp_to_zero);
     float a = tex.sample(s, in.uv).a;
     return float4(a, a, a, a);
 }
 
 /// a part in a caster's way: only marks the stencil where it's drawn
 fragment float4 avatar_blocker(AvatarVOut in [[stage_in]], texture2d<float> tex [[texture(0)]]) {
-    constexpr sampler s(filter::linear, mip_filter::linear, address::clamp_to_edge);
+    constexpr sampler s(filter::linear, mip_filter::linear, address::clamp_to_zero);
     if (tex.sample(s, in.uv).a < 0.03) discard_fragment();   // (all of it, to its faintest edge: else a sliver of shadow showed past it, at the armpits)
     return float4(0);
 }
