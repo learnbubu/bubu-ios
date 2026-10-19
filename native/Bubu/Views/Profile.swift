@@ -7,7 +7,7 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
-    @State private var dressing = false
+    @State private var dressing = Launch.screen == "dress"   // (`-screen dress`: the editor, for the Mac's checks)
     @State private var look = AvatarLook.load()
     private let course = Course.shared
 

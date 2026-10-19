@@ -40,6 +40,12 @@ enum Launch {
         guard let i = a.firstIndex(of: "-screen"), i + 1 < a.count else { return nil }
         return a[i + 1]
     }
+    /// `-outfit <id>`: wear this outfit (the Mac's checks of an outfit against Studio).
+    static var outfit: String? {
+        let a = ProcessInfo.processInfo.arguments
+        guard let i = a.firstIndex(of: "-outfit"), i + 1 < a.count else { return nil }
+        return a[i + 1]
+    }
     /// `-plus`, in debug builds only: run as a Bùbù Plus member (there's no purchase yet).
     static var plus: Bool { ProcessInfo.processInfo.arguments.contains("-plus") }
     /// Nothing is heard: under the tests, or launched with `-silent` (the Mac's checks, when

@@ -43,7 +43,7 @@ final class Router {
     init() {
         switch Launch.screen {
         case "path", "pathstep", "pathpractice", "practice", "lesson", "hud", "shop", "pocket": tab = .learn
-        case "profile": tab = .profile
+        case "profile", "dress": tab = .profile
         case "settings", "account": tab = .settings
         default: tab = .home
         }

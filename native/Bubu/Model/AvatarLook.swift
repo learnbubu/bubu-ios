@@ -19,7 +19,8 @@ struct AvatarLook: Codable, Equatable {
 
     static let key = "avatarLook"
     static func load() -> AvatarLook {
-        guard let d = UserDefaults.standard.data(forKey: key), let l = try? JSONDecoder().decode(AvatarLook.self, from: d) else { return AvatarLook() }
+        var l = UserDefaults.standard.data(forKey: key).flatMap { try? JSONDecoder().decode(AvatarLook.self, from: $0) } ?? AvatarLook()
+        if let o = Launch.outfit, Outfit.all.contains(where: { $0.id == o }) { l.outfit = o }   // (the Mac's checks)
         return l
     }
     func save() {
