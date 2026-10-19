@@ -58,8 +58,6 @@ struct AchievementFamily: Identifiable {
 }
 
 extension ProgressStore {
-    /// Words met at least once.
-    var wordsLearned: Int { Course.shared.cards.filter { (srs[$0.id]?.reps ?? 0) >= 1 }.count }
     /// Lessons that ended on this moment (its key: "flawless", "nightowl"...).
     func moments(_ key: String) -> Int { activity.moments?[key] ?? 0 }
 
