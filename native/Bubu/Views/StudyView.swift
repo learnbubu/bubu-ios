@@ -395,7 +395,7 @@ struct StudyView: View {
     /// over it as an overlay and nothing moves (the owner, 4 Oct 2026: not "sliding up again").
     private var bannerRoom: CGFloat {
         guard case .card = session.current, session.exercise?.kind == .choice else { return 0 }
-        return 118
+        return 140   // (a wrong answer's sheet, with the right answer in it, is the tallest: 118 left the bottom option a third under it, the Mac's check of a8e8192)
     }
 
     private var promptLabel: String {
@@ -1168,7 +1168,7 @@ struct ChoiceView: View {
     private var maxSave: CGFloat {
         let n = CGFloat(ex.options.count)
         if ex.dir == "picture" { return 12 + 2 * 12 + 2 * 18 }
-        return 12 + max(0, n - 1) * 4 + n * 2 * (listPad - 4)
+        return 12 + max(0, n - 1) * 5 + n * 2 * (listPad - 3)
     }
     private func fit(_ bottom: CGFloat) {
         guard !answered, floor.isFinite, bottom > 0 else { return }
@@ -1270,7 +1270,7 @@ struct ChoiceView: View {
                 .frame(maxWidth: .infinity)
                 .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
             } else {
-                VStack(spacing: 10 - 4 * squeeze) {
+                VStack(spacing: 10 - 5 * squeeze) {
                     ForEach(ex.options, id: \.self) { opt in option(opt).modifier(PickedMark(on: opt == picked)) }
                 }
                 .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
@@ -1411,7 +1411,7 @@ struct ChoiceView: View {
             // fill the gap: a word tile, as wide as its word (Duolingo's "Complete the sentence")
             .frame(maxWidth: ex.dir == "gap" ? nil : .infinity)
             .frame(minWidth: ex.dir == "gap" ? 48 : nil)
-            .padding(.horizontal, ex.dir == "gap" ? 16 : 14).padding(.vertical, listPad - (listPad - 4) * squeeze)
+            .padding(.horizontal, ex.dir == "gap" ? 16 : 14).padding(.vertical, listPad - (listPad - 3) * squeeze)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 16))
         // on the whole tile (face and lip), so the box and its text hop together (the owner, 5 Oct 2026)
