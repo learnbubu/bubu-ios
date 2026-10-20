@@ -47,12 +47,15 @@ them. The red open pocket is still to make.
    - a part includes something it should leave out: the seal on the flap or on the open pocket;
    - the open pocket has a deep dark hollow at the top instead of a thin slit, or anything coming out of it;
    - the open pocket's body has moved or changed size: only the flap may go up above it;
+   - the flap and pocket don't read as one piece of paper: a gold line along the crease, a notch or gap at the
+     corners, or the front's edge curling up instead of meeting the sides flush;
    - the character on a pocket isn't copied exactly (福 on red and gold, 吉 on jade);
    - it's more detailed or glossier than the references;
    - there's any other text, letter or number;
    - the backdrop isn't one flat solid magenta.
 
-Make the red open pocket first (its flap is already in `refs`), then **stop and report**. Then the jade three (stop and report), the gold three, and the
+Make the red open pocket first: it's an EDIT of the owner's pick of the last try (`refs/ref-pk2-red-open-try.png`),
+fixing only where the flap meets the pocket. Then **stop and report**. Then the jade three (stop and report), the gold three, and the
 five prize pieces, reporting after each.
 
 ## When all 14 are made

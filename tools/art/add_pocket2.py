@@ -78,9 +78,26 @@ def parts(kind, colour, inside):
     ]
 
 
+# the red open pocket: Codex's second try, close, fixed by an edit (the owner, 20 Oct 2026: "so close! just some disconnect
+# still", "and crease in the wrong place?"). The jade and gold ones take the same wording from the start.
+FOLD = ("The flap and the pocket are ONE piece of paper: the flap folds at the BACK panel's top edge, and at that crease the "
+        "flap's red runs straight down into the back panel's red with only a soft fold shading, NO gold line or rim along "
+        "the crease (the gold rim is only on the flap's free curved edge at the top). The outer outline is one continuous "
+        "line: the pocket's left and right sides carry straight on up through the crease into the flap's sides, no notch, "
+        "no step, no gap at the corners. The FRONT panel's top edge sits a little below the crease, a gentle curve with its "
+        "gold trim, and its two ends meet the pocket's sides exactly, flush, not curling up. Between the front's edge and "
+        "the crease only a shallow sliver of the darker back panel shows.")
+OPEN_FIX = ("The FIRST attached image is an opened lucky pocket for the app. EDIT it: keep everything exactly as it is (canvas, "
+            "size, place, the flap's shape and colour, the front with its circle, character and swirls, the style) and fix "
+            "ONLY where the flap meets the pocket. " + FOLD + END)
+
 JOBS = []
 for k, c, i in POCKETS:
     o, f, sl = parts(k, c, i)
+    if k == "red":
+        o = ("pk2-red-open", ["refs/ref-pk2-red-open-try.png"], OPEN_FIX)
+    else:
+        o = (o[0], o[1], o[2].replace(" Nothing coming out of it.", " Nothing coming out of it. " + FOLD))
     JOBS += [f, o, sl]          # the flap first: the open picture copies it
 
 PIECE = "\n\n" + mp.STYLE + "\n\nKeep it simple and bold, like the attached coin: big flat shapes, a soft sheen, no fine detail.\n\n" + mp.KEY
