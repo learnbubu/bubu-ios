@@ -55,17 +55,20 @@ def parts(kind, colour, inside):
     # under it, and patching them looked bad (the owner, 20 Oct 2026)
     r = f"refs/ref-pk2-{kind}.png"
     return [
-        (f"pk2-{kind}-open", [r, "refs/ref-pk2-open-shape.png"], SAME + "Draw the pocket OPENED, with the round panda clasp "
-         "REMOVED. Open it the way the BOTTOM-LEFT envelope in the SECOND attached image is open (use that picture only for how "
-         "an open envelope is shaped, not for its style or colours, and draw nothing else from it): the top flap folded up so "
-         "it stands above the pocket as a rounded tab, hinged at the pocket's top edge, showing its plain underside, a shade "
-         f"darker {colour} with a thin gold edge on its rim, no pattern. Below the hinge, a SHALLOW band of the darker back "
-         "panel shows, and the FRONT panel's top edge sits just under it, a crisp edge with small stepped shoulders near each "
-         "side and a thin gold line along it, like the second picture. The band is shallow (about a tenth of the pocket's "
-         "height), flat and simple: NOT a deep box, no big dark hollow, no shadowy curve. The front below keeps exactly its "
-         "circle with its character and the corner swirls, in exactly the same place; where the flap used to cover it, it's "
-         f"plain {colour}. The pocket keeps its size and place; only the flap goes up above it. Nothing coming out of it."
-         + END),
+        # (not from a clip-art reference: its flat vector look and stepped edge looked pasted on, not ours: the owner, 20 Oct 2026)
+        (f"pk2-{kind}-open", [r, f"refs/ref-pk2-{kind}-flap.png"], SAME + "Draw the pocket OPENED, with the round panda clasp "
+         "REMOVED, made only from this pocket's own shapes so it all reads as one piece of paper in the same soft storybook "
+         "style (the same soft shading, rounded corners, warm gold trim, no hard vector lines). The flap is the SECOND attached "
+         "image: fold it straight up about the pocket's top edge, so it stands above the pocket upside down, exactly its own "
+         "outline mirrored (its sides carry straight on up from the pocket's sides, the same width, joined to them at the fold "
+         "with no gap; its curved edge with the gold rim now at the top). We see its plain underside: a shade darker "
+         f"{colour}, the gold rim along its curved edge, soft shading darker toward the fold, no swirls, no clasp. Below the "
+         "fold, the front panel's top edge is a gentle curve dipping a little in the middle, echoing the flap's curve, with "
+         "the same gold trim and rounded ends meeting the sides; between that edge and the fold, a SHALLOW sliver of the "
+         "darker back panel (about a twentieth of the pocket's height at the middle, less at the sides). NOT a deep box, no "
+         "big dark hollow. The front below keeps exactly its circle with its character and the corner swirls, in exactly the "
+         f"same place; where the flap used to cover it, it's plain {colour}. The pocket keeps its size and place; only the "
+         "flap goes up above it. Nothing coming out of it." + END),
         (f"pk2-{kind}-flap", [r], SAME + "Draw ONLY the top FLAP of the pocket, exactly as it is on the closed pocket: the "
          "top of the pocket down to the flap's curved lower edge with its gold trim and the swirls on it, in exactly the same "
          "place. REMOVE the round panda clasp (leave plain flap where it was). Nothing below the flap's edge: the body "
@@ -77,7 +80,8 @@ def parts(kind, colour, inside):
 
 JOBS = []
 for k, c, i in POCKETS:
-    JOBS += parts(k, c, i)
+    o, f, sl = parts(k, c, i)
+    JOBS += [f, o, sl]          # the flap first: the open picture copies it
 
 PIECE = "\n\n" + mp.STYLE + "\n\nKeep it simple and bold, like the attached coin: big flat shapes, a soft sheen, no fine detail.\n\n" + mp.KEY
 JOBS += [
@@ -108,6 +112,10 @@ if __name__ == "__main__":
     ref(os.path.join(ASSETS, "pocket-jade.imageset", "pocket-jade.png"), "refs/ref-pk2-jade.png")
     ref(os.path.join(HERE, "out", "raw", "pk-pocket-gold.png"), "refs/ref-pk2-gold.png")
     ref(os.path.join(HERE, "out", "raw", "pk-pocket-gold.png"), "refs/ref-pk-gold.png")
+    # each pocket's own flap, for its open picture (once made)
+    for k, _, _ in POCKETS:
+        f = os.path.join(HERE, "out", "raw", f"pk2-{k}-flap.png")
+        if os.path.exists(f): Image.open(f).convert("RGB").save(os.path.join(HERE, "refs", f"ref-pk2-{k}-flap.png"))
     Image.open(os.path.join(ASSETS, "panda-red-envelope.imageset", "panda-red-envelope.png")).save(os.path.join(HERE, "refs", "panda-red-envelope.png"))
     jobs = json.load(open("jobs.json", encoding="utf-8"))
     jobs = [j for j in jobs if j.get("group") != "pocket2"]

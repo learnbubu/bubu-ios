@@ -13,10 +13,12 @@ Leave the older group `"pocket"` (`pk-*`) alone: it's kept and reused.
 ## The parts (9): red, jade and gold, three each
 
 Each part is an **edit of the whole pocket**, the first reference (`refs/ref-pk2-<colour>.png`):
-- `-open`: the whole pocket opened like the bottom-left envelope in `refs/ref-pk2-open-shape.png`, the owner's pick: the flap up as a rounded tab, a shallow band of back panel, the front's top edge with small shoulders. A hongbao is
-  flat, so the opening is only a **thin slit** along the top edge, never a deep dark hollow. `split_open.py` cuts it
-  into the body and the flap's underside.
-- `-flap`: only the top flap, closed, in place, without the seal.
+- `-open`: the whole pocket opened, made from its own shapes: its flap (the second reference) folded straight up,
+  mirrored, joined to the sides with no gap, showing its plain darker underside; below the fold only a shallow sliver
+  of back panel, and the front's top edge a gentle curve with the same gold trim. One soft storybook piece of paper,
+  never a deep dark hollow and never flat clip-art. `split_open.py` cuts it into the body and the flap's underside.
+- `-flap`: only the top flap, closed, in place, without the seal. Made **before** `-open`: once it's saved, copy it to
+  `refs/ref-pk2-<colour>-flap.png`, the open picture's second reference.
 - `-seal`: only the round panda clasp, in place.
 
 **They must line up.** The pocket stays the same size, in the same place, on the same 1024 square as the reference, so
@@ -50,7 +52,7 @@ them. The red open pocket is still to make.
    - there's any other text, letter or number;
    - the backdrop isn't one flat solid magenta.
 
-Make the red open pocket first, then **stop and report**. Then the jade three (stop and report), the gold three, and the
+Make the red open pocket first (its flap is already in `refs`), then **stop and report**. Then the jade three (stop and report), the gold three, and the
 five prize pieces, reporting after each.
 
 ## When all 14 are made
