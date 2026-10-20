@@ -142,9 +142,16 @@ struct FirecrackerBurst: View {
         }
     }
 
-    private var sealChars: [String] {
+    /// The seal's lines: up to ten, the count and 连 one under the other (五 / 连); past ten the count in
+    /// Chinese on one line over 连 (十五 / 连), so it reads as a seal and fits in it (it went to digits
+    /// stacked down and spilled out: the owner, 20 Oct 2026)
+    private var sealLines: [String] {
         let cn = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
-        return (n <= 10 ? [cn[n]] : Array(String(n)).map(String.init)) + ["连"]
+        let count: String
+        if n <= 10 { count = cn[max(0, n)] }
+        else if n < 100 { count = (n / 10 > 1 ? cn[n / 10] : "") + "十" + (n % 10 > 0 ? cn[n % 10] : "") }
+        else { count = String(n) }
+        return [count, "连"]
     }
 
     @ViewBuilder private func sealView(t: Double, k: Double) -> some View {
@@ -152,11 +159,16 @@ struct FirecrackerBurst: View {
         let sc = u < 0.7 ? lerp(1.8, 0.94, easeOut(u / 0.7)) : lerp(0.94, 1, (u - 0.7) / 0.3)
         let rot = u < 0.7 ? lerp(seal.rotate + 5, seal.rotate - 1, u / 0.7) : lerp(seal.rotate - 1, seal.rotate, (u - 0.7) / 0.3)
         let size = seal.size * k
+        let wide = sealLines[0].count
+        // one character a line: the seal's size; two or three on the count's line: smaller, to fit the seal's width
+        let f = seal.font * k * (wide <= 1 ? 1 : wide == 2 ? 0.74 : wide == 3 ? 0.54 : 0.44)
         ZStack {
             Image("fx-seal").resizable().scaledToFit()
-            VStack(spacing: seal.gap * k) {
-                ForEach(Array(sealChars.enumerated()), id: \.offset) { _, ch in
-                    Text(ch).font(.system(size: seal.font * k * (sealChars.count > 2 ? 0.7 : 1), weight: .heavy, design: .serif))
+            VStack(spacing: (wide <= 1 ? seal.gap : 2) * k) {
+                ForEach(Array(sealLines.enumerated()), id: \.offset) { i, line in
+                    Text(line).font(.system(size: i == 1 && wide > 1 ? max(f, seal.font * k * 0.74) : f, weight: .heavy, design: .serif))
+                        .tracking(wide > 1 && i == 0 ? -f * 0.06 : 0)
+                        .lineLimit(1).fixedSize()
                 }
             }
             .foregroundStyle(Color(UIColor(hex: 0xFFF4E6)))

@@ -42,13 +42,12 @@ struct MatchView: View {
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
                 .padding(.top, 2)
             Spacer(minLength: 6)
-            Button(action: done) {
-                Text("Continue").font(.nunitoXB(16.8))
-                    .foregroundStyle(session.matchFinished ? Color.onAccent : Color.onAccent.opacity(0.7))
-                    .frame(maxWidth: .infinity).padding(15)
-                    .background(session.matchFinished ? Color.accent : Color.accent.opacity(0.38), in: Capsule())
-            }
-            .buttonStyle(PressDown(depth: 1))
+            // the lesson's own button, as Check and Continue under the other exercises: flat and grey until
+            // the pairs are done, then raised, in colour, with its shine (the owner, 20 Oct 2026)
+            Button(action: done) { Text("Continue") }
+                .buttonStyle(RaisedButton(fill: session.matchFinished ? Color.accent : Color.line,
+                                          ink: session.matchFinished ? Color.onAccent : Color.muted,
+                                          sweep: session.matchFinished, lip: session.matchFinished ? 5 : 0))
             .disabled(!session.matchFinished)
             .padding(.bottom, 2)
         }

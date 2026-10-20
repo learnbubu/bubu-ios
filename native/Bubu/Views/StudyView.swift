@@ -50,6 +50,8 @@ struct StudyView: View {
     @State private var lift: CGFloat = 0
     /// the exercise's visible height, so the answers sit low in the card
     @State private var scrollHeight: CGFloat = 0
+    /// the exercise's foot (in "study"): a multiple-choice exercise's options keep above the feedback's room
+    @State private var scrollBottom: CGFloat = .infinity
     /// the combo burst on screen (its count), and the cheer between parts of a lesson
     @State private var burst: Int?
     /// the progress bar's place on screen: the burst's firecrackers come out from behind it
@@ -90,10 +92,17 @@ struct StudyView: View {
                                 }
                             }
                             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { scrollHeight = max(0, $0 - 1) }
+                            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { scrollBottom = $0 }
                             .onPreferenceChange(PickedBottomKey.self) { pickedBottom = $0; relift() }
                             .onPreferenceChange(PickedTopKey.self) { pickedTop = $0; relift() }
                             .scrollIndicators(.hidden)
                             .scrollBounceBehavior(.basedOnSize)
+                            // typing: with the keyboard up the exercise keeps its size, so it's scrolled to keep the box
+                            // in view over Check (its foot was covered: the owner, 20 Oct 2026)
+                            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
+                                guard session.exercise?.kind == .type, feedback == nil else { return }
+                                withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("type-field", anchor: .bottom) }
+                            }
                             // the feedback takes room from the exercise: keep the answers in view
                             .onChange(of: feedback != nil) { _, shown in
                                 if !shown { lift = 0 }
@@ -352,7 +361,8 @@ struct StudyView: View {
                                       skip: { session.skip() })
                         } else {
                             ChoiceView(ex: ex, picked: pick.selected, answered: session.answered, wheels: wheels,
-                                       skipped: skipped, skip: { cantListen() }) { select($0) }
+                                       skipped: skipped, skip: { cantListen() },
+                                       floor: fixed ? scrollBottom - 12 - bannerRoom : .infinity) { select($0) }
                         }
                     }
                 case nil:
@@ -981,12 +991,8 @@ struct MeetView: View {
             .frame(maxWidth: 440)
             .background(Color.panel, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
-            Button(action: done) {
-                Text("Continue").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
-                    .frame(maxWidth: .infinity).padding(14)
-                    .background(Color.accent, in: Capsule())
-            }
-            .buttonStyle(PressDown(depth: 3))
+            Button(action: done) { Text("Continue") }
+            .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
             .background(Color.accentDark, in: Capsule().offset(y: 3))
             .padding(.top, 18)
         }
@@ -1046,12 +1052,8 @@ struct TipCard: View {
             .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             Text("You can read this again on the lesson sheet or in the Guide.")
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
-            Button(action: done) {
-                Text(more > 0 ? "Next tip" : "Got it").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
-                    .frame(maxWidth: .infinity).padding(14)
-                    .background(Color.accent, in: Capsule())
-            }
-            .buttonStyle(PressDown(depth: 3))
+            Button(action: done) { Text(more > 0 ? "Next tip" : "Got it") }
+            .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
             .background(Color.accentDark, in: Capsule().offset(y: 3))
             .padding(.top, 6)
         }
@@ -1070,12 +1072,8 @@ struct TonesIntroCard: View {
                 .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             Text("From here on, some exercises ask for the right tones. You can read this again in Settings.")
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
-            Button(action: done) {
-                Text("Got it").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
-                    .frame(maxWidth: .infinity).padding(14)
-                    .background(Color.accent, in: Capsule())
-            }
-            .buttonStyle(PressDown(depth: 3))
+            Button(action: done) { Text("Got it") }
+            .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
             .background(Color.accentDark, in: Capsule().offset(y: 3))
             .padding(.top, 6)
         }
@@ -1151,6 +1149,11 @@ struct ChoiceView: View {
     var skipped = false
     /// "Can't listen now", under a listening exercise (nil: no such button)
     var skip: (() -> Void)? = nil
+    /// Where the options must end (in "study") so the feedback sheet, when it comes up, leaves them in view
+    /// (.infinity: anywhere, a phone that scrolls). Four tall options that went past it were lifted clear on
+    /// the answer, and the screen slid up (the owner, 20 Oct 2026); now they're drawn a little tighter from
+    /// the start instead, so nothing moves.
+    var floor: CGFloat = .infinity
     /// an option tapped: it's selected (`picked`); the answer comes with Check
     var choose: (String) -> Void
     @Environment(ProgressStore.self) private var progress
@@ -1158,6 +1161,21 @@ struct ChoiceView: View {
     @State private var tonesOpen = false
     /// the prompt's pinyin, shown with a tap where it's hidden
     @State private var peek = false
+    /// how much tighter the options are drawn to keep above `floor`: 0 (as designed) to 1 (as tight as they go)
+    @State private var squeeze: CGFloat = 0
+    private var listPad: CGFloat { ex.dir == "recall" || ex.dir == "gap" ? 10 : 14 }
+    /// the room squeezing saves at most: the gap over the options, the gaps between them, and their padding
+    private var maxSave: CGFloat {
+        let n = CGFloat(ex.options.count)
+        if ex.dir == "picture" { return 12 + 2 * 12 + 2 * 18 }
+        return 12 + max(0, n - 1) * 4 + n * 2 * (listPad - 4)
+    }
+    private func fit(_ bottom: CGFloat) {
+        guard !answered, floor.isFinite, bottom > 0 else { return }
+        // (measured with the squeeze already in, so it's added back: what it would need drawn as designed)
+        let s = min(1, max(0, (bottom - floor + squeeze * maxSave) / maxSave))
+        if abs(s - squeeze) > 0.02 { squeeze = s }
+    }
     /// Pinyin over the tested word, and over every option (one rule for all four options, so
     /// which ones have pinyin never gives the answer away). Never where the pinyin is tested.
     private var pinyinShown: Bool {
@@ -1235,23 +1253,28 @@ struct ChoiceView: View {
                 Button("What are tones?") { Coach.tonesLinkTapped(); tonesOpen = true }
                     .font(.nunito(14, .bold)).foregroundStyle(Color.accent).padding(.top, 8)
             }
+            Group {
             if ex.dir == "picture" {
-                Spacer(minLength: 18)
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                Spacer(minLength: 18 - 12 * squeeze)
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12 - 12 * squeeze) {
                     ForEach(ex.options, id: \.self) { opt in pictureCard(opt).modifier(PickedMark(on: opt == picked)) }
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
             } else {
-            Spacer(minLength: 18)
+            Spacer(minLength: 18 - 12 * squeeze)
             if ex.dir == "gap" {
                 // word tiles in a row, centred, wrapping as they need
                 FlowLayout(spacing: 12, lineSpacing: 14, center: true) {
                     ForEach(ex.options, id: \.self) { opt in option(opt).modifier(PickedMark(on: opt == picked)) }
                 }
                 .frame(maxWidth: .infinity)
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
             } else {
-                VStack(spacing: 10) {
+                VStack(spacing: 10 - 4 * squeeze) {
                     ForEach(ex.options, id: \.self) { opt in option(opt).modifier(PickedMark(on: opt == picked)) }
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
+            }
             }
             }
             if ex.dir == "listen", let skip {
@@ -1304,14 +1327,14 @@ struct ChoiceView: View {
         return Button { choose(opt) } label: {
             VStack(spacing: 6) {
                 if let pic = Pictures.asset(opt) {
-                    Image(pic).resizable().scaledToFit().frame(height: 64)
+                    Image(pic).resizable().scaledToFit().frame(height: 64 - 18 * squeeze)
                 } else {
                     Text(Pictures.of(opt) ?? "").font(.system(size: 48)).frame(height: 56)
                 }
                 Text(opt).font(.hanzi(20, .bold)).foregroundStyle(Color.ink)
                 PinyinText(pinyin: Course.wordPy[opt] ?? "", size: 13, weight: .bold).opacity(pinyinShown ? 1 : 0)
             }
-            .frame(maxWidth: .infinity).padding(.vertical, 10)
+            .frame(maxWidth: .infinity).padding(.vertical, 10 - 6 * squeeze)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 16))
         .modifier(SuccessShine(on: state == true && opt == picked, delay: 0.05, radius: 16))
@@ -1388,7 +1411,7 @@ struct ChoiceView: View {
             // fill the gap: a word tile, as wide as its word (Duolingo's "Complete the sentence")
             .frame(maxWidth: ex.dir == "gap" ? nil : .infinity)
             .frame(minWidth: ex.dir == "gap" ? 48 : nil)
-            .padding(.horizontal, ex.dir == "gap" ? 16 : 14).padding(.vertical, ex.dir == "recall" || ex.dir == "gap" ? 10 : 14)
+            .padding(.horizontal, ex.dir == "gap" ? 16 : 14).padding(.vertical, listPad - (listPad - 4) * squeeze)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 16))
         // on the whole tile (face and lip), so the box and its text hop together (the owner, 5 Oct 2026)
@@ -2013,11 +2036,8 @@ struct QuitAsk: View {
                 Text("Wait, don't go!").font(.nunitoXB(21)).foregroundStyle(Color.ink)
                 Text("You'll lose this lesson's progress if you leave now.")
                     .font(.nunito(15.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
-                Button(action: keep) {
-                    Text("Keep learning").font(.nunitoXB(16.8)).foregroundStyle(Color.onAccent)
-                        .frame(maxWidth: .infinity).padding(15).background(Color.accent, in: Capsule())
-                }
-                .buttonStyle(PressDown(depth: 1))
+                Button(action: keep) { Text("Keep learning") }
+                .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
                 Button(action: quit) {
                     Text("End lesson").font(.nunitoXB(15.5)).foregroundStyle(Color.again).padding(8)
                 }
@@ -2065,6 +2085,8 @@ struct TypeView: View {
                 .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.panel))
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
+                // (what StudyView scrolls into view when the keyboard comes up, with a little room under it)
+                .background(alignment: .bottom) { Color.clear.frame(height: 1).offset(y: 12).id("type-field") }
             // (wrapping, never clipped: the Mac's check of 0.1.38 found the descenders cut off)
             // (an SF Symbol, not the 🌐 emoji: the emoji's fallback font clipped Nunito's descenders)
             (ex.typeHanzi ? Text("Use the ") + Text(Image(systemName: "globe")) + Text(" key for the Chinese keyboard")
