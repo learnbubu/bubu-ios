@@ -55,14 +55,17 @@ def parts(kind, colour, inside):
     # under it, and patching them looked bad (the owner, 20 Oct 2026)
     r = f"refs/ref-pk2-{kind}.png"
     return [
-        (f"pk2-{kind}-open", [r], SAME + "Draw the pocket OPENED, with the round panda clasp REMOVED. The top flap is folded "
-         "straight UP, so it stands above the pocket, hinged along the pocket's top edge, and we see its plain UNDERSIDE: a "
-         f"shade darker {colour}, a thin gold edge along its curved rim, no pattern, no clasp. The pocket's body stays exactly "
-         "where it is, with the same top edge: its front exactly as it is (the circle with its character, the corner swirls), "
-         f"and where the flap used to cover it, the front simply carries on in plain {colour} up to the top edge. Along the "
-         "top edge, between the front and the flap, only a THIN dark slit of the inside, about as thick as the gold rim. A "
-         "hongbao is FLAT paper: NOT a deep box, no big dark hollow, no shadowy curve dipping down into the front, nothing "
-         "coming out of it. Only the flap goes up into the space above the pocket; everything else stays in place." + END),
+        (f"pk2-{kind}-open", [r, "refs/ref-pk2-open-shape.png"], SAME + "Draw the pocket OPENED, with the round panda clasp "
+         "REMOVED. Open it the way the BOTTOM-LEFT envelope in the SECOND attached image is open (use that picture only for how "
+         "an open envelope is shaped, not for its style or colours, and draw nothing else from it): the top flap folded up so "
+         "it stands above the pocket as a rounded tab, hinged at the pocket's top edge, showing its plain underside, a shade "
+         f"darker {colour} with a thin gold edge on its rim, no pattern. Below the hinge, a SHALLOW band of the darker back "
+         "panel shows, and the FRONT panel's top edge sits just under it, a crisp edge with small stepped shoulders near each "
+         "side and a thin gold line along it, like the second picture. The band is shallow (about a tenth of the pocket's "
+         "height), flat and simple: NOT a deep box, no big dark hollow, no shadowy curve. The front below keeps exactly its "
+         "circle with its character and the corner swirls, in exactly the same place; where the flap used to cover it, it's "
+         f"plain {colour}. The pocket keeps its size and place; only the flap goes up above it. Nothing coming out of it."
+         + END),
         (f"pk2-{kind}-flap", [r], SAME + "Draw ONLY the top FLAP of the pocket, exactly as it is on the closed pocket: the "
          "top of the pocket down to the flap's curved lower edge with its gold trim and the swirls on it, in exactly the same "
          "place. REMOVE the round panda clasp (leave plain flap where it was). Nothing below the flap's edge: the body "

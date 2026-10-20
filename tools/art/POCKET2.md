@@ -13,7 +13,7 @@ Leave the older group `"pocket"` (`pk-*`) alone: it's kept and reused.
 ## The parts (9): red, jade and gold, three each
 
 Each part is an **edit of the whole pocket**, the first reference (`refs/ref-pk2-<colour>.png`):
-- `-open`: the whole pocket opened, with the flap folded up above it and its plain underside showing. A hongbao is
+- `-open`: the whole pocket opened like the bottom-left envelope in `refs/ref-pk2-open-shape.png`, the owner's pick: the flap up as a rounded tab, a shallow band of back panel, the front's top edge with small shoulders. A hongbao is
   flat, so the opening is only a **thin slit** along the top edge, never a deep dark hollow. `split_open.py` cuts it
   into the body and the flap's underside.
 - `-flap`: only the top flap, closed, in place, without the seal.
