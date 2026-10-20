@@ -110,6 +110,8 @@ struct StickerMoment: View {
     var stillShift: CGFloat = 0
     /// ...and right
     var stillShiftX: CGFloat = 0
+    /// ...and its height (from its foot), where the still is drawn a touch taller than the moment draws him
+    var stillScaleY: CGFloat = 1
     @State private var ready = MomentPlayer.shared.ready
     @State private var drawn = false
     @State private var box: CGRect = .zero
@@ -118,7 +120,7 @@ struct StickerMoment: View {
     var body: some View {
         Color.clear
             .frame(width: side, height: side)
-            .overlay { Image(still).resizable().scaledToFit().padding(side * stillInset).offset(x: side * stillShiftX, y: side * stillShift).opacity(drawn ? 0 : 1) }
+            .overlay { Image(still).resizable().scaledToFit().padding(side * stillInset).scaleEffect(x: 1, y: stillScaleY, anchor: .bottom).offset(x: side * stillShiftX, y: side * stillShift).opacity(drawn ? 0 : 1) }
             .background(GeometryReader { g in
                 Color.clear
                     .onAppear { box = g.frame(in: .global); place() }
