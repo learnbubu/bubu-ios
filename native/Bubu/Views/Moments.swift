@@ -52,8 +52,27 @@ final class Moments {
 
     private var switching = false
     func show(_ m: Moment) {
+        // Streak saved plays the studio's moment: wait for its player to be ready (at launch, when a spare lantern
+        // relights the day by itself, it wasn't yet, and the card showed only the still: the Mac, 20 Oct 2026),
+        // a few seconds at most
+        if case .relit = m, !MomentPlayer.shared.ready, !Launch.underTests, !waitingForPlayer {
+            waitingForPlayer = true
+            var done = false
+            let go = { [weak self] in
+                guard let self, !done else { return }
+                done = true; self.waitingForPlayer = false
+                // (ready, or not after all: shown either way, the still standing in)
+                if self.current == nil && !self.switching { self.present(m) } else { self.queue.append(m) }
+            }
+            let token = NotificationCenter.default.addObserver(forName: MomentPlayer.readyNote, object: nil, queue: .main) { _ in go() }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 8) { go() }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 8.1) { NotificationCenter.default.removeObserver(token) }
+            return
+        }
         if current == nil && !switching { present(m) } else { queue.append(m) }
     }
+    /// (a Streak saved moment waiting for the player)
+    private var waitingForPlayer = false
 
     private func present(_ m: Moment) {
         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { current = m }

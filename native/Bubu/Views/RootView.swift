@@ -148,9 +148,10 @@ struct RootView: View {
                 .tabItem { tabIcon(.settings) }.tag(Router.Tab.settings)
         }
         .sensoryFeedback(.selection, trigger: router.tab)
-        // the done screen's moment player: loaded a little after launch, so it's ready by a lesson's end
+        // the done screen's moment player: loaded just after launch, so it's ready by a lesson's end, and soon for
+        // the Streak saved moment a relit day shows on opening (it was 2 s in: the Mac, 20 Oct 2026)
         // (not under the tests: the web view kept the test host busy, ~28 min a run instead of ~4: the Mac, 0.1.60)
-        .task { guard !Launch.underTests else { return }; try? await Task.sleep(for: .seconds(2)); MomentPlayer.shared.warm() }
+        .task { guard !Launch.underTests else { return }; try? await Task.sleep(for: .milliseconds(500)); MomentPlayer.shared.warm() }
         .overlay {
             if let lesson = router.lesson {
                 LessonSheet(lesson: lesson) { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { router.lesson = nil } }
