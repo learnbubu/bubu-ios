@@ -46,6 +46,7 @@ struct StudyView: View {
     /// lifted so a tall sheet (spot the difference) doesn't cover the answer you picked (the Mac's check of 0.1.80)
     @State private var sheetTop: CGFloat = .infinity
     @State private var pickedBottom: CGFloat = 0
+    @State private var pickedTop: CGFloat = 0
     @State private var lift: CGFloat = 0
     /// the exercise's visible height, so the answers sit low in the card
     @State private var scrollHeight: CGFloat = 0
@@ -90,6 +91,7 @@ struct StudyView: View {
                             }
                             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { scrollHeight = max(0, $0 - 1) }
                             .onPreferenceChange(PickedBottomKey.self) { pickedBottom = $0; relift() }
+                            .onPreferenceChange(PickedTopKey.self) { pickedTop = $0; relift() }
                             .scrollIndicators(.hidden)
                             .scrollBounceBehavior(.basedOnSize)
                             // the feedback takes room from the exercise: keep the answers in view
@@ -366,11 +368,16 @@ struct StudyView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.9), value: exerciseKey)
     }
 
-    /// Lift the exercise just enough that the answer you picked shows above the feedback sheet: once the
-    /// sheet is up, never while answering (pickedBottom is measured after the lift, so it's added back).
+    /// Lift the exercise clear of the feedback sheet only when the sheet would hide most of the answer you picked
+    /// (a tall one: spot the difference). Otherwise the screen stays still and the sheet overlaps the bottom row
+    /// (the owner, 14 and 20 Oct 2026: it slid up on a picture question). Once the sheet is up, never while
+    /// answering (the picked option is measured after the lift, so it's added back).
     private func relift() {
         guard feedback != nil, pickedBottom > 0, sheetTop.isFinite else { if feedback == nil, lift != 0 { lift = 0 }; return }
-        let need = pickedBottom + lift + 10 - sheetTop
+        let bottom = pickedBottom + lift, top = (pickedTop > 0 ? pickedTop : pickedBottom) + lift
+        let hidden = bottom - sheetTop, tall = max(1, bottom - top)
+        guard hidden > tall * 0.5 else { return }
+        let need = bottom + 10 - sheetTop
         if need > lift + 1 { withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { lift = need } }
     }
 
@@ -1118,12 +1125,18 @@ struct PickedBottomKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }
+/// ...and its top (so a lift is only for a sheet that would hide most of it).
+struct PickedTopKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { let n = nextValue(); if n > 0 { value = value > 0 ? min(value, n) : n } }
+}
 
 struct PickedMark: ViewModifier {
     let on: Bool
     func body(content: Content) -> some View {
         content.background(GeometryReader { g in
             Color.clear.preference(key: PickedBottomKey.self, value: on ? g.frame(in: .named("study")).maxY : 0)
+                .preference(key: PickedTopKey.self, value: on ? g.frame(in: .named("study")).minY : 0)
         })
     }
 }
@@ -2028,10 +2041,9 @@ struct TypeView: View {
 
     var body: some View {
         let w = ex.card.word
-        // with the keyboard up, a smaller Bùbù and tighter spacing, so the note under the field
-        // isn't pushed past the card's foot (the Mac's check of 0.1.38 found it cut)
-        VStack(spacing: focused ? 14 : 22) {
-            MascotPrompt(mood: result, compact: focused) {
+        // the same with the keyboard up as down: Bùbù and the card don't shrink (the owner, 20 Oct 2026)
+        VStack(spacing: 22) {
+            MascotPrompt(mood: result) {
                 if ex.isNew { NewBadge() }
                 if ex.typeHanzi {
                     // in characters: the meaning, and the characters once it's answered
@@ -2045,7 +2057,7 @@ struct TypeView: View {
             TextField(ex.typeHanzi ? "Type it in Chinese" : "Type the pinyin", text: $typed)
                 .font(.nunito(22, .bold)).foregroundStyle(Color.ink)
                 .multilineTextAlignment(.center)
-                .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(ex.typeHanzi ? .default : .asciiCapable)
+                .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.default)   // (the full keyboard: its globe key switches to Chinese, and characters count)
                 .submitLabel(.done).onSubmit(submit)
                 .focused($focused)
                 .disabled(result != nil)
@@ -2056,7 +2068,7 @@ struct TypeView: View {
             // (wrapping, never clipped: the Mac's check of 0.1.38 found the descenders cut off)
             // (an SF Symbol, not the 🌐 emoji: the emoji's fallback font clipped Nunito's descenders)
             (ex.typeHanzi ? Text("Use the ") + Text(Image(systemName: "globe")) + Text(" key for the Chinese keyboard")
-                          : Text("Tones are optional: ni hao or ni3 hao3. Characters count too."))
+                          : Text("Tones are optional: ni hao or ni3 hao3. Or type the characters: the ") + Text(Image(systemName: "globe")) + Text(" key switches to Chinese."))
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
                 .lineLimit(3).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 8)
         }

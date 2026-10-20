@@ -28,6 +28,8 @@ struct MatchView: View {
 
     var body: some View {
         VStack(spacing: 12) {
+            // the pairs in the middle of the page, not under the title (the owner, 20 Oct 2026)
+            Spacer(minLength: 6)
             HStack(alignment: .top, spacing: 10) {
                 VStack(spacing: 10) {
                     ForEach(left, id: \.id) { c in tile(.left, c) }
@@ -93,6 +95,8 @@ struct MatchView: View {
         // a matched pair hops and shines, as the other right answers (the owner, 6 Oct 2026)
         .modifier(SuccessShine(on: isDone, delay: side == .right ? 0.05 : 0, radius: 14, compact: true))
         .disabled(isDone)
+        // faded as one picture: faded layer by layer, the tile's edge showed through its face as a pale band
+        .compositingGroup()
         .opacity(faded.contains(c.id) ? 0.35 : 1)
         .modifier(MatchShake(shakes: CGFloat(shakes[k] ?? 0)))
         .animation(.easeOut(duration: 0.15), value: isPicked)
