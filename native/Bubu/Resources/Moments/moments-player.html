@@ -1688,7 +1688,7 @@ function renderMoments(t) {
   // the whole sticker pops in, unless placing
   // the pop: the blob, and layers with no entrance of their own, grow in about the sticker's middle;
   // layers that make their own entrance (a rocket flying in) come in at full size
-  const ps = M.place ? 1 : Math.max(0, backOut(pop)), pa = 1;
+  const ps = M.place || (PLAYER.box && PLAYER.box.inPlace) ? 1 : Math.max(0, backOut(pop)), pa = 1;   // (inPlace: there from the start, no grow-in: Streak saved)
   const OWN = { speedy: ["bubu", "cloud", "wind"], onfire: ["bubu", "trail"], earlybird: ["sun", "bun"], sweep: ["crosses"] }[k] || [];
   MB.box.style.transform = "none"; MB.box.style.opacity = 1;
   const tt = pr("title"), st = pr("sub");

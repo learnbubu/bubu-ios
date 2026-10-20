@@ -17,7 +17,9 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     static let readyNote = Notification.Name("bubuMomentPlayerReady")
     /// a moment's first frame is on screen (a still picture standing in for it can go)
     static let playingNote = Notification.Name("bubuMomentPlaying")
-    private var pending: (key: String, box: CGRect)?
+    private var pending: (key: String, box: CGRect, inPlace: Bool)?
+    /// (the moment playing came in place: a move keeps it so)
+    private var playingInPlace = false
     /// counts plays, so a late fallback belongs to the play that set it
     private var plays = 0
 
@@ -56,14 +58,16 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
         DispatchQueue.main.async {
             self.ready = true
             NotificationCenter.default.post(name: Self.readyNote, object: nil)
-            if let p = self.pending { self.pending = nil; self.play(p.key, in: p.box) }
+            if let p = self.pending { self.pending = nil; self.play(p.key, in: p.box, inPlace: p.inPlace) }
         }
     }
 
     /// Plays a moment with its sticker in `box` (in the web view's points).
-    func play(_ key: String, in box: CGRect) {
-        guard ready else { pending = (key, box); return }
-        web.evaluateJavaScript("bubuPlay(\(Self.js(key)), \(Self.js(box))); 0", completionHandler: nil)
+    /// `inPlace`: there from the start, no grow-in (Streak saved: Bùbù's already holding the lantern out)
+    func play(_ key: String, in box: CGRect, inPlace: Bool = false) {
+        guard ready else { pending = (key, box, inPlace); return }
+        playingInPlace = inPlace
+        web.evaluateJavaScript("bubuPlay(\(Self.js(key)), \(Self.js(box, inPlace: inPlace))); 0", completionHandler: nil)
         // (if the page's "playing" never comes, it's shown anyway: a moment must never go unseen)
         plays += 1
         let n = plays
@@ -76,7 +80,7 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     /// The sticker's box moved (the layout settled): it plays on, from there.
     func move(to box: CGRect) {
         if pending != nil { pending?.box = box; return }
-        web.evaluateJavaScript("bubuMove(\(Self.js(box))); 0", completionHandler: nil)
+        web.evaluateJavaScript("bubuMove(\(Self.js(box, inPlace: playingInPlace))); 0", completionHandler: nil)   // (keeps inPlace)
     }
 
     func stop() {
@@ -87,8 +91,8 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     }
 
     private static func js(_ s: String) -> String { "\"" + s.filter { $0.isLetter || $0.isNumber } + "\"" }
-    private static func js(_ b: CGRect) -> String {
-        String(format: "{x:%.1f,y:%.1f,size:%.1f}", b.minX, b.minY, b.width)
+    private static func js(_ b: CGRect, inPlace: Bool = false) -> String {
+        String(format: "{x:%.1f,y:%.1f,size:%.1f%@}", b.minX, b.minY, b.width, inPlace ? ",inPlace:true" : "")
     }
 }
 
@@ -100,6 +104,8 @@ struct StickerMoment: View {
     var side: CGFloat = 220
     /// room round the still (none when it's the moment's own first frame, framed as the sticker)
     var stillInset: CGFloat = 0.12
+    /// there from the start, no grow-in
+    var inPlace = false
     @State private var ready = MomentPlayer.shared.ready
     @State private var drawn = false
     @State private var box: CGRect = .zero
@@ -127,7 +133,7 @@ struct StickerMoment: View {
         let o = MomentPlayer.shared.origin ?? .zero
         let b = CGRect(x: box.minX - o.x, y: box.minY - o.y, width: box.width, height: box.height)
         if started { MomentPlayer.shared.move(to: b) } else {
-            started = true; MomentPlayer.shared.play(key, in: b)
+            started = true; MomentPlayer.shared.play(key, in: b, inPlace: inPlace)
             // (once the web view has surely settled in its place)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { place() }
         }
