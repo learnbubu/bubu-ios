@@ -87,6 +87,8 @@ struct RootView: View {
         if Launch.screen == "char" { router.tab = .learn; CharNav.shared.open("好"); return }
         // the rewards: the shop, and a red pocket opened (it opens itself for this)
         if Launch.screen == "shop" { DispatchQueue.main.asyncAfter(deadline: .now() + 1) { Moments.shared.show(.shop) }; return }
+        // the Streak saved moment (Studio's: an ember flies round the spare lantern and lights it)
+        if Launch.screen == "relit" { DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { Moments.shared.show(.relit(streak: 5, left: 1)) }; return }
         if Launch.screen == "pocket" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 Moments.shared.show(.pocket(.init(kind: .red, reward: 30, title: "Lesson complete!", sub: "Bùbù has something for you.")))

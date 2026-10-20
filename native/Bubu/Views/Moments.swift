@@ -261,9 +261,11 @@ struct MomentCard: View {
             note("You have \(n) spare lantern\(n == 1 ? "" : "s")")
             button("Use a spare lantern") {
                 close()
+                // the Streak saved moment, as when a spare lantern relights the day by itself (the owner, 20 Oct
+                // 2026: it only showed a toast here), once this card has gone
                 if progress.relight() {
-                    Sounds.shared.play("complete")
-                    Moments.shared.toast("Saved! \(progress.streak)\u{2011}day streak carries on.")
+                    let streak = progress.streak, left = progress.embers
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { Moments.shared.show(.relit(streak: streak, left: left)) }
                 }
             }
             .padding(.top, 10)
