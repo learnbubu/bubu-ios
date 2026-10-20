@@ -50,15 +50,19 @@ POCKETS = [
 
 
 def parts(kind, colour, inside):
-    # (the flap's underside is made from the flap by flap_inside.py: Codex drew the whole pocket under it)
+    # the open pocket is drawn whole and cut in two along the pocket's top edge by split_open.py (the body under it, the
+    # flap's underside over it): drawn as parts, the body came out a deep dark box and the underside with a whole pocket
+    # under it, and patching them looked bad (the owner, 20 Oct 2026)
     r = f"refs/ref-pk2-{kind}.png"
     return [
-        (f"pk2-{kind}-body", [r], SAME + "Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp "
-         "REMOVED. The front stays exactly as it is (the big circle with its character, the corner swirls), and where the "
-         f"flap was, the front simply carries on up in its plain {colour}, no pattern, to just under the pocket's top edge. "
-         "A hongbao is FLAT paper: along the very top there is only a THIN slit of darker inside, about as thick as the gold "
-         "rim (roughly 2% of the pocket's height), straight across. NOT a deep pocket: no big dark hollow, no shadowy curve "
-         "dipping down into the front." + END),
+        (f"pk2-{kind}-open", [r], SAME + "Draw the pocket OPENED, with the round panda clasp REMOVED. The top flap is folded "
+         "straight UP, so it stands above the pocket, hinged along the pocket's top edge, and we see its plain UNDERSIDE: a "
+         f"shade darker {colour}, a thin gold edge along its curved rim, no pattern, no clasp. The pocket's body stays exactly "
+         "where it is, with the same top edge: its front exactly as it is (the circle with its character, the corner swirls), "
+         f"and where the flap used to cover it, the front simply carries on in plain {colour} up to the top edge. Along the "
+         "top edge, between the front and the flap, only a THIN dark slit of the inside, about as thick as the gold rim. A "
+         "hongbao is FLAT paper: NOT a deep box, no big dark hollow, no shadowy curve dipping down into the front, nothing "
+         "coming out of it. Only the flap goes up into the space above the pocket; everything else stays in place." + END),
         (f"pk2-{kind}-flap", [r], SAME + "Draw ONLY the top FLAP of the pocket, exactly as it is on the closed pocket: the "
          "top of the pocket down to the flap's curved lower edge with its gold trim and the swirls on it, in exactly the same "
          "place. REMOVE the round panda clasp (leave plain flap where it was). Nothing below the flap's edge: the body "
