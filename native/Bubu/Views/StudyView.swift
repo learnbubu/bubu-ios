@@ -384,6 +384,9 @@ struct StudyView: View {
     /// answering (the picked option is measured after the lift, so it's added back).
     private func relift() {
         guard feedback != nil, pickedBottom > 0, sheetTop.isFinite else { if feedback == nil, lift != 0 { lift = 0 }; return }
+        // a multiple-choice screen that doesn't scroll never moves: its options are fitted above the sheet's room from
+        // the start (it still slid on a right answer and a look-alike: the Mac's check of b474e5b)
+        guard !fixed else { return }
         let bottom = pickedBottom + lift, top = (pickedTop > 0 ? pickedTop : pickedBottom) + lift
         let hidden = bottom - sheetTop, tall = max(1, bottom - top)
         guard hidden > tall * 0.5 else { return }
@@ -1163,14 +1166,17 @@ struct ChoiceView: View {
     @State private var peek = false
     /// how much tighter the options are drawn to keep above `floor`: 0 (as designed) to 1 (as tight as they go)
     @State private var squeeze: CGFloat = 0
+    /// the options' foot as last measured, to fit again when `floor` arrives (it's measured after them)
+    @State private var lastBottom: CGFloat = 0
     private var listPad: CGFloat { ex.dir == "recall" || ex.dir == "gap" ? 10 : 14 }
     /// the room squeezing saves at most: the gap over the options, the gaps between them, and their padding
     private var maxSave: CGFloat {
         let n = CGFloat(ex.options.count)
-        if ex.dir == "picture" { return 12 + 2 * 12 + 2 * 18 }
-        return 12 + max(0, n - 1) * 5 + n * 2 * (listPad - 3)
+        if ex.dir == "picture" { return 14 + 2 * 12 + 2 * 18 }
+        return 14 + max(0, n - 1) * 6 + n * 2 * (listPad - 3)
     }
     private func fit(_ bottom: CGFloat) {
+        if bottom > 0 { lastBottom = bottom }
         guard !answered, floor.isFinite, bottom > 0 else { return }
         // (measured with the squeeze already in, so it's added back: what it would need drawn as designed)
         let s = min(1, max(0, (bottom - floor + squeeze * maxSave) / maxSave))
@@ -1255,13 +1261,13 @@ struct ChoiceView: View {
             }
             Group {
             if ex.dir == "picture" {
-                Spacer(minLength: 18 - 12 * squeeze)
+                Spacer(minLength: 18 - 14 * squeeze)
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12 - 12 * squeeze) {
                     ForEach(ex.options, id: \.self) { opt in pictureCard(opt).modifier(PickedMark(on: opt == picked)) }
                 }
                 .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
             } else {
-            Spacer(minLength: 18 - 12 * squeeze)
+            Spacer(minLength: 18 - 14 * squeeze)
             if ex.dir == "gap" {
                 // word tiles in a row, centred, wrapping as they need
                 FlowLayout(spacing: 12, lineSpacing: 14, center: true) {
@@ -1270,7 +1276,7 @@ struct ChoiceView: View {
                 .frame(maxWidth: .infinity)
                 .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
             } else {
-                VStack(spacing: 10 - 5 * squeeze) {
+                VStack(spacing: 10 - 6 * squeeze) {
                     ForEach(ex.options, id: \.self) { opt in option(opt).modifier(PickedMark(on: opt == picked)) }
                 }
                 .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
@@ -1304,6 +1310,9 @@ struct ChoiceView: View {
             }
             .presentationDetents([.medium, .large])
         }
+        // (the exercise's foot is often known only after the options are laid out: fit again when it is,
+        // or they were never squeezed: the Mac's check of b474e5b)
+        .onChange(of: floor) { _, _ in fit(lastBottom) }
         .onAppear {
             // the first pinyin drill ever opens the primer once
             if ex.dir == "pinyin" && !UserDefaults.standard.bool(forKey: "tonesSeen") {
