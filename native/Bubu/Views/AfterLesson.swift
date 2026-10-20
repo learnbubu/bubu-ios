@@ -108,7 +108,7 @@ struct StreakStage: View {
                 .padding(.top, 20)
             Text("\(shown)").font(.nunito(84, .black)).tracking(-2).foregroundStyle(Self.red)
                 .monospacedDigit().contentTransition(.numericText(value: Double(shown)))
-                .padding(.top, 8)
+                .padding(.top, 22)   // (room for the tassel as it swings low, before the lift)
             Text("day streak").font(.nunito(20, .black)).foregroundStyle(Self.red).padding(.top, -6)
             weekRow(week, today: today)
                 .padding(.top, 26)
