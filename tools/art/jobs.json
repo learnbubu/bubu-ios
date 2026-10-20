@@ -3465,5 +3465,160 @@
    "refs/ref-jade-dragon-hood.png"
   ],
   "prompt": "Bùbù for an ACHIEVEMENT BADGE in the app, shown small (80 to 100 pixels), so it must read at a glance: Bùbù wearing OUR Jade Dragon costume hood, exactly as in the LAST attached image (copy its design): a rounded green hood with darker green scalloped edges, a cream face opening ringed with small white fangs, a light-green snout on top with two nostrils, two big round dragon eyes with white brows above it, two yellow curved horns, a small red crest between them, red fins at the sides and thin yellow whiskers. Simplify it to his sticker style; the hood may be a little smaller than in the picture, but every part must be there and match. His paws up like little claws, roaring cheekily.\n\nONLY Bùbù and his one prop, NOTHING behind him: no badge shape, no circle, no ground, no scenery (the app puts him on the badge). Draw him BIG: he fills about 85% of the canvas height, centred, his head in the upper part. The app stands him inside a badge shape that hides the lower part of his legs, so keep the action - his face, his paws and his prop - in the top 60% of the canvas, and make it lively: a clear pose and a strong, happy expression. His prop may reach out towards the edges.\n\nSTICKER SIMPLE, EXACTLY like Bùbù in the first two attached images (ignore the shape behind him there): big bold flat shapes, very few details, one or two flat tones a colour, no texture, no grain, no fine lines, no small patterns, no outlines, no glossy highlights.\n\nBùbù, clearly him (the third attached image): a chubby baby panda, a big round cream-white head about as wide as his body, charcoal round ears, charcoal eye patches with happy arched eyes, a small black nose, rosy blush cheeks, a little white tuft of fur on top, charcoal arms and stubby legs, a cream belly, and his small coral-red backpack.\n\nPalette: muted and warm, as the app: jade and teal greens, warm cream, terracotta red, soft orange, soft gold, warm greys, charcoal for the darkest. Nothing in the family's badge colour (dragon green) is needed: the badge behind him will be that colour, so keep his prop a different colour from it where you can.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk2-red-body.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-red.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp REMOVED: the front of the pocket from the line where the flap's curved edge was, down to the bottom, exactly as it is (the big circle with its character, the corner swirls). Above that line, inside the original outline, show the pocket's opening: the top edge of the back panel, a little lower than the old top, and between them a deep shadowy crimson inside with a soft shadow, as if you are looking slightly down into an empty open envelope.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-red-flap.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-red.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the top FLAP of the pocket, exactly as it is on the closed pocket: the top of the pocket down to the flap's curved lower edge with its gold trim and the swirls on it, in exactly the same place. REMOVE the round panda clasp (leave plain flap where it was). Nothing below the flap's edge: the body is magenta.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-red-flap-inside.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-red.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the INSIDE of the top flap, as if the flap has been folded up and back and we see its underside: the same outline as the flap but flipped upside down, standing up ABOVE where the pocket's top edge is, attached along that top edge. The underside is plain red a shade darker than the front, with a thin gold edge along its curved rim and a soft shading toward the fold, no pattern, no clasp. Nothing else: the pocket's body is NOT drawn (magenta).\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-red-seal.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-red.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the round panda clasp (the gold coin-shaped seal with the panda face at the flap's tip), exactly as it is, in exactly the same place and size. Nothing else: no flap, no pocket.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-jade-body.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-jade.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp REMOVED: the front of the pocket from the line where the flap's curved edge was, down to the bottom, exactly as it is (the big circle with its character, the corner swirls). Above that line, inside the original outline, show the pocket's opening: the top edge of the back panel, a little lower than the old top, and between them a deep shadowy green inside with a soft shadow, as if you are looking slightly down into an empty open envelope.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-jade-flap.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-jade.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the top FLAP of the pocket, exactly as it is on the closed pocket: the top of the pocket down to the flap's curved lower edge with its gold trim and the swirls on it, in exactly the same place. REMOVE the round panda clasp (leave plain flap where it was). Nothing below the flap's edge: the body is magenta.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-jade-flap-inside.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-jade.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the INSIDE of the top flap, as if the flap has been folded up and back and we see its underside: the same outline as the flap but flipped upside down, standing up ABOVE where the pocket's top edge is, attached along that top edge. The underside is plain jade-green a shade darker than the front, with a thin gold edge along its curved rim and a soft shading toward the fold, no pattern, no clasp. Nothing else: the pocket's body is NOT drawn (magenta).\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-jade-seal.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-jade.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the round panda clasp (the gold coin-shaped seal with the panda face at the flap's tip), exactly as it is, in exactly the same place and size. Nothing else: no flap, no pocket.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-gold-body.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-gold.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp REMOVED: the front of the pocket from the line where the flap's curved edge was, down to the bottom, exactly as it is (the big circle with its character, the corner swirls). Above that line, inside the original outline, show the pocket's opening: the top edge of the back panel, a little lower than the old top, and between them a deep warm amber inside with a soft shadow, as if you are looking slightly down into an empty open envelope.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-gold-flap.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-gold.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the top FLAP of the pocket, exactly as it is on the closed pocket: the top of the pocket down to the flap's curved lower edge with its gold trim and the swirls on it, in exactly the same place. REMOVE the round panda clasp (leave plain flap where it was). Nothing below the flap's edge: the body is magenta.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-gold-flap-inside.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-gold.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the INSIDE of the top flap, as if the flap has been folded up and back and we see its underside: the same outline as the flap but flipped upside down, standing up ABOVE where the pocket's top edge is, attached along that top edge. The underside is plain gold a shade darker than the front, with a thin gold edge along its curved rim and a soft shading toward the fold, no pattern, no clasp. Nothing else: the pocket's body is NOT drawn (magenta).\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-gold-seal.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk2-gold.png"
+  ],
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the round panda clasp (the gold coin-shaped seal with the panda face at the flap's tip), exactly as it is, in exactly the same place and size. Nothing else: no flap, no pocket.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+ },
+ {
+  "file": "out/raw/pk2-coin-pile.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-coin.png"
+  ],
+  "prompt": "The attached image is the app's gold coin. Draw ONLY a generous heap of these same gold coins (round, square hole), about fifteen, piled into a rounded mound, a few leaning up on their edges, one gold ingot (yuanbao) resting on top, and two small sparkles. Centred, seen from the front, filling about 80% of the width.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it simple and bold, like the attached coin: big flat shapes, a soft sheen, no fine detail.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk2-xp-jade.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-coin.png",
+   "refs/ref-pk-jade.png"
+  ],
+  "prompt": "The attached images are the app's gold coin and jade pocket, for the style. Draw ONLY a lucky jade charm: a round jade-green disc (a bi) with a round hole in the middle, a soft inner glow, a red knotted cord and short red tassel hanging from its top, and two small sparkles. Centred, a simple icon. (It stands for bonus XP.)\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it simple and bold, like the attached coin: big flat shapes, a soft sheen, no fine detail.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk2-blossom.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-coin.png"
+  ],
+  "prompt": "The attached image is the app's gold coin, for the style. Draw ONLY one plum blossom flower seen from the front: five round soft-pink petals, a warm gold centre with a few short stamens. Centred, a simple icon.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it simple and bold, like the attached coin: big flat shapes, a soft sheen, no fine detail.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk2-sparkle.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/ref-pk-coin.png"
+  ],
+  "prompt": "The attached image is the app's gold coin, for the style. Draw ONLY one four-pointed sparkle star: long slim points up, down, left and right, pale warm gold with a near-white centre, soft edges. Centred, filling about 70% of the canvas.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it simple and bold, like the attached coin: big flat shapes, a soft sheen, no fine detail.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/pk2-month-bubu.png",
+  "group": "pocket2",
+  "size": "1024x1024",
+  "refs": [
+   "refs/panda-red-envelope.png",
+   "refs/ref-pk-gold.png"
+  ],
+  "prompt": "The FIRST attached image is Bùbù the panda from the app; copy him exactly (face, ears, eye patches, blush, white tuft, coral-red backpack straps). Draw ONLY Bùbù from the chest up, beaming with his eyes happily closed, hugging the GOLD lucky pocket from the SECOND image to his chest with both paws (its character facing us, copied exactly), a few gold sparkles around him. He fills the canvas from the bottom edge up to near the top, centred, cut off flat at the bottom (it goes in a round medal).\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
