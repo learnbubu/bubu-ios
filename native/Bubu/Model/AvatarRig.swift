@@ -71,6 +71,19 @@ struct AvatarRig: Decodable {
         return r
     }
 
+    /// A calm moment to show him still (an outfit's tile): Idle, in the middle of its longest stretch with his eyes
+    /// open (no part that closes them showing), so a tile never catches him mid-blink or mid-sway.
+    func stillFrame() -> (anim: Anim, ms: Double)? {
+        guard let a = anims["Idle"] ?? anims.values.first, a.frames > 0 else { return nil }
+        let closed = parts.indices.filter { parts[$0].name.lowercased().contains("closed") }
+        var best = (start: 0, len: 0), run = (start: 0, len: 0)
+        for f in 0..<a.frames {
+            let open = closed.allSatisfy { a.opacity[f * parts.count + $0] < 0.5 }
+            if open { run.len += 1; if run.len > best.len { best = run } } else { run = (f + 1, 0) }
+        }
+        return (a, Double(best.start + best.len / 2) * 1000 / fps)
+    }
+
     /// A box in the document (x, y, w, h).
     typealias Box = (x: Float, y: Float, w: Float, h: Float)
 

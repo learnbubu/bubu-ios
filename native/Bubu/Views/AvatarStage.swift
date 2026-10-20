@@ -69,6 +69,7 @@ struct AvatarStage: UIViewRepresentable {
         c.name = name
         let b = (x: box.x - box.w * bleed, y: box.y - box.h * bleed, w: box.w * (1 + 2 * bleed), h: box.h * (1 + 2 * bleed))
         guard let rig = AvatarRig.load(name), let r = AvatarRenderer(rig: rig, view: v, box: b) else { return }
+        if still { r.hold = rig.stillFrame() }
         c.renderer = r
         r.wear(look)
         v.delegate = r
@@ -254,7 +255,11 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
 
     /// What plays now, and how far in (ms): Idle for one or two of its loops, then another once, then Idle again (both
     /// start and end at rest, so they meet without a jump).
+    /// held on one moment (an outfit's tile): drawn the same whenever it's drawn again (a colour changed)
+    var hold: (anim: AvatarRig.Anim, ms: Double)?
+
     private func direct(_ now: CFTimeInterval) -> (AvatarRig.Anim, Double) {
+        if let h = hold { before = nil; return (h.anim, h.ms) }
         // (for checking against Studio: launched with -avatarAt Name:ms it holds that frame)
         if let hold = UserDefaults.standard.string(forKey: "avatarAt"), let c = hold.lastIndex(of: ":"),
            let a = rig.anims[String(hold[..<c])], let ms = Double(hold[hold.index(after: c)...]) { before = nil; return (a, ms) }
