@@ -50,22 +50,19 @@ POCKETS = [
 
 
 def parts(kind, colour, inside):
+    # (the flap's underside is made from the flap by flap_inside.py: Codex drew the whole pocket under it)
     r = f"refs/ref-pk2-{kind}.png"
     return [
         (f"pk2-{kind}-body", [r], SAME + "Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp "
-         "REMOVED: the front of the pocket from the line where the flap's curved edge was, down to the bottom, exactly as it "
-         "is (the big circle with its character, the corner swirls). Above that line, inside the original outline, show the "
-         f"pocket's opening: the top edge of the back panel, a little lower than the old top, and between them {inside} "
-         "inside with a soft shadow, as if you are looking slightly down into an empty open envelope." + END),
+         "REMOVED. The front stays exactly as it is (the big circle with its character, the corner swirls), and where the "
+         f"flap was, the front simply carries on up in its plain {colour}, no pattern, to just under the pocket's top edge. "
+         "A hongbao is FLAT paper: along the very top there is only a THIN slit of darker inside, about as thick as the gold "
+         "rim (roughly 2% of the pocket's height), straight across. NOT a deep pocket: no big dark hollow, no shadowy curve "
+         "dipping down into the front." + END),
         (f"pk2-{kind}-flap", [r], SAME + "Draw ONLY the top FLAP of the pocket, exactly as it is on the closed pocket: the "
          "top of the pocket down to the flap's curved lower edge with its gold trim and the swirls on it, in exactly the same "
          "place. REMOVE the round panda clasp (leave plain flap where it was). Nothing below the flap's edge: the body "
          "is magenta." + END),
-        (f"pk2-{kind}-flap-inside", [r], SAME + f"Draw ONLY the INSIDE of the top flap, as if the flap has been folded up "
-         "and back and we see its underside: the same outline as the flap but flipped upside down, standing up ABOVE where the "
-         f"pocket's top edge is, attached along that top edge. The underside is plain {colour} a shade darker than the front, "
-         "with a thin gold edge along its curved rim and a soft shading toward the fold, no pattern, no clasp. Nothing else: "
-         "the pocket's body is NOT drawn (magenta)." + END),
         (f"pk2-{kind}-seal", [r], SAME + "Draw ONLY the round panda clasp (the gold coin-shaped seal with the panda face at "
          "the flap's tip), exactly as it is, in exactly the same place and size. Nothing else: no flap, no pocket." + END),
     ]

@@ -3473,7 +3473,7 @@
   "refs": [
    "refs/ref-pk2-red.png"
   ],
-  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp REMOVED: the front of the pocket from the line where the flap's curved edge was, down to the bottom, exactly as it is (the big circle with its character, the corner swirls). Above that line, inside the original outline, show the pocket's opening: the top edge of the back panel, a little lower than the old top, and between them a deep shadowy crimson inside with a soft shadow, as if you are looking slightly down into an empty open envelope.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp REMOVED. The front stays exactly as it is (the big circle with its character, the corner swirls), and where the flap was, the front simply carries on up in its plain red, no pattern, to just under the pocket's top edge. A hongbao is FLAT paper: along the very top there is only a THIN slit of darker inside, about as thick as the gold rim (roughly 2% of the pocket's height), straight across. NOT a deep pocket: no big dark hollow, no shadowy curve dipping down into the front.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
  },
  {
   "file": "out/raw/pk2-red-flap.png",
@@ -3483,15 +3483,6 @@
    "refs/ref-pk2-red.png"
   ],
   "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the top FLAP of the pocket, exactly as it is on the closed pocket: the top of the pocket down to the flap's curved lower edge with its gold trim and the swirls on it, in exactly the same place. REMOVE the round panda clasp (leave plain flap where it was). Nothing below the flap's edge: the body is magenta.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
- },
- {
-  "file": "out/raw/pk2-red-flap-inside.png",
-  "group": "pocket2",
-  "size": "1024x1024",
-  "refs": [
-   "refs/ref-pk2-red.png"
-  ],
-  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the INSIDE of the top flap, as if the flap has been folded up and back and we see its underside: the same outline as the flap but flipped upside down, standing up ABOVE where the pocket's top edge is, attached along that top edge. The underside is plain red a shade darker than the front, with a thin gold edge along its curved rim and a soft shading toward the fold, no pattern, no clasp. Nothing else: the pocket's body is NOT drawn (magenta).\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
  },
  {
   "file": "out/raw/pk2-red-seal.png",
@@ -3509,7 +3500,7 @@
   "refs": [
    "refs/ref-pk2-jade.png"
   ],
-  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp REMOVED: the front of the pocket from the line where the flap's curved edge was, down to the bottom, exactly as it is (the big circle with its character, the corner swirls). Above that line, inside the original outline, show the pocket's opening: the top edge of the back panel, a little lower than the old top, and between them a deep shadowy green inside with a soft shadow, as if you are looking slightly down into an empty open envelope.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp REMOVED. The front stays exactly as it is (the big circle with its character, the corner swirls), and where the flap was, the front simply carries on up in its plain jade-green, no pattern, to just under the pocket's top edge. A hongbao is FLAT paper: along the very top there is only a THIN slit of darker inside, about as thick as the gold rim (roughly 2% of the pocket's height), straight across. NOT a deep pocket: no big dark hollow, no shadowy curve dipping down into the front.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
  },
  {
   "file": "out/raw/pk2-jade-flap.png",
@@ -3519,15 +3510,6 @@
    "refs/ref-pk2-jade.png"
   ],
   "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the top FLAP of the pocket, exactly as it is on the closed pocket: the top of the pocket down to the flap's curved lower edge with its gold trim and the swirls on it, in exactly the same place. REMOVE the round panda clasp (leave plain flap where it was). Nothing below the flap's edge: the body is magenta.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
- },
- {
-  "file": "out/raw/pk2-jade-flap-inside.png",
-  "group": "pocket2",
-  "size": "1024x1024",
-  "refs": [
-   "refs/ref-pk2-jade.png"
-  ],
-  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the INSIDE of the top flap, as if the flap has been folded up and back and we see its underside: the same outline as the flap but flipped upside down, standing up ABOVE where the pocket's top edge is, attached along that top edge. The underside is plain jade-green a shade darker than the front, with a thin gold edge along its curved rim and a soft shading toward the fold, no pattern, no clasp. Nothing else: the pocket's body is NOT drawn (magenta).\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
  },
  {
   "file": "out/raw/pk2-jade-seal.png",
@@ -3545,7 +3527,7 @@
   "refs": [
    "refs/ref-pk2-gold.png"
   ],
-  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp REMOVED: the front of the pocket from the line where the flap's curved edge was, down to the bottom, exactly as it is (the big circle with its character, the corner swirls). Above that line, inside the original outline, show the pocket's opening: the top edge of the back panel, a little lower than the old top, and between them a deep warm amber inside with a soft shadow, as if you are looking slightly down into an empty open envelope.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
+  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the pocket's BODY with its top flap REMOVED and the round panda clasp REMOVED. The front stays exactly as it is (the big circle with its character, the corner swirls), and where the flap was, the front simply carries on up in its plain gold, no pattern, to just under the pocket's top edge. A hongbao is FLAT paper: along the very top there is only a THIN slit of darker inside, about as thick as the gold rim (roughly 2% of the pocket's height), straight across. NOT a deep pocket: no big dark hollow, no shadowy curve dipping down into the front.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
  },
  {
   "file": "out/raw/pk2-gold-flap.png",
@@ -3555,15 +3537,6 @@
    "refs/ref-pk2-gold.png"
   ],
   "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the top FLAP of the pocket, exactly as it is on the closed pocket: the top of the pocket down to the flap's curved lower edge with its gold trim and the swirls on it, in exactly the same place. REMOVE the round panda clasp (leave plain flap where it was). Nothing below the flap's edge: the body is magenta.\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
- },
- {
-  "file": "out/raw/pk2-gold-flap-inside.png",
-  "group": "pocket2",
-  "size": "1024x1024",
-  "refs": [
-   "refs/ref-pk2-gold.png"
-  ],
-  "prompt": "The FIRST attached image is a lucky pocket (a Chinese red envelope) from the app. EDIT it. It is one layer of an animation, so it must line up EXACTLY with the original: keep the canvas, the pocket's size, position and outline exactly the same, and keep the style, colours and pattern exactly the same (copy any character on it stroke for stroke). Draw ONLY the INSIDE of the top flap, as if the flap has been folded up and back and we see its underside: the same outline as the flap but flipped upside down, standing up ABOVE where the pocket's top edge is, attached along that top edge. The underside is plain gold a shade darker than the front, with a thin gold edge along its curved rim and a soft shading toward the fold, no pattern, no clasp. Nothing else: the pocket's body is NOT drawn (magenta).\n\nBackground: one flat, solid pure magenta (#FF00FF) everywhere outside what is drawn, no shadow, no glow, no halo. No text or letters apart from the character already on the pocket."
  },
  {
   "file": "out/raw/pk2-gold-seal.png",
