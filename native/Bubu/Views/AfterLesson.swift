@@ -485,3 +485,97 @@ struct QuestStage: View {
         }
     }
 }
+
+/// Streak saved, as a screen of its own (the owner, 20 Oct 2026: "no pop up!"): the streak screen's layout with Bùbù as
+/// its hero, his own moment (already there, holding the spare lantern out; the ember circles it and lights it), and
+/// under him the streak as the streak screen shows it: the number, the week with its ticks (the saved day too), the
+/// line, how many spares are left, and Keep going. The number warms in as his lantern lights.
+struct StreakSavedScreen: View {
+    let streak: Int
+    let left: Int
+    let progress: ProgressStore
+    var close: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var lit = false
+    @State private var weekIn = false
+    @State private var lineIn = false
+    @State private var buttonIn = false
+
+    var body: some View {
+        let week = progress.thisWeek, today = progress.today
+        ZStack {
+            Color.bg.ignoresSafeArea()
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                StickerMoment(key: "spare", still: "spare-still", side: 270, stillInset: 0, inPlace: true)
+                Text("\(streak)").font(.nunito(84, .black)).tracking(-2).monospacedDigit()
+                    .foregroundStyle(lit ? StreakStage.red : Color.muted.opacity(0.55))
+                    .scaleEffect(lit ? 1 : 0.94)
+                    .padding(.top, 6)
+                Text("day streak").font(.nunito(20, .black))
+                    .foregroundStyle(lit ? StreakStage.red : Color.muted.opacity(0.55)).padding(.top, -6)
+                weekRow(week, today: today)
+                    .padding(.top, 24)
+                    .opacity(weekIn ? 1 : 0).offset(y: weekIn ? 0 : 14)
+                VStack(spacing: 10) {
+                    Text("A spare lantern kept your \(streak)\u{2011}day streak.")
+                        .font(.nunito(16, .bold)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                    Label { Text("\(left) spare lantern\(left == 1 ? "" : "s") left") } icon: { LanternMark(lit: true, size: 15) }
+                        .font(.nunitoXB(13)).foregroundStyle(Color(UIColor(hex: 0xB7822E)))
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(Color(UIColor(hex: 0xFCEBC8)), in: Capsule())
+                }
+                .padding(.top, 18).padding(.horizontal, 10)
+                .opacity(lineIn ? 1 : 0)
+                Spacer(minLength: 0)
+                Button("Keep going", action: close)
+                    .buttonStyle(WideButton())
+                    .opacity(buttonIn ? 1 : 0)
+                    .allowsHitTesting(buttonIn)
+                    .padding(.bottom, 12)
+            }
+            .padding(.horizontal, 24)
+            // (Bùbù's moment plays over the page, at his sticker's place)
+            if MomentPlayer.shared.loaded {
+                MomentStage().ignoresSafeArea().allowsHitTesting(false)
+            }
+        }
+        .task { await play() }
+    }
+
+    private func weekRow(_ week: [String], today: String) -> some View {
+        let names = ["M", "T", "W", "T", "F", "S", "S"]
+        return HStack(spacing: 10) {
+            ForEach(0..<7, id: \.self) { i in
+                let d = week[i], isToday = d == today, future = d > today
+                let on = progress.litOn(d)
+                VStack(spacing: 8) {
+                    Text(names[i]).font(.nunitoXB(12)).foregroundStyle(isToday ? StreakStage.red : Color.muted)
+                    let nextOn = i < 6 && week[i + 1] <= today && progress.litOn(week[i + 1])
+                    ZStack {
+                        Circle().fill(on ? StreakStage.red : future ? Color.line.opacity(0.6) : Color.line.opacity(0.35))
+                        if isToday && !on { Circle().strokeBorder(StreakStage.red, style: StrokeStyle(lineWidth: 2, dash: [4, 3])) }
+                        if on { Image(systemName: "checkmark").font(.system(size: 13, weight: .heavy)).foregroundStyle(.white) }
+                    }
+                    .frame(width: 32, height: 32)
+                    .background(alignment: .leading) {
+                        if on && nextOn { Rectangle().fill(StreakStage.red).frame(width: 42, height: 32).offset(x: 16) }
+                    }
+                }
+            }
+        }
+    }
+
+    /// in time with his moment: the lantern lights about 1.6 s in
+    private func play() async {
+        if reduceMotion { lit = true; weekIn = true; lineIn = true; buttonIn = true; return }
+        try? await Task.sleep(for: .milliseconds(1600))
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.55)) { lit = true }
+        try? await Task.sleep(for: .milliseconds(400))
+        withAnimation(.easeOut(duration: 0.3)) { weekIn = true }
+        try? await Task.sleep(for: .milliseconds(350))
+        withAnimation(.easeOut(duration: 0.3)) { lineIn = true }
+        try? await Task.sleep(for: .milliseconds(300))
+        withAnimation(.easeOut(duration: 0.3)) { buttonIn = true }
+    }
+}

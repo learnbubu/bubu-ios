@@ -178,6 +178,16 @@ struct MomentCard: View {
     }
 
     var body: some View {
+        // Streak saved: a screen of its own, not a card (the owner, 20 Oct 2026)
+        if case .relit(let streak, let left) = moment {
+            StreakSavedScreen(streak: streak, left: left, progress: progress, close: close)
+                .transition(.opacity)
+        } else {
+            card
+        }
+    }
+
+    private var card: some View {
         ZStack {
             Color.black.opacity(0.5).ignoresSafeArea()
             VStack(spacing: 6) {
