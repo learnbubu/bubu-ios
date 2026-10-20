@@ -317,31 +317,58 @@ struct RaisedButton: ButtonStyle {
     }
 }
 
-/// Now and then a band of light sweeps across (a button inviting a tap).
+/// Now and then light sweeps across (a button inviting a tap): the lessons' own shine, its two crisp streaks (a wide
+/// one and a thin one just behind, as the owner tuned them) at 27°, and the two corner sparkles (the owner, 20 Oct
+/// 2026: the button's soft band didn't match the lessons'), every few seconds.
 struct IdleSweep: ViewModifier {
     var on = true
     var radius: CGFloat = 16
+    @State private var sweep: CGFloat = -1
+    @State private var shining = false
+    @State private var twinkle = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var streak: some View {
+        LinearGradient(stops: [.init(color: .white.opacity(0), location: 0), .init(color: .white, location: 0.35),
+                               .init(color: .white, location: 0.65), .init(color: .white.opacity(0), location: 1)],
+                       startPoint: .leading, endPoint: .trailing)
+    }
+
     func body(content: Content) -> some View {
-        content.overlay {
-            if on {
-                GeometryReader { g in
-                    LinearGradient(colors: [.white.opacity(0), .white.opacity(0.32), .white.opacity(0)], startPoint: .leading, endPoint: .trailing)
-                        .frame(width: max(40, g.size.width * 0.3), height: g.size.height * 2)
-                        .rotationEffect(.degrees(20))
-                        .position(x: 0, y: g.size.height / 2)
-                        .keyframeAnimator(initialValue: -0.4, repeating: true) { v, x in
-                            v.offset(x: x * g.size.width)
-                        } keyframes: { _ in
-                            KeyframeTrack {
-                                LinearKeyframe(-0.4, duration: 3.6)
-                                CubicKeyframe(1.4, duration: 0.85)
-                            }
+        content
+            .overlay {
+                if on {
+                    GeometryReader { g in
+                        // (the long tiles' look: band 32% of the width, at least 30 pt; streaks 34% and 30% of it)
+                        let band = max(30, g.size.width * 0.32)
+                        HStack(spacing: band * 0.03) {
+                            streak.frame(width: band * 0.34)
+                            streak.frame(width: band * 0.30)
                         }
+                        .frame(width: band, height: g.size.height * 3)
+                        .opacity(0.75)
+                        .rotationEffect(.degrees(27))
+                        .frame(height: g.size.height)
+                        .offset(x: -band * 1.4 + (sweep + 1) / 2 * (g.size.width + band * 1.8))
+                        .frame(width: g.size.width, height: g.size.height, alignment: .leading)
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+                    .opacity(shining ? 1 : 0)
+                    .allowsHitTesting(false)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
-                .allowsHitTesting(false)
             }
-        }
+            .overlay { if on { CornerSparkles(on: twinkle) } }
+            .task(id: on) {
+                guard on, !reduceMotion else { return }
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(3.6))
+                    if Task.isCancelled { break }
+                    sweep = -1; shining = true; twinkle = true
+                    withAnimation(.linear(duration: 0.8)) { sweep = 1 }
+                    try? await Task.sleep(for: .seconds(0.85))
+                    shining = false; twinkle = false
+                }
+            }
     }
 }
 
