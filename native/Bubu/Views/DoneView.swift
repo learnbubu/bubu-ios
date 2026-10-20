@@ -71,6 +71,8 @@ struct DoneView: View {
             .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
             .id(stage)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // (over the buttons: the streak's spark flies down past them to today, in front of everything)
+            .zIndex(1)
             buttons(r).padding(.top, 12)
                 .opacity(splash && r.simple.isEmpty && stage == 0 && moment == nil || held ? 0 : 1)
                 .allowsHitTesting(!held)
@@ -237,6 +239,7 @@ struct DoneView: View {
                 withAnimation(.easeOut(duration: 0.3)) { held = false }
                 if r.fire?.milestone == true { Sounds.shared.play("milestone") }
             }
+            .zIndex(1)   // (its spark in front of what the day earned, under it: the owner, 20 Oct 2026)
             // what the day earned: a spare lantern, a milestone's coins
             HStack(spacing: 8) {
                 if r.fire?.ember == true {
