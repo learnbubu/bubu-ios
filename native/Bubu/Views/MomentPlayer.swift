@@ -129,7 +129,13 @@ struct StickerMoment: View {
             .onReceive(NotificationCenter.default.publisher(for: MomentPlayer.readyNote)) { _ in ready = true; place() }
             .onReceive(NotificationCenter.default.publisher(for: MomentPlayer.playingNote)) { _ in
                 guard started else { return }
-                withAnimation(.easeOut(duration: 0.25)) { drawn = true }
+                // (a beat later: "playing" can come before the web view's first frame is on screen, and the still
+                // fading then left a blink, one launch in two: the Mac, 20 Oct 2026; under the moment, lined up
+                // with it, it doesn't show)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                    guard started else { return }
+                    withAnimation(.easeOut(duration: 0.25)) { drawn = true }
+                }
             }
             .onDisappear { started = false }
     }
