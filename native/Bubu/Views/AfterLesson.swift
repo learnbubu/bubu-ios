@@ -507,7 +507,9 @@ struct StreakSavedScreen: View {
             Color.bg.ignoresSafeArea()
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
-                StickerMoment(key: "spare", still: "spare-still", side: 270, stillInset: 0, inPlace: true)
+                // (the still framed as the moment draws him: it was ~3.5% bigger and a little higher, so he settled at the
+                // handover: the Mac's measure of 0.2.3)
+                StickerMoment(key: "spare", still: "spare-still", side: 270, stillInset: 0.0175, inPlace: true, stillShift: 0.009)
                 Text("\(streak)").font(.nunito(84, .black)).tracking(-2).monospacedDigit()
                     .foregroundStyle(lit ? StreakStage.red : Color.muted.opacity(0.55))
                     .scaleEffect(lit ? 1 : 0.94)

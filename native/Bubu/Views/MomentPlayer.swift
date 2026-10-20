@@ -106,6 +106,8 @@ struct StickerMoment: View {
     var stillInset: CGFloat = 0.12
     /// there from the start, no grow-in
     var inPlace = false
+    /// the still moved down (a share of the side), to sit exactly where the moment's first frame draws
+    var stillShift: CGFloat = 0
     @State private var ready = MomentPlayer.shared.ready
     @State private var drawn = false
     @State private var box: CGRect = .zero
@@ -114,7 +116,7 @@ struct StickerMoment: View {
     var body: some View {
         Color.clear
             .frame(width: side, height: side)
-            .overlay { Image(still).resizable().scaledToFit().padding(side * stillInset).opacity(drawn ? 0 : 1) }
+            .overlay { Image(still).resizable().scaledToFit().padding(side * stillInset).offset(y: side * stillShift).opacity(drawn ? 0 : 1) }
             .background(GeometryReader { g in
                 Color.clear
                     .onAppear { box = g.frame(in: .global); place() }
