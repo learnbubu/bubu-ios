@@ -6,8 +6,7 @@ import AVFoundation
 /// from the top as it drops away, and the prize lands, a coin rain behind it, the words drawn here over it.
 ///
 /// The pictures are three videos from Studio, played one after another: the waiting loop, the opening (once), and
-/// the prize's hold loop, whose first frame is the opening's last. The waiting loop is two bobs long, the lessons' sheen
-/// sweeping across the pocket once in it (the owner, 21 Oct 2026). A little money (a lesson, a chapter) lands as a
+/// the prize's hold loop, whose first frame is the opening's last. A little money (a lesson, a chapter) lands as a
 /// small stack; a milestone's lands as the big heap.
 struct HongbaoScreen: View {
     let pocket: Moments.Pocket
@@ -40,6 +39,7 @@ struct HongbaoScreen: View {
                     Text("Red envelope").font(.nunito(16, .heavy)).opacity(0.85)
                 }
                 .foregroundStyle(Color(UIColor(hex: 0xFFD98A)))
+                .modifier(LetterSheen(on: phase == .waiting))
                 .shadow(color: .black.opacity(0.2), radius: 0, y: 2)
                 .position(x: g.size.width / 2, y: h * 0.131 + 40)
                 .opacity(phase == .waiting ? 1 : 0)
@@ -99,6 +99,54 @@ struct HongbaoScreen: View {
         for (i, d) in [0.06, 0.24, 0.42, 0.7].enumerated() {
             DispatchQueue.main.asyncAfter(deadline: .now() + land + d) { withAnimation(.easeOut(duration: 0.4)) { words = i + 1 } }
         }
+    }
+}
+
+/// The lessons' sheen (IdleSweep's two crisp streaks at 27°) across the words themselves, every few seconds: the
+/// light only where the letters are (the owner, 21 Oct 2026: on the 红包 heading, not the pocket).
+private struct LetterSheen: ViewModifier {
+    var on: Bool
+    @State private var sweep: CGFloat = -1
+    @State private var shining = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var streak: some View {
+        LinearGradient(stops: [.init(color: .white.opacity(0), location: 0), .init(color: .white, location: 0.35),
+                               .init(color: .white, location: 0.65), .init(color: .white.opacity(0), location: 1)],
+                       startPoint: .leading, endPoint: .trailing)
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .overlay {
+                GeometryReader { g in
+                    let band = max(30, g.size.width * 0.32)
+                    HStack(spacing: band * 0.03) {
+                        streak.frame(width: band * 0.34)
+                        streak.frame(width: band * 0.30)
+                    }
+                    .frame(width: band, height: g.size.height * 3)
+                    .opacity(0.85)
+                    .rotationEffect(.degrees(27))
+                    .frame(height: g.size.height)
+                    .offset(x: -band * 1.4 + (sweep + 1) / 2 * (g.size.width + band * 1.8))
+                    .frame(width: g.size.width, height: g.size.height, alignment: .leading)
+                }
+                .opacity(shining ? 1 : 0)
+                .mask(content)
+                .allowsHitTesting(false)
+            }
+            .task(id: on) {
+                guard on, !reduceMotion else { return }
+                try? await Task.sleep(for: .seconds(0.8))
+                while !Task.isCancelled {
+                    sweep = -1; shining = true
+                    withAnimation(.linear(duration: 0.8)) { sweep = 1 }
+                    try? await Task.sleep(for: .seconds(0.85))
+                    shining = false
+                    try? await Task.sleep(for: .seconds(2.8))
+                }
+            }
     }
 }
 
