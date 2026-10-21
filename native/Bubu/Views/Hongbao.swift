@@ -193,10 +193,20 @@ final class HongbaoPlayers {
         ended = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: opening.currentItem, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
+                // the hold goes on top only once it's really playing (its clock past its first frame): put up
+                // straight away its layer flashed a stale picture for one frame (the Mac's 60 fps check of 4ecdd3d);
+                // till then the opening holds its last frame, which is the hold's first
                 self.hold.play()
-                self.show(2)
                 self.wait.pause()
                 prize()
+                Task { @MainActor [weak self] in
+                    for _ in 0..<30 {
+                        guard let self else { return }
+                        if self.hold.currentTime().seconds > 0.02 { break }
+                        try? await Task.sleep(nanoseconds: 8_000_000)
+                    }
+                    self?.show(2)
+                }
             }
         }
     }

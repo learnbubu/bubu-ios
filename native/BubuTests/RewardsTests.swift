@@ -413,7 +413,9 @@ final class RewardsTests: XCTestCase {
         XCTAssertGreaterThan(last?.result?.pocket?.reward ?? 0, 0)
         // and the quests' bars fill on from where they were
         XCTAssertFalse(last?.result?.questsBefore.isEmpty ?? true)
-        XCTAssertGreaterThanOrEqual(p.coins, 120)
+        // (the pocket's coins: 5 to 30 in fives, so 105 to 130 from the 100 it started with)
+        XCTAssertEqual(p.coins, 100 + (last?.result?.pocket?.reward ?? 0))
+        XCTAssertGreaterThanOrEqual(p.coins, 105)
         XCTAssertEqual(p.activity.pocketDay, p.today)
         XCTAssertEqual(p.buns, 5)                  // no mistakes, no buns eaten
     }
