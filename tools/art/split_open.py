@@ -11,6 +11,8 @@ import numpy as np
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+# where the crease is on each open picture (measured: the darkest row where the flap meets the back panel)
+CREASE = {"red": 250}
 
 
 def magenta(a):
@@ -19,7 +21,7 @@ def magenta(a):
 
 def split(kind):
     ref = np.array(Image.open(os.path.join(HERE, "refs", f"ref-pk2-{kind}.png")).convert("RGB")).astype(int)
-    top = np.nonzero(~magenta(ref))[0].min()
+    top = CREASE.get(kind) or np.nonzero(~magenta(ref))[0].min()
     a = np.array(Image.open(os.path.join(HERE, "out", "raw", f"pk2-{kind}-open.png")).convert("RGB"))
     body, flap = a.copy(), a.copy()
     body[:top] = (255, 0, 255)

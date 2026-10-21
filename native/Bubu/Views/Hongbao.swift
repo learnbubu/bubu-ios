@@ -34,7 +34,7 @@ struct HongbaoScreen: View {
                 HongbaoVideo(players: players).allowsHitTesting(false)
 
                 // waiting: 红包 over it, "Tap to open!" under
-                VStack(spacing: 4) {
+                VStack(spacing: 12) {
                     Text("红包").font(.hanzi(64, .heavy)).tracking(14).padding(.leading, 14)
                     Text("Red envelope").font(.nunito(16, .heavy)).opacity(0.85)
                 }
