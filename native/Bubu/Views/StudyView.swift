@@ -1148,6 +1148,8 @@ struct ChoiceView: View {
     @State private var tonesOpen = false
     /// the prompt's pinyin, shown with a tap where it's hidden
     @State private var peek = false
+    /// a gap sentence's words tapped (their pinyin shows)
+    @State private var gapPeeked: Set<Int> = []
     /// The options are always drawn at their own size, the same on every phone; the feedback sheet comes up over
     /// the foot of the screen when the answer's in (the owner, 21 Oct 2026: they were squeezed to fit above it)
     private var listPad: CGFloat { ex.dir == "recall" || ex.dir == "gap" ? 10 : 14 }
@@ -1335,38 +1337,39 @@ struct ChoiceView: View {
     /// once it's answered), and what the whole sentence means under it.
     @ViewBuilder
     /// A number (零 … 九, 十, 百, 两…): in a gap it can't be told from the other words (a phone number, an
-    /// age), so the sentence's English comes with it as the clue (the owner, 21 Oct 2026: "how are we
-    /// supposed to know what number it will be")
+    /// age), so a tap on any word shows the whole sentence's English first, as the clue (the owner, 21 Oct
+    /// 2026: "how are we supposed to know what number it will be"; then: not always on show, a tap as elsewhere)
     private static func isNumber(_ w: String) -> Bool { !w.isEmpty && w.allSatisfy { "零〇一二两三四五六七八九十百千万".contains($0) } }
 
-    @ViewBuilder private func gapPrompt(_ sent: Sentence) -> some View {
-        gapLine(sent)
-        if Self.isNumber(ex.answer) {
-            Text(sent.en).font(.nunito(15, .semibold)).foregroundStyle(Color.muted)
-                .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 6)
-        }
-    }
-
-    private func gapLine(_ sent: Sentence) -> some View {
+    /// The sentence with its gap: each word tappable for its meaning and pinyin, as the sentence exercises' words
+    /// (dotted under), the gap a slot until it's answered.
+    private func gapPrompt(_ sent: Sentence) -> some View {
         let filled = answered && !skipped
+        let phrase = Self.isNumber(ex.answer) ? sent.en : Hints.phrase(sent.en, sent.words)
         return FlowLayout(spacing: 2, lineSpacing: 4, center: true) {
-            ForEach(Array(sent.words.enumerated()), id: \.offset) { _, word in
-                let gap = word.hanzi == ex.answer
-                VStack(spacing: 1) {
-                    PinyinText(pinyin: word.pinyin, size: 12.5, weight: .semibold)
-                        .opacity(gap ? (filled ? 1 : 0) : wheels.shows(hanzi: word.hanzi) || peek ? 1 : 0)
-                    if gap {
+            ForEach(Array(sent.words.enumerated()), id: \.offset) { i, word in
+                if word.hanzi == ex.answer {
+                    VStack(spacing: 1) {
+                        PinyinText(pinyin: word.pinyin, size: 12.5, weight: .semibold).opacity(filled ? 1 : 0)
                         gapSlot(word.hanzi, filled: filled)
-                    } else {
-                        Text(word.hanzi).font(.hanzi(24.8)).foregroundStyle(Color.ink).padding(.bottom, 2)
                     }
+                    .padding(.horizontal, 3)
+                } else {
+                    HintChip(hanzi: word.hanzi, pinyin: word.pinyin, phrase: phrase, link: Hints.link(sent.words, at: i),
+                             tapped: { _ = gapPeeked.insert(i) }) {
+                        VStack(spacing: 1) {
+                            PinyinText(pinyin: word.pinyin, size: 12.5, weight: .semibold)
+                                .opacity(wheels.shows(hanzi: word.hanzi) || peek || gapPeeked.contains(i) ? 1 : 0)
+                            Text(word.hanzi).font(.hanzi(24.8)).foregroundStyle(Color.ink).padding(.bottom, 2)
+                                .overlay(alignment: .bottom) {
+                                    Line().stroke(Color.muted, style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2)
+                                }
+                        }
+                    }
+                    .padding(.horizontal, 3)
                 }
-                .padding(.horizontal, 3)
             }
         }
-        .contentShape(Rectangle())
-        .onTapGesture { reveal() }
     }
 
     private func option(_ opt: String) -> some View {
