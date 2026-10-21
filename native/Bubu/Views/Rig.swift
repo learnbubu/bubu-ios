@@ -160,13 +160,14 @@ struct FirecrackerBurst: View {
         let rot = u < 0.7 ? lerp(seal.rotate + 5, seal.rotate - 1, u / 0.7) : lerp(seal.rotate - 1, seal.rotate, (u - 0.7) / 0.3)
         let size = seal.size * k
         let wide = sealLines[0].count
-        // one character a line: the seal's size; two or three on the count's line: smaller, to fit the seal's width
-        let f = seal.font * k * (wide <= 1 ? 1 : wide == 2 ? 0.74 : wide == 3 ? 0.54 : 0.44)
+        // one character a line (五 / 连, 十 / 连): sized to sit inside the seal's border with room round it (at the seal's
+        // full size they filled it to the edge: the owner, 21 Oct 2026); two or three on the count's line: smaller still
+        let f = seal.font * k * (wide <= 1 ? 0.78 : wide == 2 ? 0.66 : wide == 3 ? 0.5 : 0.42)
         ZStack {
             Image("fx-seal").resizable().scaledToFit()
             VStack(spacing: (wide <= 1 ? seal.gap : 2) * k) {
                 ForEach(Array(sealLines.enumerated()), id: \.offset) { i, line in
-                    Text(line).font(.system(size: i == 1 && wide > 1 ? max(f, seal.font * k * 0.74) : f, weight: .heavy, design: .serif))
+                    Text(line).font(.system(size: i == 1 && wide > 1 ? max(f, seal.font * k * 0.66) : f, weight: .heavy, design: .serif))
                         .tracking(wide > 1 && i == 0 ? -f * 0.06 : 0)
                         .lineLimit(1).fixedSize()
                 }

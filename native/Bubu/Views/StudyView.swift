@@ -50,8 +50,6 @@ struct StudyView: View {
     @State private var lift: CGFloat = 0
     /// the exercise's visible height, so the answers sit low in the card
     @State private var scrollHeight: CGFloat = 0
-    /// the exercise's foot (in "study"): a multiple-choice exercise's options keep above the feedback's room
-    @State private var scrollBottom: CGFloat = .infinity
     /// the combo burst on screen (its count), and the cheer between parts of a lesson
     @State private var burst: Int?
     /// the progress bar's place on screen: the burst's firecrackers come out from behind it
@@ -86,13 +84,12 @@ struct StudyView: View {
                                 VStack(spacing: 0) {
                                     content.padding(.horizontal, 12).padding(.top, 15)
                                         .offset(y: -lift)
-                                        .padding(.bottom, 12 + bannerRoom)
+                                        .padding(.bottom, 12)
                                         .frame(minHeight: scrollHeight, alignment: .top)
                                     Color.clear.frame(height: 1).id("exercise-end")
                                 }
                             }
                             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { scrollHeight = max(0, $0 - 1) }
-                            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { scrollBottom = $0 }
                             .onPreferenceChange(PickedBottomKey.self) { pickedBottom = $0; relift() }
                             .onPreferenceChange(PickedTopKey.self) { pickedTop = $0; relift() }
                             .scrollIndicators(.hidden)
@@ -361,8 +358,7 @@ struct StudyView: View {
                                       skip: { session.skip() })
                         } else {
                             ChoiceView(ex: ex, picked: pick.selected, answered: session.answered, wheels: wheels,
-                                       skipped: skipped, skip: { cantListen() },
-                                       floor: fixed ? scrollBottom - 12 - bannerRoom : .infinity) { select($0) }
+                                       skipped: skipped, skip: { cantListen() }) { select($0) }
                         }
                     }
                 case nil:
@@ -392,13 +388,6 @@ struct StudyView: View {
         guard hidden > tall * 0.5 else { return }
         let need = bottom + 10 - sheetTop
         if need > lift + 1 { withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { lift = need } }
-    }
-
-    /// Room kept at a multiple-choice exercise's foot from the start, so the feedback pops up
-    /// over it as an overlay and nothing moves (the owner, 4 Oct 2026: not "sliding up again").
-    private var bannerRoom: CGFloat {
-        guard case .card = session.current, session.exercise?.kind == .choice else { return 0 }
-        return 140   // (a wrong answer's sheet, with the right answer in it, is the tallest: 118 left the bottom option a third under it, the Mac's check of a8e8192)
     }
 
     private var promptLabel: String {
@@ -1152,11 +1141,6 @@ struct ChoiceView: View {
     var skipped = false
     /// "Can't listen now", under a listening exercise (nil: no such button)
     var skip: (() -> Void)? = nil
-    /// Where the options must end (in "study") so the feedback sheet, when it comes up, leaves them in view
-    /// (.infinity: anywhere, a phone that scrolls). Four tall options that went past it were lifted clear on
-    /// the answer, and the screen slid up (the owner, 20 Oct 2026); now they're drawn a little tighter from
-    /// the start instead, so nothing moves.
-    var floor: CGFloat = .infinity
     /// an option tapped: it's selected (`picked`); the answer comes with Check
     var choose: (String) -> Void
     @Environment(ProgressStore.self) private var progress
@@ -1164,24 +1148,9 @@ struct ChoiceView: View {
     @State private var tonesOpen = false
     /// the prompt's pinyin, shown with a tap where it's hidden
     @State private var peek = false
-    /// how much tighter the options are drawn to keep above `floor`: 0 (as designed) to 1 (as tight as they go)
-    @State private var squeeze: CGFloat = 0
-    /// the options' foot as last measured, to fit again when `floor` arrives (it's measured after them)
-    @State private var lastBottom: CGFloat = 0
+    /// The options are always drawn at their own size, the same on every phone; the feedback sheet comes up over
+    /// the foot of the screen when the answer's in (the owner, 21 Oct 2026: they were squeezed to fit above it)
     private var listPad: CGFloat { ex.dir == "recall" || ex.dir == "gap" ? 10 : 14 }
-    /// the room squeezing saves at most: the gap over the options, the gaps between them, and their padding
-    private var maxSave: CGFloat {
-        let n = CGFloat(ex.options.count)
-        if ex.dir == "picture" { return 14 + 2 * 12 + 2 * 18 }
-        return 14 + max(0, n - 1) * 6 + n * 2 * (listPad - 3)
-    }
-    private func fit(_ bottom: CGFloat) {
-        if bottom > 0 { lastBottom = bottom }
-        guard !answered, floor.isFinite, bottom > 0 else { return }
-        // (measured with the squeeze already in, so it's added back: what it would need drawn as designed)
-        let s = min(1, max(0, (bottom - floor + squeeze * maxSave) / maxSave))
-        if abs(s - squeeze) > 0.02 { squeeze = s }
-    }
     /// Pinyin over the tested word, and over every option (one rule for all four options, so
     /// which ones have pinyin never gives the answer away). Never where the pinyin is tested.
     private var pinyinShown: Bool {
@@ -1261,25 +1230,22 @@ struct ChoiceView: View {
             }
             Group {
             if ex.dir == "picture" {
-                Spacer(minLength: 18 - 14 * squeeze)
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12 - 12 * squeeze) {
+                Spacer(minLength: 18)
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                     ForEach(ex.options, id: \.self) { opt in pictureCard(opt).modifier(PickedMark(on: opt == picked)) }
                 }
-                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
             } else {
-            Spacer(minLength: 18 - 14 * squeeze)
+            Spacer(minLength: 18)
             if ex.dir == "gap" {
                 // word tiles in a row, centred, wrapping as they need
                 FlowLayout(spacing: 12, lineSpacing: 14, center: true) {
                     ForEach(ex.options, id: \.self) { opt in option(opt).modifier(PickedMark(on: opt == picked)) }
                 }
                 .frame(maxWidth: .infinity)
-                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
             } else {
-                VStack(spacing: 10 - 6 * squeeze) {
+                VStack(spacing: 10) {
                     ForEach(ex.options, id: \.self) { opt in option(opt).modifier(PickedMark(on: opt == picked)) }
                 }
-                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("study")).maxY } action: { fit($0) }
             }
             }
             }
@@ -1310,9 +1276,6 @@ struct ChoiceView: View {
             }
             .presentationDetents([.medium, .large])
         }
-        // (the exercise's foot is often known only after the options are laid out: fit again when it is,
-        // or they were never squeezed: the Mac's check of b474e5b)
-        .onChange(of: floor) { _, _ in fit(lastBottom) }
         .onAppear {
             // the first pinyin drill ever opens the primer once
             if ex.dir == "pinyin" && !UserDefaults.standard.bool(forKey: "tonesSeen") {
@@ -1336,14 +1299,14 @@ struct ChoiceView: View {
         return Button { choose(opt) } label: {
             VStack(spacing: 6) {
                 if let pic = Pictures.asset(opt) {
-                    Image(pic).resizable().scaledToFit().frame(height: 64 - 18 * squeeze)
+                    Image(pic).resizable().scaledToFit().frame(height: 64)
                 } else {
                     Text(Pictures.of(opt) ?? "").font(.system(size: 48)).frame(height: 56)
                 }
                 Text(opt).font(.hanzi(20, .bold)).foregroundStyle(Color.ink)
                 PinyinText(pinyin: Course.wordPy[opt] ?? "", size: 13, weight: .bold).opacity(pinyinShown ? 1 : 0)
             }
-            .frame(maxWidth: .infinity).padding(.vertical, 10 - 6 * squeeze)
+            .frame(maxWidth: .infinity).padding(.vertical, 10)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 16))
         .modifier(SuccessShine(on: state == true && opt == picked, delay: 0.05, radius: 16))
@@ -1371,9 +1334,23 @@ struct ChoiceView: View {
     /// Fill the gap: the sentence with the word's place left empty (the word goes in, green,
     /// once it's answered), and what the whole sentence means under it.
     @ViewBuilder
-    private func gapPrompt(_ sent: Sentence) -> some View {
+    /// A number (零 … 九, 十, 百, 两…): in a gap it can't be told from the other words (a phone number, an
+    /// age), so the sentence's English comes with it as the clue (the owner, 21 Oct 2026: "how are we
+    /// supposed to know what number it will be")
+    private static func isNumber(_ w: String) -> Bool { !w.isEmpty && w.allSatisfy { "零〇一二两三四五六七八九十百千万".contains($0) } }
+
+    @ViewBuilder private func gapPrompt(_ sent: Sentence) -> some View {
+        gapLine(sent)
+        if Self.isNumber(ex.answer) {
+            Text(sent.en).font(.nunito(15, .semibold)).foregroundStyle(Color.muted)
+                .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 6)
+        }
+    }
+
+    private func gapLine(_ sent: Sentence) -> some View {
         let filled = answered && !skipped
-        FlowLayout(spacing: 2, lineSpacing: 4, center: true) {
+        return FlowLayout(spacing: 2, lineSpacing: 4, center: true) {
             ForEach(Array(sent.words.enumerated()), id: \.offset) { _, word in
                 let gap = word.hanzi == ex.answer
                 VStack(spacing: 1) {
@@ -1420,7 +1397,7 @@ struct ChoiceView: View {
             // fill the gap: a word tile, as wide as its word (Duolingo's "Complete the sentence")
             .frame(maxWidth: ex.dir == "gap" ? nil : .infinity)
             .frame(minWidth: ex.dir == "gap" ? 48 : nil)
-            .padding(.horizontal, ex.dir == "gap" ? 16 : 14).padding(.vertical, listPad - (listPad - 3) * squeeze)
+            .padding(.horizontal, ex.dir == "gap" ? 16 : 14).padding(.vertical, listPad)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 16))
         // on the whole tile (face and lip), so the box and its text hop together (the owner, 5 Oct 2026)
