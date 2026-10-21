@@ -6,7 +6,8 @@ import AVFoundation
 /// from the top as it drops away, and the prize lands, a coin rain behind it, the words drawn here over it.
 ///
 /// The pictures are three videos from Studio, played one after another: the waiting loop, the opening (once), and
-/// the prize's hold loop, whose first frame is the opening's last. A little money (a lesson, a chapter) lands as a
+/// the prize's hold loop, whose first frame is the opening's last. The waiting loop is two bobs long, the lessons' sheen
+/// sweeping across the pocket once in it (the owner, 21 Oct 2026). A little money (a lesson, a chapter) lands as a
 /// small stack; a milestone's lands as the big heap.
 struct HongbaoScreen: View {
     let pocket: Moments.Pocket
@@ -34,9 +35,9 @@ struct HongbaoScreen: View {
                 HongbaoVideo(players: players).allowsHitTesting(false)
 
                 // waiting: 红包 over it, "Tap to open!" under
-                VStack(spacing: 2) {
-                    Text("红包").font(.hanzi(46, .heavy)).tracking(10).padding(.leading, 10)
-                    Text("Red envelope").font(.nunito(14, .heavy)).opacity(0.85)
+                VStack(spacing: 4) {
+                    Text("红包").font(.hanzi(64, .heavy)).tracking(14).padding(.leading, 14)
+                    Text("Red envelope").font(.nunito(16, .heavy)).opacity(0.85)
                 }
                 .foregroundStyle(Color(UIColor(hex: 0xFFD98A)))
                 .shadow(color: .black.opacity(0.2), radius: 0, y: 2)
