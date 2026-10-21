@@ -447,7 +447,7 @@ final class ProgressStore {
     // so they merge across devices like XP does.
 
     static let bunsMax = 5, bunMs = 4 * 60 * 60 * 1000.0, coinsStart = 100
-    static let pocketLesson = (lo: 20, hi: 35), pocketChapter = 100
+    static let pocketLesson = (lo: 5, hi: 30), pocketChapter = 100     // (5 to 30 in fives: the owner, 21 Oct 2026)
     static let chestXP = 50
 
     /// Whether Bùbù Plus is offered at all. It can't be bought yet (no StoreKit), and

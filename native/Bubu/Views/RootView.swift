@@ -42,7 +42,7 @@ final class Router {
 
     init() {
         switch Launch.screen {
-        case "path", "pathstep", "pathpractice", "practice", "lesson", "hud", "shop", "pocket": tab = .learn
+        case "path", "pathstep", "pathpractice", "practice", "lesson", "hud", "shop", "pocket", "hongbaobig": tab = .learn
         case "profile", "dress": tab = .profile
         case "settings", "account": tab = .settings
         default: tab = .home
@@ -89,9 +89,16 @@ struct RootView: View {
         if Launch.screen == "shop" { DispatchQueue.main.asyncAfter(deadline: .now() + 1) { Moments.shared.show(.shop) }; return }
         // the Streak saved moment (Studio's: an ember flies round the spare lantern and lights it)
         if Launch.screen == "relit" { DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { Moments.shared.show(.relit(streak: 5, left: 1)) }; return }
+        // the hongbao, a milestone's: the big heap
+        if Launch.screen == "hongbaobig" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                Moments.shared.show(.pocket(.init(kind: .red, reward: 150, title: "", sub: "A 30-day streak! That's a milestone.", milestone: true)))
+            }
+            return
+        }
         if Launch.screen == "pocket" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                Moments.shared.show(.pocket(.init(kind: .red, reward: 30, title: "Lesson complete!", sub: "Bùbù has something for you.")))
+                Moments.shared.show(.pocket(.init(kind: .red, reward: 15, title: "Lesson complete!", sub: "For finishing today's lesson.")))
             }
             return
         }

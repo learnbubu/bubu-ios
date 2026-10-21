@@ -13,14 +13,17 @@ struct DoneView: View {
     @State private var stage = Launch.screen == "donenext" ? 99 : 0
     /// the button waits while the streak plays and until the pocket is opened
     @State private var held = false
+    /// a hongbao up, full screen, over the done screen (a milestone's, or the lesson's red pocket)
+    @State private var hongbao: Moments.Pocket?
 
-    enum Step { case result, learned, streak, pocket, quests }
+    enum Step { case result, learned, streak, milestone, pocket, quests }
     /// The screens this session gets, in order.
     private func steps(_ r: StudySession.Result) -> [Step] {
         guard r.simple.isEmpty else { return [.result] }
         var out: [Step] = [.result]
         if !(r.learned.isEmpty ? r.practised : r.learned).isEmpty { out.append(.learned) }
         if r.fireJustLit { out.append(.streak) }
+        if r.milestonePocket != nil { out.append(.milestone) }
         if r.pocket != nil { out.append(.pocket) }
         if progress.todayQuests.contains(where: { progress.progress(of: $0) > (r.questsBefore[$0.id] ?? 0) }) || out.count == 1 { out.append(.quests) }
         return out
@@ -29,7 +32,9 @@ struct DoneView: View {
     private func isLast(_ r: StudySession.Result) -> Bool { stage >= steps(r).count - 1 }
     private func advance(_ r: StudySession.Result) {
         let s = steps(r), n = min(stage + 1, s.count - 1)
-        held = (s[n] == .streak && !reduceMotion) || s[n] == .pocket
+        held = (s[n] == .streak && !reduceMotion)
+        var t = Transaction(); t.disablesAnimations = true
+        withTransaction(t) { hongbao = s[n] == .milestone ? r.milestonePocket : s[n] == .pocket ? r.pocket : nil }
         withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { stage = n }
     }
     /// the opening splash: the title over a tilted band with Bùbù and confetti, about a second
@@ -62,8 +67,7 @@ struct DoneView: View {
                 case .result: stageOne(r)
                 case .learned: LearnedStage(title: r.learned.isEmpty ? "YOU PRACTISED" : "YOU LEARNED", cards: r.learned.isEmpty ? r.practised : r.learned)
                 case .streak: streakStage(r)
-                case .pocket: PocketCard(pocket: r.pocket!, opened: { DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { withAnimation { held = false } } }, close: { advance(r) }, button: false)
-                        .frame(maxHeight: .infinity)
+                case .milestone, .pocket: Color.clear      // (the hongbao, full screen over it)
                 case .quests: QuestStage(before: r.questsBefore)
                 }
                 }
@@ -97,6 +101,18 @@ struct DoneView: View {
             if stage == 0 && !momentStarted && splash { playerReady = true }
         }
         .sensoryFeedback(.success, trigger: stage) { _, n in n == 1 }
+        // a hongbao: full screen over the done screen, in at once (it fades its own words in), and on to the next
+        // step when it's closed
+        .fullScreenCover(isPresented: Binding(get: { hongbao != nil }, set: { if !$0 { hongbao = nil } })) {
+            if let p = hongbao {
+                HongbaoScreen(pocket: p) {
+                    var t = Transaction(); t.disablesAnimations = true
+                    withTransaction(t) { hongbao = nil }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { advance(r) }
+                }
+                .environment(progress)
+            }
+        }
         .onAppear {
             guard splash else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0.6 : 1.35)) {
@@ -244,10 +260,6 @@ struct DoneView: View {
             HStack(spacing: 8) {
                 if r.fire?.ember == true {
                     Label { Text("A spare lantern") } icon: { LanternMark(size: 15) }
-                        .padding(.horizontal, 12).padding(.vertical, 6).background(Color.accentSoft, in: Capsule())
-                }
-                if let c = r.fire?.coins, c > 0 {
-                    Label { Text("+\(c) coins").monospacedDigit() } icon: { CoinIcon(size: 16) }
                         .padding(.horizontal, 12).padding(.vertical, 6).background(Color.accentSoft, in: Capsule())
                 }
             }

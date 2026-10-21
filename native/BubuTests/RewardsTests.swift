@@ -206,7 +206,7 @@ final class RewardsTests: XCTestCase {
     func testRedPockets() {
         let (p, setNow) = make(at: noon)
         let first = p.lessonPocket(chapterEnd: false)
-        XCTAssertTrue((20...35).contains(first))
+        XCTAssertTrue((5...30).contains(first))
         XCTAssertEqual(first % 5, 0)
         XCTAssertEqual(p.activity.pocketDay, p.today)
         XCTAssertEqual(p.lessonPocket(chapterEnd: false), 0)       // the first lesson each day
@@ -217,7 +217,7 @@ final class RewardsTests: XCTestCase {
         p.setPlus(true)
         for _ in 0..<40 {                                          // every lesson with Plus
             let n = p.lessonPocket(chapterEnd: false)
-            XCTAssertTrue((20...35).contains(n) && n % 5 == 0)
+            XCTAssertTrue((5...30).contains(n) && n % 5 == 0)
         }
     }
 

@@ -166,6 +166,8 @@ final class StudySession: Identifiable {
         var questsBefore: [String: Int] = [:]
         /// the lesson's red pocket, to open on the done screen
         var pocket: Moments.Pocket?
+        /// a streak milestone's coins, opened as the big hongbao after the streak
+        var milestonePocket: Moments.Pocket?
     }
 
     // the skip test's tally
@@ -1118,6 +1120,10 @@ final class StudySession: Identifiable {
         result?.xpDouble = xpDoubled
         result?.questsBefore = questsAtStart
         result?.pocket = earnedPocket
+        if let f = fire, f.coins > 0 {
+            result?.milestonePocket = Moments.Pocket(kind: .red, reward: f.coins, title: "",
+                                                     sub: "A \(f.streak)-day streak! That's a milestone.", milestone: true)
+        }
         if isPractice { result?.practised = practisedWords }
         if !idle {
             let hour = Calendar.current.component(.hour, from: Date(timeIntervalSince1970: progress.now() / 1000))
@@ -1190,7 +1196,7 @@ final class StudySession: Identifiable {
         progress.addCoins(got)
         // (opened on the done screen, as its own screen)
         earnedPocket = Moments.Pocket(kind: .red, reward: got, title: chapterEnd ? "Chapter complete!" : "A red pocket!",
-                                      sub: chapterEnd ? "A fuller pocket for a whole chapter" : "For finishing the lesson.")
+                                      sub: chapterEnd ? "For finishing the chapter." : "For finishing today's lesson.")
     }
 
     /// Finishing a chapter's last lesson unlocks its story (web: finishStudy's toast).

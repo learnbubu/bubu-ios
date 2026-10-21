@@ -25,6 +25,8 @@ final class Moments {
         let reward: Int
         let title: String
         let sub: String
+        /// a streak milestone's: the big heap lands (a lesson's, a small stack)
+        var milestone = false
     }
 
     /// Out of buns, or a look at them. Where it opened decides what its buttons do:
@@ -178,8 +180,11 @@ struct MomentCard: View {
     }
 
     var body: some View {
+        // a red pocket: the hongbao, a screen of its own (the owner, 21 Oct 2026)
+        if case .pocket(let p) = moment, p.kind == .red {
+            HongbaoScreen(pocket: p, close: close).transition(.opacity)
         // Streak saved: a screen of its own, not a card (the owner, 20 Oct 2026)
-        if case .relit(let streak, let left) = moment {
+        } else if case .relit(let streak, let left) = moment {
             StreakSavedScreen(streak: streak, left: left, progress: progress, close: close)
                 .transition(.opacity)
         } else {
@@ -247,7 +252,7 @@ struct MomentCard: View {
             sub("\(next) XP to level \(lv + 1)")
             button("Nice", close).padding(.top, 10)
         case .pocket(let p):
-            PocketCard(pocket: p, opened: { pocketOpened = true }, close: close)
+            PocketCard(pocket: p, opened: { pocketOpened = true }, close: close)     // (jade, XP: a red one is the hongbao)
         case .buns(let b):
             BunsCard(sheet: b, progress: progress, close: close)
         case .plus:
