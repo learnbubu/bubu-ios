@@ -56,14 +56,14 @@ struct HongbaoScreen: View {
                             .foregroundStyle(Color(UIColor(hex: 0xFFD98A)))
                         Text("Wishing you good fortune!").font(.nunito(17, .heavy)).foregroundStyle(Color(UIColor(hex: 0xF2D1A8)))
                     }
-                    .position(x: g.size.width / 2, y: h * 0.192 + 38)
+                    .position(x: g.size.width / 2, y: h * (0.192 + 29.0 / 780) + 38)
                     .modifier(WordIn(on: words >= 1))
                     Text("You got \(pocket.reward) coins!").font(.nunito(24, .black)).foregroundStyle(.white)
-                        .position(x: g.size.width / 2, y: h * (big ? 0.599 : 0.579) + 14)
+                        .position(x: g.size.width / 2, y: h * ((big ? 0.599 : 0.579) + 48.0 / 780) + 14)
                         .modifier(WordIn(on: words >= 2, pop: true))
                     Text(pocket.sub).font(.nunito(15.5, .bold)).foregroundStyle(Color(UIColor(hex: 0xE9C9AE)))
                         .multilineTextAlignment(.center).padding(.horizontal, 30)
-                        .position(x: g.size.width / 2, y: h * (big ? 0.642 : 0.623) + 12)
+                        .position(x: g.size.width / 2, y: h * ((big ? 0.642 : 0.623) + 48.0 / 780) + 12)
                         .modifier(WordIn(on: words >= 3))
                 }
                 VStack {
