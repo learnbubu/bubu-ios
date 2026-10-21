@@ -1489,15 +1489,22 @@ struct Exercise {
     var sayEn: String { sentence?.en ?? card.word.gloss }
 
     /// Word tiles to put in order (web: buildSentenceExercise).
+    /// the most words a tile exercise's sentence has, and the most tiles it lays out (the answer's and the extra ones)
+    static let maxSentenceWords = 7, maxTiles = 9
+
     static func sentence(_ c: Card, met: (String) -> Bool, hear: Bool = false) -> Exercise? {
         let course = Course.shared
         // a sentence card is its own sentence, always Chinese to English
         let own = c.isSentence && !hear ? c.ownSentence : nil
-        guard let sent = own ?? course.sentences(for: c, met: met).randomElement() else { return nil }
+        // (a sentence whose tiles fit the screen above Check: at most 7 Chinese words and 8 English ones, and 9
+        // tiles in all with the extra ones; a phone number of ten words ran its last row under Check, the owner,
+        // 21 Oct 2026: "we really can't have ones that are going off the page")
+        let fits = { (s: Sentence) in s.words.count <= Self.maxSentenceWords && Sentence.enWords(s.en).count <= Self.maxSentenceWords + 1 }
+        guard let sent = own.flatMap({ fits($0) ? $0 : nil }) ?? course.sentences(for: c, met: met).filter(fits).randomElement() else { return nil }
         let enWords = Sentence.enWords(sent.en)
         let toChinese = hear || (own == nil && (enWords.count < 2 || Bool.random()))
         let long = sent.words.count > 6 || enWords.count > 7
-        let nDistract = long ? 2 : 3
+        let nDistract = max(0, min(long ? 2 : 3, Self.maxTiles - (toChinese ? sent.words.count : enWords.count)))
         var tiles: [Tile] = []
         // the extra tiles: words already met, as Duolingo has it (the owner, 2 Oct 2026: 快 可 能 in
         // the first lessons), then words from the stones up to this one; never a word from further on

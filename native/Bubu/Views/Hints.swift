@@ -413,14 +413,26 @@ extension View {
     /// Any touch on the screen, a tap or the start of a drag, closes an open hint (the owner, 21 Oct 2026: it
     /// stayed up while a tile was moved). A tap on a word still opens its own: the close comes first, then the
     /// word's tap. Watching only (simultaneous), so nothing under it loses its touch.
-    func closesHints() -> some View {
-        simultaneousGesture(DragGesture(minimumDistance: 0).onChanged { _ in
-            if HintFocus.shared.open != nil { HintFocus.shared.open = nil }
-        })
-    }
+    func closesHints() -> some View { modifier(ClosesHints()) }
 
     func hintBubble<B: View>(open: Binding<Bool>, @ViewBuilder _ bubble: @escaping () -> B) -> some View {
         modifier(HintBubbleModifier(open: open, bubble: bubble))
+    }
+}
+
+/// Closes an open hint once, as a touch begins, and not again while that touch lasts: the drag's later updates
+/// (and its last one, which comes after a word's tap has opened its hint) left the hint shut every time (the
+/// Mac's check of e0e93ee: no hint opened at all).
+private struct ClosesHints: ViewModifier {
+    // (a gesture state: it's back to false when the touch ends or is taken over, by a scroll say)
+    @GestureState private var touching = false
+    func body(content: Content) -> some View {
+        content.simultaneousGesture(DragGesture(minimumDistance: 0)
+            .updating($touching) { _, state, _ in
+                guard !state else { return }
+                state = true
+                if HintFocus.shared.open != nil { HintFocus.shared.open = nil }
+            })
     }
 }
 
