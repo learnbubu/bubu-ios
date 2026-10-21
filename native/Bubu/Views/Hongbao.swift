@@ -34,14 +34,14 @@ struct HongbaoScreen: View {
                 HongbaoVideo(players: players).allowsHitTesting(false)
 
                 // waiting: 红包 over it, "Tap to open!" under
-                VStack(spacing: -6) {
+                VStack(spacing: -12) {
                     Text("红包").font(.hanzi(64, .heavy)).tracking(14).padding(.leading, 14)
                     Text("Red envelope").font(.nunito(16, .heavy)).opacity(0.85)
                 }
                 .foregroundStyle(Color(UIColor(hex: 0xFFD98A)))
                 .modifier(LetterSheen(on: phase == .waiting))
                 .shadow(color: .black.opacity(0.2), radius: 0, y: 2)
-                .position(x: g.size.width / 2, y: h * 0.131 + 40)
+                .position(x: g.size.width / 2, y: h * 0.131 + 60)
                 .opacity(phase == .waiting ? 1 : 0)
                 Text("Tap to open!").font(.nunito(17, .black)).foregroundStyle(.white)
                     .phaseAnimator([1.0, 0.55]) { v, a in v.opacity(phase == .waiting ? a : 0) } animation: { _ in .easeInOut(duration: 0.8) }
