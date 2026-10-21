@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // Tap-a-word hints, as the web's hintable / showHint / englishHints.
 
@@ -420,20 +421,39 @@ extension View {
     }
 }
 
-/// Closes an open hint once, as a touch begins, and not again while that touch lasts: the drag's later updates
-/// (and its last one, which comes after a word's tap has opened its hint) left the hint shut every time (the
-/// Mac's check of e0e93ee: no hint opened at all).
+/// Closes an open hint as any touch begins, watched from the window itself: a UIKit recognizer that never claims
+/// the touch, so SwiftUI's gestures never see it. (Any drag gesture on a SwiftUI ancestor, even a watching one,
+/// stopped the words' own taps from recognising: no hint opened at all, the Mac's checks of e0e93ee and 98183a5.)
+/// A tap on a word: the close comes as the finger lands, the word's tap opens its hint as it lifts.
 private struct ClosesHints: ViewModifier {
-    // (a gesture state: it's back to false when the touch ends or is taken over, by a scroll say)
-    @GestureState private var touching = false
-    func body(content: Content) -> some View {
-        content.simultaneousGesture(DragGesture(minimumDistance: 0)
-            .updating($touching) { _, state, _ in
-                guard !state else { return }
-                state = true
-                if HintFocus.shared.open != nil { HintFocus.shared.open = nil }
-            })
+    func body(content: Content) -> some View { content.background(TouchWatcherInstaller().allowsHitTesting(false)) }
+}
+
+private struct TouchWatcherInstaller: UIViewRepresentable {
+    final class Host: UIView {
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            guard let w = window, !(w.gestureRecognizers ?? []).contains(where: { $0 is HintCloser }) else { return }
+            w.addGestureRecognizer(HintCloser())
+        }
     }
+    func makeUIView(context: Context) -> Host { let v = Host(); v.isUserInteractionEnabled = false; return v }
+    func updateUIView(_ v: Host, context: Context) {}
+}
+
+/// Sees every touch begin in the window, closes any open hint, and steps aside (it fails at once and never
+/// cancels, delays or competes with anything).
+private final class HintCloser: UIGestureRecognizer, UIGestureRecognizerDelegate {
+    init() {
+        super.init(target: nil, action: nil)
+        cancelsTouchesInView = false; delaysTouchesBegan = false; delaysTouchesEnded = false
+        delegate = self
+    }
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        MainActor.assumeIsolated { if HintFocus.shared.open != nil { HintFocus.shared.open = nil } }
+        state = .failed
+    }
+    func gestureRecognizer(_ g: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
 }
 
 private struct HintBubbleModifier<B: View>: ViewModifier {
