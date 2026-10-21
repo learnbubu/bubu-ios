@@ -34,8 +34,10 @@ struct HongbaoScreen: View {
                 HongbaoVideo(players: players).allowsHitTesting(false)
 
                 // waiting: 红包 over it, "Tap to open!" under
-                VStack(spacing: -12) {
-                    Text("红包").font(.hanzi(64, .heavy)).tracking(14).padding(.leading, 14)
+                // (spaced as the mock-up has it, measured against the Hanzi's height: the gap between 红 and 包 about
+                // 29% of it, Red envelope 17% under it; on the phone they were 40% and 8%, the owner, 21 Oct 2026)
+                VStack(spacing: -7) {
+                    Text("红包").font(.hanzi(64, .heavy)).tracking(8).padding(.leading, 8)
                     Text("Red envelope").font(.nunito(16, .heavy)).opacity(0.85)
                 }
                 .foregroundStyle(Color(UIColor(hex: 0xFFD98A)))
