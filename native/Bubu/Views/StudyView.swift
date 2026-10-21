@@ -143,6 +143,7 @@ struct StudyView: View {
             }
         }
         .coordinateSpace(.named("study"))
+        .closesHints()
         .animation(.easeInOut(duration: 0.25), value: session.result != nil)
         // every fifth right answer in a row: the burst
         .onChange(of: session.combo) { old, n in
@@ -1648,8 +1649,6 @@ struct SentenceView: View {
     @State private var pinyinOpen = false
     /// the words whose hidden pinyin has been shown with a tap
     @State private var peeked: Set<Int> = []
-    @State private var held: Exercise.Tile?
-    @State private var justHeld = false
     // dragging a tile (web: the tile follows the finger and its place in the answer
     // follows it): the tile's slot stays in the answer, empty, while a copy is carried
     @State private var drag: TileDrag?
@@ -1844,7 +1843,7 @@ struct SentenceView: View {
     private func tileFace(_ t: Exercise.Tile, tint: Color?) -> some View {
         VStack(spacing: 1) {
             // pinyin over a Chinese tile while its word is new (its place kept, so the tiles
-            // stay one height); once strong, holding the tile shows it
+            // stay one height)
             if let py = t.pinyin {
                 Text(py).font(.nunito(12.5, .semibold)).foregroundStyle(Color.muted)
                     .opacity(wheels.shows(hanzi: t.text) ? 1 : 0)
@@ -1867,37 +1866,18 @@ struct SentenceView: View {
 
     private func tile(_ t: Exercise.Tile, inAnswer: Bool, tap: @escaping () -> Void) -> some View {
         let tint: Color? = inAnswer ? (result == true ? .good : result == false ? .again : nil) : nil
-        // a hold shows the tile's hint, and the tap its release makes is ignored (the Mac's check)
         let order = Double(placed.firstIndex(of: t) ?? 0)
-        return Button { if justHeld { justHeld = false } else if !justDragged { tap() } } label: {
+        // (no hint on the tiles, held or not: only the sentence's words above give hints, the owner, 21 Oct 2026)
+        return Button { if !justDragged { tap() } } label: {
             tileFace(t, tint: tint).modifier(SuccessShine(on: inAnswer && result == true, delay: 0.05 + order * 0.09, compact: true))
         }
         .buttonStyle(PressDown(depth: 2))
         .sensoryFeedback(.selection, trigger: placed.count)
-        .simultaneousGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in
-            guard drag == nil else { return }
-            held = t; justHeld = true; HintTip.used = true
-            HintFocus.shared.open = AnyHashable("tile-\(t.id)")      // (closes any word's hint)
-            // (where the release makes no tap, the next real tap still counts)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { justHeld = false }
-        })
         .highPriorityGesture(
             DragGesture(minimumDistance: 8, coordinateSpace: .named("sentence"))
                 .onChanged { v in dragMoved(t, v, fromBank: !inAnswer) }
                 .onEnded { v in dragEnded(t, v) },
             including: result == nil ? .all : .subviews)
-        .hintBubble(open: Binding(get: { held == t && (inAnswer || !placed.contains(t)) && HintFocus.shared.open == AnyHashable("tile-\(t.id)") },
-                                  set: { if !$0 { held = nil; if HintFocus.shared.open == AnyHashable("tile-\(t.id)") { HintFocus.shared.open = nil } } })) {
-            if t.pinyin != nil {
-                HintBubble(hanzi: t.text, pinyin: t.pinyin)
-            } else {
-                let en = ex.sentence?.en ?? ""
-                // (the hint's words keep their punctuation, "password?", the tiles don't: compare them bare)
-                let bare = { (x: String) in Sentence.enWords(x).first?.lowercased() ?? x.lowercased() }
-                let w = Hints.english(en, ex.sentence?.words ?? []).first { bare($0.text) == bare(t.text) }?.word
-                HintBubble(hanzi: w?.hanzi, pinyin: w?.pinyin, reverse: true, empty: "Not in this sentence")
-            }
-        }
     }
 }
 
@@ -1910,7 +1890,6 @@ extension SentenceView {
             if fromBank && placed.contains(t) { return }       // its empty place in the bank
             let inAnswer = placed.contains(t)
             let f = frames[inAnswer ? t.id : t.id + Self.bankKey] ?? CGRect(origin: v.startLocation, size: .zero)
-            held = nil
             drag = TileDrag(tile: t, grab: CGSize(width: v.startLocation.x - f.minX, height: v.startLocation.y - f.minY), at: v.location)
             if !inAnswer { placed.append(t); moves += 1 }
         }

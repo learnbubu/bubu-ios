@@ -410,6 +410,15 @@ extension View {
     /// A hint bubble standing above this view, drawn over its neighbours and kept on the screen;
     /// a tap on it closes it. (Not a popover: one, once dismissed, wouldn't always open again,
     /// and one on a sentence tile, once dismissed, closed the whole lesson: the owner's reports.)
+    /// Any touch on the screen, a tap or the start of a drag, closes an open hint (the owner, 21 Oct 2026: it
+    /// stayed up while a tile was moved). A tap on a word still opens its own: the close comes first, then the
+    /// word's tap. Watching only (simultaneous), so nothing under it loses its touch.
+    func closesHints() -> some View {
+        simultaneousGesture(DragGesture(minimumDistance: 0).onChanged { _ in
+            if HintFocus.shared.open != nil { HintFocus.shared.open = nil }
+        })
+    }
+
     func hintBubble<B: View>(open: Binding<Bool>, @ViewBuilder _ bubble: @escaping () -> B) -> some View {
         modifier(HintBubbleModifier(open: open, bubble: bubble))
     }
