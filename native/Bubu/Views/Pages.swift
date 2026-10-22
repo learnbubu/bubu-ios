@@ -9,6 +9,7 @@ enum Page: Hashable {
     case guide(Int)              // a chapter's guidebook
     case tones                   // tone-pair trainer
     case converse                // dialogue roleplay
+    case vocab                   // the Classroom's Vocabulary: today's words, your garden, a search
     case pick                    // choose words for flashcards, matching or a quiz
     case flash([String])
     case match([String])
@@ -43,6 +44,7 @@ struct PageView: View {
         case .guide(let ci): GuidePage(chapter: ci)
         case .tones: TonesPage()
         case .converse: ConversePage()
+        case .vocab: VocabRoom()
         case .pick: PickPage()
         case .studyChoice: StudyChoicePage()
         case .avatar: AvatarBuilderPage()

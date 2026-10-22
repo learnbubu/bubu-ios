@@ -41,6 +41,7 @@ final class Router {
         case "tones": push(.tones)
         case "speak": push(.converse)
         case "pick": push(.pick)
+        case "vocab": push(.vocab)
         default: Moments.shared.toast("Coming in the next build.")
         }
     }

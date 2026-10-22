@@ -124,102 +124,193 @@ struct PickPage: View {
     }
 }
 
-// MARK: - flashcards (web: startFlash)
+// MARK: - flashcards
 
+/// Flashcards, simpler (the owner's board G, 22 Oct 2026): one word big, its picture, pinyin and sound; tap and it
+/// turns to what it means and a sentence with it; then "Still learning" (it comes round again, once, and it's
+/// marked to come back soon) or "Got it". Each answer counts as a review. A word or two of thanks at the end.
 struct FlashPage: View {
     let ids: [String]
-    @Environment(Router.self) private var router
-    @State private var cards: [Card] = []
-    @State private var index = 0
+    @Environment(ProgressStore.self) private var progress
+    @Environment(\.dismiss) private var dismiss
+    @State private var queue: [Card] = []
+    @State private var total = 0
     @State private var flipped = false
+    @State private var example: Sentence?
+    /// the ones put back once already (they're not put back again)
+    @State private var again = Set<String>()
+    @State private var got = 0
+    @State private var learning = 0
+    @State private var finished = false
     private let course = Course.shared
 
     var body: some View {
-        VStack(spacing: 18) {
-            if !cards.isEmpty {
-                let c = cards[index]
-                ProgressBarShine(value: Double(index + 1) / Double(cards.count))
+        VStack(spacing: 0) {
+            topBar
+            if finished { end } else if let c = queue.first { card(c).id(c.id + "\(queue.count)") }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 18).padding(.bottom, 14)
+        .background(Home.bg.ignoresSafeArea())
+        .toolbar(.hidden, for: .navigationBar)
+        .environment(\.colorScheme, .light)
+        .onAppear {
+            guard queue.isEmpty, !finished else { return }
+            queue = ids.compactMap { course.cardById[$0] }.shuffled()
+            total = queue.count
+            pickExample()
+        }
+    }
+
+    private var done: Int { got + learning }
+
+    private var topBar: some View {
+        HStack(spacing: 12) {
+            Button { dismiss() } label: {
+                Image(systemName: "xmark").font(.system(size: 18, weight: .black)).foregroundStyle(Color(UIColor(hex: 0x8A97A3)))
+                    .frame(width: 34, height: 40)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Close")
+            GeometryReader { g in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Home.line)
+                    Capsule().fill(Home.teal).frame(width: max(12, g.size.width * CGFloat(finished ? 1 : Double(min(got, total)) / Double(max(total, 1)))))
+                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: got)
+                }
+            }
+            .frame(height: 12)
+            Text(finished ? "\(total) / \(total)" : "\(min(got + 1, total)) / \(total)").font(.nunito(13, .heavy)).monospacedDigit().foregroundStyle(Home.muted)
+        }
+        .frame(height: 52)
+    }
+
+    private func card(_ c: Card) -> some View {
+        VStack(spacing: 0) {
+            Button { withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { flipped.toggle() } } label: {
                 ZStack {
-                    face {
-                        VStack(spacing: 8) {
-                            Text(c.word.hanzi).font(.hanzi(c.word.hanzi.count > 3 ? 44 : 64, .medium)).foregroundStyle(Color.ink)
-                                .minimumScaleFactor(0.5).lineLimit(1)
-                            Text("tap to flip").font(.nunito(13)).foregroundStyle(Color.muted)
+                    VStack(spacing: 4) {
+                        if let pic = Pictures.asset(c.word.hanzi) {
+                            Image(pic).resizable().scaledToFit().frame(height: 96).padding(.bottom, 8)
                         }
+                        Text(c.word.hanzi).font(.hanzi(c.word.hanzi.count > 3 ? 46 : 64, .medium)).foregroundStyle(Home.ink)
+                            .minimumScaleFactor(0.5).lineLimit(1)
+                        PinyinText(pinyin: c.word.pinyin, size: 20, weight: .heavy)
                     }
                     .opacity(flipped ? 0 : 1)
-                    face {
-                        VStack(spacing: 10) {
-                            if let pic = Pictures.asset(c.word.hanzi) {
-                                Image(pic).resizable().scaledToFit().frame(height: 70)
-                            }
-                            TappableHanzi(text: c.word.hanzi, pinyin: c.word.pinyin, size: 30, weight: .bold)
-                            PinyinText(pinyin: c.word.pinyin, size: 26)
-                            Text(c.word.pos.map { "\(c.word.en) · \($0)" } ?? c.word.en)
-                                .font(.nunito(18, .semibold)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
-                            HStack(spacing: 10) {
-                                SpeakerButton(text: c.word.hanzi, size: 22)
-                                Button { Speech.shared.speak(c.word.hanzi, slow: true) } label: {
-                                    Text("½×").font(.nunitoXB(15)).foregroundStyle(Color.accent).padding(6)
-                                }
-                                .buttonStyle(.plain)
-                                if StrokeData.shared.writable(c.word.hanzi) {
-                                    Button { router.push(.writingSheet(c.word.hanzi)) } label: {
-                                        Image(systemName: "pencil.line").font(.system(size: 20)).foregroundStyle(Color.accent).padding(6)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                        }
+                    meaning(c)
+                        .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                        .opacity(flipped ? 1 : 0)
+                }
+                .padding(22)
+                .frame(maxWidth: .infinity).frame(height: 390)
+                .background {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Home.line).offset(y: 6)
+                        RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Color(UIColor(hex: 0xFFFDF8)))
+                        RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Home.line, lineWidth: 1.5)
                     }
-                    .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-                    .opacity(flipped ? 1 : 0)
                 }
-                .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.5)
-                .onTapGesture { withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { flipped.toggle() } }
-                .gesture(DragGesture(minimumDistance: 30).onEnded { v in
-                    if v.translation.width < -40 { step(1) } else if v.translation.width > 40 { step(-1) }
-                })
-                .sensoryFeedback(.impact(weight: .light), trigger: flipped)
+                .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.45)
+            }
+            .buttonStyle(.plain)
+            .overlay(alignment: .topTrailing) { SpeakerButton(text: c.word.hanzi, size: 22).padding(14) }
+            .overlay(alignment: .bottom) {
+                Text(flipped ? "tap to turn it back" : "tap to see what it means").font(.nunito(13, .heavy))
+                    .foregroundStyle(Color(UIColor(hex: 0x8A97A3))).padding(.bottom, 16).allowsHitTesting(false)
+            }
+            .sensoryFeedback(.impact(weight: .light), trigger: flipped)
+            .padding(.top, 22)
+            .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .move(edge: .leading).combined(with: .opacity)))
 
-                HStack(spacing: 10) {
-                    round("chevron.left") { step(-1) }
-                    Button("Flip") { withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) { flipped.toggle() } }
-                        .buttonStyle(WideButton())
-                    round("chevron.right") { step(1) }
+            Spacer(minLength: 20)
+            HStack(spacing: 10) {
+                Button { answer(c, gotIt: false) } label: {
+                    Text("Still learning").font(.nunito(17, .black)).foregroundStyle(Color(UIColor(hex: 0xB7822E)))
                 }
+                .buttonStyle(LipButton(face: Color(UIColor(hex: 0xFFFDF8)), lip: Home.line, radius: 16, depth: 4))
+                Button { answer(c, gotIt: true) } label: {
+                    Text("Got it").font(.nunito(17, .black)).foregroundStyle(.white)
+                }
+                .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 16, depth: 4))
+            }
+            .frame(height: 54)
+            .padding(.bottom, 10)
+        }
+        .frame(maxHeight: .infinity)
+    }
+
+    /// The back: what it means, and a sentence with it.
+    private func meaning(_ c: Card) -> some View {
+        VStack(spacing: 6) {
+            Text(c.word.hanzi).font(.hanzi(28, .medium)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.5)
+            Text(c.word.en).font(.nunito(26, .black)).foregroundStyle(Home.ink).multilineTextAlignment(.center)
+                .minimumScaleFactor(0.6).lineLimit(3)
+            if let pos = c.word.pos {
+                Text(pos).font(.nunito(13, .bold)).foregroundStyle(Home.muted)
+            }
+            if let s = example {
+                VStack(spacing: 3) {
+                    Text(s.hanzi).font(.hanzi(18)).foregroundStyle(Home.ink).multilineTextAlignment(.center)
+                    Text(s.en).font(.nunito(13.5, .bold)).foregroundStyle(Home.muted).multilineTextAlignment(.center)
+                }
+                .padding(.top, 14)
             }
         }
-        .padding(18)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .navigationTitle(cards.isEmpty ? "Flashcards" : "Flashcards · \(index + 1) / \(cards.count)")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { cards.shuffle(); index = 0; flipped = false } label: { Image(systemName: "shuffle") }
+    }
+
+    private func answer(_ c: Card, gotIt: Bool) {
+        progress.review(c.id, gotIt ? .good : .again)
+        progress.recordReview()
+        withAnimation(.spring(response: 0.38, dampingFraction: 0.86)) {
+            queue.removeFirst()
+            if gotIt { got += 1 } else {
+                learning += 1
+                // (it comes round again, a few cards on, once)
+                if again.insert(c.id).inserted { queue.insert(c, at: min(queue.count, 3)) } else { got += 1 }
             }
+            flipped = false
+            if queue.isEmpty { finished = true }
         }
-        .onAppear { if cards.isEmpty { cards = ids.compactMap { course.cardById[$0] }.shuffled() } }
+        pickExample()
     }
 
-    private func face<C: View>(@ViewBuilder _ c: () -> C) -> some View {
-        c().frame(maxWidth: .infinity, minHeight: 320).padding(20)
-            .background(Color.panel, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Color.line))
-            .panelShadow()
+    private func pickExample() {
+        guard let c = queue.first else { example = nil; return }
+        example = course.sentences(for: c).filter { $0.hanzi.count <= 16 }.min { $0.hanzi.count < $1.hanzi.count }
     }
 
-    private func round(_ icon: String, _ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: icon).font(.system(size: 18, weight: .bold)).foregroundStyle(Color.accent)
-                .frame(width: 54, height: 50).background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    private var end: some View {
+        VStack(spacing: 0) {
+            Spacer(minLength: 20)
+            Image("panda-flashcards").resizable().scaledToFit().frame(height: 170)
+            Text("Nice work!").font(.nunito(30, .black)).foregroundStyle(Home.ink).padding(.top, 10)
+            Text("You went through \(total) word\(total == 1 ? "" : "s")").font(.nunito(15.5, .bold)).foregroundStyle(Home.muted).padding(.top, 2)
+            HStack(spacing: 10) {
+                tally("\(total - again.count)", "first time", Home.teal)
+                tally("\(again.count)", "still learning", Color(UIColor(hex: 0xB7822E)))
+            }
+            .padding(.top, 22)
+            Spacer(minLength: 20)
+            Button { dismiss() } label: {
+                Text("Done").font(.nunito(17, .black)).foregroundStyle(.white)
+            }
+            .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 16, depth: 4))
+            .frame(height: 54)
+            .padding(.bottom, 10)
         }
-        .buttonStyle(PressDown(depth: 1))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .sensoryFeedback(.success, trigger: finished)
     }
 
-    private func step(_ d: Int) {
-        flipped = false
-        withAnimation(.easeOut(duration: 0.2)) { index = (index + d + cards.count) % cards.count }
+    private func tally(_ n: String, _ label: String, _ tint: Color) -> some View {
+        VStack(spacing: 1) {
+            Text(n).font(.nunito(26, .black)).monospacedDigit().foregroundStyle(tint)
+            Text(label).font(.nunito(12.5, .heavy)).foregroundStyle(Home.muted)
+        }
+        .frame(maxWidth: .infinity).padding(.vertical, 12)
+        .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Home.line, lineWidth: 1.5))
     }
 }
 

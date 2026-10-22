@@ -28,7 +28,7 @@ struct ClassroomPage: View {
                 whatToStudy
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 11), GridItem(.flexible(), spacing: 11)], spacing: 11) {
                     ForEach(tiles, id: \.id) { t in
-                        Button { router.practice(t.id == "vocab" ? "pick" : t.id, progress) } label: { tile(t) }
+                        Button { router.practice(t.id, progress) } label: { tile(t) }
                             .buttonStyle(PressDown(depth: 2))
                     }
                 }

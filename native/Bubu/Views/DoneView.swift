@@ -48,6 +48,8 @@ struct DoneView: View {
     @State private var stickerBox: CGRect = .zero
     @State private var stageOrigin: CGPoint = .zero
     @State private var momentStarted = false
+    @State private var momentDrawn = false
+    @State private var momentMissing = false
     private var moment: ResultMoment? { playerReady ? session.result?.moment : nil }
 
     static let milestoneWords: [Int: String] = [
@@ -100,6 +102,10 @@ struct DoneView: View {
         .onReceive(NotificationCenter.default.publisher(for: MomentPlayer.readyNote)) { _ in
             if stage == 0 && !momentStarted && splash { playerReady = true }
         }
+        .onReceive(NotificationCenter.default.publisher(for: MomentPlayer.playingNote)) { _ in
+            guard momentStarted else { return }
+            momentDrawn = true
+        }
         .sensoryFeedback(.success, trigger: stage) { _, n in n == 1 }
         // a hongbao: full screen over the done screen, in at once (it fades its own words in), and on to the next
         // step when it's closed
@@ -131,6 +137,7 @@ struct DoneView: View {
         if momentStarted { MomentPlayer.shared.move(to: box) } else {
             momentStarted = true; MomentPlayer.shared.play(m.key, in: box)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { place(m) }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { if !momentDrawn { withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { momentMissing = true } } }
         }
     }
 
@@ -170,9 +177,12 @@ struct DoneView: View {
             // centred with empty room above (the owner, 4 Oct 2026)
             if let m = moment {
                 // the moment's sticker (drawn by the player over this space), its title and line
+                // (Bùbù comes in its place if it hasn't drawn in a second and a half: the page can be gone, and the
+                // space sat empty; the owner, 22 Oct 2026)
                 Color.clear
                     .frame(minHeight: 120, maxHeight: 360)
                     .frame(maxWidth: .infinity)
+                    .overlay { Image("done-panda").resizable().scaledToFit().padding(24).opacity(momentMissing && !momentDrawn ? 1 : 0) }
                     .background(GeometryReader { g in Color.clear.preference(key: MomentStickerBox.self, value: g.frame(in: .global)) })
                     .layoutPriority(-1)
                 Text(m.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color(UIColor(hex: m.color)))

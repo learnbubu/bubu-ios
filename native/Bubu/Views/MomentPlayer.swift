@@ -4,7 +4,7 @@ import WebKit
 /// The done screen's sticker moments, played by the effects studio's own code: `moments-player.html`
 /// (built by the studio's `player.js`, with the layers, masks, bend weights and timings saved there),
 /// in one transparent web view that's loaded once, a little after launch, and reused.
-final class MomentPlayer: NSObject, WKScriptMessageHandler {
+final class MomentPlayer: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
     static let shared = MomentPlayer()
 
     let web: WKWebView
@@ -30,6 +30,7 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
         web = WKWebView(frame: CGRect(x: 0, y: 0, width: 390, height: 844), configuration: cfg)
         super.init()
         uc.add(self, name: "bubu")
+        web.navigationDelegate = self
         web.isOpaque = false
         web.backgroundColor = .clear
         web.scrollView.backgroundColor = .clear
@@ -39,6 +40,10 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
         // unseen until a moment has drawn its first frame (nothing of the page shows while it loads)
         web.alpha = 0
         // (under the tests the page isn't loaded at all: it's never ready, and the done screen keeps its usual splash)
+        load()
+    }
+
+    private func load() {
         if !Launch.underTests, let url = Bundle.main.url(forResource: "moments-player", withExtension: "html") {
             web.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         }
@@ -47,9 +52,23 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     /// Loads the page (call early: decoding the pictures takes a moment).
     func warm() {}
 
+    /// The page is gone: iOS ended its web process (a big page, the app a while in the background), and it's
+    /// blank. A moment played into it drew nothing and the done screen sat empty (the owner, 22 Oct 2026).
+    /// It's not ready any more (the done screen keeps its splash and Bùbù) and it loads again.
+    private func lost() {
+        ready = false
+        web.alpha = 0
+        load()
+    }
+    /// (a moment's tried again only once: one the page itself can't play mustn't load it over and over)
+    private var retried = false
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { lost() }
+
     func userContentController(_ c: WKUserContentController, didReceive m: WKScriptMessage) {
         if (m.body as? String) == "playing" {
             DispatchQueue.main.async {
+                self.retried = false
                 self.web.alpha = 1
                 NotificationCenter.default.post(name: Self.playingNote, object: nil)
             }
@@ -67,12 +86,17 @@ final class MomentPlayer: NSObject, WKScriptMessageHandler {
     func play(_ key: String, in box: CGRect, inPlace: Bool = false) {
         guard ready else { pending = (key, box, inPlace); return }
         playingInPlace = inPlace
-        web.evaluateJavaScript("bubuPlay(\(Self.js(key)), \(Self.js(box, inPlace: inPlace))); 0", completionHandler: nil)
-        // (if the page's "playing" never comes, it's shown anyway: a moment must never go unseen)
         plays += 1
         let n = plays
+        // (the page couldn't play it, its process gone and the page blank: it plays once the page is back)
+        web.evaluateJavaScript("bubuPlay(\(Self.js(key)), \(Self.js(box, inPlace: inPlace))); 0") { [weak self] _, error in
+            guard let self, error != nil, self.plays == n else { return }
+            if !self.retried { self.retried = true; self.pending = (key, box, inPlace) }
+            self.lost()
+        }
+        // (if the page's "playing" never comes, it's shown anyway: a moment must never go unseen)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
-            guard let self, self.plays == n, self.pending == nil else { return }
+            guard let self, self.plays == n, self.pending == nil, self.ready else { return }
             self.web.alpha = 1
         }
     }
