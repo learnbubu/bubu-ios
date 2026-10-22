@@ -203,7 +203,7 @@ struct VocabRoom: View {
         let pic = UIImage(named: art) != nil
         return Button(action: go) {
             VStack(spacing: 0) {
-                if pic { Image(art).resizable().scaledToFit().frame(height: 34).padding(.bottom, 2) }
+                if pic { Image(art).resizable().scaledToFit().frame(height: 42).padding(.bottom, 1) }
                 Text("\(n)").font(.nunito(21, .black)).monospacedDigit().foregroundStyle(Color(UIColor(hex: ink)))
                 Text(pic ? label : "\(icon) \(label)").font(.nunito(11, .heavy)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.8)
             }
