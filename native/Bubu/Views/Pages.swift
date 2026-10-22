@@ -27,7 +27,6 @@ extension View {
     func pageDestinations() -> some View {
         navigationDestination(for: Page.self) { p in
             PageView(page: p)
-                .toolbarBackground(Color.bg, for: .navigationBar)
                 .background(Color.bg.ignoresSafeArea())
         }
     }
@@ -96,8 +95,7 @@ struct BrowsePage: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .navigationTitle("Browse · \(cards.count) words")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageBar("Browse") { BarCount(text: "\(cards.count) words") }
     }
 }
 
@@ -191,14 +189,8 @@ struct CharactersPage: View {
             }
             .padding(.horizontal, 18)
         }
-        .searchable(text: $query, prompt: "Search 字, pinyin or meaning…")
-        .navigationTitle("Characters")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Text("\(progress.charsKnown) / \(Course.allChars.count)").font(.nunito(13, .semibold)).foregroundStyle(Color.muted)
-            }
-        }
+        .searchBar($query, prompt: "Search 字, pinyin or meaning")
+        .pageBar("Characters") { BarCount(text: "\(progress.charsKnown) / \(Course.allChars.count)") }
     }
 
     private func cell(_ ch: String, lv: Int, due: Bool) -> some View {

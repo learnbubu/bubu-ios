@@ -19,8 +19,7 @@ struct QuestsPage: View {
         .scrollIndicators(.hidden)
         .background(Home.bg.ignoresSafeArea())
         .environment(\.colorScheme, .light)
-        .navigationTitle("Daily quests")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageBar("Daily quests")
         .onAppear { progress.ensureQuests() }
     }
 
@@ -87,8 +86,7 @@ struct ActivityPage: View {
         .scrollIndicators(.hidden)
         .background(Home.bg.ignoresSafeArea())
         .environment(\.colorScheme, .light)
-        .navigationTitle("Learning activity")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageBar("Learning activity")
     }
 
     private func heading(_ t: String) -> some View {

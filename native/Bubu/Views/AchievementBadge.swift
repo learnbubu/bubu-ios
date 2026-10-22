@@ -144,8 +144,7 @@ struct AchievementsPage: View {
         .scrollIndicators(.hidden)
         .background(Home.bg.ignoresSafeArea())
         .environment(\.colorScheme, .light)
-        .navigationTitle("Achievements")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageBar("Achievements")
         .onAppear { progress.stampAchievements() }
     }
 }

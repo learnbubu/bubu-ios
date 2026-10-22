@@ -306,11 +306,7 @@ struct AvatarBuilderPage: View {
             .background(Color.panel)
         }
         .sensoryFeedback(.selection, trigger: draft)
-        .navigationTitle("Edit Avatar")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) { Button("Reset") { draft = nil } }
-        }
+        .pageBar("Edit Avatar") { BarButton(label: "Reset") { draft = nil } }
     }
 
     private func set(_ cfg: AvatarConfig, _ key: String, _ id: String) {

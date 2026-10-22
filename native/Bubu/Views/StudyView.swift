@@ -1274,8 +1274,7 @@ struct ChoiceView: View {
         .sheet(isPresented: $tonesOpen) {
             NavigationStack {
                 ScrollView { TonesPrimer().padding(20) }
-                    .navigationTitle("The four tones").navigationBarTitleDisplayMode(.inline)
-                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { tonesOpen = false } } }
+                    .pageBar("The four tones", back: false) { BarButton(label: "Done") { tonesOpen = false } }
             }
             .presentationDetents([.medium, .large])
         }

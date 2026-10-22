@@ -111,14 +111,8 @@ struct TonesPage: View {
             .padding(.horizontal, 18).padding(.bottom, 40)
         }
         .overlay { if confetti { Confetti(count: 70).allowsHitTesting(false) } }
-        .navigationTitle("Tone pairs")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                if !finished && !questions.isEmpty {
-                    Text("\(index + 1) / \(questions.count)").font(.nunito(13, .semibold)).foregroundStyle(Color.muted)
-                }
-            }
+        .pageBar("Tone pairs") {
+            if !finished && !questions.isEmpty { BarCount(text: "\(index + 1) / \(questions.count)") }
         }
         .onAppear { if questions.isEmpty { start() } }
     }

@@ -62,8 +62,7 @@ struct ConversePage: View {
                 .padding(.horizontal, 18).padding(.top, 12).padding(.bottom, 12)
                 .background { Color.panel.shadow(color: .black.opacity(0.06), radius: 8, y: -3).ignoresSafeArea(edges: .bottom) }
         }
-        .navigationTitle(dialogue.map { "Converse · \($0.title)" } ?? "Converse")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageBar(dialogue?.title ?? "Converse")
         .onAppear { canCheck = SFSpeechRecognizer(locale: Locale(identifier: "zh-CN"))?.isAvailable ?? false }
         .onDisappear { recognizer.end(); run += 1; Speech.shared.stop() }
     }

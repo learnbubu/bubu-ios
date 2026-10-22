@@ -102,14 +102,8 @@ struct PickPage: View {
             .padding(.horizontal, 18).padding(.vertical, 10)
             .background { Color.panel.shadow(color: .black.opacity(0.06), radius: 8, y: -3).ignoresSafeArea(edges: .bottom) }
         }
-        .searchable(text: $query, prompt: "Search 汉字, pinyin or English")
-        .navigationTitle("Pick words")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Text("\(picks.ids.count) chosen").font(.nunito(13, .semibold)).foregroundStyle(Color.muted)
-            }
-        }
+        .searchBar($query, prompt: "Search 汉字, pinyin or English")
+        .pageBar("Pick words") { BarCount(text: "\(picks.ids.count) chosen") }
     }
 
     private func preset(_ label: String, _ action: @escaping () -> Void) -> some View {
@@ -403,8 +397,7 @@ struct MatchPage: View {
             }
         }
         .padding(18)
-        .navigationTitle("Match · \(done) / \(total)")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageBar("Match") { BarCount(text: "\(done) / \(total)") }
         .onAppear { if total == 0 { start() } }
     }
 

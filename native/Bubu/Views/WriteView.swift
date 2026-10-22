@@ -537,8 +537,7 @@ struct WritingSheetPage: View {
                 .padding(18)
             }
         }
-        .navigationTitle("Writing sheet · \(hanzi)")
-        .navigationBarTitleDisplayMode(.inline)
+        .pageBar("Writing sheet · \(hanzi)")
     }
 
     /// Other words with this character (web: exampleWords).

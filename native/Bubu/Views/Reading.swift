@@ -115,13 +115,7 @@ struct ReadingsPage: View {
             }
             .padding(.horizontal, 18).padding(.bottom, 30)
         }
-        .navigationTitle("Reading")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Text("\(reads.filter { progress.readDone($0.id) }.count) / \(reads.count) read").font(.nunito(13, .semibold)).foregroundStyle(Color.muted)
-            }
-        }
+        .pageBar("Reading") { BarCount(text: "\(reads.filter { progress.readDone($0.id) }.count) / \(reads.count) read") }
     }
 }
 
@@ -236,8 +230,7 @@ struct StoryPage: View {
                 .padding(.horizontal, 18).padding(.bottom, 40)
             }
             .overlay { if confetti { Confetti(count: 70).allowsHitTesting(false) } }
-            .navigationTitle(r.title)
-            .navigationBarTitleDisplayMode(.inline)
+            .pageBar("Story")
             .onAppear {
                 if options.isEmpty { options = r.q.options.enumerated().map { Option(text: $0.element, index: $0.offset) }.shuffled() }
             }
@@ -411,13 +404,7 @@ struct GuidePage: View {
             }
             .padding(.horizontal, 18).padding(.bottom, 40)
         }
-        .navigationTitle("Guidebook")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Text("\(learnt) / \(cards.count) words").font(.nunito(13, .semibold)).foregroundStyle(Color.muted)
-            }
-        }
+        .pageBar("Guidebook") { BarCount(text: "\(learnt) / \(cards.count) words") }
     }
 
     private func heading(_ t: String) -> some View {
