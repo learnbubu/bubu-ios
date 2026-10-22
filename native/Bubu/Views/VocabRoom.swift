@@ -84,8 +84,11 @@ struct VocabRoom: View {
             if !query.isEmpty {
                 Button { query = ""; searching = false } label: {
                     Image(systemName: "xmark.circle.fill").font(.system(size: 17)).foregroundStyle(Home.muted)
+                        .frame(width: 44, height: 46).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .padding(.trailing, -12)
+                .accessibilityLabel("Clear the search")
             }
         }
         .padding(.horizontal, 14).frame(height: 46)
@@ -162,11 +165,11 @@ struct VocabRoom: View {
             if UIImage(named: "vocab-bed") != nil {
                 GeometryReader { geo in
                     Image("vocab-bed").resizable().scaledToFit()
-                        .frame(width: geo.size.width * 0.55)
+                        .frame(width: geo.size.width * 0.4)
                         .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black, location: 0.55), .init(color: .clear, location: 1)],
                                              startPoint: .top, endPoint: .bottom))
                         .opacity(0.6)
-                        .offset(x: 2, y: 4)
+                        .offset(x: 4, y: -6)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 .allowsHitTesting(false)
@@ -202,10 +205,13 @@ struct VocabRoom: View {
     private func cell(_ n: Int, _ label: String, art: String, icon: String, ink: UInt32, go: @escaping () -> Void) -> some View {
         let pic = UIImage(named: art) != nil
         return Button(action: go) {
-            VStack(spacing: 0) {
-                if pic { Image(art).resizable().scaledToFit().frame(height: 42).padding(.bottom, 1) }
-                Text("\(n)").font(.nunito(21, .black)).monospacedDigit().foregroundStyle(Color(UIColor(hex: ink)))
-                Text(pic ? label : "\(icon) \(label)").font(.nunito(11, .heavy)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.8)
+            // (the pot beside the number: over it, the cells grew and the room no longer fitted one screen; the Mac)
+            HStack(spacing: 5) {
+                if pic { Image(art).resizable().scaledToFit().frame(width: 30, height: 40) }
+                VStack(spacing: 0) {
+                    Text("\(n)").font(.nunito(21, .black)).monospacedDigit().foregroundStyle(Color(UIColor(hex: ink)))
+                    Text(pic ? label : "\(icon) \(label)").font(.nunito(11, .heavy)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.75)
+                }
             }
             .frame(maxWidth: .infinity).padding(.vertical, 8).padding(.horizontal, 6)
             .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
