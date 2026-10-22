@@ -89,25 +89,27 @@ struct VocabRoom: View {
             }
         }
         .padding(.horizontal, 14).frame(height: 46)
-        .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(searching ? Home.teal : Home.line, lineWidth: 1.5))
-        .padding(.bottom, 14)
+        .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(searching ? Home.teal : Home.line, lineWidth: 1.5))
+        .padding(.bottom, 12)
     }
 
     @ViewBuilder
     private func room(_ g: VocabGarden) -> some View {
         today(g)
         section("Your words")
-        HStack(spacing: 9) {
-            gardenTile("🌱", g.fresh.count, "New") { flash(g.fresh, 12) }
-            gardenTile("🌿", g.growing.count, "Growing") { flash(g.growing, 15) }
-            gardenTile("🌸", g.blooming.count, "Blooming") { flash(g.blooming, 15) }
+        // the Classroom's catch-up cells
+        HStack(spacing: 8) {
+            cell(g.fresh.count, "🌱 New", ink: 0x1F7A6C) { flash(g.fresh, 12) }
+            cell(g.growing.count, "🌿 Growing", ink: 0xB7822E) { flash(g.growing, 15) }
+            cell(g.blooming.count, "🌸 Blooming", ink: 0xD9608A) { flash(g.blooming, 15) }
         }
         section("Ways to practise")
-        HStack(spacing: 9) {
-            way("🃏", "Flashcards", "see it, say it, flip", bg: 0xD6E9FB, lip: 0xBCD5EC) { flash(g.today, g.today.count) }
-            way("🧩", "Match", "pairs against the clock", bg: 0xE5DCFA, lip: 0xCFC2EE) { router.push(.match(g.today.map(\.id))) }
-            way("✅", "Quiz", "pick the right one", bg: 0xD3EEDB, lip: 0xB9DCC4) {
+        // the Classroom's tiles
+        HStack(spacing: 11) {
+            tile("class-vocab", "Flashcards", bg: 0xD6E9FB) { flash(g.today, g.today.count) }
+            tile("class-chars", "Match", bg: 0xFCEBB8) { router.push(.match(g.today.map(\.id))) }
+            tile("class-quiz", "Quiz", bg: 0xE5DCFA) {
                 router.start(StudySession.quiz(progress, cards: g.today, focuses: ["recognize", "recall", "pinyin", "listen"], tooFew: "Learn a few words first, then quiz them."))
             }
         }
@@ -115,96 +117,108 @@ struct VocabRoom: View {
         .opacity(g.today.isEmpty ? 0.5 : 1)
     }
 
-    /// Today's words: one tap to practise them, as flashcards.
+    /// Today's words, as Home's Up next card: its kicker, title and line, a bar (how many of the words you've reached
+    /// you've learnt), and its one raised button.
     private func today(_ g: VocabGarden) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("TODAY'S WORDS").font(.nunito(11, .black)).tracking(1.5).foregroundStyle(.white.opacity(0.72))
+        let reached = g.fresh.count + g.growing.count + g.blooming.count
+        let learnt = g.growing.count + g.blooming.count
+        return VStack(alignment: .leading, spacing: 0) {
+            Text("Today's words").font(.nunito(12, .black)).tracking(1.4).textCase(.uppercase).foregroundStyle(Home.teal)
             Text(g.today.isEmpty ? "No words yet" : "\(g.today.count) words to practise")
-                .font(.nunito(23, .black)).foregroundStyle(.white).padding(.top, 3)
-            Text(g.today.isEmpty ? "Learn your first words on the path" : "the ones you're learning, and a few new")
-                .font(.nunito(13.5, .bold)).foregroundStyle(.white.opacity(0.82)).padding(.top, 1)
+                .font(.nunito(25, .black)).tracking(-0.3).foregroundStyle(Home.ink).padding(.top, 4)
+            Text(g.today.isEmpty ? "Learn your first words on the path" : "The ones you're learning, and a few new")
+                .font(.nunito(15.5, .bold)).foregroundStyle(Home.muted)
             if !g.today.isEmpty {
                 // (as many as fit on one line, then how many more)
                 ViewThatFits(in: .horizontal) {
                     ForEach([6, 5, 4, 3, 2], id: \.self) { n in chips(g.today, n) }
                 }
-                .padding(.top, 12)
+                .padding(.top, 11)
             }
+            HStack(spacing: 10) {
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color(UIColor(hex: 0xD3DED8)))
+                        Capsule().fill(Home.teal).frame(width: geo.size.width * (reached == 0 ? 0 : Double(learnt) / Double(reached)))
+                    }
+                }
+                .frame(height: 10)
+                Text("\(learnt) / \(reached) learnt").font(.nunito(12.5, .heavy)).monospacedDigit().foregroundStyle(Home.muted).fixedSize()
+            }
+            .padding(.top, 13)
             Button {
                 if g.today.isEmpty { router.toPath() } else { flash(g.today, g.today.count) }
             } label: {
-                Text(g.today.isEmpty ? "To the path" : "Start · about \(max(1, (g.today.count * 15 + 59) / 60)) min")
-                    .font(.nunito(17, .black)).foregroundStyle(Home.teal)
+                Text(g.today.isEmpty ? "To the path →" : "Start flashcards →").font(.nunito(18, .black)).foregroundStyle(.white)
             }
-            .buttonStyle(LipButton(face: .white, lip: Color(UIColor(hex: 0xCFE3DC)), radius: 15, depth: 4))
-            .frame(height: 50)
-            .padding(.top, 14)
+            .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 17, depth: 4))
+            .frame(height: 56)
+            .padding(.top, 15)
         }
-        .padding(.horizontal, 18).padding(.top, 16).padding(.bottom, 18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background {
-            ZStack {
-                RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Home.tealDark).offset(y: 5)
-                RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Home.teal)
-            }
-        }
-        .padding(.bottom, 5)
+        .padding(.horizontal, 17).padding(.top, 15).padding(.bottom, 17)
+        .background(LinearGradient(colors: [Color(UIColor(hex: 0xEEF7F2)), Color(UIColor(hex: 0xE2EFE8))], startPoint: .topLeading, endPoint: .bottomTrailing))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color(UIColor(hex: 0xD7E8DF)), lineWidth: 1))
+        .shadow(color: Color(UIColor(hex: 0x1E463C)).opacity(0.08), radius: 8, y: 6)
     }
 
     private func chips(_ cards: [Card], _ n: Int) -> some View {
         HStack(spacing: 6) {
             ForEach(cards.prefix(n), id: \.id) { c in
-                Text(c.word.hanzi).font(.hanzi(16, .medium)).foregroundStyle(.white).lineLimit(1).fixedSize()
+                Text(c.word.hanzi).font(.hanzi(16, .medium)).foregroundStyle(Home.ink).lineLimit(1).fixedSize()
                     .padding(.horizontal, 9).padding(.vertical, 4)
-                    .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(.white.opacity(0.75), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
             if cards.count > n {
-                Text("+\(cards.count - n)").font(.nunito(13, .black)).foregroundStyle(.white).fixedSize()
+                Text("+\(cards.count - n)").font(.nunito(13, .black)).foregroundStyle(Home.teal).fixedSize()
                     .padding(.horizontal, 9).padding(.vertical, 6)
-                    .background(.white.opacity(0.16), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(.white.opacity(0.75), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
         }
     }
 
     private func section(_ t: String) -> some View {
-        Text(t).font(.nunito(15, .heavy)).foregroundStyle(Home.ink).padding(.top, 20).padding(.bottom, 8)
+        Text(t).font(.nunito(15, .heavy)).foregroundStyle(Home.ink).padding(.top, 18).padding(.bottom, 8)
     }
 
-    private func gardenTile(_ icon: String, _ n: Int, _ label: String, go: @escaping () -> Void) -> some View {
+    /// A catch-up cell, as the Classroom's: the number in its colour, its name under it.
+    private func cell(_ n: Int, _ label: String, ink: UInt32, go: @escaping () -> Void) -> some View {
         Button(action: go) {
-            VStack(spacing: 2) {
-                Text(icon).font(.system(size: 24))
-                Text("\(n)").font(.nunito(21, .black)).monospacedDigit().foregroundStyle(Home.teal)
-                Text(label).font(.nunito(12, .heavy)).foregroundStyle(Home.muted)
+            VStack(spacing: 0) {
+                Text("\(n)").font(.nunito(21, .black)).monospacedDigit().foregroundStyle(Color(UIColor(hex: ink)))
+                Text(label).font(.nunito(11, .heavy)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.8)
             }
-            .frame(maxWidth: .infinity).padding(.vertical, 10)
+            .frame(maxWidth: .infinity).padding(.vertical, 8).padding(.horizontal, 6)
             .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Home.line, lineWidth: 1.5))
         }
         .buttonStyle(PressDown(depth: 2))
         .disabled(n == 0)
         .opacity(n == 0 ? 0.55 : 1)
-        .accessibilityLabel("\(label) words: \(n). Practise them")
+        .accessibilityLabel("\(label.dropFirst(2)) words: \(n). Practise them")
     }
 
-    private func way(_ icon: String, _ title: String, _ sub: String, bg: UInt32, lip: UInt32, go: @escaping () -> Void) -> some View {
-        Button(action: go) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(icon).font(.system(size: 26))
-                Text(title).font(.nunito(15, .black)).foregroundStyle(Home.ink).padding(.top, 4)
-                Text(sub).font(.nunito(11.5, .bold)).foregroundStyle(Home.muted).fixedSize(horizontal: false, vertical: true).padding(.top, 1)
+    /// A practice tile, as the Classroom's: its picture above, its name on a pale band along the bottom.
+    private func tile(_ art: String, _ title: String, bg: UInt32, go: @escaping () -> Void) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 20, style: .continuous), h: CGFloat = 106
+        return Button(action: go) {
+            VStack(spacing: 0) {
+                Image(art).resizable().scaledToFit()
+                    .frame(height: h * 0.64 * 0.86)
+                    .padding(.top, h * 0.07).padding(.horizontal, 8)
+                Spacer(minLength: 0)
+                Text(title).font(.nunito(14.5, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.8)
+                    .frame(maxWidth: .infinity).padding(.top, 6).padding(.bottom, 7)
+                    .background(Color(UIColor(hex: 0xFFFDF8)).opacity(0.62))
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(.horizontal, 10).padding(.top, 12).padding(.bottom, 11)
-            .background {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color(UIColor(hex: lip))).offset(y: 3)
-                    RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color(UIColor(hex: bg)))
-                }
-            }
+            .frame(maxWidth: .infinity).frame(height: h)
+            .background(Color(UIColor(hex: bg)))
+            .clipShape(shape)
+            .background(shape.fill(.black.opacity(0.08)).offset(y: 4))
+            .contentShape(shape)
         }
         .buttonStyle(PressDown(depth: 2))
-        .fixedSize(horizontal: false, vertical: true)
     }
 
     private func flash(_ cards: [Card], _ n: Int) {
@@ -266,7 +280,7 @@ struct VocabRoom: View {
         HStack(spacing: 10) {
             Button { picks.ids.removeAll() } label: {
                 Image(systemName: "xmark").font(.system(size: 14, weight: .black)).foregroundStyle(Home.muted)
-                    .frame(width: 46, height: 50)
+                    .frame(width: 50, height: 52)
                     .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Home.line, lineWidth: 1.5))
             }
@@ -275,8 +289,8 @@ struct VocabRoom: View {
             Button { router.push(.flash(course.cards.filter { picks.ids.contains($0.id) }.map(\.id))) } label: {
                 Text("Practise your \(picks.ids.count) word\(picks.ids.count == 1 ? "" : "s")").font(.nunito(17, .black)).foregroundStyle(.white)
             }
-            .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 15, depth: 4))
-            .frame(height: 50)
+            .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 17, depth: 4))
+            .frame(height: 56)
         }
         .padding(.horizontal, 18).padding(.top, 10).padding(.bottom, 12)
         .background(Home.bg.shadow(color: .black.opacity(0.06), radius: 8, y: -3).ignoresSafeArea(edges: .bottom))

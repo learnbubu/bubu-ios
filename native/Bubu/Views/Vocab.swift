@@ -126,9 +126,11 @@ struct PickPage: View {
 
 // MARK: - flashcards
 
-/// Flashcards, simpler (the owner's board G, 22 Oct 2026): one word big, its picture, pinyin and sound; tap and it
-/// turns to what it means and a sentence with it; then "Still learning" (it comes round again, once, and it's
-/// marked to come back soon) or "Got it". Each answer counts as a review. A word or two of thanks at the end.
+/// Flashcards, simpler (the owner's board G, 22 Oct 2026), in the lessons' own look (the owner: "make sure the style
+/// of the vocab matches the rest of how the app works"): their close, progress bar (gold with a combo of Got its),
+/// raised card and buttons, and the done screen's tiles at the end, with XP. One word big, its picture, pinyin and
+/// sound; tap and it turns to what it means and a sentence with it; then Still learning (it comes round again, once,
+/// marked to come back soon) or Got it. Each answer counts as a review.
 struct FlashPage: View {
     let ids: [String]
     @Environment(ProgressStore.self) private var progress
@@ -140,62 +142,59 @@ struct FlashPage: View {
     /// the ones put back once already (they're not put back again)
     @State private var again = Set<String>()
     @State private var got = 0
-    @State private var learning = 0
+    @State private var combo = 0
     @State private var finished = false
+    @State private var xp = 0
+    @State private var started = Date()
+    @State private var seconds = 0
     private let course = Course.shared
 
     var body: some View {
         VStack(spacing: 0) {
             topBar
             if finished { end } else if let c = queue.first { card(c).id(c.id + "\(queue.count)") }
-            Spacer(minLength: 0)
         }
-        .padding(.horizontal, 18).padding(.bottom, 14)
-        .background(Home.bg.ignoresSafeArea())
+        .padding(.horizontal, 16).padding(.bottom, 12)
+        .background(Color.bg.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         // (the whole screen, as a lesson's)
         .toolbar(.hidden, for: .tabBar)
-        .environment(\.colorScheme, .light)
         .onAppear {
             guard queue.isEmpty, !finished else { return }
             queue = ids.compactMap { course.cardById[$0] }.shuffled()
             total = queue.count
+            started = Date()
             pickExample()
         }
     }
 
-    private var done: Int { got + learning }
-
+    /// As a lesson's: close, the progress bar.
     private var topBar: some View {
         HStack(spacing: 12) {
             Button { dismiss() } label: {
-                Image(systemName: "xmark").font(.system(size: 18, weight: .black)).foregroundStyle(Color(UIColor(hex: 0x8A97A3)))
-                    .frame(width: 34, height: 40)
+                Image(systemName: "xmark").font(.system(size: 22, weight: .heavy)).foregroundStyle(Color.muted)
+                    .frame(width: 36, height: 36).contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Close")
-            GeometryReader { g in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Home.line)
-                    Capsule().fill(Home.teal).frame(width: max(12, g.size.width * CGFloat(finished ? 1 : Double(min(got, total)) / Double(max(total, 1)))))
-                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: got)
-                }
-            }
-            .frame(height: 12)
-            Text(finished ? "\(total) / \(total)" : "\(min(got + 1, total)) / \(total)").font(.nunito(13, .heavy)).monospacedDigit().foregroundStyle(Home.muted)
+            ProgressBarShine(value: finished ? 1 : Double(got) / Double(max(total, 1)), height: 16, combo: combo)
         }
-        .frame(height: 52)
+        .padding(.top, 8).padding(.bottom, 4)
     }
 
     private func card(_ c: Card) -> some View {
-        VStack(spacing: 0) {
+        let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+        return VStack(spacing: 0) {
+            Text(flipped ? "What it means" : "Do you know this word?").font(.nunito(25, .black)).tracking(-0.4).foregroundStyle(Color.ink)
+                .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 18)
+                .contentTransition(.opacity)
             Button { withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) { flipped.toggle() } } label: {
                 ZStack {
                     VStack(spacing: 4) {
                         if let pic = Pictures.asset(c.word.hanzi) {
                             Image(pic).resizable().scaledToFit().frame(height: 96).padding(.bottom, 8)
                         }
-                        Text(c.word.hanzi).font(.hanzi(c.word.hanzi.count > 3 ? 46 : 64, .medium)).foregroundStyle(Home.ink)
+                        Text(c.word.hanzi).font(.hanzi(c.word.hanzi.count > 3 ? 46 : 64, .medium)).foregroundStyle(Color.ink)
                             .minimumScaleFactor(0.5).lineLimit(1)
                         PinyinText(pinyin: c.word.pinyin, size: 20, weight: .heavy)
                     }
@@ -205,39 +204,31 @@ struct FlashPage: View {
                         .opacity(flipped ? 1 : 0)
                 }
                 .padding(22)
-                .frame(maxWidth: .infinity).frame(height: 390)
-                .background {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Home.line).offset(y: 6)
-                        RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Color(UIColor(hex: 0xFFFDF8)))
-                        RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Home.line, lineWidth: 1.5)
-                    }
-                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // raised, as the answer tiles: the panel on a lip of the line's colour
+                .background(Color.panel, in: shape)
+                .overlay(shape.strokeBorder(Color.line, lineWidth: 2))
+                .padding(.bottom, 5)
+                .background(shape.fill(Color.line).padding(.top, 5))
                 .rotation3DEffect(.degrees(flipped ? 180 : 0), axis: (x: 0, y: 1, z: 0), perspective: 0.45)
             }
             .buttonStyle(.plain)
             .overlay(alignment: .topTrailing) { SpeakerButton(text: c.word.hanzi, size: 22).padding(14) }
             .overlay(alignment: .bottom) {
-                Text(flipped ? "tap to turn it back" : "tap to see what it means").font(.nunito(13, .heavy))
-                    .foregroundStyle(Color(UIColor(hex: 0x8A97A3))).padding(.bottom, 16).allowsHitTesting(false)
+                Text(flipped ? "TAP TO TURN IT BACK" : "TAP TO SEE WHAT IT MEANS").font(.nunitoXB(12)).tracking(1)
+                    .foregroundStyle(Color.muted).padding(.bottom, 20).allowsHitTesting(false)
             }
             .sensoryFeedback(.impact(weight: .light), trigger: flipped)
-            .padding(.top, 22)
+            .padding(.top, 14)
+            .frame(maxHeight: 440)
             .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .move(edge: .leading).combined(with: .opacity)))
 
-            Spacer(minLength: 20)
+            Spacer(minLength: 18)
             HStack(spacing: 10) {
-                Button { answer(c, gotIt: false) } label: {
-                    Text("Still learning").font(.nunito(17, .black)).foregroundStyle(Color(UIColor(hex: 0xB7822E)))
-                }
-                .buttonStyle(LipButton(face: Color(UIColor(hex: 0xFFFDF8)), lip: Home.line, radius: 16, depth: 4))
-                Button { answer(c, gotIt: true) } label: {
-                    Text("Got it").font(.nunito(17, .black)).foregroundStyle(.white)
-                }
-                .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 16, depth: 4))
+                Button("Still learning") { answer(c, gotIt: false) }.buttonStyle(WideButton(ghost: true))
+                Button("Got it") { answer(c, gotIt: true) }.buttonStyle(WideButton())
             }
-            .frame(height: 54)
-            .padding(.bottom, 10)
+            .padding(.bottom, 6)
         }
         .frame(maxHeight: .infinity)
     }
@@ -245,16 +236,16 @@ struct FlashPage: View {
     /// The back: what it means, and a sentence with it.
     private func meaning(_ c: Card) -> some View {
         VStack(spacing: 6) {
-            Text(c.word.hanzi).font(.hanzi(28, .medium)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.5)
-            Text(c.word.en).font(.nunito(26, .black)).foregroundStyle(Home.ink).multilineTextAlignment(.center)
+            Text(c.word.hanzi).font(.hanzi(28, .medium)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.5)
+            Text(c.word.en).font(.nunito(26, .black)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                 .minimumScaleFactor(0.6).lineLimit(3)
             if let pos = c.word.pos {
-                Text(pos).font(.nunito(13, .bold)).foregroundStyle(Home.muted)
+                Text(pos).font(.nunito(13, .bold)).foregroundStyle(Color.muted)
             }
             if let s = example {
                 VStack(spacing: 3) {
-                    Text(s.hanzi).font(.hanzi(18)).foregroundStyle(Home.ink).multilineTextAlignment(.center)
-                    Text(s.en).font(.nunito(13.5, .bold)).foregroundStyle(Home.muted).multilineTextAlignment(.center)
+                    Text(s.hanzi).font(.hanzi(18)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
+                    Text(s.en).font(.nunito(13.5, .bold)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
                 }
                 .padding(.top, 14)
             }
@@ -266,15 +257,22 @@ struct FlashPage: View {
         progress.recordReview()
         withAnimation(.spring(response: 0.38, dampingFraction: 0.86)) {
             queue.removeFirst()
-            if gotIt { got += 1 } else {
-                learning += 1
+            if gotIt { got += 1; combo += 1 } else {
+                combo = 0
                 // (it comes round again, a few cards on, once)
                 if again.insert(c.id).inserted { queue.insert(c, at: min(queue.count, 3)) } else { got += 1 }
             }
             flipped = false
-            if queue.isEmpty { finished = true }
         }
+        if queue.isEmpty { finish() }
         pickExample()
+    }
+
+    /// The end: XP for the words (one each, and one more for each known first time), as a lesson's done screen.
+    private func finish() {
+        seconds = max(1, Int(Date().timeIntervalSince(started)))
+        xp = progress.earnXP(total + (total - again.count)).earned
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { finished = true }
     }
 
     private func pickExample() {
@@ -283,36 +281,25 @@ struct FlashPage: View {
     }
 
     private var end: some View {
-        VStack(spacing: 0) {
-            Spacer(minLength: 20)
-            Image("panda-flashcards").resizable().scaledToFit().frame(height: 170)
-            Text("Nice work!").font(.nunito(30, .black)).foregroundStyle(Home.ink).padding(.top, 10)
-            Text("You went through \(total) word\(total == 1 ? "" : "s")").font(.nunito(15.5, .bold)).foregroundStyle(Home.muted).padding(.top, 2)
+        let known = total == 0 ? 100 : (total - again.count) * 100 / total
+        return VStack(spacing: 0) {
+            Spacer(minLength: 10)
+            Image("panda-flashcards").resizable().scaledToFit().frame(maxHeight: 240)
+            Text("Cards done!").font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).padding(.top, 8)
+            Text("You went through \(total) word\(total == 1 ? "" : "s")").font(.nunito(15, .bold)).foregroundStyle(Color.ink).padding(.top, 2)
+            // the done screen's tiles
             HStack(spacing: 10) {
-                tally("\(total - again.count)", "first time", Home.teal)
-                tally("\(again.count)", "still learning", Color(UIColor(hex: 0xB7822E)))
+                XPTile(steps: [.init(label: "Total XP", value: xp, tint: Color(light: 0xF0A92E, dark: 0xF5B03D))], delay: 0.2)
+                DoneTile(value: seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: "Time", icon: "clock.fill", tint: .accent, delay: 0.42)
+                DoneTile(value: known, format: { "\($0)%" }, label: "Knew them", icon: "checkmark.circle.fill", tint: .good, delay: 0.64)
             }
             .padding(.top, 22)
-            Spacer(minLength: 20)
-            Button { dismiss() } label: {
-                Text("Done").font(.nunito(17, .black)).foregroundStyle(.white)
-            }
-            .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 16, depth: 4))
-            .frame(height: 54)
-            .padding(.bottom, 10)
+            Spacer(minLength: 16)
+            Button("Continue") { dismiss() }.buttonStyle(WideButton())
+                .padding(.bottom, 6)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .sensoryFeedback(.success, trigger: finished)
-    }
-
-    private func tally(_ n: String, _ label: String, _ tint: Color) -> some View {
-        VStack(spacing: 1) {
-            Text(n).font(.nunito(26, .black)).monospacedDigit().foregroundStyle(tint)
-            Text(label).font(.nunito(12.5, .heavy)).foregroundStyle(Home.muted)
-        }
-        .frame(maxWidth: .infinity).padding(.vertical, 12)
-        .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Home.line, lineWidth: 1.5))
     }
 }
 
