@@ -15,6 +15,8 @@ struct VocabRoom: View {
     @State private var garden: VocabGarden?
     @State private var query = ""
     @State private var results: [Card] = []
+    /// the typing the results are for
+    @State private var resultsFor = ""
     @FocusState private var searching: Bool
     private let course = Course.shared
 
@@ -37,13 +39,21 @@ struct VocabRoom: View {
         .background(Home.bg.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .environment(\.colorScheme, .light)
-        .onAppear { garden = VocabGarden(progress) }
-        // (looked up a moment after the typing stops, not at every letter)
+        .onAppear {
+            garden = VocabGarden(progress)
+            // (the search's index made now, off the main thread, not at the first letter typed: the first search
+            // said "No words match" for a second while it was made)
+            Task.detached(priority: .utility) { VocabSearch.warm() }
+        }
+        // (looked up a moment after the typing stops, not at every letter; the results say which typing they're for,
+        // so an old search's are never taken for this one's)
         .task(id: query) {
             let q = query
             try? await Task.sleep(for: .milliseconds(140))
             guard !Task.isCancelled else { return }
-            results = VocabSearch.find(q)
+            let found = await Task.detached(priority: .userInitiated) { VocabSearch.find(q) }.value
+            guard !Task.isCancelled, q == query else { return }
+            results = found; resultsFor = q
         }
     }
 
@@ -54,13 +64,14 @@ struct VocabRoom: View {
             BackPill(label: "Classroom") { dismiss() }
             Text("Vocabulary").font(.nunito(34, .black)).tracking(-0.5).foregroundStyle(Home.ink)
                 .frame(maxHeight: .infinity, alignment: .bottom).padding(.leading, 2).padding(.bottom, 6)
-            Image("panda-flashcards").resizable().scaledToFit().frame(width: 104)
+            // (inside the header, his feet on its foot: hung below it, he covered the search field's end; the Mac,
+            // 22 Oct 2026)
+            Image("panda-flashcards").resizable().scaledToFit().frame(height: 94)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                .offset(x: 4, y: 26).allowsHitTesting(false)
+                .padding(.bottom, 4).allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .frame(height: 100)
-        .zIndex(1)
     }
 
     private var searchField: some View {
@@ -207,7 +218,8 @@ struct VocabRoom: View {
     private var searchResults: some View {
         LazyVStack(alignment: .leading, spacing: 0) {
             if results.isEmpty {
-                Text("No words match that.").font(.nunito(14, .bold)).foregroundStyle(Home.muted).padding(.top, 10)
+                // (only once this typing's been looked up)
+                Text(resultsFor == query ? "No words match that." : " ").font(.nunito(14, .bold)).foregroundStyle(Home.muted).padding(.top, 10)
             } else {
                 Text("Tap ＋ to put a word on your list").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted).padding(.bottom, 8)
                 ForEach(results, id: \.id) { c in resultRow(c) }
@@ -319,6 +331,9 @@ enum VocabSearch {
             return Entry(card: c, han: c.word.hanzi, en: en, py: py, pyJoined: py.replacingOccurrences(of: " ", with: ""))
         }
     }()
+
+    /// Makes the index (it's made once).
+    static func warm() { _ = index.count }
 
     static func find(_ raw: String, limit: Int = 40) -> [Card] {
         let q = raw.trimmingCharacters(in: .whitespaces).lowercased()

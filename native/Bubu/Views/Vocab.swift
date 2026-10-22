@@ -153,6 +153,8 @@ struct FlashPage: View {
         .padding(.horizontal, 18).padding(.bottom, 14)
         .background(Home.bg.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
+        // (the whole screen, as a lesson's)
+        .toolbar(.hidden, for: .tabBar)
         .environment(\.colorScheme, .light)
         .onAppear {
             guard queue.isEmpty, !finished else { return }

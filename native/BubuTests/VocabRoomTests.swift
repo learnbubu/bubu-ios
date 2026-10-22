@@ -53,6 +53,13 @@ final class VocabRoomTests: XCTestCase {
         XCTAssertTrue(VocabSearch.find("a").allSatisfy { !$0.isSentence })
     }
 
+    func testTheExactPinyinComesFirst() {
+        // 医生 yī shēng before 一身 yī shēn, which "yisheng" starts like
+        XCTAssertEqual(VocabSearch.find("yisheng").first?.word.hanzi, "医生")
+        XCTAssertEqual(VocabSearch.find("yi sheng").first?.word.hanzi, "医生")
+        XCTAssertEqual(VocabSearch.find("yishen").first?.word.hanzi, "一身")
+    }
+
     func testAWholeWordComesBeforeOneThatStartsWithIt() {
         // "eat" finds a word meaning eat before one meaning "eaten up" or the like
         let r = VocabSearch.find("eat")
