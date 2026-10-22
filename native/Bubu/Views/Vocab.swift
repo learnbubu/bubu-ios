@@ -1,11 +1,20 @@
 import SwiftUI
 import Observation
 
-/// The words you've picked for flashcards, matching or a quiz, kept while the app runs.
+/// The words you've picked for flashcards, matching or a quiz (Vocabulary's search puts them on your list), kept
+/// between launches.
 @Observable
 final class Picks {
     static let shared = Picks()
-    var ids: Set<String> = []
+    private static let key = "bubu.picks"
+    var ids: Set<String> {
+        didSet { if !Launch.underTests { UserDefaults.standard.set(Array(ids).sorted(), forKey: Self.key) } }
+    }
+    init() {
+        // (words no longer in the course are let go)
+        let saved = Launch.underTests ? [] : UserDefaults.standard.stringArray(forKey: Self.key) ?? []
+        ids = Set(saved.filter { Course.shared.cardById[$0] != nil })
+    }
 }
 
 // MARK: - pick words (web: renderPicker)
@@ -149,6 +158,8 @@ struct FlashPage: View {
     @State private var answers = 0
     /// the done screen has the session now (it lets a level reached show)
     @State private var handedOn = false
+    /// "Wait, don't go!", as a lesson's close asks once something's answered
+    @State private var quitAsk = false
     @State private var queue: [Card] = []
     @State private var total = 0
     @State private var flipped = false
@@ -170,6 +181,12 @@ struct FlashPage: View {
             if let n = burst {
                 FirecrackerBurst(n: n, bar: barFrame).id(n).ignoresSafeArea().allowsHitTesting(false)
             }
+            if quitAsk {
+                QuitAsk(keep: { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = false } },
+                        quit: { quitAsk = false; dismiss() },
+                        line: "Your cards so far are saved, but you'll miss the end of the set and its XP.", end: "End flashcards")
+                    .transition(.opacity).zIndex(20)
+            }
         }
         .background(Color.bg.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
@@ -190,6 +207,7 @@ struct FlashPage: View {
             total = queue.count
             session = StudySession.flashcards(progress, cards: queue)
             pickExample()
+            say()
         }
         .onDisappear {
             guard !handedOn else { return }
@@ -200,7 +218,9 @@ struct FlashPage: View {
     /// As a lesson's: close, the progress bar.
     private var topBar: some View {
         HStack(spacing: 12) {
-            Button { dismiss() } label: {
+            Button {
+                if answers == 0 { dismiss() } else { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = true } }
+            } label: {
                 Image(systemName: "xmark").font(.system(size: 22, weight: .heavy)).foregroundStyle(Color.muted)
                     .frame(width: 36, height: 36).contentShape(Rectangle())
             }
@@ -211,6 +231,19 @@ struct FlashPage: View {
                     Color.clear.onAppear { barFrame = g.frame(in: .global) }
                         .onChange(of: g.frame(in: .global)) { _, f in barFrame = f }
                 })
+            // as a lesson's: double XP on, and the buns while they're being earned back
+            if progress.boostActive {
+                HStack(spacing: 1) {
+                    Image(systemName: "bolt.fill").font(.system(size: 12, weight: .black))
+                    Text("2×").font(.nunito(14, .black))
+                }
+                .foregroundStyle(Color.white)
+                .padding(.horizontal, 7).padding(.vertical, 4)
+                .background(Color.gold, in: Capsule())
+            }
+            if let s = session, s.earnsBuns, progress.buns < ProgressStore.bunsMax {
+                BunRow(n: progress.isPlus ? ProgressStore.bunsMax : progress.bunState.n, plus: progress.isPlus, bump: s.bunsEarned)
+            }
         }
         .padding(.top, 8).padding(.bottom, 4)
     }
@@ -299,6 +332,15 @@ struct FlashPage: View {
         }
         if queue.isEmpty { finish() }
         pickExample()
+        say()
+    }
+
+    /// The next word said as it comes up, as a lesson says its prompts (when they're set to play).
+    private func say() {
+        guard let c = queue.first, progress.prefs.playsAutomatically else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            if queue.first?.id == c.id && !flipped { Speech.shared.speak(c.word.hanzi) }
+        }
     }
 
     /// The end, as a lesson's: its done screen, over everything (the moment, XP, the streak, quests, pockets).

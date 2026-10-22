@@ -1996,18 +1996,20 @@ struct FlowLayout: Layout {
 struct QuitAsk: View {
     let keep: () -> Void
     let quit: () -> Void
+    var line = "You'll lose this lesson's progress if you leave now."
+    var end = "End lesson"
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.black.opacity(0.35).ignoresSafeArea().onTapGesture { keep() }
             VStack(spacing: 14) {
                 Image("panda-sad").resizable().scaledToFit().frame(height: 110)
                 Text("Wait, don't go!").font(.nunitoXB(21)).foregroundStyle(Color.ink)
-                Text("You'll lose this lesson's progress if you leave now.")
+                Text(line)
                     .font(.nunito(15.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
                 Button(action: keep) { Text("Keep learning") }
                 .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
                 Button(action: quit) {
-                    Text("End lesson").font(.nunitoXB(15.5)).foregroundStyle(Color.again).padding(8)
+                    Text(end).font(.nunitoXB(15.5)).foregroundStyle(Color.again).padding(8)
                 }
                 .buttonStyle(.plain)
             }

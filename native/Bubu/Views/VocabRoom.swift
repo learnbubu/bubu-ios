@@ -100,15 +100,15 @@ struct VocabRoom: View {
         section("Your words")
         // the Classroom's catch-up cells
         HStack(spacing: 8) {
-            cell(g.fresh.count, "🌱 New", ink: 0x1F7A6C) { flash(g.fresh, 12) }
-            cell(g.growing.count, "🌿 Growing", ink: 0xB7822E) { flash(g.growing, 15) }
-            cell(g.blooming.count, "🌸 Blooming", ink: 0xD9608A) { flash(g.blooming, 15) }
+            cell(g.fresh.count, "New", art: "vocab-seed", icon: "🌱", ink: 0x1F7A6C) { flash(g.fresh, 12) }
+            cell(g.growing.count, "Growing", art: "vocab-grow", icon: "🌿", ink: 0xB7822E) { flash(g.growing, 15) }
+            cell(g.blooming.count, "Blooming", art: "vocab-bloom", icon: "🌸", ink: 0xD9608A) { flash(g.blooming, 15) }
         }
         section("Ways to practise")
         // the Classroom's tiles
         HStack(spacing: 11) {
-            tile("class-vocab", "Flashcards", bg: 0xD6E9FB) { flash(g.today, g.today.count) }
-            tile("class-chars", "Match", bg: 0xFCEBB8) { router.push(.match(g.today.map(\.id))) }
+            tile(Self.art("vocab-flash", or: "class-vocab"), "Flashcards", bg: 0xD6E9FB) { flash(g.today, g.today.count) }
+            tile(Self.art("vocab-match", or: "class-chars"), "Match", bg: 0xFCEBB8) { router.push(.match(g.today.map(\.id))) }
             tile("class-quiz", "Quiz", bg: 0xE5DCFA) {
                 router.start(StudySession.quiz(progress, cards: g.today, focuses: ["recognize", "recall", "pinyin", "listen"], tooFew: "Learn a few words first, then quiz them."))
             }
@@ -157,6 +157,21 @@ struct VocabRoom: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 17).padding(.top, 15).padding(.bottom, 17)
+        .background(alignment: .topTrailing) {
+            // a garden bed in the corner, as Up next's hills: to the right, faded out towards the bottom
+            if UIImage(named: "vocab-bed") != nil {
+                GeometryReader { geo in
+                    Image("vocab-bed").resizable().scaledToFit()
+                        .frame(width: geo.size.width * 0.55)
+                        .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black, location: 0.55), .init(color: .clear, location: 1)],
+                                             startPoint: .top, endPoint: .bottom))
+                        .opacity(0.6)
+                        .offset(x: 2, y: 4)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+                .allowsHitTesting(false)
+            }
+        }
         .background(LinearGradient(colors: [Color(UIColor(hex: 0xEEF7F2)), Color(UIColor(hex: 0xE2EFE8))], startPoint: .topLeading, endPoint: .bottomTrailing))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color(UIColor(hex: 0xD7E8DF)), lineWidth: 1))
@@ -183,11 +198,14 @@ struct VocabRoom: View {
     }
 
     /// A catch-up cell, as the Classroom's: the number in its colour, its name under it.
-    private func cell(_ n: Int, _ label: String, ink: UInt32, go: @escaping () -> Void) -> some View {
-        Button(action: go) {
+    /// (its picture, when it's in; the emoji until then)
+    private func cell(_ n: Int, _ label: String, art: String, icon: String, ink: UInt32, go: @escaping () -> Void) -> some View {
+        let pic = UIImage(named: art) != nil
+        return Button(action: go) {
             VStack(spacing: 0) {
+                if pic { Image(art).resizable().scaledToFit().frame(height: 34).padding(.bottom, 2) }
                 Text("\(n)").font(.nunito(21, .black)).monospacedDigit().foregroundStyle(Color(UIColor(hex: ink)))
-                Text(label).font(.nunito(11, .heavy)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.8)
+                Text(pic ? label : "\(icon) \(label)").font(.nunito(11, .heavy)).foregroundStyle(Home.muted).lineLimit(1).minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity).padding(.vertical, 8).padding(.horizontal, 6)
             .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -196,8 +214,11 @@ struct VocabRoom: View {
         .buttonStyle(PressDown(depth: 2))
         .disabled(n == 0)
         .opacity(n == 0 ? 0.55 : 1)
-        .accessibilityLabel("\(label.dropFirst(2)) words: \(n). Practise them")
+        .accessibilityLabel("\(label) words: \(n). Practise them")
     }
+
+    /// A picture, or the one standing in for it until it's in.
+    static func art(_ name: String, or stand: String) -> String { UIImage(named: name) != nil ? name : stand }
 
     /// A practice tile, as the Classroom's: its picture above, its name on a pale band along the bottom.
     private func tile(_ art: String, _ title: String, bg: UInt32, go: @escaping () -> Void) -> some View {
@@ -233,7 +254,16 @@ struct VocabRoom: View {
         LazyVStack(alignment: .leading, spacing: 0) {
             if results.isEmpty {
                 // (only once this typing's been looked up)
-                Text(resultsFor == query ? "No words match that." : " ").font(.nunito(14, .bold)).foregroundStyle(Home.muted).padding(.top, 10)
+                if resultsFor == query {
+                    VStack(spacing: 6) {
+                        if UIImage(named: "panda-searching") != nil {
+                            Image("panda-searching").resizable().scaledToFit().frame(height: 130)
+                        }
+                        Text("No words match that.").font(.nunito(15, .heavy)).foregroundStyle(Home.ink)
+                        Text("Try English, 汉字 or pinyin").font(.nunito(13, .bold)).foregroundStyle(Home.muted)
+                    }
+                    .frame(maxWidth: .infinity).padding(.top, 24)
+                }
             } else {
                 Text("Tap ＋ to put a word on your list").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted).padding(.bottom, 8)
                 ForEach(results, id: \.id) { c in resultRow(c) }

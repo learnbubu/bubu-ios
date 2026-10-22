@@ -1292,6 +1292,8 @@ final class StudySession: Identifiable {
             combo = 0
             againCount += 1
         }
+        // a review's Got it earns a bun back, as a right answer does
+        if gotIt && earnsBuns && progress.earnBun() { bunsEarned += 1 }
         sessionXP += xp
         let qMark = progress.xpCounter
         progress.questEvent("recognize", correct: gotIt)
