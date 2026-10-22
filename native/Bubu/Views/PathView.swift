@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// The learning path: stepping stones on a gentle wave, chapter banners between them,
-/// and the scenery composed in the path editor. Same geometry as the web app's phone
-/// layout, so every piece lands where it was placed.
+/// The learning path: stepping stones on a gentle wave, each chapter's eased into the middle at its ends, a thin
+/// divider where one chapter gives way to the next, the chapter you're in pinned under the HUD (its guide a tap
+/// away), and the scenery: placed in the path editor, and one piece at each bend besides.
 ///
 /// Built for speed: the layout is worked out once (`PathModel`) and kept until the
 /// width or the current lesson changes, only the stretch near the screen is drawn,
@@ -17,6 +17,8 @@ struct PathView: View {
     @State private var band: Int?
     /// the lesson the path last scrolled to, so coming back to the tab doesn't jump
     @State private var landedOn: String??
+    /// the chapter pinned at the top: the one scrolled into (nil until the first scroll report: the current one)
+    @State private var pinned: Int?
 
     private let size = PathModel.size, stoneRatio = PathModel.stoneRatio
     private typealias Item = PathModel.Item
@@ -39,9 +41,9 @@ struct PathView: View {
                             stone(it, W: W, current: current)
                         }
                         scenery(model, win, behind: false)
-                        // the chapter banners go over the art, so their text always reads
-                        ForEach(model.items(in: win).filter { $0.chapter != nil }, id: \.lesson.id) { it in
-                            banner(it.chapter!, model: model, it: it, W: W)
+                        // the dividers go over the art, so their names always read
+                        ForEach(model.items(in: win).filter { $0.chapter != nil && $0.index > 0 }, id: \.lesson.id) { it in
+                            divider(it.chapter!, mid: model.dividers[it.index] ?? it.y, W: W)
                         }
                         // a marker at the current stone, for the scroll to land on: positioned
                         // views all report the full canvas as their frame, so they can't be targets
@@ -57,6 +59,9 @@ struct PathView: View {
                     .onGeometryChange(for: CGFloat.self) { -$0.frame(in: .named("path")).minY } action: { y in
                         let b = PathModel.band(for: y)
                         if b != band { band = b }
+                        // (the pinned chapter, changed only when another is scrolled into)
+                        let ci = model.chapter(atScroll: y)
+                        if ci != pinned { pinned = ci }
                     }
                 }
                 .coordinateSpace(name: "path")
@@ -68,7 +73,14 @@ struct PathView: View {
             }
             // (no fades at the top or the bottom: they showed as a broken white band over the art, under the
             // status bar and above the tab bar; the owner, 22 Oct 2026)
-            .overlay(alignment: .top) { HUD() }
+            .overlay(alignment: .top) {
+                VStack(spacing: 8) {
+                    HUD()
+                    if !course.chapters.isEmpty {
+                        ChapterBar(chapter: pinned ?? model.items.first(where: { $0.lesson.id == current })?.ci ?? 0)
+                    }
+                }
+            }
             .overlay(alignment: .bottom) { ReviewButton() }
         }
         .background(Color.bg.ignoresSafeArea())
@@ -80,14 +92,12 @@ struct PathView: View {
         if current != nil { reader.scrollTo("current", anchor: .center) }
     }
 
-    private func nodeX(_ i: Int, _ W: CGFloat, count: Int) -> CGFloat { PathModel.nodeX(i, W, count: count) }
-
     // MARK: pieces
     @ViewBuilder
     private func stone(_ it: Item, W: CGFloat, current: String?) -> some View {
         let done = progress.isDone(it.lesson.id), now = it.lesson.id == current
         let state = done ? "done" : now ? "now" : "locked"
-        let x = nodeX(it.index, W, count: 64)
+        let x = cache.model(course, width: W, current: current).xs[it.index]
         Button { router.lesson = it.lesson } label: {
             ZStack {
                 if now {
@@ -114,33 +124,27 @@ struct PathView: View {
         .position(x: x, y: it.y)
     }
 
+    /// Where one chapter gives way to the next: its name between two thin lines, right across the page; under
+    /// a finished chapter, its story.
     @ViewBuilder
-    private func banner(_ ci: Int, model: PathModel, it: Item, W: CGFloat) -> some View {
-        let (d, t) = progress.chapterProgress(ci)
-        let right = model.bannerRight[it.index] ?? false
-        let mid = model.bannerMids[it.index] ?? it.y
-        VStack(alignment: right ? .trailing : .leading, spacing: 0) {
-            HStack(spacing: 8) {
-                Text(course.chapterLabel(ci).uppercased())
-                    .font(.nunitoXB(10)).tracking(1.3).foregroundStyle(Color.accent)
-                GuidePill(chapter: ci)
-            }
-            Text(course.chapters[ci].title)
-                .font(.nunitoXB(18)).tracking(-0.2).foregroundStyle(Color.ink)
-                .multilineTextAlignment(right ? .trailing : .leading)
-                .padding(.top, 2)
-            Bar(value: Double(d) / Double(max(t, 1)))
-                .scaleEffect(x: right ? -1 : 1)
-                .padding(.top, 8).padding(.bottom, 5)
-            HStack(spacing: 8) {
-                Text("\(d) / \(t) lessons").font(.nunito(11, .bold)).foregroundStyle(Color.muted)
-                // a finished chapter ends in its story
-                if d == t, let story = course.storyFor(chapter: ci) { StoryPill(storyId: story.id) }
+    private func divider(_ ci: Int, mid: CGFloat, W: CGFloat) -> some View {
+        let before = ci - 1, (d, t) = progress.chapterProgress(before)
+        let line = Capsule().fill(Color.line).frame(height: 2)
+        VStack(spacing: 8) {
+            if d == t, let story = course.storyFor(chapter: before) { StoryPill(storyId: story.id) }
+            HStack(spacing: 12) {
+                line
+                Text(course.chapters[ci].title)
+                    .font(.nunitoXB(15)).foregroundStyle(Color.muted)
+                    .multilineTextAlignment(.center).lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: W * 0.6)
+                line
             }
         }
-        .padding(.horizontal, 18)
-        .frame(width: W * 0.62, alignment: right ? .trailing : .leading)
-        .position(x: right ? W * 0.69 : W * 0.31, y: mid)
+        .padding(.horizontal, 22)
+        .frame(width: W)
+        .position(x: W / 2, y: mid)
     }
 
     /// The scenery composed in the path editor, anchored to its stone.
@@ -332,6 +336,59 @@ struct StartBubble: View {
                 }
             }
             .phaseAnimator([0, -3]) { v, dy in v.offset(y: dy) } animation: { _ in .easeInOut(duration: 0.9) }
+    }
+}
+
+/// The chapter you're in, pinned under the HUD as Duolingo's unit is: its place and name on the left, then
+/// past a line the guidebook, drawn as theirs (a notebook, its rings down the left). A tap opens the guide.
+struct ChapterBar: View {
+    let chapter: Int
+    @Environment(Router.self) private var router
+    private let course = Course.shared
+    var body: some View {
+        Button { router.push(.guide(chapter)) } label: {
+            HStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(course.chapterLabel(chapter).uppercased())
+                        .font(.nunito(10.5, .black)).tracking(1.3).foregroundStyle(Color.muted)
+                    Text(course.chapters[chapter].title)
+                        .font(.nunitoXB(17)).foregroundStyle(Color.ink)
+                        .multilineTextAlignment(.leading).lineLimit(2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 14).padding(.vertical, 9)
+                Rectangle().fill(Color.line).frame(width: 2)
+                GuideBook()
+                    .stroke(Color.accent, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+                    .frame(width: 26, height: 26)
+                    .frame(width: 58)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .background {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.line).offset(y: 3)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.panel)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PressDown(depth: 2))
+        .padding(.horizontal, 14)
+        .accessibilityLabel("\(course.chapterLabel(chapter)): \(course.chapters[chapter].title). Open its guide")
+    }
+}
+
+/// The guidebook, in line: a notebook (on a 32 grid), its spiral rings down the left, three lines of writing.
+struct GuideBook: Shape {
+    func path(in r: CGRect) -> Path {
+        let k = min(r.width, r.height) / 32, o = CGPoint(x: r.midX - 16 * k, y: r.midY - 16 * k)
+        func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: o.x + x * k, y: o.y + y * k) }
+        var p = Path()
+        p.addRoundedRect(in: CGRect(origin: pt(8, 4), size: CGSize(width: 19.5 * k, height: 24 * k)), cornerSize: CGSize(width: 4 * k, height: 4 * k))
+        for y in [9, 14, 19, 24] as [CGFloat] { p.move(to: pt(4.5, y)); p.addLine(to: pt(10.5, y)) }
+        for (y, w) in [(11, 9), (16, 9), (21, 6)] as [(CGFloat, CGFloat)] { p.move(to: pt(13.5, y)); p.addLine(to: pt(13.5 + w, y)) }
+        return p
     }
 }
 

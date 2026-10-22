@@ -16,7 +16,8 @@ final class PathModelTests: XCTestCase {
         XCTAssertEqual(m.xs.count, m.items.count)
         for (a, b) in zip(m.items, m.items.dropFirst()) { XCTAssertLessThan(a.y, b.y) }
         XCTAssertEqual(m.currentY, m.items[3].y)
-        XCTAssertEqual(m.bannerMids.count, course.chapters.count)
+        // a divider before every chapter but the first
+        XCTAssertEqual(m.dividers.count, m.items.filter { $0.chapter != nil }.count - 1)
         // every composed piece, then the scenery the path planted itself after them
         let composed = course.data.pathLayout.pieces.count
         XCTAssertEqual(m.pieces.filter { $0.id < composed }.count, composed)
@@ -25,39 +26,32 @@ final class PathModelTests: XCTestCase {
         XCTAssertGreaterThan(m.height, m.items.last!.y)
     }
 
-    /// The layout the JIC edition had: pandas whole on the screen (landmarks may run off an edge), and the temple
-    /// beside the first stones, not up under chapter 1's title (docs/reference/jic).
-    func testSceneryKeepsClearOfTheEdgesAndTheFirstTitle() {
-        for width in [375, 393, 402, 430] as [CGFloat] {
-            let m = PathModel(course: course, width: width, current: course.lessons[0].id)
-            for p in m.pieces where p.art.hasPrefix("panda") {
-                XCTAssertGreaterThanOrEqual(p.x - p.w / 2, -0.5, "\(p.art) off the left at \(width)")
-                XCTAssertLessThanOrEqual(p.x + p.w / 2, width + 0.5, "\(p.art) off the right at \(width)")
-            }
-            let temple = try! XCTUnwrap(m.pieces.first { $0.art == "cluster-right-temple" })
-            let titleBottom = m.bannerMids[0]! + PathModel.bannerH / 2
-            XCTAssertGreaterThan(temple.y - temple.h / 2, titleBottom - 30, "the temple reaches up over chapter 1's title at \(width)")
-        }
-    }
-
-    /// A header and the pebble trail agree on its side, so no pebbles run through its text.
-    func testHeadersKeepTheirSideForTheTrailToo() {
+    /// Every chapter starts and ends in the middle of the page (its wave eased in and out, as Duolingo's units
+    /// wind in at their ends), and swings full out in between.
+    func testEachChapterStartsAndEndsInTheMiddle() {
         let m = PathModel(course: course, width: W, current: nil)
-        XCTAssertEqual(m.bannerRight.count, course.chapters.count)
-        for it in m.items where it.chapter != nil {
-            XCTAssertEqual(m.bannerRight[it.index], PathModel.bannerOnRight(it, course: course, xs: m.xs, W: W))
+        for ci in Set(m.items.map(\.ci)) {
+            let ch = m.items.filter { $0.ci == ci }
+            guard ch.count >= 3 else { continue }
+            XCTAssertEqual(m.xs[ch.first!.index], W / 2, accuracy: 0.5, "chapter \(ci) starts off the middle")
+            XCTAssertEqual(m.xs[ch.last!.index], W / 2, accuracy: 0.5, "chapter \(ci) ends off the middle")
+            if ch.count >= 6 {
+                let out = ch.map { abs(m.xs[$0.index] - W / 2) }.max()!
+                XCTAssertEqual(out, PathModel.wave, accuracy: 0.5, "chapter \(ci) never swings full out")
+            }
         }
     }
 
-    func testTheWaveMatchesTheOldFormula() {
-        // the old per-call loop over one period, kept here as the reference
-        func old(_ i: Int) -> CGFloat {
-            var k: CGFloat = 0
-            for j in 0..<8 { k = max(k, abs(sin(CGFloat(j) * 2 * .pi / 8))) }
-            let half = PathModel.size / 2 + 8
-            return max(half, min(W - half, W / 2 + PathModel.wave * sin((CGFloat(i) + PathModel.phase) * 2 * .pi / 8) / k))
+    /// The chapter pinned at the top is the one scrolled into: the first at the top, then each in turn once
+    /// its divider has gone up under the pinned bar.
+    func testThePinnedChapterFollowsTheScroll() {
+        let m = PathModel(course: course, width: W, current: nil)
+        XCTAssertEqual(m.chapter(atScroll: 0), m.items.first!.ci)
+        for t in m.chapterTops.dropFirst().prefix(5) {
+            let under = t.y - PathModel.hud - PathModel.pinH
+            XCTAssertNotEqual(m.chapter(atScroll: under - 4), t.ci, "chapter \(t.ci) pinned before its divider got there")
+            XCTAssertEqual(m.chapter(atScroll: under + 4), t.ci, "chapter \(t.ci) not pinned once its divider went under")
         }
-        for i in 0..<40 { XCTAssertEqual(PathModel.nodeX(i, W, count: 64), old(i), accuracy: 1e-9) }
     }
 
     /// What the old path redid on every render (layout, pebble trail, scenery), now done once.
@@ -88,7 +82,7 @@ final class PathModelTests: XCTestCase {
     /// stone on screen is among them.
     func testOnlyTheStretchNearTheScreenIsDrawn() {
         let m = PathModel(course: course, width: W, current: course.lessons[200].id)
-        let everything = m.items.count + m.pebbles.count + m.pieces.count + m.bannerMids.count
+        let everything = m.items.count + m.pebbles.count + m.pieces.count + m.dividers.count
         for offset in stride(from: CGFloat(0), through: m.height - H, by: 173) {
             let win = PathModel.window(band: PathModel.band(for: offset), viewport: H)
             let drawn = m.items(in: win)
@@ -104,36 +98,36 @@ final class PathModelTests: XCTestCase {
         print("PERF path pieces drawn near the current stone: \(drawn) of \(everything)")
     }
 
-    /// Past the last hand-composed piece the path plants itself, a band per five stones, as the
-    /// JIC edition did: real art only, landmarks and pandas whole on the screen, the same every build.
-    func testThePathPlantsItselfPastTheComposedPieces() {
-        let layout = course.data.pathLayout
+    /// The path plants one thing at each bend, on its open side: Bùbù and the scenery taking turns (so both
+    /// turn up on both sides), real art only, clear of the dividers, Bùbù whole on the screen, the same every build.
+    func testThePathPlantsOneThingAtEachBend() {
+        let composed = course.data.pathLayout.pieces.count
         for width in [375, 393, 402, 430] as [CGFloat] {
             let m = PathModel(course: course, width: width, current: course.lessons[0].id)
-            let stones = Set(layout.pieces.map(\.stone))
-            let composedUntil = m.items.last { stones.contains($0.lesson.id) }?.index ?? -1
-            let firstBand = composedUntil < 0 ? 0 : (composedUntil / PathModel.bandLessons + 1) * PathModel.bandLessons
-            guard firstBand < m.items.count else { continue }
-            let generated = m.pieces.filter { $0.id >= layout.pieces.count }
-            XCTAssertGreaterThan(generated.count, (m.items.count - firstBand) / PathModel.bandLessons, "too little scenery at \(width)")
-            XCTAssertTrue(generated.contains { $0.ground }, "no pandas planted at \(width)")
+            let generated = m.pieces.filter { $0.id >= composed }
+            let bends = m.items.filter { PathModel.swing($0) > 0.99 && abs(abs(PathModel.lean($0)) - 1) < 1e-6 }
+            XCTAssertGreaterThan(generated.count, bends.count / 2, "too little scenery at \(width)")
             XCTAssertEqual(Set(m.pieces.map(\.id)).count, m.pieces.count, "piece ids must be unique")
-            // the generated scenery comes after the composed, and reaches the end of the path
-            let startY = m.items[firstBand].y - 844
+            var sides: [String: Set<Bool>] = ["panda": [], "scenery": []]
             for p in generated {
-                // the course's art table, or the art pipeline's (NewArt), as PathModel merges them
-                guard let a = course.data.art[p.art] ?? NewArt.art[p.art] else {
-                    XCTFail("\(p.art) isn't in the art table"); continue
+                XCTAssertNotNil(course.data.art[p.art] ?? NewArt.art[p.art], "\(p.art) isn't in the art table")
+                // at a bend, on its open side (across from where the stones swing)
+                let near = bends.filter { abs($0.y - p.y) < PathModel.gap * 1.6 }
+                XCTAssertTrue(near.contains { (PathModel.lean($0) > 0) == (p.x < width / 2) }, "\(p.art) isn't at a bend's open side at \(width)")
+                for (_, mid) in m.dividers {
+                    XCTAssertFalse(p.y - p.h / 2 < mid + PathModel.divH / 2 && p.y + p.h / 2 > mid - PathModel.divH / 2 && p.art.hasPrefix("panda"),
+                                   "\(p.art) over a divider at \(width)")
                 }
-                XCTAssertGreaterThan(p.y + p.h / 2, startY, "\(p.art) planted up among the composed pieces at \(width)")
-                XCTAssertLessThanOrEqual(p.y + p.h / 2, m.items.last!.y + PathModel.size * 0.9 + 0.5, "\(p.art) below the last stone")
                 if p.art.hasPrefix("panda") {
-                    _ = a
                     XCTAssertGreaterThanOrEqual(p.x - p.w / 2, -0.5, "\(p.art) off the left at \(width)")
                     XCTAssertLessThanOrEqual(p.x + p.w / 2, width + 0.5, "\(p.art) off the right at \(width)")
                 }
+                sides[p.art.hasPrefix("panda") ? "panda" : "scenery"]!.insert(p.x < width / 2)
             }
-            XCTAssertGreaterThan(generated.map(\.y).max() ?? 0, m.items[max(0, m.items.count - 2 * PathModel.bandLessons)].y - 844)
+            XCTAssertEqual(sides["panda"], [true, false], "Bùbù only on one side at \(width)")
+            XCTAssertEqual(sides["scenery"], [true, false], "scenery only on one side at \(width)")
+            XCTAssertTrue(generated.contains { $0.art.hasPrefix("hang-") }, "no hanging pieces at \(width)")
+            XCTAssertGreaterThan(Set(generated.filter { $0.art.hasPrefix("panda") }.map(\.art)).count, 5, "too few of Bùbù's poses at \(width)")
             // stable between launches
             let again = PathModel(course: course, width: width, current: course.lessons[0].id)
             XCTAssertEqual(again.pieces.map(\.art), m.pieces.map(\.art))

@@ -5,14 +5,19 @@ import os
 #endif
 
 /// Where everything on the learning path goes, worked out once for a screen width
-/// and a current lesson: the stones, the chapter headers, the scenery and the
-/// pebble trail. The path only reads it, so moving between tabs, or any change to
+/// and a current lesson: the stones, the dividers between chapters, the scenery and
+/// the pebble trail. (The chapter you're in is pinned at the top, over the path, as
+/// Duolingo's unit is: the path itself only marks where one chapter gives way to the
+/// next, with a thin divider. The owner, 22 Oct 2026.) The path only reads it, so moving between tabs, or any change to
 /// the store that doesn't finish a lesson, costs no layout work. Same geometry as
 /// the web app's phone layout (PATH_CFG.phone).
 struct PathModel {
     // the web app's phone layout (PATH_CFG.phone)
     static let size: CGFloat = 74, gap: CGFloat = 143, wave: CGFloat = 106, per: CGFloat = 8, phase: CGFloat = 6
-    static let hud: CGFloat = 62, bannerH: CGFloat = 72, hgap: CGFloat = 36, bubble: CGFloat = 40, pad: CGFloat = 170
+    static let hud: CGFloat = 62, bubble: CGFloat = 40, pad: CGFloat = 170
+    /// the pinned chapter under the HUD (its room at the top of the path), and the space a chapter break adds
+    /// between two stones, its divider (`divH` tall) in the middle of it
+    static let pinH: CGFloat = 72, divGap: CGFloat = 104, divH: CGFloat = 30
     static let stoneRatio: CGFloat = 1.62
 
     // scenery constants, from the path composer (SC in the web app)
@@ -20,7 +25,9 @@ struct PathModel {
     static let pebEvery: CGFloat = 9.2, pebSize: CGFloat = 11, pebVar: CGFloat = 0.63
     static let pebWander: CGFloat = 31, pebClear: CGFloat = 4
 
-    struct Item { let lesson: Lesson; let index: Int; let chapter: Int?; let y: CGFloat }
+    /// A stone: its lesson, its place in the course, `chapter` on a chapter's first stone, the chapter it's in
+    /// (`ci`), its place in that chapter (`j` of `n`), and how far down the page it is.
+    struct Item { let lesson: Lesson; let index: Int; let chapter: Int?; let ci: Int; let j: Int; let n: Int; let y: CGFloat }
     struct Pebble { let x: CGFloat; let y: CGFloat; let w: CGFloat }
     /// One stretch of the trail, drawn as one canvas.
     struct PebbleGroup { let key: Int; let pebbles: [Pebble]; let top: CGFloat; let bottom: CGFloat }
@@ -33,11 +40,12 @@ struct PathModel {
     let items: [Item]
     /// each stone's x, by index
     let xs: [CGFloat]
-    /// where each chapter header is centred, by the index of its first stone
-    let bannerMids: [Int: CGFloat]
-    /// which side each chapter header sits on, by the index of its first stone: the banner
-    /// and the pebble trail (which keeps clear of it) must agree
-    let bannerRight: [Int: Bool]
+    /// where each divider is centred, by the index of the first stone of the chapter it starts (every chapter
+    /// but the first: the pinned header names that one)
+    let dividers: [Int: CGFloat]
+    /// each chapter's first stone's index and where its stretch of the page begins (its divider; the first, 0):
+    /// for the chapter pinned at the top as the path scrolls
+    let chapterTops: [(ci: Int, y: CGFloat)]
     let pieces: [Piece]
     let pebbles: [PebbleGroup]
     let height: CGFloat
@@ -49,20 +57,15 @@ struct PathModel {
         self.current = current
         let items = Self.layout(course, current: current)
         self.items = items
-        let xs = (0..<items.count).map { Self.nodeX($0, W, count: 64) }
+        let xs = items.map { Self.stoneX($0, W) }
         self.xs = xs
         height = (items.last?.y ?? 0) + Self.pad
         currentY = items.first { $0.lesson.id == current }?.y ?? 0
-        var mids: [Int: CGFloat] = [:]
-        var sides: [Int: Bool] = [:]
-        for it in items where it.chapter != nil {
-            mids[it.index] = Self.bannerMid(it, items: items, current: current)
-            sides[it.index] = Self.bannerOnRight(it, course: course, xs: xs, W: W)
-        }
-        bannerMids = mids
-        bannerRight = sides
+        let mids = Self.dividerMids(items, current: current)
+        dividers = mids
+        chapterTops = items.filter { $0.chapter != nil }.map { (ci: $0.ci, y: $0.index == 0 ? 0 : mids[$0.index] ?? $0.y) }
         let (pieces, _) = Self.composed(course, items, xs, W)
-        // past the last composed stone, the path plants itself, as the JIC edition did. That
+        // at its bends the path plants itself, around what was placed by hand. That
         // doesn't depend on the current lesson, so it's planted once a width (it's the slow part);
         // a current lesson that starts a chapter moves every stone after it down by its START
         // bubble, and the planted pieces from there down move with them
@@ -78,7 +81,16 @@ struct PathModel {
             q.ground = p.ground
             return q
         }
-        pebbles = Self.trail(course, items, xs, mids, sides, W)
+        pebbles = Self.trail(course, items, xs, mids, W)
+    }
+
+    /// The chapter to pin at the top when the path is scrolled `offset` down: the last one whose divider has
+    /// gone up under the pinned header.
+    func chapter(atScroll offset: CGFloat) -> Int {
+        let line = offset + Self.hud + Self.pinH
+        var ci = chapterTops.first?.ci ?? 0
+        for t in chapterTops { if t.y <= line { ci = t.ci } else { break } }
+        return ci
     }
 
     /// The scenery composed in the path editor, anchored to its stone, and the last stone it's on.
@@ -107,15 +119,10 @@ struct PathModel {
     private static func planted(_ course: Course, _ W: CGFloat) -> (pieces: [Piece], ys: [CGFloat]) {
         if let hit = plantedCache.get(W) { return hit }
         let items = layout(course, current: nil)
-        let xs = (0..<items.count).map { nodeX($0, W, count: 64) }
-        var mids: [Int: CGFloat] = [:], sides: [Int: Bool] = [:]
-        for it in items where it.chapter != nil {
-            mids[it.index] = bannerMid(it, items: items, current: nil)
-            sides[it.index] = bannerOnRight(it, course: course, xs: xs, W: W)
-        }
-        let (pieces, until) = composed(course, items, xs, W)
-        let out = (pieces: bands(course, items, xs, mids, sides, W, composed: pieces, after: until,
-                                 firstId: course.data.pathLayout.pieces.count),
+        let xs = items.map { stoneX($0, W) }
+        let mids = dividerMids(items, current: nil)
+        let (pieces, _) = composed(course, items, xs, W)
+        let out = (pieces: bends(course, items, xs, mids, W, composed: pieces, firstId: course.data.pathLayout.pieces.count),
                    ys: items.map(\.y))
         plantedCache.set(W, out)
         return out
@@ -138,11 +145,12 @@ struct PathModel {
         var items: [Item] = [], y: CGFloat = 0, i = 0
         let bub = { (id: String) -> CGFloat in id == current ? bubble : 0 }
         for (ci, ch) in course.chapters.enumerated() {
-            for (li, id) in ch.lessons.enumerated() {
-                guard let lesson = course.lessonById[id] else { continue }
-                if i == 0 { y = hud + 16 + bannerH + bub(id) + size / 2 }
-                else if li == 0 { y += hgap + bannerH + bub(id) }
-                items.append(Item(lesson: lesson, index: i, chapter: li == 0 ? ci : nil, y: y))
+            let lessons = ch.lessons.compactMap { course.lessonById[$0] }
+            for (li, lesson) in lessons.enumerated() {
+                // (the first stone below the HUD and the pinned chapter; each chapter after a divider)
+                if i == 0 { y = hud + pinH + 12 + bub(lesson.id) + size / 2 }
+                else if li == 0 { y += divGap + bub(lesson.id) }
+                items.append(Item(lesson: lesson, index: i, chapter: li == 0 ? ci : nil, ci: ci, j: li, n: lessons.count, y: y))
                 y += gap; i += 1
             }
         }
@@ -156,30 +164,33 @@ struct PathModel {
         return k < 1e-6 ? 1 : k
     }()
 
-    static func nodeX(_ i: Int, _ W: CGFloat, count: Int) -> CGFloat {
-        var k: CGFloat = waveNorm
-        if count < Int(per) {
-            k = 0
-            for j in 0..<count { k = max(k, abs(sin(CGFloat(j) * 2 * .pi / per))) }
-            if k < 1e-6 { k = 1 }
-        }
+    /// smoothstep, 0 to 1 over 0…1
+    private static func ease(_ u: CGFloat) -> CGFloat { let v = max(0, min(1, u)); return v * v * (3 - 2 * v) }
+
+    /// How strongly a stone swings from the middle: each chapter's wave grows from the middle over its first
+    /// two stones and dies back to it over its last two (as Duolingo winds into the middle at each unit's ends),
+    /// so every chapter starts and ends the same way.
+    static func swing(_ it: Item) -> CGFloat { min(ease(CGFloat(it.j) / 2), ease(CGFloat(it.n - 1 - it.j) / 2)) }
+
+    /// The wave's sideways lean at a stone, -1 (left) … 1 (right), before its swing: each chapter's own wave,
+    /// from its first stone.
+    static func lean(_ it: Item) -> CGFloat { sin(CGFloat(it.j) * 2 * .pi / per) / waveNorm }
+
+    /// A stone's x: its chapter's wave, eased into the middle at the chapter's ends.
+    static func stoneX(_ it: Item, _ W: CGFloat) -> CGFloat {
         let half = size / 2 + 8
-        return max(half, min(W - half, W / 2 + wave * sin((CGFloat(i) + phase) * 2 * .pi / per) / k))
+        return max(half, min(W - half, W / 2 + wave * lean(it) * swing(it)))
     }
 
-    /// Where a chapter header is centred: halfway between the stone above
-    /// (or the HUD) and the top of its first stone, START bubble included.
-    private static func bannerMid(_ it: Item, items: [Item], current: String?) -> CGFloat {
-        let top = it.y - size / 2 - (it.lesson.id == current ? bubble : 0)
-        let prev = it.index == 0 ? hud : items[it.index - 1].y + size / 2
-        return (prev + top) / 2
-    }
-
-    /// A chapter header's side: as composed in the path editor, else across from the stones
-    /// around it (right when they lean left).
-    static func bannerOnRight(_ it: Item, course: Course, xs: [CGFloat], W: CGFloat) -> Bool {
-        if let s = course.data.pathLayout.headers[it.lesson.id] { return s == "right" }
-        return it.index > 0 && (xs[it.index - 1] + xs[it.index]) / 2 < W / 2
+    /// Where each divider is centred: halfway between the stone above and the top of the chapter's first
+    /// stone, START bubble included. Every chapter but the first.
+    private static func dividerMids(_ items: [Item], current: String?) -> [Int: CGFloat] {
+        var out: [Int: CGFloat] = [:]
+        for it in items where it.chapter != nil && it.index > 0 {
+            let top = it.y - size / 2 - (it.lesson.id == current ? bubble : 0)
+            out[it.index] = (items[it.index - 1].y + size / 2 + top) / 2
+        }
+        return out
     }
 
     /// The web app's hash noise, -1…1.
@@ -190,9 +201,9 @@ struct PathModel {
 
     /// The pebble trail, laid exactly as the web app lays it: a fixed density along a
     /// smooth walk through the stones, wandering either side, and dropped wherever
-    /// it would land on a stone or under a chapter header. Grouped one stretch
+    /// it would land on a stone or on a divider. Grouped one stretch
     /// between two stones at a time, so no single canvas is the height of the course.
-    private static func trail(_ course: Course, _ items: [Item], _ x: [CGFloat], _ mids: [Int: CGFloat], _ sides: [Int: Bool], _ W: CGFloat) -> [PebbleGroup] {
+    private static func trail(_ course: Course, _ items: [Item], _ x: [CGFloat], _ mids: [Int: CGFloat], _ W: CGFloat) -> [PebbleGroup] {
         guard items.count > 1 else { return [] }
         let ys = items.map(\.y)
         let unit = size / 74
@@ -202,13 +213,9 @@ struct PathModel {
             var u = f - CGFloat(i); u = u * u * (3 - 2 * u)
             return (i, x[i] + (x[i + 1] - x[i]) * u, ys[i] + (ys[i + 1] - ys[i]) * u)
         }
-        // headers, each on its own side of the page
+        // the dividers, right across the page
         var headers: [Int: CGRect] = [:]
-        for it in items where it.chapter != nil {
-            let mid = mids[it.index] ?? 0
-            let right = sides[it.index] ?? false
-            headers[it.index] = CGRect(x: right ? W * 0.38 : 0, y: mid - bannerH / 2, width: W * 0.62, height: bannerH)
-        }
+        for (i, mid) in mids { headers[i] = CGRect(x: 0, y: mid - divH / 2, width: W, height: divH) }
         let halfW = size * stoneRatio / 2 + pebClear * unit, halfH = size / 2 + pebClear * unit
         let count = max(0, Int(((ys[ys.count - 1] - ys[0]) / (pebEvery * unit)).rounded()))
         var out: [Int: [Pebble]] = [:]
@@ -235,36 +242,22 @@ struct PathModel {
 
     // MARK: automatic scenery
 
-    /* The JIC edition's automatic bands (renderPath in the web app). The path composer's
-       arrangement covers five stones on a 390x844 screen; past the last hand-composed
-       piece it repeats down the path, one band per five stones. Each band gets a panda
-       first, then the template's three slots, each slot rotating through its family so
-       the path doesn't repeat. Collisions are judged on where a piece is painted (the
-       measured strips in `slabs`), not its bounding box: a piece that would run into a
-       stone, a header or other scenery slides up or down the path to the nearest clear
-       stretch, then tries the mirrored side, then a little smaller, else is left out. */
+    /* One thing at each bend (the owner, 22 Oct 2026). Where a chapter's wave swings furthest to one side, the
+       page across from it is open: each of those bends gets one piece, Bùbù and the scenery taking turns
+       (Bùbù, scenery, scenery, Bùbù… so both turn up on both sides), the scenery a hanging piece (from the
+       screen's edge, across the bend) or a corner (standing at the edge below it), each rotating through its
+       family. Pieces placed by hand in the path editor take their bend: one there already, it's left to them.
+       Collisions are judged on where a piece is painted (the measured strips in `slabs`): a piece that would
+       run into a stone, a divider or other scenery slides up or down a little, then tries smaller, else the
+       bend is left open. */
 
-    static let bandLessons = 5
-    private static let bandTop: CGFloat = 200       // where the first stone sat in the composer
-    private static let bandHeight: CGFloat = 844    // the screen the arrangement was composed on
-
-    /// A slot of the composed band, as percentages of the 390x844 screen; `y` is the piece's base.
-    private struct Slot { let art: String; let x: CGFloat; let y: CGFloat; let w: CGFloat; let family: [String] }
-
-    /// The JIC edition's families: its choices, so the path matches it band for band.
-    /// The new art (NewArt, tools/art, Oct 2026) joins them; the torii, a Japanese gate, is
-    /// retired from the rotation in a Chinese course (the owner, 5 Oct 2026).
-    private static let landmarks = ["cluster-right-temple", "land-pagoda", "land-pavilion", "land-house", "land-bridge", "land-waterfall", "land-cliff"]
-        + NewArt.landmarks
-    private static let leftFoliage = ["cluster-left-bamboo", "fol-bamboo", "fol-pine", "fol-blossom", "fol-banana", "fol-oak"] + NewArt.corners
-    private static let rightFoliage = ["cluster-right-bamboo", "fol-bamboo", "fol-pine", "fol-blossom", "fol-banana", "fol-oak"] + NewArt.corners
-    private static let template: [Slot] = [
-        Slot(art: "cluster-right-temple", x: 69, y: 35.6, w: 65, family: landmarks),
-        Slot(art: "cluster-left-bamboo", x: 26.7, y: 98.2, w: 66, family: leftFoliage),
-        Slot(art: "cluster-right-bamboo", x: 98, y: 112, w: 44, family: rightFoliage),
-    ]
-    /// Where the band's panda stands, and its size (the web's PANDA).
-    private static let pandaX: CGFloat = 79.2, pandaY: CGFloat = 50.8, pandaW: CGFloat = 22, pandaAR: CGFloat = 831.0 / 614.0
+    /// which kind each bend gets, in turn
+    private enum Bend { case panda, scenery }
+    private static let bendKinds: [Bend] = [.panda, .scenery, .scenery, .panda]
+    /// poses that need something the bend doesn't give (an edge to peek round, a sign to write on) or don't suit it
+    private static let notOnThePath: Set<String> = ["panda-peek", "panda-peeking-from-the-right", "panda-blank-sign", "panda-sad"]
+    /// the corner pieces (anchored bottom-left; mirrored for the right)
+    private static let cornerFamily = ["fol-bamboo", "fol-pine", "fol-blossom", "fol-banana", "fol-oak"] + NewArt.corners
 
     /// Where each piece is actually painted: ten strips top to bottom, each the opaque extent
     /// as a fraction of the width. Measured from the artwork (the web's SLABS).
@@ -412,101 +405,66 @@ struct PathModel {
         }
     }
 
-    /// The automatic scenery, one band per five stones after the last composed one.
-    private static func bands(_ course: Course, _ items: [Item], _ xs: [CGFloat], _ mids: [Int: CGFloat], _ sides: [Int: Bool],
-                              _ W: CGFloat, composed: [Piece], after composedUntil: Int, firstId: Int) -> [Piece] {
-        guard let last = items.last, composedUntil < items.count - 1 else { return [] }
+    /// The scenery the path plants itself: one piece at each bend (see above).
+    private static func bends(_ course: Course, _ items: [Item], _ xs: [CGFloat], _ mids: [Int: CGFloat], _ W: CGFloat,
+                              composed: [Piece], firstId: Int) -> [Piece] {
+        guard let last = items.last else { return [] }
         let art = course.data.art.merging(NewArt.art) { old, _ in old }
-        // everything scenery keeps out of: the stones, and the headers, each on its own side
+        // everything scenery keeps out of: the stones, and the dividers, right across the page
         var obstacles = Grid<Box>()
         for it in items {
             let x = xs[it.index], hw = size * stoneRatio / 2
             obstacles.add(Box(x0: x - hw, x1: x + hw, y0: it.y - size / 2, y1: it.y + size / 2), it.y - size / 2, it.y + size / 2)
-            if it.chapter != nil, let mid = mids[it.index] {
-                let right = sides[it.index] ?? false
-                obstacles.add(Box(x0: right ? W * 0.38 : 0, x1: right ? W : W * 0.62, y0: mid - bannerH / 2, y1: mid + bannerH / 2, header: true),
-                              mid - bannerH / 2, mid + bannerH / 2)
-            }
         }
-        // nothing under the HUD, nothing below the last stone
-        var planter = Planter(obstacles: obstacles, top: hud + 8, end: last.y + size * 0.9)
+        for (_, mid) in mids {
+            obstacles.add(Box(x0: 0, x1: W, y0: mid - divH / 2, y1: mid + divH / 2, header: true), mid - divH / 2, mid + divH / 2)
+        }
+        // nothing under the HUD and the pinned chapter, nothing below the last stone
+        var planter = Planter(obstacles: obstacles, top: hud + pinH, end: last.y + size * 0.9)
         for c in composed { planter.claim(c.art, c.x, c.y + c.h / 2, c.w, c.h, c.flip) }
 
-        let scale = gap / 143                        // the spacing it was composed at
-        var out: [Piece] = []
-        for b in 0...((items.count - 1) / bandLessons) {
-            let first = b * bandLessons
-            if first <= composedUntil { continue }   // composed by hand: leave it be
-            let anchor = items[first].y - bandTop * scale
-            let span = bandHeight * scale
-
-            // The panda goes first: it matters more than the planting. As composed if that's
-            // clear, otherwise beside one of the band's stones, on the open side, about a
-            // stone's width away from it.
-            if art["panda-walking"] != nil {
-                let pw = W * pandaW / 100, ph = pw * pandaAR
-                let tx = W * pandaX / 100, tb = anchor + bandHeight * pandaY / 100 * scale
-                var spot: (x: CGFloat, base: CGFloat)?
-                if let y = planter.settle("panda-walking", tx, tb, pw, ph, tx > W / 2, reach: b == 0 ? 0 : gap * 0.5, asComposed: b == 0)
-                    ?? planter.settle("panda-walking", tx, tb, pw, ph, tx > W / 2, reach: gap * 0.5) {
-                    spot = (tx, y)
-                } else {
-                    for k in [1, 3, 0, 2, 4] {
-                        let i = first + k
-                        guard i < items.count else { continue }
-                        let side: CGFloat = xs[i] < W / 2 ? 1 : -1
-                        let edge = xs[i] + side * size * stoneRatio / 2
-                        let cx = max(pw / 2 + 4, min(W - pw / 2 - 4, edge + side * (size * 0.9 + pw / 2)))
-                        if abs(cx - edge) - pw / 2 < size * 0.4 { continue }      // too tight a fit
-                        if let yb = planter.settle("panda-walking", cx, items[i].y + size * 1.16, pw, ph, cx > W / 2, reach: gap * 0.35) {
-                            spot = (cx, yb); break
-                        }
-                    }
-                }
-                if let s = spot {
-                    out.append(Piece(id: firstId + out.count, art: "panda-walking", x: s.x, y: s.base - ph / 2, w: pw, h: ph,
-                                     flip: s.x > W / 2, behind: false, ground: true))
-                    planter.claim("panda-walking", s.x, s.base, pw, ph, s.x > W / 2)
-                }
-            }
-
-            for (k, slot) in template.enumerated() {
-                let base = anchor + bandHeight * slot.y / 100 * scale
-                // the first band is the template as composed; after that each slot rotates
-                // through its family, the two foliage slots out of step
-                let name = b == 0 ? slot.art : slot.family[(b * 5 + k * 7) % slot.family.count]
+        let pandas = art.keys.filter { $0.hasPrefix("panda-") && !notOnThePath.contains($0) }.sorted()
+        let hanging = art.keys.filter { $0.hasPrefix("hang-") }.sorted()
+        let corners = cornerFamily.filter { art[$0] != nil }
+        var out: [Piece] = [], k = 0, np = 0, nh = 0, nc = 0
+        for it in items where swing(it) > 0.99 && abs(abs(lean(it)) - 1) < 1e-6 {
+            // the open side: across from where the stones swing
+            let left = lean(it) > 0
+            let kind = bendKinds[k % bendKinds.count]
+            k += 1
+            // a bend with a piece placed by hand on its side is the editor's
+            if composed.contains(where: { abs($0.y - it.y) < gap * 1.6 && ($0.x < W / 2) == left }) { continue }
+            if kind == .panda {
+                guard !pandas.isEmpty else { continue }
+                // (stepped through the poses seven at a time, so neighbouring bends differ)
+                let name = pandas[(np * 7) % pandas.count]
+                np += 1
                 guard let a = art[name] else { continue }
-                let aw = CGFloat(a.w), ar = CGFloat(a.ar), standsWhole = name.hasPrefix("panda")
-                let slotRight = slot.x > 50
-                var cw: CGFloat = 0, ch: CGFloat = 0, cx: CGFloat = 0, flipped = false
-                var y: CGFloat?
-                if b == 0 {                              // exactly as composed, if the stones allow
-                    cw = W * aw / 100; ch = cw * ar; cx = W * slot.x / 100
-                    y = planter.settle(name, cx, base, cw, ch, false, reach: 0, asComposed: true)
+                let w = W * 0.26, h = w * CGFloat(a.ar)
+                let cx = left ? w / 2 + 12 : W - w / 2 - 12
+                if let yb = planter.settle(name, cx, it.y + h * 0.4, w, h, !left, reach: gap * 0.45) {
+                    out.append(Piece(id: firstId + out.count, art: name, x: cx, y: yb - h / 2, w: w, h: h, flip: !left, behind: false, ground: true))
+                    planter.claim(name, cx, yb, w, h, !left)
                 }
-                // full size on the composed side, then mirrored, then a little smaller,
-                // anywhere in the band
-                if y == nil {
-                    search: for s in [1, 0.85, 0.72] as [CGFloat] {
-                        cw = W * aw / 100 * s; ch = cw * ar
-                        for mirrored in [false, true] {
-                            // the slot's outer edge stays where it was composed, so a piece in
-                            // it keeps the same overhang off the side of the screen
-                            let full = W * slot.w / 100, x0 = W * slot.x / 100
-                            let outer = slotRight ? x0 + full / 2 - cw / 2 : x0 - full / 2 + cw / 2
-                            cx = mirrored ? W - outer : outer
-                            // a landmark stands whole on the screen, as the composed ones do
-                            if standsWhole { cx = max(cw / 2, min(W - cw / 2, cx)) }
-                            let onRight = slotRight != mirrored
-                            flipped = standsWhole ? mirrored : (onRight != (a.side == "right"))
-                            y = planter.settle(name, cx, base, cw, ch, flipped, reach: span * 0.6)
-                            if y != nil { break search }
-                        }
+            } else {
+                // hanging pieces and corners take turns
+                let hang = (nh + nc) % 2 == 0 && !hanging.isEmpty || corners.isEmpty
+                let family = hang ? hanging : corners
+                guard !family.isEmpty else { continue }
+                let name = family[((hang ? nh : nc) * 7) % family.count]
+                if hang { nh += 1 } else { nc += 1 }
+                guard let a = art[name] else { continue }
+                for scale in [1, 0.85, 0.72] as [CGFloat] {
+                    let cw = W * CGFloat(a.w) / 100 * scale, ch = cw * CGFloat(a.ar)
+                    // (drawn for the left edge: mirrored for the right)
+                    let cx = left ? cw / 2 : W - cw / 2
+                    let base = hang ? it.y + ch * 0.5 : it.y + gap * 0.5
+                    if let yb = planter.settle(name, cx, base, cw, ch, !left, reach: gap * 0.4) {
+                        out.append(Piece(id: firstId + out.count, art: name, x: cx, y: yb - ch / 2, w: cw, h: ch, flip: !left, behind: true))
+                        planter.claim(name, cx, yb, cw, ch, !left)
+                        break
                     }
                 }
-                guard let yb = y else { continue }         // no room for it in this band
-                out.append(Piece(id: firstId + out.count, art: name, x: cx, y: yb - ch / 2, w: cw, h: ch, flip: flipped, behind: true))
-                planter.claim(name, cx, yb, cw, ch, flipped)
             }
         }
         return out
