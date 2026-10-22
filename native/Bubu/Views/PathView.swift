@@ -394,7 +394,9 @@ struct ChapterBar: View {
 /// The guidebook, in line: a notebook (on a 32 grid), its spiral rings down the left, three lines of writing.
 struct GuideBook: Shape {
     func path(in r: CGRect) -> Path {
-        let k = min(r.width, r.height) / 32, o = CGPoint(x: r.midX - 16 * k, y: r.midY - 16 * k)
+        // (moved left a little: the rings are thin and the body heavy, so drawn centred on its grid it looked off to the
+        // right in its box; the owner, 23 Oct 2026)
+        let k = min(r.width, r.height) / 32, o = CGPoint(x: r.midX - 17.8 * k, y: r.midY - 16 * k)
         func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: o.x + x * k, y: o.y + y * k) }
         var p = Path()
         p.addRoundedRect(in: CGRect(origin: pt(8, 4), size: CGSize(width: 19.5 * k, height: 24 * k)), cornerSize: CGSize(width: 4 * k, height: 4 * k))

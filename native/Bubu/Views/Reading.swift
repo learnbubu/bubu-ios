@@ -137,6 +137,8 @@ struct StoryPage: View {
     @State private var solved = false
     @State private var confetti = false
     @State private var options: [Option] = []
+    /// the story being read aloud (Listen is Stop meanwhile)
+    @State private var playing = false
     private struct Option: Hashable { let text: String; let index: Int }
     private let course = Course.shared
 
@@ -144,6 +146,37 @@ struct StoryPage: View {
     private func token(_ t: String) -> Token {
         let parts = t.components(separatedBy: "|")
         return parts.count == 3 ? Token(h: parts[0], p: parts[1], e: parts[2]) : Token(h: t, p: nil, e: nil)
+    }
+
+    /// The story as its speakers' turns, each on its own line (the owner, 23 Oct 2026: "if it's a different person it
+    /// starts a new line"): a name followed by "：" starts one, wherever it falls in the sentences.
+    private struct Turn { var speaker: [String] = []; var words: [String] = [] }
+    private func turns(_ r: Reading) -> [Turn] {
+        let all = r.sentences.flatMap { $0 }
+        var out: [Turn] = [], cur = Turn(), i = 0
+        while i < all.count {
+            if i + 1 < all.count, all[i + 1] == "：", token(all[i]).p != nil {
+                if !cur.speaker.isEmpty || !cur.words.isEmpty { out.append(cur) }
+                cur = Turn(speaker: [all[i], all[i + 1]])
+                i += 2
+                continue
+            }
+            cur.words.append(all[i])
+            i += 1
+        }
+        if !cur.speaker.isEmpty || !cur.words.isEmpty { out.append(cur) }
+        return out
+    }
+
+    @ViewBuilder
+    private func word(_ raw: String) -> some View {
+        let t = token(raw)
+        if let p = t.p {
+            HintWord(hanzi: t.h, pinyin: p, size: 23, meaning: t.e, showPinyin: pinyinOn)
+        } else {
+            Text(t.h).font(.hanzi(23)).foregroundStyle(Color.ink)
+                .padding(.top, pinyinOn ? 11.5 : 0)
+        }
     }
 
     var body: some View {
@@ -159,24 +192,32 @@ struct StoryPage: View {
                         }
                     }
                     HStack(spacing: 8) {
-                        tool("Listen", icon: "speaker.wave.2.fill") { Speech.shared.speak(all) }
-                        tool("½×", icon: nil) { Speech.shared.speak(all, slow: true) }
+                        // (playing: one Stop in their place, as it can't otherwise be stopped; the owner, 23 Oct 2026)
+                        if playing {
+                            tool("Stop", icon: "stop.fill", on: true) { Speech.shared.stop(); playing = false }
+                        } else {
+                            tool("Listen", icon: "speaker.wave.2.fill") { listen(all, slow: false) }
+                            tool("½×", icon: nil) { listen(all, slow: true) }
+                        }
                         tool("Pinyin", icon: nil, on: pinyinOn) { withAnimation { pinyinOn.toggle() } }
                         tool("English", icon: nil, on: englishOn) { withAnimation { englishOn.toggle() } }
                     }
-                    FlowLayout(spacing: 2, lineSpacing: pinyinOn ? 10 : 8) {
-                        ForEach(Array(r.sentences.enumerated()), id: \.offset) { _, s in
-                            ForEach(Array(s.enumerated()), id: \.offset) { _, raw in
-                                let t = token(raw)
-                                if let p = t.p {
-                                    HintWord(hanzi: t.h, pinyin: p, size: 23, meaning: t.e, showPinyin: pinyinOn)
-                                } else {
-                                    Text(t.h).font(.hanzi(23)).foregroundStyle(Color.ink)
-                                        .padding(.top, pinyinOn ? 11.5 : 0)
+                    // each speaker's turn on a line of its own: their name, then what they say, wrapping under itself
+                    VStack(alignment: .leading, spacing: pinyinOn ? 14 : 10) {
+                        ForEach(Array(turns(r).enumerated()), id: \.offset) { _, t in
+                            HStack(alignment: .top, spacing: 2) {
+                                if !t.speaker.isEmpty {
+                                    HStack(spacing: 2) { ForEach(Array(t.speaker.enumerated()), id: \.offset) { _, raw in word(raw) } }
+                                        .fixedSize()
                                 }
+                                FlowLayout(spacing: 2, lineSpacing: pinyinOn ? 10 : 8) {
+                                    ForEach(Array(t.words.enumerated()), id: \.offset) { _, raw in word(raw) }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
                     .panel(radius: 18)
                     if englishOn {
@@ -200,6 +241,20 @@ struct StoryPage: View {
             .onAppear {
                 if options.isEmpty { options = r.q.options.enumerated().map { Option(text: $0.element, index: $0.offset) }.shuffled() }
             }
+            // (leaving the story stops it)
+            .onDisappear { if playing { Speech.shared.stop(); playing = false } }
+        }
+    }
+
+    /// Reads the story out, and watches for it to end (Stop goes back to Listen then).
+    private func listen(_ text: String, slow: Bool) {
+        Speech.shared.speak(text, slow: slow)
+        playing = true
+        Task { @MainActor in
+            // (a moment for it to start, then until it's quiet)
+            try? await Task.sleep(for: .milliseconds(700))
+            while playing, Speech.shared.isPlaying { try? await Task.sleep(for: .milliseconds(250)) }
+            playing = false
         }
     }
 

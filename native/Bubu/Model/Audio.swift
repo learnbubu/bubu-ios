@@ -70,6 +70,9 @@ final class Speech {
         clipQueue.async { [self] in clip?.stop() }
     }
 
+    /// Something is being said (the phone's voice or a clip): a story's Listen shows Stop while it is.
+    var isPlaying: Bool { synth.isSpeaking || clipQueue.sync { clip?.isPlaying ?? false } }
+
     // MARK: recorded clips
 
     /// Each character in the story has their own voice, and their clips a code of their own
