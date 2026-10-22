@@ -124,23 +124,21 @@ struct PathView: View {
         .position(x: x, y: it.y)
     }
 
-    /// Where one chapter gives way to the next: its name between two thin lines, right across the page; under
-    /// a finished chapter, its story.
+    /// Where one chapter gives way to the next: its name between two thin lines, right across the page. (A
+    /// finished chapter's story is in its guide, behind the pinned bar's book.)
     @ViewBuilder
     private func divider(_ ci: Int, mid: CGFloat, W: CGFloat) -> some View {
-        let before = ci - 1, (d, t) = progress.chapterProgress(before)
-        let line = Capsule().fill(Color.line).frame(height: 2)
-        VStack(spacing: 8) {
-            if d == t, let story = course.storyFor(chapter: before) { StoryPill(storyId: story.id) }
-            HStack(spacing: 12) {
-                line
-                Text(course.chapters[ci].title)
-                    .font(.nunitoXB(15)).foregroundStyle(Color.muted)
-                    .multilineTextAlignment(.center).lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: W * 0.6)
-                line
-            }
+        let line = Capsule().fill(Color.line).frame(minWidth: 16, maxWidth: .infinity).frame(height: 2)
+        HStack(spacing: 12) {
+            line
+            // (the name first: the lines give way to it, so it keeps to one line where it fits)
+            Text(course.chapters[ci].title)
+                .font(.nunitoXB(15)).foregroundStyle(Color.muted)
+                .multilineTextAlignment(.center).lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: W - 44 - 2 * 28)
+                .layoutPriority(1)
+            line
         }
         .padding(.horizontal, 22)
         .frame(width: W)
@@ -344,7 +342,13 @@ struct StartBubble: View {
 struct ChapterBar: View {
     let chapter: Int
     @Environment(Router.self) private var router
+    @Environment(ProgressStore.self) private var progress
     private let course = Course.shared
+    /// the chapter's done and its story's there, not yet read
+    private var storyWaiting: Bool {
+        guard progress.chapterDone(chapter), let story = course.storyFor(chapter: chapter) else { return false }
+        return !progress.readDone(story.id)
+    }
     var body: some View {
         Button { router.push(.guide(chapter)) } label: {
             HStack(spacing: 0) {
@@ -356,12 +360,16 @@ struct ChapterBar: View {
                         .multilineTextAlignment(.leading).lineLimit(2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 14).padding(.vertical, 9)
+                .padding(.horizontal, 14).padding(.vertical, 15)
                 Rectangle().fill(Color.line).frame(width: 2)
                 GuideBook()
-                    .stroke(Color.accent, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
-                    .frame(width: 26, height: 26)
-                    .frame(width: 58)
+                    .stroke(Color.accent, style: StrokeStyle(lineWidth: 2.3, lineCap: .round, lineJoin: .round))
+                    .frame(width: 30, height: 30)
+                    // (its story finished and not yet read: a dot on the book)
+                    .overlay(alignment: .topTrailing) {
+                        if storyWaiting { Circle().fill(Color.ember).frame(width: 9, height: 9).overlay(Circle().stroke(Color.panel, lineWidth: 2)).offset(x: 3, y: -1) }
+                    }
+                    .frame(width: 62)
             }
             .fixedSize(horizontal: false, vertical: true)
             .background {

@@ -17,7 +17,7 @@ struct PathModel {
     static let hud: CGFloat = 62, bubble: CGFloat = 40, pad: CGFloat = 170
     /// the pinned chapter under the HUD (its room at the top of the path), and the space a chapter break adds
     /// between two stones, its divider (`divH` tall) in the middle of it
-    static let pinH: CGFloat = 72, divGap: CGFloat = 104, divH: CGFloat = 30
+    static let pinH: CGFloat = 84, divGap: CGFloat = 104, divH: CGFloat = 46
     static let stoneRatio: CGFloat = 1.62
 
     // scenery constants, from the path composer (SC in the web app)
@@ -100,6 +100,9 @@ struct PathModel {
         var pieces: [Piece] = []
         var composedUntil = -1
         for (n, p) in course.data.pathLayout.pieces.enumerated() {
+            // (for now only Bùbù and the hanging pieces: the hills, temples and corners placed for the old path
+            // are left out; the owner, 22 Oct 2026)
+            guard sceneryKinds.contains(where: { p.art.hasPrefix($0) }) else { continue }
             guard let it = byId[p.stone], let a = course.data.art[p.art] else { continue }
             composedUntil = max(composedUntil, it.index)
             let w = W * p.w / 100, h = w * a.ar
@@ -244,9 +247,10 @@ struct PathModel {
 
     /* One thing at each bend (the owner, 22 Oct 2026). Where a chapter's wave swings furthest to one side, the
        page across from it is open: each of those bends gets one piece, Bùbù and the scenery taking turns
-       (Bùbù, scenery, scenery, Bùbù… so both turn up on both sides), the scenery a hanging piece (from the
-       screen's edge, across the bend) or a corner (standing at the edge below it), each rotating through its
-       family. Pieces placed by hand in the path editor take their bend: one there already, it's left to them.
+       (Bùbù, scenery, scenery, Bùbù… so both turn up on both sides), the scenery a hanging piece (a branch,
+       a roof's edge, from the screen's side across the bend), each rotating through its family. For now
+       that's all: no corners or landmarks (the owner: "only want the bubu and these ones that are like
+       branches or the edge of a roof hanging out the side"). Pieces placed by hand in the path editor take their bend: one there already, it's left to them.
        Collisions are judged on where a piece is painted (the measured strips in `slabs`): a piece that would
        run into a stone, a divider or other scenery slides up or down a little, then tries smaller, else the
        bend is left open. */
@@ -256,8 +260,11 @@ struct PathModel {
     private static let bendKinds: [Bend] = [.panda, .scenery, .scenery, .panda]
     /// poses that need something the bend doesn't give (an edge to peek round, a sign to write on) or don't suit it
     private static let notOnThePath: Set<String> = ["panda-peek", "panda-peeking-from-the-right", "panda-blank-sign", "panda-sad"]
-    /// the corner pieces (anchored bottom-left; mirrored for the right)
-    private static let cornerFamily = ["fol-bamboo", "fol-pine", "fol-blossom", "fol-banana", "fol-oak"] + NewArt.corners
+    /// what the path shows, placed by hand or by itself: Bùbù, and the pieces hanging in from the side
+    static let sceneryKinds = ["panda-", "hang-"]
+    /// a hanging piece's tallest: about two stones apart (a long one, the firecracker string, ran down most of
+    /// a screen)
+    private static let hangMaxH: CGFloat = gap * 1.9
 
     /// Where each piece is actually painted: ten strips top to bottom, each the opaque extent
     /// as a fraction of the width. Measured from the artwork (the web's SLABS).
@@ -425,8 +432,7 @@ struct PathModel {
 
         let pandas = art.keys.filter { $0.hasPrefix("panda-") && !notOnThePath.contains($0) }.sorted()
         let hanging = art.keys.filter { $0.hasPrefix("hang-") }.sorted()
-        let corners = cornerFamily.filter { art[$0] != nil }
-        var out: [Piece] = [], k = 0, np = 0, nh = 0, nc = 0
+        var out: [Piece] = [], k = 0, np = 0, nh = 0
         for it in items where swing(it) > 0.99 && abs(abs(lean(it)) - 1) < 1e-6 {
             // the open side: across from where the stones swing
             let left = lean(it) > 0
@@ -447,18 +453,17 @@ struct PathModel {
                     planter.claim(name, cx, yb, w, h, !left)
                 }
             } else {
-                // hanging pieces and corners take turns
-                let hang = (nh + nc) % 2 == 0 && !hanging.isEmpty || corners.isEmpty
-                let family = hang ? hanging : corners
-                guard !family.isEmpty else { continue }
-                let name = family[((hang ? nh : nc) * 7) % family.count]
-                if hang { nh += 1 } else { nc += 1 }
+                guard !hanging.isEmpty else { continue }
+                let name = hanging[(nh * 7) % hanging.count]
+                nh += 1
                 guard let a = art[name] else { continue }
+                // (no taller than two stones apart: a long one is drawn narrower)
+                let full = min(W * CGFloat(a.w) / 100, hangMaxH / CGFloat(a.ar))
                 for scale in [1, 0.85, 0.72] as [CGFloat] {
-                    let cw = W * CGFloat(a.w) / 100 * scale, ch = cw * CGFloat(a.ar)
-                    // (drawn for the left edge: mirrored for the right)
+                    let cw = full * scale, ch = cw * CGFloat(a.ar)
+                    // (drawn for the left edge: mirrored for the right; hung across the bend)
                     let cx = left ? cw / 2 : W - cw / 2
-                    let base = hang ? it.y + ch * 0.5 : it.y + gap * 0.5
+                    let base = it.y + ch * 0.5
                     if let yb = planter.settle(name, cx, base, cw, ch, !left, reach: gap * 0.4) {
                         out.append(Piece(id: firstId + out.count, art: name, x: cx, y: yb - ch / 2, w: cw, h: ch, flip: !left, behind: true))
                         planter.claim(name, cx, yb, cw, ch, !left)

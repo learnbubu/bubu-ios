@@ -18,10 +18,11 @@ final class PathModelTests: XCTestCase {
         XCTAssertEqual(m.currentY, m.items[3].y)
         // a divider before every chapter but the first
         XCTAssertEqual(m.dividers.count, m.items.filter { $0.chapter != nil }.count - 1)
-        // every composed piece, then the scenery the path planted itself after them
+        // every composed piece of the kinds the path shows (Bùbù, hanging pieces), then the scenery it planted itself
         let composed = course.data.pathLayout.pieces.count
-        XCTAssertEqual(m.pieces.filter { $0.id < composed }.count, composed)
-        XCTAssertGreaterThanOrEqual(m.pieces.count, composed)
+        let shown = course.data.pathLayout.pieces.filter { p in PathModel.sceneryKinds.contains { p.art.hasPrefix($0) } }.count
+        XCTAssertEqual(m.pieces.filter { $0.id < composed }.count, shown)
+        XCTAssertGreaterThanOrEqual(m.pieces.count, shown)
         XCTAssertFalse(m.pebbles.isEmpty)
         XCTAssertGreaterThan(m.height, m.items.last!.y)
     }
@@ -127,6 +128,9 @@ final class PathModelTests: XCTestCase {
             XCTAssertEqual(sides["panda"], [true, false], "Bùbù only on one side at \(width)")
             XCTAssertEqual(sides["scenery"], [true, false], "scenery only on one side at \(width)")
             XCTAssertTrue(generated.contains { $0.art.hasPrefix("hang-") }, "no hanging pieces at \(width)")
+            // only Bùbù and the hanging pieces, placed or planted; none taller than two stones apart
+            for p in m.pieces { XCTAssertTrue(PathModel.sceneryKinds.contains { p.art.hasPrefix($0) }, "\(p.art) isn't Bùbù or a hanging piece") }
+            for p in generated where p.art.hasPrefix("hang-") { XCTAssertLessThanOrEqual(p.h, PathModel.gap * 1.9 + 0.5, "\(p.art) too tall at \(width)") }
             XCTAssertGreaterThan(Set(generated.filter { $0.art.hasPrefix("panda") }.map(\.art)).count, 5, "too few of Bùbù's poses at \(width)")
             // stable between launches
             let again = PathModel(course: course, width: width, current: course.lessons[0].id)

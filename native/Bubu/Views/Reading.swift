@@ -281,6 +281,17 @@ struct GuidePage: View {
                 Text("\(ch.lessons.count) lesson\(ch.lessons.count == 1 ? "" : "s") · \(cards.count) words" + (finished ? " · finished" : ""))
                     .font(.nunito(14.5)).foregroundStyle(Color.muted).padding(.top, 2)
 
+                // its story, first: the path's guidebook is the way to it (the owner, 22 Oct 2026)
+                if let story = course.storyFor(chapter: chapter) {
+                    Button { router.push(.story(story.id)) } label: {
+                        Label(finished ? "Read the story: \(story.title)" : "Finish the chapter to unlock its story",
+                              systemImage: finished ? "book.fill" : "lock.fill")
+                    }
+                    .buttonStyle(WideButton(ghost: !finished))
+                    .disabled(!finished)
+                    .padding(.top, 14)
+                }
+
                 if !notes.isEmpty {
                     heading("Grammar tips")
                     ForEach(Array(notes.enumerated()), id: \.offset) { _, n in
@@ -342,15 +353,6 @@ struct GuidePage: View {
                     }
                 }
 
-                if let story = course.storyFor(chapter: chapter) {
-                    Button { router.push(.story(story.id)) } label: {
-                        Label(finished ? "Read the story: \(story.title)" : "Finish the chapter to unlock its story",
-                              systemImage: finished ? "book.fill" : "lock.fill")
-                    }
-                    .buttonStyle(WideButton(ghost: !finished))
-                    .disabled(!finished)
-                    .padding(.top, 18)
-                }
             }
             .padding(.horizontal, 18).padding(.bottom, 40)
         }
