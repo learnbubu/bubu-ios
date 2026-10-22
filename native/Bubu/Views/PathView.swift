@@ -391,17 +391,31 @@ struct ChapterBar: View {
     }
 }
 
-/// The guidebook, in line: a notebook (on a 32 grid), its spiral rings down the left, three lines of writing.
+/// The guidebook, in line: an open book (on a 32 grid), its two pages from the spine, writing on each.
 struct GuideBook: Shape {
     func path(in r: CGRect) -> Path {
-        // (moved left a little: the rings are thin and the body heavy, so drawn centred on its grid it looked off to the
-        // right in its box; the owner, 23 Oct 2026)
-        let k = min(r.width, r.height) / 32, o = CGPoint(x: r.midX - 17.8 * k, y: r.midY - 16 * k)
+        // an open book (the owner's pick, 23 Oct 2026, of five): two pages curving up from the spine, two lines of
+        // writing on each; symmetric, so it sits centred in its box
+        let k = min(r.width, r.height) / 32, o = CGPoint(x: r.midX - 16 * k, y: r.midY - 16 * k)
         func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: o.x + x * k, y: o.y + y * k) }
         var p = Path()
-        p.addRoundedRect(in: CGRect(origin: pt(8, 4), size: CGSize(width: 19.5 * k, height: 24 * k)), cornerSize: CGSize(width: 4 * k, height: 4 * k))
-        for y in [9, 14, 19, 24] as [CGFloat] { p.move(to: pt(4.5, y)); p.addLine(to: pt(10.5, y)) }
-        for (y, w) in [(11, 9), (16, 9), (21, 6)] as [(CGFloat, CGFloat)] { p.move(to: pt(13.5, y)); p.addLine(to: pt(13.5 + w, y)) }
+        // the pages' outline: the left page's top edge out from the spine, down its side, its foot back to the spine,
+        // then the right page's foot, up its side and its top edge back
+        p.move(to: pt(16, 9.5))
+        p.addCurve(to: pt(3.5, 7.5), control1: pt(12.5, 7), control2: pt(8, 6.5))
+        p.addLine(to: pt(3.5, 24.5))
+        p.addCurve(to: pt(16, 26.5), control1: pt(8, 23.5), control2: pt(12.5, 24))
+        p.addCurve(to: pt(28.5, 24.5), control1: pt(19.5, 24), control2: pt(24, 23.5))
+        p.addLine(to: pt(28.5, 7.5))
+        p.addCurve(to: pt(16, 9.5), control1: pt(24, 6.5), control2: pt(19.5, 7))
+        p.closeSubpath()
+        // the spine
+        p.move(to: pt(16, 9.5)); p.addLine(to: pt(16, 26.5))
+        // the writing, following the pages' curve
+        for y in [12.5, 17] as [CGFloat] {
+            p.move(to: pt(7, y)); p.addQuadCurve(to: pt(13, y + 0.6), control: pt(10.2, y - 0.4))
+            p.move(to: pt(19, y + 0.6)); p.addQuadCurve(to: pt(25, y), control: pt(21.8, y - 0.4))
+        }
         return p
     }
 }
