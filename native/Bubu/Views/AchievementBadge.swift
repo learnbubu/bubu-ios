@@ -53,9 +53,12 @@ struct AchievementBadge: View {
                 .shadow(color: Self.tone(base, 0.45).opacity(0.45), radius: 10 * u, x: 10 * u, y: 14 * u)
                 .frame(width: w, height: h, alignment: .top)
                 .offset(y: h * 0.015)
+                // (he breaks out over the coin down past its middle, and wider than the badge: arms and paws held out
+                // to the sides were cut to the coin, and his picture is drawn a little wider than the badge; only his
+                // legs, at the foot, are kept inside the face)
                 .mask(
                     ZStack(alignment: .topLeading) {
-                        Rectangle().frame(width: w, height: cy - R * 0.1)
+                        Rectangle().frame(width: w * 1.3, height: cy + R * 0.3).position(x: cx, y: (cy + R * 0.3) / 2)
                         Circle().frame(width: 2 * rf, height: 2 * rf).position(x: cx, y: cy + 5 * u)
                     }
                     .frame(width: w, height: h, alignment: .topLeading)
