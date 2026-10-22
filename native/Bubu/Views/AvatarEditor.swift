@@ -73,25 +73,12 @@ struct AvatarEditor: View {
         .sensoryFeedback(.selection, trigger: look)
     }
 
+    /// The app's page bar, as every page's (the Mac, 23 Oct 2026: this one had its own, an ink chevron, the outfit's
+    /// name and a round ↶): back, Edit Avatar, and Reset as a pill.
     private var header: some View {
-        HStack {
-            round("chevron.left", label: "Back") { close(nil) }
-            Spacer()
-            Text(Outfit.named(look.outfit).name).font(.nunito(18, .black)).foregroundStyle(Home.ink)
-                .contentTransition(.opacity).animation(.easeOut(duration: 0.15), value: look.outfit)
-            Spacer()
-            round("arrow.uturn.backward", label: "Start again") { withAnimation(.easeOut(duration: 0.2)) { look = AvatarLook() } }
+        PageBar(title: "Edit Avatar", onBack: { close(nil) }) {
+            BarButton(label: "Reset") { withAnimation(.easeOut(duration: 0.2)) { look = AvatarLook() } }
         }
-        .padding(.horizontal, 18).padding(.top, 8)
-    }
-
-    private func round(_ icon: String, label: String, _ act: @escaping () -> Void) -> some View {
-        Button(action: act) {
-            Image(systemName: icon).font(.system(size: 16, weight: .bold)).foregroundStyle(Home.ink)
-                .frame(width: 42, height: 42).homeCard(radius: 21)
-        }
-        .buttonStyle(CardPress())
-        .accessibilityLabel(label)
     }
 
     /// Outfits | Avatar, underlined

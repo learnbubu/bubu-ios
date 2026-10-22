@@ -143,13 +143,15 @@ struct StoryPage: View {
     }
 
     /// The story as its speakers' turns, each on its own line (the owner, 23 Oct 2026: "if it's a different person it
-    /// starts a new line"): a name followed by "：" starts one, wherever it falls in the sentences.
+    /// starts a new line"): one of the cast's names followed by "：", at the start of a sentence, starts one, wherever it
+    /// falls in the sentences. Narration's colons ("他说：", "问小雨：", a letter's "亲爱的小雨：") don't.
     private struct Turn { var speaker: [String] = []; var words: [String] = [] }
     private func turns(_ r: Reading) -> [Turn] {
         let all = r.sentences.flatMap { $0 }
         var out: [Turn] = [], cur = Turn(), i = 0
         while i < all.count {
-            if i + 1 < all.count, all[i + 1] == "：", token(all[i]).p != nil {
+            let atStart = i == 0 || ["。", "！", "？", "…", "”", "\n"].contains(token(all[i - 1]).h)
+            if i + 1 < all.count, all[i + 1] == "：", atStart, Speech.speakerCodes[token(all[i]).h] != nil {
                 if !cur.speaker.isEmpty || !cur.words.isEmpty { out.append(cur) }
                 cur = Turn(speaker: [all[i], all[i + 1]])
                 i += 2
@@ -159,6 +161,35 @@ struct StoryPage: View {
             i += 1
         }
         if !cur.speaker.isEmpty || !cur.words.isEmpty { out.append(cur) }
+        return out
+    }
+
+    /// The words as the line wraps them: punctuation goes with the word before it, so a "。" never starts a line alone.
+    private func clumps(_ words: [String]) -> [[String]] {
+        var out: [[String]] = []
+        for w in words {
+            if token(w).p == nil, !out.isEmpty { out[out.count - 1].append(w) } else { out.append([w]) }
+        }
+        return out
+    }
+
+    /// The English as its speakers' turns too, each on its own line (it was one paragraph under the turns): a line
+    /// starts at a speaker's name and its colon, as the Chinese does; a translation without them stays one paragraph.
+    static let englishSpeakers = ["Chen Ming's dad", "Chen Ming's mum", "Chen Ming", "Xiǎo Yǔ", "Xiao Yu", "Mark", "Duoduo"]
+    static func englishTurns(_ text: String) -> [(speaker: String?, words: String)] {
+        let names = englishSpeakers.map { NSRegularExpression.escapedPattern(for: $0) }.joined(separator: "|")
+        guard let re = try? NSRegularExpression(pattern: "(?:^|(?<=[.!?\"”’)][ \\n]))(\(names)):\\s*") else { return [(nil, text)] }
+        let ns = text as NSString
+        let ms = re.matches(in: text, range: NSRange(location: 0, length: ns.length))
+        guard !ms.isEmpty else { return [(nil, text)] }
+        var out: [(String?, String)] = []
+        let lead = ns.substring(to: ms[0].range.location).trimmingCharacters(in: .whitespacesAndNewlines)
+        if !lead.isEmpty { out.append((nil, lead)) }
+        for (i, m) in ms.enumerated() {
+            let end = i + 1 < ms.count ? ms[i + 1].range.location : ns.length
+            let words = ns.substring(with: NSRange(location: m.range.upperBound, length: end - m.range.upperBound))
+            out.append((ns.substring(with: m.range(at: 1)), words.trimmingCharacters(in: .whitespacesAndNewlines)))
+        }
         return out
     }
 
@@ -205,7 +236,9 @@ struct StoryPage: View {
                                         .fixedSize()
                                 }
                                 FlowLayout(spacing: 2, lineSpacing: pinyinOn ? 10 : 8) {
-                                    ForEach(Array(t.words.enumerated()), id: \.offset) { _, raw in word(raw) }
+                                    ForEach(Array(clumps(t.words).enumerated()), id: \.offset) { _, c in
+                                        HStack(alignment: .top, spacing: 2) { ForEach(Array(c.enumerated()), id: \.offset) { _, raw in word(raw) } }
+                                    }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             }
@@ -215,7 +248,13 @@ struct StoryPage: View {
                     .padding(16)
                     .panel(radius: 18)
                     if englishOn {
-                        Text(r.translation).font(.nunito(15.5)).foregroundStyle(Color.ink).lineSpacing(3)
+                        VStack(alignment: .leading, spacing: 7) {
+                            ForEach(Array(Self.englishTurns(r.translation).enumerated()), id: \.offset) { _, t in
+                                (t.speaker.map { Text("\($0): ").font(.nunito(15.5, .black)) } ?? Text(""))
+                                    + Text(t.words).font(.nunito(15.5))
+                            }
+                        }
+                        .foregroundStyle(Color.ink).lineSpacing(3)
                             .padding(14).frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                             .transition(.opacity)
@@ -332,7 +371,7 @@ struct GuidePage: View {
                 // its story, first: the path's guidebook is the way to it (the owner, 22 Oct 2026)
                 if let story = course.storyFor(chapter: chapter) {
                     Button { router.push(.story(story.id)) } label: {
-                        Label(finished ? "Read the story: \(story.title)" : "Finish the chapter to unlock its story",
+                        Label(finished ? "Read the story: \(story.title)" : "Unlocks after this chapter",
                               systemImage: finished ? "book.fill" : "lock.fill")
                     }
                     .buttonStyle(WideButton(ghost: !finished))

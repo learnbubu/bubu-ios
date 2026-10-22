@@ -71,6 +71,8 @@ struct PageBar<Trailing: View>: View {
     let title: String
     /// a back button (pages pushed on a stack); off for a sheet, closed by its own button
     var back = true
+    /// what back does, when not going back a page (a screen shown over the others closes itself)
+    var onBack: (() -> Void)? = nil
     @ViewBuilder var trailing: Trailing
     @Environment(\.dismiss) private var dismiss
 
@@ -83,7 +85,7 @@ struct PageBar<Trailing: View>: View {
                 .padding(.horizontal, 104)
             HStack(spacing: 0) {
                 if back {
-                    Button { dismiss() } label: {
+                    Button { if let onBack { onBack() } else { dismiss() } } label: {
                         Image(systemName: "chevron.left").font(.system(size: 16, weight: .heavy)).foregroundStyle(Color.accent)
                             .frame(width: 40, height: 40)
                             .background(Self.pill, in: Circle())
