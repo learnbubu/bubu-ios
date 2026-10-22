@@ -348,9 +348,13 @@ struct FlashPage: View {
         guard let s = session else { dismiss(); return }
         s.finishFlashcards()
         handedOn = true
-        dismiss()
-        // (once the page has gone: the done screen comes up as a lesson's does)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { router.study = s }
+        // the done screen slides up over the last card, and the page goes from under it once it's covered (closed
+        // first, the room showed for half a second before it: the Mac, 22 Oct 2026)
+        router.study = s
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            var t = Transaction(); t.disablesAnimations = true
+            withTransaction(t) { dismiss() }
+        }
     }
 
     private func pickExample() {
