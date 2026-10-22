@@ -169,7 +169,7 @@ struct VocabRoom: View {
                         .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black, location: 0.55), .init(color: .clear, location: 1)],
                                              startPoint: .top, endPoint: .bottom))
                         .opacity(0.6)
-                        .offset(x: 4, y: -6)
+                        .offset(x: 4, y: -1)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 .allowsHitTesting(false)
