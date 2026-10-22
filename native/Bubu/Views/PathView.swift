@@ -66,20 +66,8 @@ struct PathView: View {
                 .onAppear { land(reader, current) }
                 .onChange(of: current) { _, c in land(reader, c) }
             }
-            .overlay(alignment: .bottom) {
-                // the web's bottom fade: solid for a few points, gone by 76
-                LinearGradient(stops: [.init(color: .bg, location: 0), .init(color: .bg, location: 0.09),
-                                       .init(color: .bg.opacity(0), location: 1)], startPoint: .bottom, endPoint: .top)
-                    .frame(height: 76).allowsHitTesting(false)
-            }
-            .overlay(alignment: .top) {
-                // the status bar: the path fades out under it, so no art or stone sits behind the clock
-                LinearGradient(stops: [.init(color: .bg, location: 0), .init(color: .bg, location: 0.7),
-                                       .init(color: .bg.opacity(0), location: 1)], startPoint: .top, endPoint: .bottom)
-                    .frame(height: geo.safeAreaInsets.top + 14)
-                    .offset(y: -geo.safeAreaInsets.top)
-                    .allowsHitTesting(false)
-            }
+            // (no fades at the top or the bottom: they showed as a broken white band over the art, under the
+            // status bar and above the tab bar; the owner, 22 Oct 2026)
             .overlay(alignment: .top) { HUD() }
             .overlay(alignment: .bottom) { ReviewButton() }
         }
