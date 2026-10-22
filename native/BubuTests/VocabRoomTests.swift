@@ -53,6 +53,27 @@ final class VocabRoomTests: XCTestCase {
         XCTAssertTrue(VocabSearch.find("a").allSatisfy { !$0.isSentence })
     }
 
+    func testFlashcardsEndAsALessonDoes() {
+        let p = store()
+        let cards = Array(course.cards.filter { !$0.isSentence }.prefix(6))
+        let s = StudySession.flashcards(p, cards: cards)
+        let xp0 = p.xpTotal
+        for c in cards { s.flashcard(c, gotIt: true) }
+        XCTAssertEqual(s.combo, 6)
+        s.flashcard(cards[0], gotIt: false)
+        XCTAssertEqual(s.combo, 0)
+        XCTAssertNil(s.result)
+        s.finishFlashcards()
+        let r = s.result
+        XCTAssertEqual(r?.title, "Flashcards done!")
+        XCTAssertGreaterThan(r?.xp ?? 0, 0)
+        XCTAssertGreaterThanOrEqual(p.xpTotal - xp0, r?.xp ?? 0)
+        XCTAssertNil(s.exercise)
+        XCTAssertEqual(s.again().title, "Review")
+        // each answer scheduled the word
+        XCTAssertTrue(cards.allSatisfy { p.srs[$0.id] != nil })
+    }
+
     func testTheExactPinyinComesFirst() {
         // 医生 yī shēng before 一身 yī shēn, which "yisheng" starts like
         XCTAssertEqual(VocabSearch.find("yisheng").first?.word.hanzi, "医生")

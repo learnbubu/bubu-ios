@@ -130,11 +130,25 @@ struct PickPage: View {
 /// of the vocab matches the rest of how the app works"): their close, progress bar (gold with a combo of Got its),
 /// raised card and buttons, and the done screen's tiles at the end, with XP. One word big, its picture, pinyin and
 /// sound; tap and it turns to what it means and a sentence with it; then Still learning (it comes round again, once,
-/// marked to come back soon) or Got it. Each answer counts as a review.
+/// marked to come back soon) or Got it. Each answer counts as a review, and the cards are kept as a session
+/// (StudySession.flashcards), so they have a lesson's effects (the owner: "has all our normal effects too?"): its
+/// right and wrong sounds and taps, the run's sound and firecrackers every fifth, XP and quests, and its done screen
+/// (the moment, the streak's lantern, the pockets, a level reached).
 struct FlashPage: View {
     let ids: [String]
     @Environment(ProgressStore.self) private var progress
+    @Environment(Router.self) private var router
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var session: StudySession?
+    /// the run's firecrackers, out from behind the bar
+    @State private var burst: Int?
+    @State private var barFrame: CGRect = .zero
+    /// the last answer, for its tap (right or wrong)
+    @State private var lastGot: Bool?
+    @State private var answers = 0
+    /// the done screen has the session now (it lets a level reached show)
+    @State private var handedOn = false
     @State private var queue: [Card] = []
     @State private var total = 0
     @State private var flipped = false
@@ -142,29 +156,44 @@ struct FlashPage: View {
     /// the ones put back once already (they're not put back again)
     @State private var again = Set<String>()
     @State private var got = 0
-    @State private var combo = 0
-    @State private var finished = false
-    @State private var xp = 0
-    @State private var started = Date()
-    @State private var seconds = 0
     private let course = Course.shared
 
+    private var combo: Int { session?.combo ?? 0 }
+
     var body: some View {
-        VStack(spacing: 0) {
-            topBar
-            if finished { end } else if let c = queue.first { card(c).id(c.id + "\(queue.count)") }
+        ZStack {
+            VStack(spacing: 0) {
+                topBar
+                if let c = queue.first { card(c).id(c.id + "\(queue.count)") }
+            }
+            .padding(.horizontal, 16).padding(.bottom, 12)
+            if let n = burst {
+                FirecrackerBurst(n: n, bar: barFrame).id(n).ignoresSafeArea().allowsHitTesting(false)
+            }
         }
-        .padding(.horizontal, 16).padding(.bottom, 12)
         .background(Color.bg.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         // (the whole screen, as a lesson's)
         .toolbar(.hidden, for: .tabBar)
+        .sensoryFeedback(trigger: answers) { _, _ in lastGot.map { $0 ? .success : .error } }
+        // every fifth Got it in a row: the burst, as a lesson's
+        .onChange(of: combo) { old, n in
+            guard n > old, n >= StudySession.comboAt, n % StudySession.comboAt == 0, !reduceMotion else { return }
+            burst = n
+            DispatchQueue.main.asyncAfter(deadline: .now() + FirecrackerBurst.length) { if burst == n { burst = nil } }
+        }
         .onAppear {
-            guard queue.isEmpty, !finished else { return }
+            // (a level reached waits for the done screen, as in a lesson)
+            progress.holdLevelUps = true
+            guard queue.isEmpty, session == nil else { return }
             queue = ids.compactMap { course.cardById[$0] }.shuffled()
             total = queue.count
-            started = Date()
+            session = StudySession.flashcards(progress, cards: queue)
             pickExample()
+        }
+        .onDisappear {
+            guard !handedOn else { return }
+            progress.holdLevelUps = false; progress.showHeldLevelUp()
         }
     }
 
@@ -177,7 +206,11 @@ struct FlashPage: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Close")
-            ProgressBarShine(value: finished ? 1 : Double(got) / Double(max(total, 1)), height: 16, combo: combo)
+            ProgressBarShine(value: Double(got) / Double(max(total, 1)), height: 16, combo: combo)
+                .background(GeometryReader { g in
+                    Color.clear.onAppear { barFrame = g.frame(in: .global) }
+                        .onChange(of: g.frame(in: .global)) { _, f in barFrame = f }
+                })
         }
         .padding(.top, 8).padding(.bottom, 4)
     }
@@ -253,12 +286,12 @@ struct FlashPage: View {
     }
 
     private func answer(_ c: Card, gotIt: Bool) {
-        progress.review(c.id, gotIt ? .good : .again)
-        progress.recordReview()
+        session?.flashcard(c, gotIt: gotIt)
+        Sounds.shared.play(gotIt ? "correct" : "wrong")
+        lastGot = gotIt; answers += 1
         withAnimation(.spring(response: 0.38, dampingFraction: 0.86)) {
             queue.removeFirst()
-            if gotIt { got += 1; combo += 1 } else {
-                combo = 0
+            if gotIt { got += 1 } else {
                 // (it comes round again, a few cards on, once)
                 if again.insert(c.id).inserted { queue.insert(c, at: min(queue.count, 3)) } else { got += 1 }
             }
@@ -268,38 +301,19 @@ struct FlashPage: View {
         pickExample()
     }
 
-    /// The end: XP for the words (one each, and one more for each known first time), as a lesson's done screen.
+    /// The end, as a lesson's: its done screen, over everything (the moment, XP, the streak, quests, pockets).
     private func finish() {
-        seconds = max(1, Int(Date().timeIntervalSince(started)))
-        xp = progress.earnXP(total + (total - again.count)).earned
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { finished = true }
+        guard let s = session else { dismiss(); return }
+        s.finishFlashcards()
+        handedOn = true
+        dismiss()
+        // (once the page has gone: the done screen comes up as a lesson's does)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { router.study = s }
     }
 
     private func pickExample() {
         guard let c = queue.first else { example = nil; return }
         example = course.sentences(for: c).filter { $0.hanzi.count <= 16 }.min { $0.hanzi.count < $1.hanzi.count }
-    }
-
-    private var end: some View {
-        let known = total == 0 ? 100 : (total - again.count) * 100 / total
-        return VStack(spacing: 0) {
-            Spacer(minLength: 10)
-            Image("panda-flashcards").resizable().scaledToFit().frame(maxHeight: 240)
-            Text("Cards done!").font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).padding(.top, 8)
-            Text("You went through \(total) word\(total == 1 ? "" : "s")").font(.nunito(15, .bold)).foregroundStyle(Color.ink).padding(.top, 2)
-            // the done screen's tiles
-            HStack(spacing: 10) {
-                XPTile(steps: [.init(label: "Total XP", value: xp, tint: Color(light: 0xF0A92E, dark: 0xF5B03D))], delay: 0.2)
-                DoneTile(value: seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: "Time", icon: "clock.fill", tint: .accent, delay: 0.42)
-                DoneTile(value: known, format: { "\($0)%" }, label: "Knew them", icon: "checkmark.circle.fill", tint: .good, delay: 0.64)
-            }
-            .padding(.top, 22)
-            Spacer(minLength: 16)
-            Button("Continue") { dismiss() }.buttonStyle(WideButton())
-                .padding(.bottom, 6)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .sensoryFeedback(.success, trigger: finished)
     }
 }
 
