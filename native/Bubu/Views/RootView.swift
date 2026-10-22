@@ -25,6 +25,11 @@ final class Router {
     /// Open a session, if there was one to start.
     func start(_ s: StudySession?) { if let s { lesson = nil; study = s } }
 
+    /// Asks the path to show the current stone (bumped each time: the path scrolls to it).
+    var showCurrent = 0
+    /// The path, at the stone you're on: to start from there (Home's Start lesson; the owner, 22 Oct 2026).
+    func toPath() { learnPath = []; tab = .learn; showCurrent += 1 }
+
     /// A practice tile on Home (web: runMode).
     func practice(_ mode: String, _ p: ProgressStore) {
         switch mode {

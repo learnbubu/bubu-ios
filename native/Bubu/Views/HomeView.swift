@@ -95,9 +95,10 @@ struct HomeView: View {
                     }
                 }
                 .frame(height: 10).padding(.top, 13)
-                // the card's one button: it presses down onto its lip, as the app's others (the whole card did)
+                // the card's one button: it presses down onto its lip, as the app's others (the whole card did).
+                // A lesson: to the path, at its stone, to start it there (not straight into it); all done: a review
                 Button {
-                    if let lesson { router.start(StudySession.lesson(lesson.id, progress)) } else { router.start(StudySession.review(progress)) }
+                    if lesson != nil { router.toPath() } else { router.start(StudySession.review(progress)) }
                 } label: {
                     Text(action).font(.nunito(18, .black)).foregroundStyle(.white)
                 }

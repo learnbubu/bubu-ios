@@ -70,6 +70,10 @@ struct PathView: View {
                 // not on every visit to the tab, which would throw away where you'd scrolled
                 .onAppear { land(reader, current) }
                 .onChange(of: current) { _, c in land(reader, c) }
+                // (Home's Start lesson: brought here, to the stone you're on)
+                .onChange(of: router.showCurrent) { _, _ in
+                    if current != nil { withAnimation(.easeInOut(duration: 0.45)) { reader.scrollTo("current", anchor: .center) } }
+                }
             }
             // (no fades at the top or the bottom: they showed as a broken white band over the art, under the
             // status bar and above the tab bar; the owner, 22 Oct 2026)
