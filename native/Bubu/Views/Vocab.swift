@@ -348,6 +348,8 @@ struct FlashPage: View {
         guard let s = session else { dismiss(); return }
         s.finishFlashcards()
         handedOn = true
+        // your list, gone through in full: it's cleared (the owner, 22 Oct 2026)
+        if !ids.isEmpty, Set(ids) == Picks.shared.ids { Picks.shared.ids = [] }
         // the done screen slides up over the last card, and the page goes from under it once it's covered (closed
         // first, the room showed for half a second before it: the Mac, 22 Oct 2026)
         router.study = s
