@@ -51,8 +51,11 @@ struct ConversePage: View {
             BackPill(label: "Classroom") { dismiss() }
             VStack(alignment: .leading, spacing: 2) {
                 Text("Speaking").font(.nunito(34, .black)).tracking(-0.5).foregroundStyle(Home.ink)
-                Text("Voice chats with Xiǎoyǔ and the Chens").font(.nunito(14.5, .bold)).foregroundStyle(Home.muted)
+                Text("Voice chats with friends").font(.nunito(14.5, .bold)).foregroundStyle(Home.muted)
+                    .lineLimit(2).fixedSize(horizontal: false, vertical: true)
             }
+            // (clear of the panda on the right, on any phone: the longer line ran into it; the Mac, 23 Oct 2026)
+            .padding(.trailing, 96)
             .frame(maxHeight: .infinity, alignment: .bottom).padding(.leading, 2).padding(.bottom, 12)
             Image("panda-speaking").resizable().scaledToFit().frame(height: 100)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
