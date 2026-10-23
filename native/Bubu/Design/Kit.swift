@@ -73,6 +73,8 @@ struct PageBar<Trailing: View>: View {
     var back = true
     /// what back does, when not going back a page (a screen shown over the others closes itself)
     var onBack: (() -> Void)? = nil
+    /// the bar's ground: the page's own
+    var ground: Color = .bg
     @ViewBuilder var trailing: Trailing
     @Environment(\.dismiss) private var dismiss
 
@@ -101,7 +103,7 @@ struct PageBar<Trailing: View>: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 54)
-        .background(Color.bg)
+        .background(ground)
     }
 }
 

@@ -4,8 +4,9 @@ import AVFoundation
 /// Speaking, as WeChat voice notes (the owner, 23 Oct 2026: "we chat could be cool"): your chats with 步步, one for each
 /// of the course's conversations. He sends his lines as voice notes, their words under them (转文字, as WeChat turns a
 /// voice note into text); you hold 按住 说话 and say yours, and send it as a voice note of your own, the characters going
-/// green as he hears them. A chat whose words you haven't learnt is there to listen to. WeChat's own look: its grey,
-/// its white and green bubbles. Light only.
+/// green as he hears them. A chat whose words you haven't learnt is there to listen to. WeChat's shape in the app's own
+/// look (the owner, 23 Oct 2026: "look like WeChat, but still have our style"): cream, round photos, soft raised
+/// bubbles in our greens, the round back button and count pill, a raised teal Hold to talk. Light only.
 struct ConversePage: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
@@ -27,8 +28,9 @@ struct ConversePage: View {
                             .buttonStyle(CardPress())
                     }
                 }
-                .background(Color.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Home.line, lineWidth: 1.5))
+                .background(ChatLook.card, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Home.line, lineWidth: 1.5))
             }
             .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, 24)
         }
@@ -65,8 +67,7 @@ struct ConversePage: View {
     private func row(_ r: Row) -> some View {
         let next = r.open && !record.done(r.d.id) && rows.first(where: { $0.open && !record.done($0.d.id) })?.id == r.id
         return HStack(spacing: 12) {
-            Image("chat-bubu").resizable().scaledToFill().frame(width: 48, height: 48)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            ChatPhoto(size: 48)
                 .overlay(alignment: .topTrailing) {
                     if next { Circle().fill(Color(UIColor(hex: 0xFA5151))).frame(width: 12, height: 12).offset(x: 4, y: -4) }
                 }
@@ -77,9 +78,9 @@ struct ConversePage: View {
             }
             Spacer(minLength: 6)
             VStack(alignment: .trailing, spacing: 3) {
-                Text(r.d.lesson).font(.nunito(11.5, .bold)).foregroundStyle(Color(UIColor(hex: 0xA6A6A6))).lineLimit(1)
+                Text(r.d.lesson).font(.nunito(11.5, .bold)).foregroundStyle(ChatLook.faint).lineLimit(1)
                 if !r.open {
-                    Image(systemName: "lock.fill").font(.system(size: 12)).foregroundStyle(Color(UIColor(hex: 0xB8B8B8)))
+                    Image(systemName: "lock.fill").font(.system(size: 12)).foregroundStyle(ChatLook.faint)
                 } else if let s = record.stars(r.d.id) {
                     Text(String(repeating: "★", count: s) + String(repeating: "☆", count: 3 - s))
                         .font(.system(size: 12, weight: .bold)).foregroundStyle(Color(UIColor(hex: 0xE0A82E)))
@@ -87,7 +88,7 @@ struct ConversePage: View {
             }
         }
         .padding(.horizontal, 14).padding(.vertical, 11)
-        .overlay(alignment: .bottom) { Rectangle().fill(Color(UIColor(hex: 0xEFEFEF))).frame(height: 1).padding(.leading, 74) }
+        .overlay(alignment: .bottom) { Rectangle().fill(ChatLook.rule).frame(height: 1).padding(.leading, 74) }
         .contentShape(Rectangle())
         .accessibilityLabel("\(r.d.title)\(r.open ? "" : ", locked: listen only")")
     }
@@ -156,8 +157,6 @@ struct ChatPage: View {
         var marks: [SpeechScore.Mark] = []
     }
 
-    static let wxBg = Color(UIColor(hex: 0xEDEDED))
-    static let wxGreen = Color(UIColor(hex: 0x95EC69))
 
     var body: some View {
         VStack(spacing: 0) {
@@ -165,7 +164,7 @@ struct ChatPage: View {
             ScrollViewReader { reader in
                 ScrollView {
                     LazyVStack(spacing: 10) {
-                        Text("今天").font(.nunito(12, .bold)).foregroundStyle(Color(UIColor(hex: 0x9A9A9A))).padding(.top, 10)
+                        Text("今天").font(.hanzi(11.5, .semibold)).tracking(1.5).foregroundStyle(ChatLook.faint).padding(.top, 10)
                         ForEach(msgs) { m in message(m).id(m.id) }
                         Color.clear.frame(height: 4).id("end")
                     }
@@ -179,7 +178,7 @@ struct ChatPage: View {
             if waiting, let t = currentTurn { replyCard(t).transition(.move(edge: .bottom).combined(with: .opacity)) }
             bar
         }
-        .background(Self.wxBg.ignoresSafeArea())
+        .background(Home.bg.ignoresSafeArea())
         .overlay {
             if quitAsk {
                 QuitAsk(keep: { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = false } },
@@ -214,33 +213,27 @@ struct ChatPage: View {
 
     // MARK: the chat's top, as WeChat's
 
+    /// The app's page bar: the round back button, 步步 (online) and the conversation's name, and how many of your
+    /// lines are said, in a pill.
     private var navBar: some View {
-        ZStack {
-            VStack(spacing: 0) {
-                Text("步步").font(.hanzi(17, .semibold)).foregroundStyle(Color.black)
-                Text(dialogue?.title ?? "").font(.nunito(11.5, .bold)).foregroundStyle(Color(UIColor(hex: 0x8A8A8A))).lineLimit(1)
-            }
-            .padding(.horizontal, 80)
-            HStack {
-                Button {
-                    if msgs.contains(where: { if case .you = $0.kind { return true } else { return false } }) && !ended && !listenOnly {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = true }
-                    } else { dismiss() }
-                } label: {
-                    Image(systemName: "chevron.left").font(.system(size: 20, weight: .semibold)).foregroundStyle(Color.black)
-                        .frame(width: 44, height: 44).contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Back")
-                Spacer()
-                Text(listenOnly ? "🔒" : "\(saidLines) / \(yourLines)").font(.nunito(13, .heavy)).monospacedDigit()
-                    .foregroundStyle(Color(UIColor(hex: 0x8A8A8A))).padding(.trailing, 10)
-            }
+        PageBar(title: "", onBack: {
+            if msgs.contains(where: { if case .you = $0.kind { return true } else { return false } }) && !ended && !listenOnly {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = true }
+            } else { dismiss() }
+        }, ground: Home.bg) {
+            BarCount(text: listenOnly ? "Listening" : "\(saidLines) / \(yourLines)")
         }
-        .padding(.horizontal, 6)
-        .frame(height: 50)
-        .background(Self.wxBg)
-        .overlay(alignment: .bottom) { Rectangle().fill(Color(UIColor(hex: 0xDCDCDC))).frame(height: 0.5) }
+        .overlay {
+            VStack(spacing: 0) {
+                HStack(spacing: 6) {
+                    Circle().fill(ChatLook.online).frame(width: 8, height: 8)
+                    Text("步步").font(.hanzi(17, .bold)).foregroundStyle(Home.ink)
+                }
+                Text(dialogue?.title ?? "").font(.nunito(11.5, .heavy)).foregroundStyle(Home.muted).lineLimit(1)
+            }
+            .padding(.horizontal, 110)
+            .allowsHitTesting(false)
+        }
     }
 
     // MARK: messages
@@ -254,7 +247,7 @@ struct ChatPage: View {
                     avatar
                     voiceBubble(m, mine: false)
                     if playing != m.id && m.id == msgs.last(where: { $0.kind == .bubu })?.id && !waiting {
-                        Circle().fill(Color(UIColor(hex: 0xFA5151))).frame(width: 7, height: 7).padding(.top, 17)
+                        Circle().fill(ChatLook.red).frame(width: 7, height: 7).padding(.top, 17)
                     }
                     Spacer(minLength: 40)
                 }
@@ -264,11 +257,11 @@ struct ChatPage: View {
             HStack(alignment: .top, spacing: 8) {
                 avatar
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("没听清，再说一次？").font(.hanzi(16)).foregroundStyle(Color.black)
-                    Text("I didn't catch that. Say it again?").font(.nunito(12.5, .bold)).foregroundStyle(Color(UIColor(hex: 0x8A8A8A)))
+                    Text("没听清，再说一次？").font(.hanzi(16)).foregroundStyle(Home.ink)
+                    Text("I didn't catch that. Say it again?").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted)
                 }
                 .padding(.horizontal, 12).padding(.vertical, 9)
-                .background(Color.white, in: BubbleTail(left: true))
+                .chatBubble(mine: false)
                 Spacer(minLength: 40)
             }
         case .you(let ok):
@@ -276,7 +269,7 @@ struct ChatPage: View {
                 HStack(alignment: .top, spacing: 8) {
                     Spacer(minLength: 40)
                     Image(systemName: ok ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                        .font(.system(size: 17)).foregroundStyle(ok ? Color(UIColor(hex: 0x1F8A6D)) : Color(UIColor(hex: 0xFA5151)))
+                        .font(.system(size: 17)).foregroundStyle(ok ? ChatLook.heard : ChatLook.red)
                         .padding(.top, 11)
                     voiceBubble(m, mine: true)
                     meAvatar
@@ -291,64 +284,68 @@ struct ChatPage: View {
         }
     }
 
-    private var avatar: some View {
-        Image("chat-bubu").resizable().scaledToFill().frame(width: 40, height: 40)
-            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-    }
+    private var avatar: some View { ChatPhoto(size: 40) }
 
     private var meAvatar: some View {
-        Text("我").font(.hanzi(17, .semibold)).foregroundStyle(.white)
+        Text("我").font(.hanzi(17, .bold)).foregroundStyle(.white)
             .frame(width: 40, height: 40)
-            .background(Home.teal, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .background(Home.teal, in: Circle())
+            .overlay(Circle().stroke(.white, lineWidth: 2))
     }
 
     /// A voice note, as WeChat draws them: as long as it is, its seconds, and the sound waves (moving while it plays).
     private func voiceBubble(_ m: Msg, mine: Bool) -> some View {
         let w = min(210, 72 + CGFloat(m.seconds) * 18)
         let on = playing == m.id
+        let ink = mine ? Home.tealDark : Home.ink
         return Button { play(m) } label: {
             HStack(spacing: 6) {
                 if mine {
-                    Text("\(max(1, Int(m.seconds.rounded())))″").font(.nunito(15, .bold)).foregroundStyle(Color.black)
+                    Text("\(max(1, Int(m.seconds.rounded())))″").font(.nunito(15, .black)).foregroundStyle(ink)
                     Spacer(minLength: 0)
-                    Image(systemName: "wave.3.left").font(.system(size: 17, weight: .semibold)).foregroundStyle(Color.black)
+                    Image(systemName: "wave.3.left").font(.system(size: 17, weight: .bold)).foregroundStyle(on ? Home.teal : ink)
                         .symbolEffect(.variableColor.iterative.reversing, isActive: on)
                 } else {
-                    Image(systemName: "wave.3.right").font(.system(size: 17, weight: .semibold)).foregroundStyle(Color.black)
+                    Image(systemName: "wave.3.right").font(.system(size: 17, weight: .bold)).foregroundStyle(on ? Home.teal : ink)
                         .symbolEffect(.variableColor.iterative.reversing, isActive: on)
                     Spacer(minLength: 0)
-                    Text("\(max(1, Int(m.seconds.rounded())))″").font(.nunito(15, .bold)).foregroundStyle(Color.black)
+                    Text("\(max(1, Int(m.seconds.rounded())))″").font(.nunito(15, .black)).foregroundStyle(ink)
                 }
             }
-            .padding(.horizontal, 13)
-            .frame(width: w, height: 40)
-            .background(mine ? Self.wxGreen : Color.white, in: BubbleTail(left: !mine))
+            .padding(.horizontal, 14)
+            .frame(width: w, height: 42)
+            .chatBubble(mine: mine)
         }
         .buttonStyle(CardPress())
         .accessibilityLabel(mine ? "Your voice message, \(Int(m.seconds.rounded())) seconds. Play it" : "步步's voice message: \(m.turn.en). Play it")
+    }
+
+    /// A line's pinyin, a space put before a name in Latin letters that runs into it ("wǒ xìngSmith").
+    static func spaced(_ py: String) -> String {
+        py.replacingOccurrences(of: #"(\p{Ll})(\p{Lu}[a-z])"#, with: "$1 $2", options: .regularExpression)
     }
 
     /// The words of his voice note (WeChat's 转文字): the characters, their pinyin, what it means.
     private func transcript(_ t: Turn) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             ToneText(hanzi: t.hanzi, pinyin: t.pinyin, size: 18, weight: .medium)
-            PinyinText(pinyin: t.pinyin, size: 12.5, weight: .semibold)
-            Text(t.en).font(.nunito(12.5, .bold)).foregroundStyle(Color(UIColor(hex: 0x8A8A8A)))
+            PinyinText(pinyin: Self.spaced(t.pinyin), size: 12.5, weight: .semibold)
+            Text(t.en).font(.nunito(12.5, .bold)).foregroundStyle(Home.muted)
         }
-        .padding(.horizontal, 11).padding(.vertical, 8)
+        .padding(.horizontal, 12).padding(.vertical, 9)
         .frame(maxWidth: 270, alignment: .leading)
-        .background(Color.white.opacity(0.75), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
-        .overlay(alignment: .leading) { Rectangle().fill(Home.teal).frame(width: 3).clipShape(Capsule()) }
+        .background(ChatLook.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Home.line, lineWidth: 1.5))
     }
 
     /// What was heard of a line: each character green if it was, grey if not.
     private func marksText(_ marks: [SpeechScore.Mark], size: CGFloat) -> some View {
         marks.reduce(Text("")) { t, m in
-            t + Text(String(m.char)).foregroundColor(m.heard == false ? Color(UIColor(hex: 0xB0B0B0)) : m.heard == true ? Color(UIColor(hex: 0x1F8A6D)) : Color.black)
+            t + Text(String(m.char)).foregroundColor(m.heard == false ? ChatLook.faint : m.heard == true ? ChatLook.heard : Home.ink)
         }
         .font(.hanzi(size, .medium))
-        .padding(.horizontal, 10).padding(.vertical, 6)
-        .background(Color.white.opacity(0.75), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+        .padding(.horizontal, 11).padding(.vertical, 6)
+        .background(Home.tealSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     // MARK: your turn
@@ -358,7 +355,7 @@ struct ChatPage: View {
         VStack(alignment: .leading, spacing: 3) {
             HStack {
                 Text(t.free == true ? "SAY IT YOUR WAY · A VOICE MESSAGE" : "REPLY WITH A VOICE MESSAGE")
-                    .font(.nunito(11, .black)).tracking(1.2).foregroundStyle(Color(UIColor(hex: 0x8A8A8A)))
+                    .font(.nunito(11, .black)).tracking(1.2).foregroundStyle(Home.teal)
                 Spacer()
                 Button { Speech.shared.speak(t.hanzi) } label: {
                     Image(systemName: "speaker.wave.2.fill").font(.system(size: 14)).foregroundStyle(Home.teal)
@@ -371,10 +368,10 @@ struct ChatPage: View {
                 if interim.isEmpty { ToneText(hanzi: t.hanzi, pinyin: t.pinyin, size: 24, weight: .medium) }
                 else { marksText(interim, size: 24).padding(-10) }
             }
-            PinyinText(pinyin: t.pinyin, size: 14, weight: .semibold)
-            Text(t.en).font(.nunito(13.5, .bold)).foregroundStyle(Color(UIColor(hex: 0x6A6A6A)))
+            PinyinText(pinyin: Self.spaced(t.pinyin), size: 14, weight: .semibold)
+            Text(t.en).font(.nunito(13.5, .bold)).foregroundStyle(Home.muted)
             if let note {
-                Text(note).font(.nunito(13, .bold)).foregroundStyle(Color(UIColor(hex: 0xE0574A))).padding(.top, 2)
+                Text(note).font(.nunito(13, .bold)).foregroundStyle(ChatLook.red).padding(.top, 2)
             }
             if tries >= 2 {
                 Button("Skip this line") { skip(t) }
@@ -384,9 +381,14 @@ struct ChatPage: View {
         }
         .padding(.horizontal, 16).padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
-        .padding(.horizontal, 10).padding(.bottom, 8)
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Home.line).offset(y: 4)
+                RoundedRectangle(cornerRadius: 18, style: .continuous).fill(ChatLook.card)
+                RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Home.line, lineWidth: 1.5)
+            }
+        }
+        .padding(.horizontal, 12).padding(.bottom, 12)
     }
 
     /// WeChat's bar: hold to talk (once it's your turn), or a word while he's talking.
@@ -394,19 +396,27 @@ struct ChatPage: View {
         HStack(spacing: 10) {
             if listenOnly {
                 Text(ended ? "End of the chat" : "🔒 Learn its words to reply. Listening for now")
-                    .font(.nunito(14, .bold)).foregroundStyle(Color(UIColor(hex: 0x8A8A8A)))
-                    .frame(maxWidth: .infinity).frame(height: 44)
+                    .font(.nunito(14, .bold)).foregroundStyle(Home.muted)
+                    .frame(maxWidth: .infinity).frame(height: 54)
             } else {
-                Text(holding ? (cancelling ? "松开 取消" : "松开 发送") : "按住 说话")
-                    .font(.hanzi(16, .semibold)).foregroundStyle(Color.black.opacity(waiting ? 1 : 0.35))
-                    .overlay(alignment: .bottom) {
-                        Text(holding ? (cancelling ? "Let go to cancel" : "Let go to send") : waiting ? "Hold to talk" : "步步 is talking…")
-                            .font(.nunito(10.5, .bold)).foregroundStyle(Color(UIColor(hex: 0x8A8A8A))).fixedSize().offset(y: 14)
+                let face = !waiting ? Home.line : cancelling ? ChatLook.red : Home.teal
+                let lip = !waiting ? Color(UIColor(hex: 0xD6CFC1)) : cancelling ? Color(UIColor(hex: 0xB43A2F)) : Home.tealDark
+                let shape = RoundedRectangle(cornerRadius: 17, style: .continuous)
+                VStack(spacing: 0) {
+                    HStack(spacing: 7) {
+                        Image(systemName: holding ? (cancelling ? "xmark" : "waveform") : "mic.fill").font(.system(size: 15, weight: .black))
+                        Text(holding ? (cancelling ? "松开 取消" : "松开 发送") : "按住 说话").font(.hanzi(17, .bold))
                     }
-                    .padding(.bottom, 8)
-                    .frame(maxWidth: .infinity).frame(height: holding ? 58 : 46)
-                    .background(holding ? Color(UIColor(hex: 0xC6C6C6)) : Color.white, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    .contentShape(Rectangle())
+                    Text(holding ? (cancelling ? "Let go to cancel" : "Let go to send") : waiting ? "Hold to talk" : "步步 is talking…")
+                        .font(.nunito(11, .heavy)).opacity(0.8)
+                }
+                .foregroundStyle(waiting ? Color.white : Home.muted)
+                .frame(maxWidth: .infinity).frame(height: 54)
+                .background(face, in: shape)
+                .offset(y: holding ? 4 : 0)
+                .padding(.bottom, 4)
+                .background(shape.fill(lip).padding(.top, 4))
+                .contentShape(Rectangle())
                     .gesture(DragGesture(minimumDistance: 0)
                         .onChanged { v in
                             guard waiting else { return }
@@ -418,27 +428,27 @@ struct ChatPage: View {
                     .accessibilityAddTraits(.isButton)
             }
         }
-        .padding(.horizontal, 12).padding(.top, 8).padding(.bottom, 10)
-        .background(Color(UIColor(hex: 0xF7F7F7)).ignoresSafeArea(edges: .bottom))
-        .overlay(alignment: .top) { Rectangle().fill(Color(UIColor(hex: 0xDCDCDC))).frame(height: 0.5) }
-        .animation(.easeOut(duration: 0.15), value: holding)
+        .padding(.horizontal, 16).padding(.top, 4).padding(.bottom, 10)
+        .background(Home.bg.ignoresSafeArea(edges: .bottom))
+        .animation(.spring(response: 0.16, dampingFraction: 0.7), value: holding)
+        .animation(.easeOut(duration: 0.15), value: cancelling)
     }
 
     /// While you hold: the chat dimmed, a green voice bubble moving with your voice, the line filling in as it's heard,
     /// and the place to slide to, to cancel.
     private var recordingOverlay: some View {
         ZStack {
-            Color.black.opacity(0.45)
+            Home.ink.opacity(0.42)
             VStack(spacing: 18) {
                 Waveform(level: level, bars: 15)
-                    .foregroundStyle(Color(UIColor(hex: 0x2A2A2A)))
+                    .foregroundStyle(cancelling ? Color.white : Home.tealDark)
                     .padding(.horizontal, 26).padding(.vertical, 18)
-                    .background(cancelling ? Color(UIColor(hex: 0xFA5151)) : Self.wxGreen, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .chatBubble(mine: true, fill: cancelling ? ChatLook.red : nil)
                 if !interim.isEmpty {
                     marksText(interim, size: 24)
                 }
                 Spacer().frame(height: 30)
-                Image(systemName: "xmark").font(.system(size: 20, weight: .bold)).foregroundStyle(cancelling ? Color.black : Color.white)
+                Image(systemName: "xmark").font(.system(size: 20, weight: .bold)).foregroundStyle(cancelling ? ChatLook.red : Color.white)
                     .frame(width: 68, height: 68)
                     .background(cancelling ? Color.white : Color.white.opacity(0.22), in: Circle())
                 Text(cancelling ? "Let go to cancel" : "Slide up here to cancel").font(.nunito(12.5, .bold)).foregroundStyle(.white)
@@ -585,18 +595,42 @@ struct ChatPage: View {
     }
 }
 
-/// A chat bubble with WeChat's little point by the photo.
-struct BubbleTail: Shape {
-    var left: Bool
-    func path(in r: CGRect) -> Path {
-        var p = Path(roundedRect: r, cornerRadius: 5, style: .continuous)
-        let y: CGFloat = 20, h: CGFloat = 6
-        if left {
-            p.move(to: CGPoint(x: r.minX, y: y - h)); p.addLine(to: CGPoint(x: r.minX - 6, y: y)); p.addLine(to: CGPoint(x: r.minX, y: y + h))
-        } else {
-            p.move(to: CGPoint(x: r.maxX, y: y - h)); p.addLine(to: CGPoint(x: r.maxX + 6, y: y)); p.addLine(to: CGPoint(x: r.maxX, y: y + h))
+/// Speaking's colours: WeChat's shape, the app's look.
+enum ChatLook {
+    static let card = Color(UIColor(hex: 0xFFFDF8))
+    /// your notes: a soft green, its lip a deeper one
+    static let mine = Color(UIColor(hex: 0xCFEFDF))
+    static let mineLip = Color(UIColor(hex: 0xA9DCC4))
+    static let heard = Color(UIColor(hex: 0x1F8A6D))
+    static let red = Color(UIColor(hex: 0xE0574A))
+    static let online = Color(UIColor(hex: 0x3DBE7A))
+    static let faint = Color(UIColor(hex: 0xA89E8C))
+    static let rule = Color(UIColor(hex: 0xEFE9DD))
+}
+
+extension View {
+    /// A chat bubble in the app's look: soft and raised on a lip, its corner by the photo tucked in.
+    func chatBubble(mine: Bool, fill: Color? = nil) -> some View {
+        let shape = UnevenRoundedRectangle(topLeadingRadius: 16, bottomLeadingRadius: mine ? 16 : 5,
+                                           bottomTrailingRadius: mine ? 5 : 16, topTrailingRadius: 16, style: .continuous)
+        return background {
+            ZStack {
+                shape.fill(fill == nil ? (mine ? ChatLook.mineLip : Home.line) : Color.black.opacity(0.18)).offset(y: 3)
+                shape.fill(fill ?? (mine ? ChatLook.mine : ChatLook.card))
+                shape.stroke(fill == nil ? (mine ? ChatLook.mineLip : Home.line) : Color.clear, lineWidth: 1.5)
+            }
         }
-        p.closeSubpath()
-        return p
+    }
+}
+
+/// 步步's photo: round, on cream, a white ring round it.
+struct ChatPhoto: View {
+    var size: CGFloat
+    var body: some View {
+        Image("chat-bubu").resizable().scaledToFill().frame(width: size, height: size)
+            .background(Color(UIColor(hex: 0xFBF4E6)))
+            .clipShape(Circle())
+            .overlay(Circle().stroke(.white, lineWidth: 2))
+            .shadow(color: Home.ink.opacity(0.08), radius: 2, y: 1)
     }
 }
