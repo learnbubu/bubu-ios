@@ -33,6 +33,8 @@ final class BeginnerHelpsTests: XCTestCase {
             case .match(let cards, _)?:
                 out.append(.match(Seen(ids: cards.map(\.id), audio: s.matchAudio, met: met)))
                 for c in cards { XCTAssertTrue(s.matchPair(c.id, c.id), c.word.hanzi) }
+            case .chat?:
+                s.chatLine(right: true); s.chatDone()
             case .card(let c)?:
                 out.append(.card(c.id))
                 met.insert(c.id)
