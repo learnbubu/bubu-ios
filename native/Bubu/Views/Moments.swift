@@ -308,48 +308,63 @@ struct MomentCard: View {
     }
 }
 
-/// A short burst of confetti, as the web's: thrown up from the middle, falling, fading.
+/// A short burst of confetti, as the web's: thrown up from the middle, falling, fading. Its bits made with it, and
+/// one animation of 1.6 s driving the drawing (it was a TimelineView timed from onAppear, and drew nothing anywhere:
+/// the Mac, 0.2.23, frame by frame at full size).
 struct Confetti: View {
     let count: Int
-    @State private var start = Date()
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    private static let colours: [Color] = [0xF0B429, 0xF0742F, 0x4CE1AD, 0x6C9DFC, 0xE39AAE, 0xFDE68A].map { Color(UIColor(hex: $0)) }
-
-    private struct Bit { let x: CGFloat; let vx: CGFloat; let vy: CGFloat; let w: CGFloat; let h: CGFloat; let r: Double; let vr: Double; let c: Int }
-    @State private var bits: [Bit] = []
+    @State private var t: Double = 0
     @State private var over = false
+    @State private var bits: [ConfettiBit]
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    init(count: Int) {
+        self.count = count
+        _bits = State(initialValue: (0..<count).map { _ in
+            ConfettiBit(x: CGFloat.random(in: -0.25...0.25), vx: CGFloat.random(in: -7...7), vy: -8 - CGFloat.random(in: 0...9),
+                        w: 5 + CGFloat.random(in: 0...6), h: 3 + CGFloat.random(in: 0...5),
+                        r: Double.random(in: 0...6.28), vr: Double.random(in: -0.15...0.15), c: Int.random(in: 0..<6))
+        })
+    }
 
     var body: some View {
         if !reduceMotion && !over {
-            TimelineView(.animation) { tl in
-                let t = tl.date.timeIntervalSince(start)
-                Canvas { ctx, size in
-                    let k = t / 1.6
-                    guard k < 1 else { return }
-                    ctx.opacity = k > 0.75 ? max(0, 1 - (k - 0.75) / 0.25) : 1
-                    let frames = CGFloat(t * 60)
-                    for b in bits {
-                        // the web's per-frame physics, summed: velocity with gravity 0.35 and drag 0.99
-                        let drag = (1 - pow(0.99, frames)) / 0.01
-                        let x = size.width / 2 + b.x * size.width + b.vx * drag
-                        let y = size.height * 0.45 + b.vy * frames + 0.35 * frames * frames / 2
-                        var c = ctx
-                        c.translateBy(x: x, y: y)
-                        c.rotate(by: .radians(b.r + b.vr * Double(frames)))
-                        c.fill(Path(CGRect(x: -b.w / 2, y: -b.h / 2, width: b.w, height: b.h)), with: .color(Self.colours[b.c]))
-                    }
-                }
-            }
-            .ignoresSafeArea()
-            .onAppear {
-                bits = (0..<count).map { _ in
-                    Bit(x: CGFloat.random(in: -0.25...0.25), vx: CGFloat.random(in: -7...7), vy: -8 - CGFloat.random(in: 0...9),
-                        w: 5 + CGFloat.random(in: 0...6), h: 3 + CGFloat.random(in: 0...5),
-                        r: Double.random(in: 0...6.28), vr: Double.random(in: -0.15...0.15), c: Int.random(in: 0..<6))
-                }
-                start = Date()
-            }
-            .task { try? await Task.sleep(for: .seconds(1.7)); over = true }
+            ConfettiFrame(t: t, bits: bits)
+                .ignoresSafeArea()
+                .onAppear { withAnimation(.linear(duration: ConfettiFrame.length)) { t = ConfettiFrame.length } }
+                .task { try? await Task.sleep(for: .seconds(ConfettiFrame.length + 0.1)); over = true }
         }
     }
 }
+
+struct ConfettiBit { let x: CGFloat; let vx: CGFloat; let vy: CGFloat; let w: CGFloat; let h: CGFloat; let r: Double; let vr: Double; let c: Int }
+
+/// The confetti at `t` seconds in (animated: drawn afresh every frame of the burst).
+private struct ConfettiFrame: View, Animatable {
+    static let length = 1.6
+    var t: Double
+    let bits: [ConfettiBit]
+    var animatableData: Double { get { t } set { t = newValue } }
+    private static let colours: [Color] = [0xF0B429, 0xF0742F, 0x4CE1AD, 0x6C9DFC, 0xE39AAE, 0xFDE68A].map { Color(UIColor(hex: $0)) }
+
+    var body: some View {
+        Canvas { ctx, size in
+            let k = t / Self.length
+            guard k > 0, k < 1 else { return }
+            ctx.opacity = k > 0.75 ? max(0, 1 - (k - 0.75) / 0.25) : 1
+            let frames = CGFloat(t * 60)
+            for b in bits {
+                // the web's per-frame physics, summed: velocity with gravity 0.35 and drag 0.99
+                let drag = (1 - pow(0.99, frames)) / 0.01
+                let x = size.width / 2 + b.x * size.width + b.vx * drag
+                let y = size.height * 0.45 + b.vy * frames + 0.35 * frames * frames / 2
+                var c = ctx
+                c.translateBy(x: x, y: y)
+                c.rotate(by: .radians(b.r + b.vr * Double(frames)))
+                c.fill(Path(CGRect(x: -b.w / 2, y: -b.h / 2, width: b.w, height: b.h)), with: .color(Self.colours[b.c]))
+            }
+        }
+        .allowsHitTesting(false)
+    }
+}
+
