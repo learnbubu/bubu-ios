@@ -67,14 +67,14 @@ struct ConversePage: View {
     private func row(_ r: Row) -> some View {
         let next = r.open && !record.done(r.d.id) && rows.first(where: { $0.open && !record.done($0.d.id) })?.id == r.id
         return HStack(spacing: 12) {
-            ChatPhoto(size: 48)
+            ChatGroupPhoto(members: ChatCast.members(r.d), size: 48)
                 .overlay(alignment: .topTrailing) {
                     if next { Circle().fill(Color(UIColor(hex: 0xFA5151))).frame(width: 12, height: 12).offset(x: 4, y: -4) }
                 }
                 .opacity(r.open ? 1 : 0.55)
             VStack(alignment: .leading, spacing: 2) {
                 Text(r.d.title).font(.nunito(16, .black)).foregroundStyle(Home.ink).lineLimit(1)
-                Text(r.d.turns.first?.hanzi ?? "").font(.hanzi(13.5)).foregroundStyle(Home.muted).lineLimit(1)
+                Text(ChatCast.preview(r.d)).font(.hanzi(13.5)).foregroundStyle(Home.muted).lineLimit(1)
             }
             Spacer(minLength: 6)
             VStack(alignment: .trailing, spacing: 3) {
@@ -227,7 +227,8 @@ struct ChatPage: View {
             VStack(spacing: 0) {
                 HStack(spacing: 6) {
                     Circle().fill(ChatLook.online).frame(width: 8, height: 8)
-                    Text("步步").font(.hanzi(17, .bold)).foregroundStyle(Home.ink)
+                    Text(dialogue.map(ChatCast.chatName) ?? "").font(.hanzi(17, .bold)).foregroundStyle(Home.ink)
+                        .lineLimit(1).minimumScaleFactor(0.8)
                 }
                 Text(dialogue?.title ?? "").font(.nunito(11.5, .heavy)).foregroundStyle(Home.muted).lineLimit(1)
             }
@@ -244,8 +245,11 @@ struct ChatPage: View {
         case .bubu:
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .top, spacing: 8) {
-                    avatar
-                    voiceBubble(m, mine: false)
+                    ChatPhoto(who: m.turn.name, size: 40)
+                    VStack(alignment: .leading, spacing: 3) {
+                        if isGroup { speakerName(m.turn.name) }
+                        voiceBubble(m, mine: false)
+                    }
                     if playing != m.id && m.id == msgs.last(where: { $0.kind == .bubu })?.id && !waiting {
                         Circle().fill(ChatLook.red).frame(width: 7, height: 7).padding(.top, 17)
                     }
@@ -255,7 +259,7 @@ struct ChatPage: View {
             }
         case .ask:
             HStack(alignment: .top, spacing: 8) {
-                avatar
+                ChatPhoto(who: m.turn.name, size: 40)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("没听清，再说一次？").font(.hanzi(16)).foregroundStyle(Home.ink)
                     Text("I didn't catch that. Say it again?").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted)
@@ -284,7 +288,12 @@ struct ChatPage: View {
         }
     }
 
-    private var avatar: some View { ChatPhoto(size: 40) }
+    /// More than one of the cast talking: WeChat shows each one's name over their bubbles.
+    private var isGroup: Bool { dialogue.map { ChatCast.members($0).count > 1 } ?? false }
+
+    private func speakerName(_ name: String?) -> some View {
+        Text(name ?? "").font(.hanzi(11.5, .medium)).foregroundStyle(Home.muted).padding(.leading, 4)
+    }
 
     private var meAvatar: some View {
         Text("我").font(.hanzi(17, .bold)).foregroundStyle(.white)
@@ -470,7 +479,7 @@ struct ChatPage: View {
             return
         }
         // his line, or (listening only) yours said for you
-        let m = Msg(kind: t.who == "you" ? .you(ok: true) : .bubu, turn: t, seconds: Self.seconds(t.hanzi))
+        let m = Msg(kind: t.who == "you" ? .you(ok: true) : .bubu, turn: t, seconds: Self.seconds(t.hanzi, speaker: ChatCast.voice(t)))
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { msgs.append(m) }
         play(m)
         turn += 1
@@ -479,8 +488,8 @@ struct ChatPage: View {
     }
 
     /// How long a line's voice note is: its clip's, or about a third of a second a character.
-    static func seconds(_ text: String) -> Double {
-        if let url = Speech.clipURL(text), let p = try? AVAudioPlayer(contentsOf: url) { return p.duration }
+    static func seconds(_ text: String, speaker: String? = nil) -> Double {
+        if let url = Speech.clipURL(text, speaker: speaker), let p = try? AVAudioPlayer(contentsOf: url) { return p.duration }
         return 0.4 + Double(text.filter(Course.isHan).count) * 0.3
     }
 
@@ -491,7 +500,7 @@ struct ChatPage: View {
             player = try? AVAudioPlayer(contentsOf: f)
             player?.play()
         } else {
-            Speech.shared.speak(m.turn.hanzi)
+            Speech.shared.speak(m.turn.hanzi, speaker: ChatCast.voice(m.turn))
         }
         playing = m.id
         let id = m.id
@@ -554,7 +563,9 @@ struct ChatPage: View {
             Sounds.shared.play("wrong")
             tries += 1
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { msgs.append(Msg(kind: .ask, turn: t, seconds: 0)) }
+                // (asked by whoever spoke last)
+                let last = msgs.last(where: { $0.kind == .bubu })?.turn ?? t
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { msgs.append(Msg(kind: .ask, turn: last, seconds: 0)) }
             }
         }
     }
@@ -563,7 +574,7 @@ struct ChatPage: View {
         session?.spoke(right: false)
         misses += 1
         // (the line said for you, as a note of yours with its words, so the chat still reads through)
-        let m = Msg(kind: .you(ok: false), turn: t, seconds: Self.seconds(t.hanzi))
+        let m = Msg(kind: .you(ok: false), turn: t, seconds: Self.seconds(t.hanzi, speaker: ChatCast.voice(t)))
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { msgs.append(m) }
         play(m)
         next()
@@ -623,14 +634,76 @@ extension View {
     }
 }
 
-/// 步步's photo: round, on cream, a white ring round it.
+/// Who's who in Speaking's chats: the five of the cast you talk to, their photos (tools/art/make_chat_photos.py, from
+/// their approved drawings), and a chat's members, name and preview.
+enum ChatCast {
+    static let photos = ["小雨": "chat-xiaoyu", "林小雨": "chat-xiaoyu", "陈明": "chat-chenming", "陈妈妈": "chat-chenmama",
+                         "陈爸爸": "chat-chenbaba", "朵朵": "chat-duoduo"]
+    static func photo(_ name: String?) -> String { name.flatMap { photos[$0] } ?? "chat-bubu" }
+
+    /// The cast in a chat, in the order they first speak.
+    static func members(_ d: Dialogue) -> [String] {
+        var out: [String] = []
+        for t in d.turns where t.who != "you" { if let n = t.name, !out.contains(n) { out.append(n) } }
+        return out
+    }
+
+    /// One person: their name; a group: theirs, run together, as WeChat names a group no one has named.
+    static func chatName(_ d: Dialogue) -> String {
+        let m = members(d)
+        return m.count <= 1 ? (m.first ?? "步步") : m.prefix(3).joined(separator: "、") + (m.count > 3 ? "…(\(m.count))" : "")
+    }
+
+    /// A chat's first line, as WeChat's list shows it ("name: line" in a group).
+    static func preview(_ d: Dialogue) -> String {
+        guard let t = d.turns.first else { return "" }
+        return members(d).count > 1 ? "\(t.who == "you" ? "我" : t.name ?? ""): \(t.hanzi)" : t.hanzi
+    }
+
+    /// Whose voice a line is in: the cast's own; yours (Mark's), said for you, in 步步's.
+    static func voice(_ t: Turn) -> String? { t.who == "you" ? nil : t.name }
+}
+
+/// A person's chat photo: round, a white ring round it.
 struct ChatPhoto: View {
+    var who: String? = nil
     var size: CGFloat
     var body: some View {
-        Image("chat-bubu").resizable().scaledToFill().frame(width: size, height: size)
+        Image(ChatCast.photo(who)).resizable().scaledToFill().frame(width: size, height: size)
             .background(Color(UIColor(hex: 0xFBF4E6)))
             .clipShape(Circle())
-            .overlay(Circle().stroke(.white, lineWidth: 2))
+            .overlay(Circle().stroke(.white, lineWidth: size > 30 ? 2 : 1.5))
             .shadow(color: Home.ink.opacity(0.08), radius: 2, y: 1)
+    }
+}
+
+/// A chat's photo in the list: the one person's, or for a group, WeChat's grid of its members' (two side by side, up to
+/// four in a square, more in threes), on a cream tile.
+struct ChatGroupPhoto: View {
+    let members: [String]
+    var size: CGFloat
+    var body: some View {
+        if members.count <= 1 {
+            ChatPhoto(who: members.first, size: size)
+        } else {
+            let cols = members.count <= 4 ? 2 : 3
+            let gap: CGFloat = 2, pad: CGFloat = 3
+            let cell = (size - pad * 2 - gap * CGFloat(cols - 1)) / CGFloat(cols)
+            let rows = Int((Double(members.count) / Double(cols)).rounded(.up))
+            VStack(spacing: gap) {
+                ForEach(0..<rows, id: \.self) { r in
+                    HStack(spacing: gap) {
+                        ForEach(Array(members.dropFirst(r * cols).prefix(cols)), id: \.self) { n in
+                            Image(ChatCast.photo(n)).resizable().scaledToFill().frame(width: cell, height: cell)
+                                .clipShape(RoundedRectangle(cornerRadius: cell * 0.22, style: .continuous))
+                        }
+                    }
+                }
+            }
+            .frame(width: size, height: size)
+            .background(ChatLook.card, in: RoundedRectangle(cornerRadius: size * 0.26, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: size * 0.26, style: .continuous).stroke(Home.line, lineWidth: 1.5))
+            .shadow(color: Home.ink.opacity(0.08), radius: 2, y: 1)
+        }
     }
 }

@@ -33,6 +33,22 @@ final class ChatTests: XCTestCase {
         }
     }
 
+    func testEachChatIsWithItsCast() {
+        let first = course.data.dialogues.first!
+        XCTAssertEqual(ChatCast.members(first), ["小雨"])
+        XCTAssertEqual(ChatCast.chatName(first), "小雨")
+        XCTAssertEqual(ChatCast.photo("小雨"), "chat-xiaoyu")
+        XCTAssertEqual(ChatCast.photo(nil), "chat-bubu")
+        // every one who speaks in a chat has a photo of their own
+        for d in course.data.dialogues {
+            for m in ChatCast.members(d) { XCTAssertNotEqual(ChatCast.photo(m), "chat-bubu", "\(d.id): \(m)") }
+        }
+        // a group of five: three names, and how many
+        let big = course.data.dialogues.first { ChatCast.members($0).count == 5 }!
+        XCTAssertTrue(ChatCast.chatName(big).hasSuffix("(5)"))
+        XCTAssertTrue(ChatCast.preview(big).contains(": "))
+    }
+
     func testAVoiceNoteIsAsLongAsItsLine() {
         // (no clips under the tests: about a third of a second a character)
         XCTAssertGreaterThan(ChatPage.seconds("你好！请问，你是马克吗？"), ChatPage.seconds("你好！"))
