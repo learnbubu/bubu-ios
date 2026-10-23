@@ -54,8 +54,9 @@ CAST = [
      "cream shirt under a brown knitted waistcoat, grey trousers, black cloth shoes; a glass tea flask with green tea "
      "leaves in it in one hand, a simple wooden walking stick in the other, leaning on it a little."),
     ("cast-duoduo", "朵朵 Duǒduo, a Chinese girl of 8, born in London, Chén Míng's daughter: bright, cheeky and full of "
-     "questions. Black hair in two round buns on top of her head with red hair ties, a short fringe, a big gap-toothed "
-     "grin. A red and white striped top, denim dungarees, yellow wellies; a little backpack shaped like a dumpling; "
+     "questions. Black hair in two round buns on top of her head with red hair ties, a short fringe, a big happy open "
+     "smile like the others' (NO teeth showing, no gap). A red and white striped top, denim dungarees, yellow wellies; "
+     "a plain small coral-red backpack on both shoulders (just its straps and a bit of it showing, nothing on it); "
      "one hand raised high as if she's asking a question. She's a child: draw the base a little smaller overall (about "
      "four fifths of its height), the same shape."),
 ]

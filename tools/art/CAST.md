@@ -17,8 +17,10 @@ the base, the avatar with his hair (the finish to match), Bùbù (the palette), 
   Don't make him again.
 - `cast-chenmama`: 陈妈妈, about 58, runs the restaurant's front. Short perm, round glasses, red apron, a bowl of soup.
 - `cast-chenbaba`: 陈爸爸, about 64, retired, loves Beijing opera and tea. Brown waistcoat, a tea flask, a walking stick.
-- `cast-duoduo`: 朵朵, 8, cheeky. Two hair buns with red ties, striped top and dungarees, yellow wellies, dumpling
-  backpack. The base a little smaller overall (about four fifths), the same shape.
+- `cast-duoduo`: 朵朵, 8, cheeky. Two hair buns with red ties, striped top and dungarees, yellow wellies, a plain small
+  coral-red backpack. The base a little smaller overall (about four fifths), the same shape. **Redo**: the first five
+  (`cast-duoduo-1`…`-5`) had gap teeth and an odd dumpling backpack; the owner wants neither. A happy open smile with no
+  teeth showing, like the others'.
 - `cast-lineup`: the five side by side, to check they belong together.
 
 ## For each job in the group "cast", in order
@@ -50,10 +52,9 @@ the base, the avatar with his hair (the finish to match), Bùbù (the palette), 
 6. Put the owner's eye sparkle in: `../sfx/.venv/Scripts/python add_sparkle.py <file>`. It finds the eyes itself and
    draws the same sparkle in each (one small tilted oval high on the right). If it says it didn't find 2 eyes, report it.
 
-Chén Míng is done and the sizing works. Make **all the rest in one batch**, without stopping: `cast-xiaoyu`,
-`cast-chenmama`, `cast-chenbaba`, `cast-duoduo` (at least two versions of each, numbered as in step 1, plus any
-redrawn tries, steps 2–6 for every one), then `cast-lineup`. Then report: every file made, with its `check_head.py`
-result and what (if anything) was wrong with it.
+The batch is done (the owner likes the lineup best overall). Now only **朵朵 again**: at least two more, numbered on
+from her first five (`cast-duoduo-6.png`, `-7.png`, …), steps 2–6 for each, with the new description (no teeth
+showing, a plain coral-red backpack). Use `cast-lineup-?.png`'s look for her, apart from those two things. Then report.
 
 ## When all 6 are made
 
