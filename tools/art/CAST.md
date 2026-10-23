@@ -27,7 +27,8 @@ All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw
 4. Look at it next to the avatar (the first reference), and make it once more if any of these is true:
    - the proportions aren't the avatar's: about 2.3 heads tall, the head wider than the shoulders, short legs,
      big chunky shoes, small round mitten hands;
-   - the eyes have no white sparkle (the owner likes it: a round one high on one side, a tiny one below);
+   - the eyes have no white sparkle (the owner's pick: one small tilted oval high on the right of each eye; if a
+     drawing lacks it, `python add_sparkle.py <png> <eye box> <eye box>` puts it in);
    - there's paper grain or texture (the avatar is flat colour);
    - it has outlines, or is more detailed, realistic or anime-like than the references;
    - the person doesn't match the description (age, hair, clothes, what they hold);

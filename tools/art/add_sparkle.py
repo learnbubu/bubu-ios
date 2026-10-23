@@ -19,10 +19,12 @@ for (x0, y0, x1, y1) in boxes:
     print("eye", ex0, ey0, ex1, ey1)
     # one catch-light high on the right, a small oval tilted along the eye's curve, as the owner's pick (the first
     # draft) has
-    cx, cy, rx, ry = ex0 + w * 0.62, ey0 + h * 0.29, w * 0.15, w * 0.10
+    side = float(__import__("os").environ.get("SIDE", "0.6"))      # across the eye (0 left, 1 right)
+    size = float(__import__("os").environ.get("SIZE", "1.35"))
+    cx, cy, rx, ry = ex0 + w * side, ey0 + h * 0.29, w * 0.15 * size, w * 0.10 * size
     spot = Image.new("RGBA", (int(rx * 2 * K) + 8, int(rx * 2 * K) + 8))
     ImageDraw.Draw(spot).ellipse((4, 4 + (rx - ry) * K, 4 + rx * 2 * K, 4 + (rx + ry) * K), fill=(255, 255, 255, 255))
-    spot = spot.rotate(35, resample=Image.BICUBIC)
+    spot = spot.rotate(35 if side >= 0.5 else -35, resample=Image.BICUBIC)
     big.alpha_composite(spot, (int(cx * K - spot.width / 2), int(cy * K - spot.height / 2)))
 big.resize(im.size, Image.LANCZOS).convert("RGB").save(path)
 print("ok", path)
