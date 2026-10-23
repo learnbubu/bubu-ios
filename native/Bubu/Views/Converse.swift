@@ -199,12 +199,19 @@ struct ChatPage: View {
             guard dialogue == nil, let d = course.data.dialogues.first(where: { $0.id == dialogueId }) else { return }
             dialogue = d
             listenOnly = !course.dialogueUnlocked(d) { progress.srs[$0] != nil }
-            if !listenOnly { session = StudySession.chatting(progress, d) }
+            if !listenOnly {
+                session = StudySession.chatting(progress, d)
+                // (the microphone asked for and the audio set for recording now, once, not at every press)
+                Task {
+                    if await Recognizer.authorize() { Sounds.shared.holdForRecording(true) }
+                }
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { step() }
         }
         .onDisappear {
             run += 1
             recognizer.end(); Speech.shared.stop(); player?.stop()
+            Sounds.shared.holdForRecording(false)
             guard !handedOn else { return }
             progress.holdLevelUps = false; progress.showHeldLevelUp()
         }

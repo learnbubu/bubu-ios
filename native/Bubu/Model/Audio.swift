@@ -222,7 +222,20 @@ final class Sounds {
     }
 
     /// Switch to the microphone for speaking practice, and back.
+    /// Recording kept on through a stretch of speaking (a chat): set once as it opens, so holding to talk starts at
+    /// once and letting go doesn't switch the audio back, which cut off the sound playing then (the right-answer chime,
+    /// the next person's voice note); the owner, 23 Oct 2026: "a tad laggy pressing the button down", "things getting
+    /// cut off when they are right".
+    func holdForRecording(_ on: Bool) {
+        held = on
+        useForRecording(on)
+    }
+    private var held = false
+
     func useForRecording(_ on: Bool) {
+        // (held: already on, and staying on till the hold's let go)
+        if held && !on { return }
+        if on && recording { return }
         let session = AVAudioSession.sharedInstance()
         recording = on
         if on {
