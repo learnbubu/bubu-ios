@@ -16,9 +16,12 @@ PANDA = "refs/panda-waving.png"
 # studio": she came out taller and slimmer than the avatar, and grainy; the eyes' sparkle the owner kept: "I actually
 # like the eye sparkle")
 REF = ("The first attached image is the app's player avatar, made in our studio: draw this person to match it as closely "
-       "as possible, as if from the same set. Its proportions exactly: about 2.3 heads tall in all, the head WIDER than "
-       "the shoulders, a short compact body, short legs set a little apart, big chunky rounded shoes, short arms with "
-       "small round mitten hands, big round flat ears. Its face: the eyes tall black ovals set wide apart, each with one white "
+       "as possible, as if from the same set. Its proportions exactly, measured on it: the head (top of the hair to the "
+       "chin) is HALF the figure's whole height, so it's only about 2 heads tall; the head is WIDER than the shoulders, "
+       "a little over half the height across; a short compact body; short, THICK, stumpy legs, each about a quarter as "
+       "wide as the head, set a little apart; big chunky rounded shoes; short arms with small round mitten hands; big "
+       "round flat ears. (Slim legs and a smaller head are the mistakes to avoid: the first drafts had legs half as "
+       "thick and a head 15% smaller.) Its face: the eyes tall black ovals set wide apart, each with one white "
        "sparkle, a small tilted oval high on the right of the eye (the owner's pick), small arched brows, a tiny soft nose, rosy round cheeks. Its finish exactly: flat "
        "colour, no paper grain or texture, at most one soft darker tone on the hair and the clothes' folds, no outlines. "
        "The other attached image is the app's mascot Bùbù, for the palette. Do not copy the avatar's clothes or hair. ")

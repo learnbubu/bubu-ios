@@ -25,8 +25,9 @@ All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw
    - use the job's `size`.
 3. Save it as PNG at `file`.
 4. Look at it next to the avatar (the first reference), and make it once more if any of these is true:
-   - the proportions aren't the avatar's: about 2.3 heads tall, the head wider than the shoulders, short legs,
-     big chunky shoes, small round mitten hands;
+   - the proportions aren't the avatar's (measured on it): the head is half the figure's height (about 2 heads
+     tall), wider than the shoulders; short, thick, stumpy legs, each about a quarter as wide as the head; big chunky
+     shoes; small round mitten hands. Slim legs and a smaller head are the usual misses;
    - the eyes have no white sparkle (the owner's pick: one small tilted oval high on the right of each eye; if a
      drawing lacks it, `python add_sparkle.py <png> <eye box> <eye box>` puts it in);
    - there's paper grain or texture (the avatar is flat colour);
