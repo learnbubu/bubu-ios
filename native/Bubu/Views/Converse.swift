@@ -692,14 +692,23 @@ struct ChatPhoto: View {
     }
 }
 
-/// A chat's photo in the list: the one person's, or for a group, WeChat's grid of its members' (two side by side, up to
-/// four in a square, more in threes), on a cream tile.
+/// A chat's photo in the list: the one person's; two people's overlapping; or for a bigger group, WeChat's grid of its
+/// members' (up to four in a square, more in threes), on a cream tile.
 struct ChatGroupPhoto: View {
     let members: [String]
     var size: CGFloat
     var body: some View {
         if members.count <= 1 {
             ChatPhoto(who: members.first, size: size)
+        } else if members.count == 2 {
+            // two: their round photos side by side, overlapping a little, the second in front (the owner, 23 Oct 2026:
+            // "instead of the box, more like this for two people")
+            let d = size * 0.68
+            ZStack(alignment: .topLeading) {
+                ChatPhoto(who: members[0], size: d)
+                ChatPhoto(who: members[1], size: d).offset(x: size - d, y: size - d)
+            }
+            .frame(width: size, height: size, alignment: .topLeading)
         } else {
             let cols = members.count <= 4 ? 2 : 3
             let gap: CGFloat = 2, pad: CGFloat = 3
