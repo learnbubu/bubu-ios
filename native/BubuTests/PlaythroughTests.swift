@@ -174,6 +174,11 @@ private final class Player {
                 seen.note("meet " + cards.map(\.word.hanzi).joined(separator: " "))
             case .match(let cards, _):
                 pair(s, cards, &seen)
+            case .chat(let d, let turns):
+                // each of your lines said, the chat one step
+                for t in turns where t.who == "you" { _ = t; s.chatLine(right: true) }
+                s.chatDone()
+                seen.note("chat " + d.id)
             case .card(let c):
                 check(s, c, seen)
                 respond(s, c, &seen)
@@ -256,7 +261,7 @@ private final class Player {
     private func isAnother(_ item: StudySession.Item, than id: String) -> Bool {
         switch item {
         case .card(let c): return c.id != id
-        case .meet, .match: return true
+        case .meet, .match, .chat: return true
         }
     }
 
