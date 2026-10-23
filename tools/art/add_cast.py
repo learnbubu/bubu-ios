@@ -50,7 +50,8 @@ CAST = [
      "glasses, a warm fussy smile. A floral blouse (small red and pink flowers on cream) under a red apron, dark "
      "trousers, comfortable flat shoes; she holds a steaming bowl of soup in both hands, about to make you eat it."),
     ("cast-chenbaba", "陈爸爸, Chén Míng's father, a retired Chinese man of about 64 from Beijing; he loves Beijing opera "
-     "and his tea, and has bad knees. Short grey hair thinning on top, kind crinkled eyes, a calm content smile. A "
+     "and his tea, and has bad knees. Short NEAT grey hair combed back, thinning on top (tidy, not wild or fluffy), kind "
+     "crinkled eyes, a calm content smile. A "
      "cream shirt under a brown knitted waistcoat, grey trousers, black cloth shoes; a glass tea flask with green tea "
      "leaves in it in one hand, a simple wooden walking stick in the other, leaning on it a little."),
     ("cast-duoduo", "朵朵 Duǒduo, a Chinese girl of 8, born in London, Chén Míng's daughter: bright, cheeky and full of "
@@ -62,7 +63,9 @@ CAST = [
 ]
 
 # the approved designs, attached last: keep each one's look, redrawn over the base
-DESIGNS = {"cast-xiaoyu": "refs/ref-cast-xiaoyu.png", "cast-chenming": "refs/ref-chenming-v1.png"}
+DESIGNS = {"cast-xiaoyu": "refs/ref-cast-xiaoyu.png", "cast-chenming": "refs/ref-chenming-v1.png",
+           # (the owner, 23 Oct 2026: "for the dad I like the one in [the lineup]"; the singles' hair was wild)
+           "cast-chenbaba": "refs/ref-chenbaba-lineup.png"}
 KEEP = ("The LAST attached image is this person's approved design: keep everything about it (the hair, clothes, what "
         "they hold, pose, expression, colours) and redraw it over the base, so the face and body are the base's size.")
 LIKE = ("The LAST attached image is Xiaoyu, already approved: draw this person as from the same set as her.")

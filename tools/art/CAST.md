@@ -15,8 +15,12 @@ the base, the avatar with his hair (the finish to match), Bùbù (the palette), 
 - `cast-xiaoyu`: 林小雨, 22. **Redraw** of her approved design (attached last) over the base: her face came out 8% small.
 - `cast-chenming`: 陈明, 32, chef. **Done and approved** on the grey-hair base (`out/raw/cast-chenming.png`, sparkle in).
   Don't make him again.
-- `cast-chenmama`: 陈妈妈, about 58, runs the restaurant's front. Short perm, round glasses, red apron, a bowl of soup.
+- `cast-chenmama`: 陈妈妈, about 58. **Done and approved**: the owner picked `cast-chenmama-4.png` (copied to
+  `cast-chenmama.png`). Don't make her again.
 - `cast-chenbaba`: 陈爸爸, about 64, retired, loves Beijing opera and tea. Brown waistcoat, a tea flask, a walking stick.
+  **Redo**: the owner likes him as he is in the lineup (attached last: `refs/ref-chenbaba-lineup.png`), with neat combed
+  grey hair; the six singles' hair was wild. Keep everything about the lineup's 陈爸爸 and draw him alone, full size, on
+  the base.
 - `cast-duoduo`: 朵朵, 8, cheeky. Two hair buns with red ties, striped top and dungarees, yellow wellies, a plain small
   coral-red backpack. The base a little smaller overall (about four fifths), the same shape. **Redo**: the first five
   (`cast-duoduo-1`…`-5`) had gap teeth and an odd dumpling backpack; the owner wants neither. A happy open smile with no
@@ -52,9 +56,13 @@ the base, the avatar with his hair (the finish to match), Bùbù (the palette), 
 6. Put the owner's eye sparkle in: `../sfx/.venv/Scripts/python add_sparkle.py <file>`. It finds the eyes itself and
    draws the same sparkle in each (one small tilted oval high on the right). If it says it didn't find 2 eyes, report it.
 
-The batch is done (the owner likes the lineup best overall). Now only **朵朵 again**: at least two more, numbered on
-from her first five (`cast-duoduo-6.png`, `-7.png`, …), steps 2–6 for each, with the new description (no teeth
-showing, a plain coral-red backpack). Use `cast-lineup-?.png`'s look for her, apart from those two things. Then report.
+The batch is done (the owner likes the lineup best overall). Now two redos, at least two of each, numbered on from
+the earlier ones (`cast-chenbaba-7.png`, `-8.png`, …; `cast-duoduo-6.png`, `-7.png`, …), steps 2–6 for each:
+
+- **陈爸爸** from the lineup's (attached last), his neat combed grey hair;
+- **朵朵** with the new description: no teeth showing, a plain coral-red backpack, otherwise the lineup's look.
+
+Then report.
 
 ## When all 6 are made
 
