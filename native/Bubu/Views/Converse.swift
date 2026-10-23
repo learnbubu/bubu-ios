@@ -173,6 +173,8 @@ struct ChatPage: View {
     @State private var picking = false
     @State private var options: [Turn] = []
     @State private var wrongPicks: Set<String> = []
+    /// the chat's end, celebrated (its confetti)
+    @State private var cheer = 0
     /// the latest scroll asked for (only the last of a burst runs)
     @State private var scrollAsk = 0
     private let course = Course.shared
@@ -193,7 +195,11 @@ struct ChatPage: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if lesson == nil { navBar }
+            if lesson == nil {
+                navBar
+                // (where the messages go under: the owner, 23 Oct 2026)
+                Rectangle().fill(Home.line).frame(height: 1).opacity(0.8)
+            }
             ScrollViewReader { reader in
                 ScrollView {
                     LazyVStack(spacing: 10) {
@@ -217,6 +223,9 @@ struct ChatPage: View {
             if !picking || ended { bar }
         }
         .background(Home.bg.ignoresSafeArea())
+        .overlay {
+            if cheer > 0 { Confetti(count: 40).id(cheer).allowsHitTesting(false).ignoresSafeArea() }
+        }
         .clipShape(RoundedRectangle(cornerRadius: lesson == nil ? 0 : 22, style: .continuous))
         .overlay {
             if quitAsk {
@@ -958,8 +967,11 @@ struct ChatPage: View {
     /// The end: listening only, the chat simply ends; in a lesson, on to its next step; else its stars kept, and the
     /// lesson's done screen over it.
     private func finish() {
-        // (a button to leave by, so it can be read back first: the owner, 23 Oct 2026)
+        // (a button to leave by, so it can be read back first, and the end marked as a lesson's: the owner, 23 Oct 2026)
         withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { ended = true }
+        guard !listenOnly else { return }
+        Sounds.shared.play("complete")
+        if lesson == nil { cheer += 1 }
     }
 
     /// Finish tapped: on to the lesson's next step, or the chat's stars kept and the done screen over it.
@@ -969,7 +981,7 @@ struct ChatPage: View {
         ChatRecord.shared.finished(d.id, stars: misses == 0 ? 3 : misses <= 2 ? 2 : 1)
         s.finishFlashcards()
         handedOn = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             router.study = s
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                 var t = Transaction(); t.disablesAnimations = true

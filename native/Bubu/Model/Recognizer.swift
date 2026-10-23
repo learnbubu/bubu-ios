@@ -9,9 +9,18 @@ final class Recognizer {
     enum Failure { case notAllowed, unavailable, noSpeech }
 
     private lazy var recognizer = SFSpeechRecognizer(locale: Locale(identifier: "zh-CN"))
-    private lazy var engine = AVAudioEngine()
+    private var engine = AVAudioEngine()
     private var generation = 0
     private var request: SFSpeechAudioBufferRecognitionRequest?
+    /// The request the microphone feeds (from the audio thread): swapped when a held recording starts a new one.
+    private let feed = Feed()
+    /// Held (not settling on a pause): what was heard before the recogniser called it final on its own, and how many
+    /// times it's been started again this hold.
+    private var carried = ""
+    private var restarts = 0
+    private var taskGen = 0
+    /// Held and let go: the microphone's off, the recogniser finishing what it heard
+    private var releasing = false
     private var task: SFSpeechRecognitionTask?
     private var last: [String] = []
     private var quiet: Task<Void, Never>?
@@ -49,6 +58,7 @@ final class Recognizer {
         guard finished else { return }
         finished = false
         last = []
+        carried = ""; restarts = 0; releasing = false
         generation += 1
         let gen = generation
         Task {
@@ -59,11 +69,12 @@ final class Recognizer {
             guard let recognizer, recognizer.isAvailable else { onError(.unavailable); end(); return }
             do {
                 Sounds.shared.useForRecording(true)
-                let req = SFSpeechAudioBufferRecognitionRequest()
-                req.shouldReportPartialResults = true
-                if !hints.isEmpty { req.contextualStrings = Array(hints.prefix(100)) }
-                if recognizer.supportsOnDeviceRecognition { req.requiresOnDeviceRecognition = false }
+                let req = newRequest()
                 request = req
+                feed.set(req)
+                // (a fresh engine each time: one made under another audio route can't take the microphone's format,
+                // and installing its tap throws, which is a crash)
+                if !engine.isRunning { engine = AVAudioEngine() }
                 let input = engine.inputNode
                 let format = input.outputFormat(forBus: 0)
                 // no input yet (a call, or Bluetooth switching): installing a tap would throw
@@ -72,19 +83,20 @@ final class Recognizer {
                 let report = onLevel
                 file = recordTo.flatMap { try? AVAudioFile(forWriting: $0, settings: format.settings) }
                 let keep = file
-                input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak req] buf, _ in
-                    req?.append(buf)
+                let feed = feed
+                input.installTap(onBus: 0, bufferSize: 1024, format: format) { buf, _ in
+                    feed.append(buf)
                     try? keep?.write(from: buf)
                     let level = Recognizer.level(of: buf)
                     DispatchQueue.main.async { report(level) }
                 }
                 engine.prepare()
                 try engine.start()
-                task = recognizer.recognitionTask(with: req) { [weak self] result, error in
-                    Task { @MainActor in self?.handle(result, error) }
-                }
+                startTask(recognizer, req)
+                // (held: as long as you hold, within reason)
+                let limit: Double = settlesOnPause ? 12 : 60
                 watchdog = Task { [weak self] in
-                    try? await Task.sleep(for: .seconds(12))
+                    try? await Task.sleep(for: .seconds(limit))
                     guard !Task.isCancelled else { return }
                     self?.settle()
                 }
@@ -94,14 +106,52 @@ final class Recognizer {
         }
     }
 
+    private func newRequest() -> SFSpeechAudioBufferRecognitionRequest {
+        let req = SFSpeechAudioBufferRecognitionRequest()
+        req.shouldReportPartialResults = true
+        if !hints.isEmpty { req.contextualStrings = Array(hints.prefix(100)) }
+        if let recognizer, recognizer.supportsOnDeviceRecognition { req.requiresOnDeviceRecognition = false }
+        return req
+    }
+
+    private func startTask(_ recognizer: SFSpeechRecognizer, _ req: SFSpeechAudioBufferRecognitionRequest) {
+        taskGen += 1
+        let g = taskGen
+        task = recognizer.recognitionTask(with: req) { [weak self] result, error in
+            Task { @MainActor in
+                // (a task given up on may still call back: only the current one counts)
+                guard let self, self.taskGen == g else { return }
+                self.handle(result, error)
+            }
+        }
+    }
+
+    /// Held, and the recogniser stopped by itself (a pause it took for the end, or silence): it listens on, a new
+    /// request on the same microphone, what was heard so far kept in front (the owner, 23 Oct 2026: "sometimes I
+    /// noticed it thinks that I finished talking"). False when it can't (then it settles as before).
+    private func carryOn() -> Bool {
+        guard !settlesOnPause, !finished, !releasing, restarts < 6, let recognizer, recognizer.isAvailable else { return false }
+        restarts += 1
+        carried = last.first ?? carried
+        task?.cancel()
+        let req = newRequest()
+        request = req
+        feed.set(req)
+        startTask(recognizer, req)
+        return true
+    }
+
     private func handle(_ result: SFSpeechRecognitionResult?, _ error: Error?) {
         guard !finished else { return }
         if let result {
-            // up to eight guesses, best first, as the web asks for
-            let alts = Array(result.transcriptions.prefix(8).map(\.formattedString))
+            // up to eight guesses, best first, as the web asks for (held: after what was heard before a restart)
+            let alts = Array(result.transcriptions.prefix(8).map { carried + $0.formattedString })
             guard !alts.isEmpty else { return }
             last = alts
-            if result.isFinal { return deliver(alts) }
+            if result.isFinal {
+                if carryOn() { return }
+                return deliver(alts)
+            }
             onInterim(alts)
             if acceptEarly(alts) { return deliver(alts) }
             // the recogniser doesn't stop on silence: settle once you've paused
@@ -113,12 +163,29 @@ final class Recognizer {
                 self?.settle()
             }
         } else if error != nil {
+            if carryOn() { return }
+            if releasing { return deliver(last) }
             settle()
         }
     }
 
     func settle() {
         guard !finished else { return }
+        // held and let go: the microphone off, a moment for the recogniser's final word on all of it (judged on what
+        // it last guessed, the end of what you said could be missing)
+        if !settlesOnPause && !releasing && !last.isEmpty && task != nil {
+            releasing = true
+            if engine.isRunning { engine.stop(); engine.inputNode.removeTap(onBus: 0) }
+            feed.set(nil)
+            request?.endAudio()
+            let gen = generation
+            Task { [weak self] in
+                try? await Task.sleep(for: .milliseconds(900))
+                guard let self, self.generation == gen, !self.finished else { return }
+                self.deliver(self.last)
+            }
+            return
+        }
         if last.isEmpty { onError(.noSpeech); end() } else { deliver(last) }
     }
 
@@ -150,12 +217,21 @@ final class Recognizer {
         quiet?.cancel(); watchdog?.cancel()
         if engine.isRunning { engine.stop(); engine.inputNode.removeTap(onBus: 0) }
         file = nil      // (closes the recording)
+        feed.set(nil)
         request?.endAudio()
         task?.cancel()
         task = nil; request = nil
         Sounds.shared.useForRecording(false)
         onEnd()
     }
+}
+
+/// The request the microphone's buffers go to, set on the main thread and read on the audio thread.
+private final class Feed: @unchecked Sendable {
+    private let lock = NSLock()
+    private var req: SFSpeechAudioBufferRecognitionRequest?
+    func set(_ r: SFSpeechAudioBufferRecognitionRequest?) { lock.lock(); req = r; lock.unlock() }
+    func append(_ buf: AVAudioPCMBuffer) { lock.lock(); let r = req; lock.unlock(); r?.append(buf) }
 }
 
 /// Scoring what was heard against what was asked, as the web's scoreSpeech.
