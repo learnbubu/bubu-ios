@@ -359,106 +359,247 @@ struct FlashPage: View {
     }
 }
 
-// MARK: - matching (web: startMatch)
+// MARK: - matching
 
+/// The Classroom's Match, in a lesson's look (the owner, 23 Oct 2026: "match our theme; hanzi on the left, English on
+/// the right"): the words in rounds of five pairs, the Chinese down the left (its pinyin while it's still new) and the
+/// meanings down the right, on the lesson's raised tiles. Tap one on each side: a right pair shines green and fades,
+/// a wrong one shakes red and breaks the run. Kept as a session (StudySession.matching), so it has a lesson's top
+/// (close, the bar and its combo, buns, double XP), its sounds and firecrackers, and ends on its done screen.
 struct MatchPage: View {
     let ids: [String]
+    @Environment(ProgressStore.self) private var progress
+    @Environment(Router.self) private var router
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var session: StudySession?
     @State private var queue: [Card] = []
-    @State private var tiles: [Tile] = []
-    @State private var first: Tile?
-    @State private var matched: Set<Tile> = []
-    @State private var missed: Set<Tile> = []
+    @State private var left: [Card] = []
+    @State private var right: [Card] = []
+    @State private var pickedLeft: String?
+    @State private var pickedRight: String?
+    /// this round's pairs matched, and their tiles faded
+    @State private var matched: Set<String> = []
+    @State private var faded: Set<String> = []
+    /// tiles flashing red after a wrong pair ("L" or "R" + the card id), and each tile's shakes so far
+    @State private var wrong: Set<String> = []
+    @State private var shakes: [String: Int] = [:]
+    @State private var misses = 0
     @State private var total = 0
     @State private var done = 0
-    @State private var message = "Tap a character, then its meaning."
-    @State private var finished = false
+    @State private var burst: Int?
+    @State private var barFrame: CGRect = .zero
+    @State private var quitAsk = false
+    @State private var handedOn = false
     private let course = Course.shared
+    static let perRound = 5
 
-    struct Tile: Hashable { let id: String; let han: Bool; let text: String }
+    private enum Side { case left, right }
+    private var combo: Int { session?.combo ?? 0 }
 
     var body: some View {
-        VStack(spacing: 14) {
-            if finished {
-                Spacer()
-                Image("done-panda").resizable().scaledToFit().frame(width: 150)
-                Text("Matching done").font(.nunito(16.8, .bold)).foregroundStyle(Color.ink)
-                Text("\(total) pair\(total == 1 ? "" : "s") matched").font(.nunitoXB(20)).foregroundStyle(Color.accent)
-                Spacer()
-                Button { start() } label: { Label("Again", systemImage: "shuffle") }.buttonStyle(WideButton())
-                Button("Done") { dismiss() }.buttonStyle(WideButton(ghost: true))
-            } else {
-                ProgressBarShine(value: total == 0 ? 0 : Double(done) / Double(total))
-                Text(message).font(.nunito(14.5)).foregroundStyle(Color.muted)
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                    ForEach(tiles, id: \.self) { t in tile(t) }
+        ZStack {
+            VStack(spacing: 0) {
+                topBar
+                Text("Tap the matching pairs").font(.nunito(25, .black)).tracking(-0.4).foregroundStyle(Color.ink)
+                    .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 18)
+                Spacer(minLength: 12)
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(spacing: 10) { ForEach(left, id: \.id) { c in tile(.left, c) } }
+                    VStack(spacing: 10) { ForEach(right, id: \.id) { c in tile(.right, c) } }
                 }
-                Spacer()
+                .id(done / Self.perRound)
+                .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
+                Text("Tap a word, then its meaning.").font(.nunito(12.5)).foregroundStyle(Color.muted).padding(.top, 10)
+                Spacer(minLength: 12)
+            }
+            .padding(.horizontal, 16).padding(.bottom, 12)
+            if let n = burst {
+                FirecrackerBurst(n: n, bar: barFrame).id(n).ignoresSafeArea().allowsHitTesting(false)
+            }
+            if quitAsk {
+                QuitAsk(keep: { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = false } },
+                        quit: { quitAsk = false; dismiss() },
+                        line: "Your pairs so far are saved, but you'll miss the end of the set and its XP.", end: "End matching")
+                    .transition(.opacity).zIndex(20)
             }
         }
-        .padding(18)
-        .pageBar("Match") { BarCount(text: "\(done) / \(total)") }
-        .onAppear { if total == 0 { start() } }
+        .background(Color.bg.ignoresSafeArea())
+        .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        .sensoryFeedback(.success, trigger: done)
+        .sensoryFeedback(.error, trigger: misses)
+        // every fifth right pair in a row: the burst, as a lesson's
+        .onChange(of: combo) { old, n in
+            guard n > old, n >= StudySession.comboAt, n % StudySession.comboAt == 0, !reduceMotion else { return }
+            burst = n
+            DispatchQueue.main.asyncAfter(deadline: .now() + FirecrackerBurst.length) { if burst == n { burst = nil } }
+        }
+        .onAppear {
+            progress.holdLevelUps = true
+            guard session == nil else { return }
+            start()
+        }
+        .onDisappear {
+            guard !handedOn else { return }
+            progress.holdLevelUps = false; progress.showHeldLevelUp()
+        }
     }
 
-    private func tile(_ t: Tile) -> some View {
-        let isMatched = matched.contains(t), isMiss = missed.contains(t), sel = first == t
-        return Button { tap(t) } label: {
-            Text(t.text).font(t.han ? .hanzi(24, .medium) : .nunito(14.5, .semibold))
-                .foregroundStyle(isMatched ? Color.good : Color.ink).multilineTextAlignment(.center)
-                .lineLimit(3).minimumScaleFactor(0.7)
-                .frame(maxWidth: .infinity, minHeight: 62).padding(8)
-                .background(isMatched ? Color.goodSoft : isMiss ? Color.againSoft : sel ? Color.accentSoft : Color.panel,
-                            in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(isMatched ? Color.good : isMiss ? Color.again : sel ? Color.accent : Color.line, lineWidth: sel ? 2 : 1))
-                .offset(x: isMiss ? -4 : 0)
-                .opacity(isMatched ? 0.55 : 1)
+    /// As a lesson's: close, the progress bar, double XP and the buns.
+    private var topBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                if done == 0 && misses == 0 { dismiss() } else { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = true } }
+            } label: {
+                Image(systemName: "xmark").font(.system(size: 22, weight: .heavy)).foregroundStyle(Color.muted)
+                    .frame(width: 36, height: 36).contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Close")
+            ProgressBarShine(value: Double(done) / Double(max(total, 1)), height: 16, combo: combo)
+                .background(GeometryReader { g in
+                    Color.clear.onAppear { barFrame = g.frame(in: .global) }
+                        .onChange(of: g.frame(in: .global)) { _, f in barFrame = f }
+                })
+            if progress.boostActive {
+                HStack(spacing: 1) {
+                    Image(systemName: "bolt.fill").font(.system(size: 12, weight: .black))
+                    Text("2×").font(.nunito(14, .black))
+                }
+                .foregroundStyle(Color.white)
+                .padding(.horizontal, 7).padding(.vertical, 4)
+                .background(Color.gold, in: Capsule())
+            }
+            if let s = session, s.earnsBuns, progress.buns < ProgressStore.bunsMax {
+                BunRow(n: progress.isPlus ? ProgressStore.bunsMax : progress.bunState.n, plus: progress.isPlus, bump: s.bunsEarned)
+            }
         }
-        .buttonStyle(PressDown(depth: 1))
-        .disabled(isMatched)
-        .animation(isMiss ? .default.repeatCount(3, autoreverses: true).speed(4) : .easeOut(duration: 0.2), value: isMiss)
+        .padding(.top, 8).padding(.bottom, 4)
+    }
+
+    private func key(_ side: Side, _ id: String) -> String { (side == .left ? "L" : "R") + id }
+
+    /// A tile, as a lesson's pairs: raised, teal while picked, green and shining when matched, red and shaking when wrong.
+    private func tile(_ side: Side, _ c: Card) -> some View {
+        let k = key(side, c.id)
+        let isDone = matched.contains(c.id)
+        let isPicked = (side == .left ? pickedLeft : pickedRight) == c.id
+        let isWrong = wrong.contains(k)
+        let edge: Color = isWrong ? .again : isDone ? .good : isPicked ? .accent : .line
+        let fill: Color = isWrong ? .againSoft : isDone ? .goodSoft : isPicked ? .accentSoft : .panel
+        return Button { tap(side, c) } label: {
+            face(side, c)
+                .frame(maxWidth: .infinity, minHeight: 64)
+                .padding(.horizontal, 8).padding(.vertical, 6)
+        }
+        .buttonStyle(Tile3D(fill: fill, edge: edge))
+        .modifier(SuccessShine(on: isDone, delay: side == .right ? 0.05 : 0, radius: 14, compact: true))
+        .disabled(isDone)
+        .compositingGroup()
+        .opacity(faded.contains(c.id) ? 0.35 : 1)
+        .modifier(PairShake(shakes: CGFloat(shakes[k] ?? 0)))
+        .animation(.easeOut(duration: 0.15), value: isPicked)
+        .animation(.easeOut(duration: 0.15), value: isWrong)
+        .accessibilityLabel(side == .left ? c.word.hanzi : c.word.gloss)
+    }
+
+    /// The Chinese on the left (its pinyin while it's new, or while the first books show it), the English on the right.
+    @ViewBuilder
+    private func face(_ side: Side, _ c: Card) -> some View {
+        let w = c.word
+        if side == .left {
+            VStack(spacing: 2) {
+                Text(w.hanzi).font(.hanzi(w.hanzi.count > 3 ? 20 : 25, .medium)).foregroundStyle(Color.ink)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                if (progress.srs[c.id]?.reps ?? 0) == 0 || Wheels.now(progress).shows(card: c) {
+                    PinyinText(pinyin: w.pinyin, size: 12.5).lineLimit(1).minimumScaleFactor(0.7)
+                }
+            }
+        } else {
+            Text(w.gloss).font(.nunito(15.5, .bold)).foregroundStyle(Color.ink)
+                .multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.75)
+        }
     }
 
     private func start() {
-        // one card per meaning, so every meaning tile has exactly one right partner
+        // one card per meaning, so every meaning has exactly one right partner
         var seen = Set<String>()
-        let uniq = ids.compactMap { course.cardById[$0] }.shuffled().filter { seen.insert($0.word.en).inserted }
-        guard uniq.count >= 3 else { Moments.shared.toast("Pick at least 3 words with different meanings to match."); dismiss(); return }
-        queue = uniq; total = uniq.count; done = 0; finished = false
+        let uniq = ids.compactMap { course.cardById[$0] }.filter { !$0.isSentence }.shuffled().filter { seen.insert($0.word.gloss).inserted }
+        guard uniq.count >= 3 else { Moments.shared.toast("Learn a few more words first, then match them."); dismiss(); return }
+        queue = uniq; total = uniq.count; done = 0
+        session = StudySession.matching(progress, cards: uniq)
         nextRound()
     }
 
     private func nextRound() {
-        let round = Array(queue.prefix(6)); queue.removeFirst(round.count)
-        matched = []; missed = []; first = nil
-        tiles = round.flatMap { [Tile(id: $0.id, han: true, text: $0.word.hanzi), Tile(id: $0.id, han: false, text: $0.word.en)] }.shuffled()
-        message = "Tap a character, then its meaning."
+        // (a last round of one or two is folded into the one before)
+        let n = queue.count <= Self.perRound + 2 ? queue.count : Self.perRound
+        let round = Array(queue.prefix(n)); queue.removeFirst(round.count)
+        matched = []; faded = []; wrong = []; pickedLeft = nil; pickedRight = nil
+        let l = round.shuffled()
+        var r = round.shuffled()
+        // no more than one pair straight across from its partner
+        var tries = 0
+        while tries < 20, r.count > 1, zip(l, r).filter({ $0.0.id == $0.1.id }).count > 1 { r.shuffle(); tries += 1 }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.88)) { left = l; right = r }
     }
 
-    private func tap(_ t: Tile) {
-        guard !matched.contains(t) else { return }
-        guard let a = first else { first = t; return }
-        if a == t { first = nil; return }
-        first = nil
-        if a.id == t.id && a.han != t.han {
-            withAnimation { matched.formUnion([a, t]) }
+    private func tap(_ side: Side, _ c: Card) {
+        guard !matched.contains(c.id) else { return }
+        // the Chinese side speaks
+        if side == .left { Speech.shared.speak(c.word.hanzi) }
+        switch side {
+        case .left: pickedLeft = pickedLeft == c.id ? nil : c.id
+        case .right: pickedRight = pickedRight == c.id ? nil : c.id
+        }
+        guard let l = pickedLeft, let r = pickedRight, let card = course.cardById[l] else { return }
+        pickedLeft = nil; pickedRight = nil
+        if l == r {
+            session?.matchTapped(card, right: true)
             Sounds.shared.play("correct")
-            if let c = course.cardById[t.id] { Speech.shared.speak(c.word.hanzi) }
+            matched.insert(l)
             done += 1
-            if matched.count == tiles.count {
-                if queue.isEmpty {
-                    Sounds.shared.play("complete")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { withAnimation { finished = true } }
-                } else {
-                    message = "Nice — next set…"
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) { withAnimation { nextRound() } }
-                }
+            withAnimation(.easeOut(duration: 0.4).delay(0.35)) { _ = faded.insert(l) }
+            if matched.count == left.count {
+                if queue.isEmpty { DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { finish() } }
+                else { DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) { nextRound() } }
             }
         } else {
+            session?.matchTapped(card, right: false)
             Sounds.shared.play("wrong")
-            missed = [a, t]
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { missed = [] }
+            misses += 1
+            let keys: Set<String> = [key(.left, l), key(.right, r)]
+            wrong.formUnion(keys)
+            withAnimation(.linear(duration: 0.4)) { for k in keys { shakes[k, default: 0] += 1 } }
+            let n = misses
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                if misses == n { wrong.removeAll() } else { wrong.subtract(keys) }
+            }
         }
+    }
+
+    /// The end, as a lesson's: its done screen slides up over the last round, and the page goes from under it.
+    private func finish() {
+        guard let s = session else { dismiss(); return }
+        s.finishFlashcards()
+        handedOn = true
+        router.study = s
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            var t = Transaction(); t.disablesAnimations = true
+            withTransaction(t) { dismiss() }
+        }
+    }
+}
+
+/// A side-to-side shake: two quick wobbles for each step up in `shakes` (as the lesson's pairs).
+private struct PairShake: GeometryEffect {
+    var shakes: CGFloat
+    var animatableData: CGFloat {
+        get { shakes }
+        set { shakes = newValue }
+    }
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        ProjectionTransform(CGAffineTransform(translationX: 7 * sin(shakes * .pi * 4), y: 0))
     }
 }

@@ -74,6 +74,24 @@ final class VocabRoomTests: XCTestCase {
         XCTAssertTrue(cards.allSatisfy { p.srs[$0.id] != nil })
     }
 
+    func testMatchingEndsAsALessonDoes() {
+        let p = store()
+        let cards = Array(course.cards.filter { !$0.isSentence }.prefix(5))
+        let s = StudySession.matching(p, cards: cards)
+        for c in cards { s.matchTapped(c, right: true) }
+        XCTAssertEqual(s.combo, 5)
+        // a wrong pair breaks the run, but marks no word forgotten
+        let before = p.srs[cards[0].id]
+        s.matchTapped(cards[0], right: false)
+        XCTAssertEqual(s.combo, 0)
+        XCTAssertEqual(p.srs[cards[0].id], before)
+        s.finishFlashcards()
+        XCTAssertEqual(s.result?.title, "Matching done!")
+        XCTAssertGreaterThan(s.result?.xp ?? 0, 0)
+        XCTAssertLessThan(s.result?.accuracy ?? 100, 100)
+        XCTAssertEqual(s.again().title, "Review")
+    }
+
     func testTheExactPinyinComesFirst() {
         // 医生 yī shēng before 一身 yī shēn, which "yisheng" starts like
         XCTAssertEqual(VocabSearch.find("yisheng").first?.word.hanzi, "医生")

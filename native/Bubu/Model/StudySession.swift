@@ -1104,7 +1104,7 @@ final class StudySession: Identifiable {
         // a lesson comes in steps (its batches of new words): one done, more to go
         let total = mode == .lesson ? Self.lessonSteps(lessonId, progress).total : 0
         let stepDone = left > 0 && stepAtStart > 0 && stepAtStart < total
-        let title = self.title == Self.flashTitle ? "Flashcards done!" : mode == .quiz ? "Quiz complete" : mode == .mistakes ? "Mistakes practised" : [.review, .trouble].contains(mode) ? "Review complete"
+        let title = self.title == Self.flashTitle ? "Flashcards done!" : self.title == Self.matchTitle ? "Matching done!" : mode == .quiz ? "Quiz complete" : mode == .mistakes ? "Mistakes practised" : [.review, .trouble].contains(mode) ? "Review complete"
             : played ? (self.title == "Chapter review" ? "Chapter review done!" : "Practice done!")
             : justFinished ? "Lesson complete!" : stepDone ? "Step \(stepAtStart) of \(total) done" : "Session complete"
         let seconds = Int(((progress.now() - start) / 1000).rounded())
@@ -1274,6 +1274,22 @@ final class StudySession: Identifiable {
     }
     static let flashTitle = "Flashcards"
 
+    /// The Classroom's Match kept as a session too, as flashcards are: its pairs score and end as a lesson's.
+    static func matching(_ p: ProgressStore, cards: [Card]) -> StudySession {
+        StudySession(lessonId: "", progress: p, cards: cards, mode: .review, title: matchTitle)
+    }
+    static let matchTitle = "Match"
+
+    /// A pair tapped in the Classroom's Match: a right one is a right answer (scheduled, XP, the run, quests); a wrong
+    /// one breaks the run and counts against the accuracy, but no word is marked forgotten (as a lesson's pairs, a
+    /// wrong pair is two tiles, not a word not known).
+    func matchTapped(_ c: Card, right: Bool) {
+        if right { flashcard(c, gotIt: true); return }
+        combo = 0
+        againCount += 1
+        answeredCount += 1
+    }
+
     /// A card answered: Got it (right) or Still learning. Scheduled and counted as an answer is, XP and runs too.
     @discardableResult
     func flashcard(_ c: Card, gotIt: Bool) -> Int {
@@ -1314,7 +1330,7 @@ final class StudySession: Identifiable {
     /// The same words again (web: Practice again).
     func again() -> StudySession {
         // (flashcards' words again: as a review of them, its exercises, not called flashcards)
-        StudySession(lessonId: lessonId, progress: progress, focuses: focuses, cards: source, mode: mode, title: title == Self.flashTitle ? "Review" : title)
+        StudySession(lessonId: lessonId, progress: progress, focuses: focuses, cards: source, mode: mode, title: [Self.flashTitle, Self.matchTitle].contains(title) ? "Review" : title)
     }
 }
 
