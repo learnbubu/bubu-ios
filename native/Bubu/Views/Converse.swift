@@ -283,6 +283,9 @@ struct ChatPage: View {
                 }
                 if !m.marks.isEmpty {
                     marksText(m.marks, size: 16).padding(.trailing, 50)
+                } else if m.file == nil {
+                    // (said for you: listening only, or a line skipped) its words, as his have
+                    transcript(m.turn).padding(.trailing, 50)
                 }
             }
         }
@@ -498,10 +501,18 @@ struct ChatPage: View {
         recognizer.acceptEarly = { _ in false }       // (it waits for you to let go)
         recognizer.onResult = { alts in judge(t, alts) }
         recognizer.onError = { f in
+            // (each counts as a try, so a line can always be skipped: with the microphone off, at once; the Mac, 23 Oct 2026)
             switch f {
-            case .notAllowed: note = "Allow the microphone and speech recognition in Settings to talk."
-            case .unavailable: note = "Speech recognition isn't available right now. Try again in a moment."
-            case .noSpeech: if !cancelling { note = "I didn't hear anything. Hold the button and speak." }
+            case .notAllowed:
+                note = "No problem: skip it for now, or allow the microphone and speech recognition in Settings to talk."
+                tries = max(tries, 2)
+            case .unavailable:
+                note = "Speech recognition isn't available right now. Try again in a moment."
+                tries += 1
+            case .noSpeech:
+                guard !cancelling else { return }
+                note = "I didn't hear anything. Hold the button and speak."
+                tries += 1
             }
         }
         recognizer.onEnd = { withAnimation(.easeOut(duration: 0.15)) { holding = false } }
@@ -541,7 +552,10 @@ struct ChatPage: View {
     private func skip(_ t: Turn) {
         session?.spoke(right: false)
         misses += 1
-        Speech.shared.speak(t.hanzi)
+        // (the line said for you, as a note of yours with its words, so the chat still reads through)
+        let m = Msg(kind: .you(ok: false), turn: t, seconds: Self.seconds(t.hanzi))
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { msgs.append(m) }
+        play(m)
         next()
     }
 
