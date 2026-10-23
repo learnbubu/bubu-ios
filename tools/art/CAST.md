@@ -6,10 +6,10 @@ five he talks to, drawn as people in the app's storybook style: the same chunky 
 
 All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw/cast-*.png`:
 
-- `cast-xiaoyu`: 林小雨, 22, design student and musician. Half-up bun, mustard cardigan, teal skirt, sketchbook. **Redo**:
-  the first try (now `cast-xiaoyu-v1.png`) was taller, slimmer and grainy next to the avatar, and the guitar
-  pin on her bag was odd. Her design is kept from that draft (attached as the third reference) and redrawn in the
-  avatar's proportions, with a plain bag.
+- `cast-xiaoyu`: 林小雨, 22, design student and musician. Half-up bun, mustard cardigan, teal skirt, sketchbook. **Redraw
+  of version 1** (attached as the third reference, `refs/ref-xiaoyu-v2.png`): keep everything about her and change only
+  the proportions to the avatar's measured ones: a bigger head (half her height), about 2 heads tall, shorter and much
+  thicker legs. Earlier tries: `cast-xiaoyu-v1.png`, `cast-xiaoyu-v2-sparkle.png`.
 - `cast-chenming`: 陈明, 32, chef-owner of 陈家饺子. White chef's jacket, red towel on his shoulder, a steamer of dumplings.
 - `cast-chenmama`: 陈妈妈, about 58, runs the restaurant's front. Short perm, round glasses, red apron, a bowl of soup.
 - `cast-chenbaba`: 陈爸爸, about 64, retired, loves Beijing opera and tea. Brown waistcoat, a tea flask, a walking stick.

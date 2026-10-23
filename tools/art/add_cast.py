@@ -35,9 +35,11 @@ CAST = [
      "and Mark's patient teacher. Long straight black hair, half of it tied up in a small bun, a soft fringe; small gold "
      "hoop earrings. A mustard-yellow cardigan over a white T-shirt, a teal skirt to the knee, white trainers; a plain "
      "cream canvas tote bag on her shoulder (nothing on it). Kind, bright, a happy open smile; one hand holding a small "
-     "sage-green spiral sketchbook to her chest. The last attached image is her first draft: keep her design from it "
-     "(the hair and bun, the cardigan, skirt, sketchbook and bag) but redraw her in the avatar's proportions, face and "
-     "finish."),
+     "sage-green spiral sketchbook to her chest. The last attached image is her current drawing, the owner's pick: "
+     "keep EVERYTHING about it (her design, her pose, her face and smile, the sketchbook, the plain bag, the colours) "
+     "and change only her proportions to the avatar's: a bigger head (half her whole height, wider than her "
+     "shoulders), so she's about 2 heads tall, and shorter, much thicker legs (each a quarter as wide as her head). "
+     "Eyes with the white sparkle, as in that drawing's first draft."),
     ("cast-chenming", "陈明 Chén Míng, a Chinese man of 32 from Beijing, chef and owner of a dumpling restaurant in London's "
      "Chinatown. Short black hair a little messy, a warm teasing grin, slightly tired eyes. A white chef's jacket with "
      "red buttons and the sleeves rolled up, dark trousers, a red kitchen towel over one shoulder; he holds up a small "
@@ -61,7 +63,7 @@ if __name__ == "__main__":
     jobs = json.load(open("jobs.json", encoding="utf-8"))
     jobs = [j for j in jobs if j.get("group") != "cast"]
     for name, who in CAST:
-        refs = [AV, PANDA] + (["refs/ref-xiaoyu-draft.png"] if name == "cast-xiaoyu" else [])
+        refs = [AV, PANDA] + (["refs/ref-xiaoyu-v2.png"] if name == "cast-xiaoyu" else [])
         jobs.append({"file": f"out/raw/{name}.png", "group": "cast", "size": "1024x1536", "refs": refs,
                      "prompt": REF + "Draw ONLY " + who + "\n\n" + POSE + END})
     # the five together, one lineup, to check they belong to one world (and to each other's sizes)
