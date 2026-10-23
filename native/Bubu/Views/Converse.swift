@@ -51,7 +51,7 @@ struct ConversePage: View {
             BackPill(label: "Classroom") { dismiss() }
             VStack(alignment: .leading, spacing: 2) {
                 Text("Speaking").font(.nunito(34, .black)).tracking(-0.5).foregroundStyle(Home.ink)
-                Text("Chat with 步步 in voice messages").font(.nunito(14.5, .bold)).foregroundStyle(Home.muted)
+                Text("Voice chats with Xiǎoyǔ and the Chens").font(.nunito(14.5, .bold)).foregroundStyle(Home.muted)
             }
             .frame(maxHeight: .infinity, alignment: .bottom).padding(.leading, 2).padding(.bottom, 12)
             Image("panda-speaking").resizable().scaledToFit().frame(height: 100)
@@ -171,8 +171,8 @@ struct ChatPage: View {
                     .padding(.horizontal, 12).padding(.bottom, 10)
                 }
                 .scrollIndicators(.hidden)
-                .onChange(of: msgs.count) { _, _ in withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("end", anchor: .bottom) } }
-                .onChange(of: waiting) { _, _ in withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("end", anchor: .bottom) } }
+                .onChange(of: msgs.count) { _, _ in toEnd(reader) }
+                .onChange(of: waiting) { _, _ in toEnd(reader) }
             }
             .overlay { if holding { recordingOverlay } }
             if waiting, let t = currentTurn { replyCard(t).transition(.move(edge: .bottom).combined(with: .opacity)) }
@@ -210,6 +210,15 @@ struct ChatPage: View {
     private var currentTurn: Turn? { dialogue.flatMap { turn < $0.turns.count ? $0.turns[turn] : nil } }
     private var yourLines: Int { dialogue?.turns.filter { $0.who == "you" }.count ?? 0 }
     private var saidLines: Int { msgs.filter { if case .you = $0.kind { return true } else { return false } }.count }
+
+    /// To the latest message, and again once the reply card has slid in (it takes the chat's foot: scrolled only before
+    /// it was in, the line you're answering was left under it; the Mac, 23 Oct 2026).
+    private func toEnd(_ reader: ScrollViewProxy) {
+        withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("end", anchor: .bottom) }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+            withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("end", anchor: .bottom) }
+        }
+    }
 
     // MARK: the chat's top, as WeChat's
 
@@ -287,6 +296,9 @@ struct ChatPage: View {
             }
         }
     }
+
+    /// Who's talking now: whoever's line came last (the bar says so while you wait).
+    private var talking: String { msgs.last(where: { $0.kind == .bubu })?.turn.name ?? "步步" }
 
     /// More than one of the cast talking: WeChat shows each one's name over their bubbles.
     private var isGroup: Bool { dialogue.map { ChatCast.members($0).count > 1 } ?? false }
@@ -416,7 +428,7 @@ struct ChatPage: View {
                         Image(systemName: holding ? (cancelling ? "xmark" : "waveform") : "mic.fill").font(.system(size: 15, weight: .black))
                         Text(holding ? (cancelling ? "松开 取消" : "松开 发送") : "按住 说话").font(.hanzi(17, .bold))
                     }
-                    Text(holding ? (cancelling ? "Let go to cancel" : "Let go to send") : waiting ? "Hold to talk" : "步步 is talking…")
+                    Text(holding ? (cancelling ? "Let go to cancel" : "Let go to send") : waiting ? "Hold to talk" : "\(talking) is talking…")
                         .font(.nunito(11, .heavy)).opacity(0.8)
                 }
                 .foregroundStyle(waiting ? Color.white : Home.muted)
