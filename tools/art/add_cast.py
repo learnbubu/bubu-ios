@@ -24,7 +24,7 @@ REF = ("The first attached image is the app's player avatar, made in our studio:
        "thick and a head 15% smaller.) Its face: the eyes PLAIN tall black ovals set wide apart, with no "
        "white in them (a sparkle is added to every drawing afterwards, the same on all), small arched brows, a tiny soft nose, rosy round cheeks. Its finish exactly: flat "
        "colour, no paper grain or texture, at most one soft darker tone on the hair and the clothes' folds, no outlines. "
-       "The other attached image is the app's mascot Bùbù, for the palette. Do not copy the avatar's clothes or hair. ")
+       "The second attached image is the app's mascot Bùbù, for the palette; a third, when attached, is Xiaoyu, already drawn and approved: draw this person as from the same set as her (her proportions, face, finish). Do not copy the avatar's clothes or hair. ")
 POSE = ("Standing, facing the viewer, full figure from head to shoes, arms relaxed (one doing what's described), friendly "
         "and natural, centred, filling about 85% of the height. ")
 END = "\n\n" + mp.STYLE + "\n\n" + mp.KEY
@@ -62,7 +62,8 @@ if __name__ == "__main__":
     jobs = json.load(open("jobs.json", encoding="utf-8"))
     jobs = [j for j in jobs if j.get("group") != "cast"]
     for name, who in CAST:
-        refs = [AV, PANDA] + (["refs/ref-xiaoyu-v2.png"] if name == "cast-xiaoyu" else [])
+        # (Xiaoyu, approved, 23 Oct 2026: "much closer to what we have as our char", is the model for the others)
+        refs = [AV, PANDA] + (["refs/ref-xiaoyu-v2.png"] if name == "cast-xiaoyu" else ["refs/ref-cast-xiaoyu.png"])
         jobs.append({"file": f"out/raw/{name}.png", "group": "cast", "size": "1024x1536", "refs": refs,
                      "prompt": REF + "Draw ONLY " + who + "\n\n" + POSE + END})
     # the five together, one lineup, to check they belong to one world (and to each other's sizes)

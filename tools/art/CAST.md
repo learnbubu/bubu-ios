@@ -6,10 +6,8 @@ five he talks to, drawn as people in the app's storybook style: the same chunky 
 
 All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw/cast-*.png`:
 
-- `cast-xiaoyu`: 林小雨, 22, design student and musician. Half-up bun, mustard cardigan, teal skirt, sketchbook. **Redraw
-  of version 1** (attached as the third reference, `refs/ref-xiaoyu-v2.png`): keep everything about her and change only
-  the proportions to the avatar's measured ones: a bigger head (half her height), about 2 heads tall, shorter and much
-  thicker legs. Earlier tries: `cast-xiaoyu-v1.png`, `cast-xiaoyu-v2-sparkle.png`.
+- `cast-xiaoyu`: 林小雨. **Done and approved** (`out/raw/cast-xiaoyu.png`, also `refs/ref-cast-xiaoyu.png`): the model
+  for the others, attached to each of their jobs as the third reference. Don't make her again.
 - `cast-chenming`: 陈明, 32, chef-owner of 陈家饺子. White chef's jacket, red towel on his shoulder, a steamer of dumplings.
 - `cast-chenmama`: 陈妈妈, about 58, runs the restaurant's front. Short perm, round glasses, red apron, a bowl of soup.
 - `cast-chenbaba`: 陈爸爸, about 64, retired, loves Beijing opera and tea. Brown waistcoat, a tea flask, a walking stick.
@@ -38,8 +36,8 @@ All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw
 5. Put the owner's eye sparkle in: `../sfx/.venv/Scripts/python add_sparkle.py <file>`. It finds the eyes itself and
    draws the same sparkle in each (one small tilted oval high on the right). If it says it didn't find 2 eyes, report it.
 
-Make `cast-xiaoyu` first, then **stop and report**: the owner checks the style before the rest. Then make the others and
-report.
+Xiaoyu is done. Make `cast-chenming` next, then **stop and report** (the first man, and the first of the Chens); then
+the others, then the lineup, and report.
 
 ## When all 6 are made
 
