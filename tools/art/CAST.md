@@ -23,17 +23,20 @@ the base, the avatar with his hair (the finish to match), Bùbù (the palette), 
 
 ## For each job in the group "cast", in order
 
-1. If `file` already exists, skip it.
+1. **Keep every attempt.** Never overwrite or delete an image: save each one under the next free number,
+   `cast-<name>-1.png`, `cast-<name>-2.png`, … (the job's `file` with `-1`, `-2` before `.png`), including ones drawn
+   again after a failed check. The owner compares them all and picks; the pick becomes `cast-<name>.png` later.
 2. Generate one image with your image generation tool:
    - use `prompt` exactly, word for word;
    - attach every image in `refs` as a reference, in order;
    - use the job's `size`.
-3. Save it as PNG at `file`.
+3. Save it as PNG under its number (step 1).
 4. Check the size: `../sfx/.venv/Scripts/python check_head.py <file>`. It measures the face without its hair (ear to
-   ear) against the body below it (chin to feet), next to the avatar's. If it doesn't say OK, draw it again (up to three
-   times, then report what it says). (A hand or something held right against an ear can make it read a few percent
+   ear) against the body below it (chin to feet), next to the avatar's. If it doesn't say OK, draw it again as a new
+   numbered attempt, keeping the first (up to three tries, then report what it says). (A hand or something held right against an ear can make it read a few percent
    big when it isn't: then judge by eye against the base. The approved Chén Míng read 1.14 for that reason.)
-5. Look at it next to the base, and make it once more if any of these is true:
+5. Look at it next to the base, and make it once more (a new numbered attempt, keeping this one) if any of these is
+   true:
    - the face, ears, body, legs or shoes aren't the base's shape and size;
    - more forehead shows than on the base: the hair must cover the grey's area, the fringe as low (the owner found the
      big-forehead Chén Míngs ridiculous);
@@ -48,8 +51,9 @@ the base, the avatar with his hair (the finish to match), Bùbù (the palette), 
    draws the same sparkle in each (one small tilted oval high on the right). If it says it didn't find 2 eyes, report it.
 
 Chén Míng is done and the sizing works. Make **all the rest in one batch**, without stopping: `cast-xiaoyu`,
-`cast-chenmama`, `cast-chenbaba`, `cast-duoduo` (two versions of each, saved as `cast-<name>.png` and `cast-<name>-b.png`,
-steps 1–6 for both), then `cast-lineup`. Then report, with each one's `check_head.py` result.
+`cast-chenmama`, `cast-chenbaba`, `cast-duoduo` (at least two versions of each, numbered as in step 1, plus any
+redrawn tries, steps 2–6 for every one), then `cast-lineup`. Then report: every file made, with its `check_head.py`
+result and what (if anything) was wrong with it.
 
 ## When all 6 are made
 
