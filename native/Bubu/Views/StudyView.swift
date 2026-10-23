@@ -59,9 +59,34 @@ struct StudyView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// A multiple-choice exercise stays still (no scrolling); the feedback slides up over its foot.
     /// On a small phone (an SE) it scrolls instead.
+    /// A chat step on screen (no tip or tones intro before it): shown by chatView, outside the scroll view.
+    private var chatStep: (Dialogue, [Turn])? {
+        guard !tonesIntro, tips.isEmpty, case .chat(let d, let turns) = session.current else { return nil }
+        return (d, turns)
+    }
+
+    /// A practice stone's chat: its heading, and the chat in all the room left. Not in the scroll view, nor sized from
+    /// it: there its height was measured from what it held, and its end (the Continue bar coming in as the reply card
+    /// went) looped the layout for good (the Mac, 0.2.20: frozen at 99% CPU).
+    private func chatView(_ d: Dialogue, _ turns: [Turn]) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(promptLabel).font(.nunito(25, .black)).tracking(-0.4).foregroundStyle(Color.ink)
+                .lineLimit(1).minimumScaleFactor(0.75)
+                .padding(.top, 14).padding(.bottom, 14)
+            ChatPage(dialogueId: d.id, lesson: LessonChat(
+                turns: turns, picks: session.chatPicks,
+                line: { session.chatLine(right: $0) },
+                cantTalk: { session.cantSpeak() },
+                done: { session.chatDone(); advance() }))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.bottom, 12)
+        }
+        .padding(.horizontal, 12).padding(.top, 15)
+        .id(exerciseKey)
+        .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
+    }
+
     private var fixed: Bool {
-        // a chat keeps still: it scrolls its own messages
-        if case .chat = session.current { return true }
         guard session.exercise?.kind == .choice, !preStart, case .card = session.current else { return false }
         return cardHeight >= 620
     }
@@ -78,6 +103,9 @@ struct StudyView: View {
                 VStack(spacing: 0) {
                     topBar
                     VStack(spacing: 0) {
+                        if let c = chatStep {
+                            chatView(c.0, c.1)
+                        } else {
                         ScrollViewReader { reader in
                             ScrollView(fixed ? [] : .vertical) {
                                 // spacing 0: the default stack gap (8 pt) between the exercise and the
@@ -115,6 +143,7 @@ struct StudyView: View {
                                     }
                                 }
                             }
+                        }
                         }
                         if !preStart, case .card = session.current { bottomSlot }
                     }
@@ -344,14 +373,8 @@ struct StudyView: View {
                     MeetView(cards: cards) { advance() }
                 case .match(let cards, _):
                     MatchView(session: session, cards: cards, audio: session.matchAudio) { advance() }
-                case .chat(let d, let turns):
-                    ChatPage(dialogueId: d.id, lesson: LessonChat(
-                        turns: turns, picks: session.chatPicks,
-                        line: { session.chatLine(right: $0) },
-                        cantTalk: { session.cantSpeak() },
-                        done: { session.chatDone(); advance() }))
-                        // (the chat's height: the step's, less its heading)
-                        .frame(height: max(360, scrollHeight - 100))
+                case .chat:
+                    EmptyView()                     // (see chatView: not in the scroll view)
                 case .card:
                     if let ex = session.exercise {
                         if ex.kind == .sentence {
