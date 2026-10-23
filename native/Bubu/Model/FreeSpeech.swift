@@ -70,27 +70,44 @@ enum FreeSpeech {
     /// The pinyin of a sentence from the course's own words (its chats' lines, its cards, longest first), never the
     /// model's (it wrote "mǎk" for 马克); nil if any character isn't in the course.
     static func pinyin(_ hanzi: String) -> String? {
-        var out: [String] = []
+        enum Kind { case word, punct, latin }
         let chars = Array(hanzi)
-        var i = 0
-        while i < chars.count {
+        // longest words first, backing off when a longer one leaves a character with no word (the Mac, 23 Oct 2026:
+        // taking the longest each time stranded characters in 11 of the course's lines)
+        var memo: [Int: [(String, Kind)]?] = [:]
+        func from(_ i: Int) -> [(String, Kind)]? {
+            if i >= chars.count { return [] }
+            if let m = memo[i] { return m }
+            var r: [(String, Kind)]? = nil
             let c = chars[i]
             if !Course.isHan(c) {
-                if let p = punct[c] { if out.isEmpty { out.append(p) } else { out[out.count - 1] += p } }
-                i += 1; continue
+                if let rest = from(i + 1) {
+                    if let p = punct[c] { r = [(p, .punct)] + rest }
+                    else if c.isASCII && (c.isLetter || c.isNumber) { r = [(String(c), .latin)] + rest }
+                    else { r = rest }                       // (quotes, spaces: left out)
+                }
+            } else {
+                for n in stride(from: min(lexiconLongest, chars.count - i), through: 1, by: -1) {
+                    guard let p = lexicon[String(chars[i..<(i + n)])], let rest = from(i + n) else { continue }
+                    r = [(p, .word)] + rest
+                    break
+                }
             }
-            var hit: (Int, String)? = nil
-            for n in stride(from: min(lexiconLongest, chars.count - i), through: 1, by: -1) {
-                if let p = lexicon[String(chars[i..<(i + n)])] { hit = (n, p); break }
-            }
-            guard let (n, p) = hit else { return nil }
-            out.append(p)
-            i += n
+            memo[i] = r
+            return r
         }
-        return out.isEmpty ? nil : out.joined(separator: " ")
+        guard let parts = from(0), parts.contains(where: { $0.1 == .word }) else { return nil }
+        // punctuation on the word before it, letters run together ("AI"), words spaced
+        var out = ""
+        var last: Kind?
+        for (t, k) in parts {
+            if k == .punct || (k == .latin && last == .latin) || out.isEmpty { out += t } else { out += " " + t }
+            last = k
+        }
+        return out
     }
 
-    private static let punct: [Character: String] = ["，": ",", "。": ".", "！": "!", "？": "?", "、": ",", "；": ";", "：": ":"]
+    private static let punct: [Character: String] = ["，": ",", "。": ".", "！": "!", "？": "?", "、": ",", "；": ";", "：": ":", "…": "…"]
 
     /// Each word's pinyin, as the course has it: its chats' lines split into words, and its cards.
     private static let lexicon: [String: String] = {

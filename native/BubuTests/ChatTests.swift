@@ -77,17 +77,14 @@ final class ChatTests: XCTestCase {
     }
 
     func testAPracticeStoneHasAChatOnceItsWordsAreMet() throws {
+        // every word met: the first practice stone with a chat ready
         let p = store()
-        // a practice stone whose chapter so far has a chat
-        let practice = try XCTUnwrap(course.lessons.first { l in
-            l.isPractice && course.data.dialogues.contains { course.practiceScope(l.id).contains($0.lesson) }
-        })
+        for c in course.cards { _ = p.answer(c.id, correct: true, dir: "recall", sessionStart: 0, mistakesMode: false) }
+        let practice = try XCTUnwrap(course.lessons.first { $0.isPractice && StudySession.practiceChat($0.id, p) != nil })
         // nothing met: no chat
-        XCTAssertNil(StudySession.practiceChat(practice.id, p))
-        // every word of the chapter so far met: a chat, of the chapter's, with a few of your lines
-        for c in course.practiceCards(practice.id) { _ = p.answer(c.id, correct: true, dir: "recall", sessionStart: 0, mistakesMode: false) }
+        XCTAssertNil(StudySession.practiceChat(practice.id, store()))
         let (d, turns) = try XCTUnwrap(StudySession.practiceChat(practice.id, p))
-        XCTAssertTrue(course.practiceScope(practice.id).contains(d.lesson))
+        XCTAssertTrue(StudySession.chatUnits(practice.id).contains(d.lesson))
         let mine = turns.filter { $0.who == "you" }.count
         XCTAssertTrue((1...StudySession.chatLines).contains(mine), "\(mine) of your lines")
         XCTAssertEqual(turns.last?.who, "you", "it ends on yours")

@@ -347,11 +347,20 @@ final class StudySession: Identifiable {
     /// A practice stone's chat: one of its chapter's chats so far with every word met, a few of your lines from it.
     static func practiceChat(_ lessonId: String, _ p: ProgressStore) -> (Dialogue, [Turn])? {
         let course = Course.shared
-        let scope = Set(course.practiceScope(lessonId))
-        let ready = course.data.dialogues.filter { scope.contains($0.lesson) && course.dialogueUnlocked($0) { p.srs[$0] != nil } }
+        let units = chatUnits(lessonId)
+        let ready = course.data.dialogues.filter { units.contains($0.lesson) && course.dialogueUnlocked($0) { p.srs[$0] != nil } }
         guard let d = ready.randomElement() else { return nil }
         let turns = chatSlice(d.turns)
         return turns.isEmpty ? nil : (d, turns)
+    }
+
+    /// The units a practice stone's chat may come from: its own and those of the lessons it practises ("起步1 U1", as a
+    /// chat names its unit, from a lesson's code "起步1 U1.2").
+    static func chatUnits(_ lessonId: String) -> Set<String> {
+        let course = Course.shared
+        return Set(([lessonId] + course.practiceScope(lessonId)).compactMap { id in
+            course.lessonById[id].map { $0.code.components(separatedBy: ".").first ?? $0.code }
+        })
     }
 
     /// A stretch of a chat with `mine` of your lines (all of it, with fewer): from the line before your first (what
