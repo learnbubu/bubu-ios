@@ -12,6 +12,7 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import add_sparkle  # noqa: E402
 import check_head  # noqa: E402
 import process  # noqa: E402
 
@@ -37,13 +38,12 @@ def photo(name, ground):
     src = Image.open(os.path.join(HERE, "out", "raw", f"cast-{name}.png")).convert("RGB")
     a = np.array(src).astype(int)
     top, bottom, chin, head = check_head.measure(a)
-    # sized by the face, ear to ear (grey hair, a bun or spikes don't change it): the face in the upper middle, the
-    # chin about four fifths of the way down, the shoulders under it
-    fs = check_head.face_skin(a) & head
-    rows = np.nonzero(fs.any(1))[0]
-    ears = max(rows, key=lambda y: np.ptp(np.nonzero(fs[y])[0]))
-    xs = np.nonzero(fs[ears])[0]
-    cx, width = (xs.min() + xs.max()) / 2, np.ptp(xs)
+    # centred and sized by the eyes (nothing else is mistaken for them: by the ears, a hand waved at ear height pulled
+    # 朵朵's photo off centre): the head's middle between them, its size from how far apart they are (2.72 x their
+    # distance is the face's width, ear to ear, on the others)
+    eyes = add_sparkle.find_eyes(a)
+    ex = [(b[0] + b[2]) / 2 for b in eyes]
+    cx, width = sum(ex) / 2, (ex[1] - ex[0]) * 2.72
     # every head the same size (the face's width sets the scale) and the head in the middle (the owner: "make sure
     # the head is the centred bit", "all same sizes"): the head is everything above the chin over the face, hair
     # included, whatever its colour
