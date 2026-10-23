@@ -7,7 +7,7 @@ five he talks to, drawn as people in the app's storybook style: the same chunky 
 All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw/cast-*.png`:
 
 - `cast-xiaoyu`: 林小雨, 22, design student and musician. Half-up bun, mustard cardigan, teal skirt, sketchbook. **Redo**:
-  the first try (now `cast-xiaoyu-v1.png`) was taller, slimmer, shiny-eyed and grainy next to the avatar, and the guitar
+  the first try (now `cast-xiaoyu-v1.png`) was taller, slimmer and grainy next to the avatar, and the guitar
   pin on her bag was odd. Her design is kept from that draft (attached as the third reference) and redrawn in the
   avatar's proportions, with a plain bag.
 - `cast-chenming`: 陈明, 32, chef-owner of 陈家饺子. White chef's jacket, red towel on his shoulder, a steamer of dumplings.
@@ -27,7 +27,7 @@ All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw
 4. Look at it next to the avatar (the first reference), and make it once more if any of these is true:
    - the proportions aren't the avatar's: about 2.3 heads tall, the head wider than the shoulders, short legs,
      big chunky shoes, small round mitten hands;
-   - the eyes have a white shine in them (the avatar's are plain black ovals);
+   - the eyes have no white sparkle (the owner likes it: a round one high on one side, a tiny one below);
    - there's paper grain or texture (the avatar is flat colour);
    - it has outlines, or is more detailed, realistic or anime-like than the references;
    - the person doesn't match the description (age, hair, clothes, what they hold);

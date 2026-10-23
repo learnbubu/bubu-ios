@@ -13,12 +13,13 @@ import make_prompts as mp
 AV = "refs/ref-player-avatar.png"
 PANDA = "refs/panda-waving.png"
 # (tightened after the first try, the owner, 23 Oct 2026: "make sure it matches as close to our one we made in our
-# studio": she came out taller and slimmer than the avatar, shiny-eyed and grainy)
+# studio": she came out taller and slimmer than the avatar, and grainy; the eyes' sparkle the owner kept: "I actually
+# like the eye sparkle")
 REF = ("The first attached image is the app's player avatar, made in our studio: draw this person to match it as closely "
        "as possible, as if from the same set. Its proportions exactly: about 2.3 heads tall in all, the head WIDER than "
        "the shoulders, a short compact body, short legs set a little apart, big chunky rounded shoes, short arms with "
-       "small round mitten hands, big round flat ears. Its face exactly: the eyes plain tall black ovals with NO white "
-       "highlight, set wide apart, small arched brows, a tiny soft nose, rosy round cheeks. Its finish exactly: flat "
+       "small round mitten hands, big round flat ears. Its face: the eyes tall black ovals set wide apart, each with a round "
+       "white sparkle high on one side and a tiny one below (as on the owner's pick, the last attached draft of Xiaoyu), small arched brows, a tiny soft nose, rosy round cheeks. Its finish exactly: flat "
        "colour, no paper grain or texture, at most one soft darker tone on the hair and the clothes' folds, no outlines. "
        "The other attached image is the app's mascot Bùbù, for the palette. Do not copy the avatar's clothes or hair. ")
 POSE = ("Standing, facing the viewer, full figure from head to shoes, arms relaxed (one doing what's described), friendly "
