@@ -21,8 +21,8 @@ REF = ("The first attached image is the app's player avatar, made in our studio:
        "a little over half the height across; a short compact body; short, THICK, stumpy legs, each about a quarter as "
        "wide as the head, set a little apart; big chunky rounded shoes; short arms with small round mitten hands; big "
        "round flat ears. (Slim legs and a smaller head are the mistakes to avoid: the first drafts had legs half as "
-       "thick and a head 15% smaller.) Its face: the eyes tall black ovals set wide apart, each with one white "
-       "sparkle, a small tilted oval high on the right of the eye (the owner's pick), small arched brows, a tiny soft nose, rosy round cheeks. Its finish exactly: flat "
+       "thick and a head 15% smaller.) Its face: the eyes PLAIN tall black ovals set wide apart, with no "
+       "white in them (a sparkle is added to every drawing afterwards, the same on all), small arched brows, a tiny soft nose, rosy round cheeks. Its finish exactly: flat "
        "colour, no paper grain or texture, at most one soft darker tone on the hair and the clothes' folds, no outlines. "
        "The other attached image is the app's mascot Bùbù, for the palette. Do not copy the avatar's clothes or hair. ")
 POSE = ("Standing, facing the viewer, full figure from head to shoes, arms relaxed (one doing what's described), friendly "
@@ -38,8 +38,7 @@ CAST = [
      "sage-green spiral sketchbook to her chest. The last attached image is her current drawing, the owner's pick: "
      "keep EVERYTHING about it (her design, her pose, her face and smile, the sketchbook, the plain bag, the colours) "
      "and change only her proportions to the avatar's: a bigger head (half her whole height, wider than her "
-     "shoulders), so she's about 2 heads tall, and shorter, much thicker legs (each a quarter as wide as her head). "
-     "Eyes with the white sparkle, as in that drawing's first draft."),
+     "shoulders), so she's about 2 heads tall, and shorter, much thicker legs (each a quarter as wide as her head)."),
     ("cast-chenming", "陈明 Chén Míng, a Chinese man of 32 from Beijing, chef and owner of a dumpling restaurant in London's "
      "Chinatown. Short black hair a little messy, a warm teasing grin, slightly tired eyes. A white chef's jacket with "
      "red buttons and the sleeves rolled up, dark trousers, a red kitchen towel over one shoulder; he holds up a small "

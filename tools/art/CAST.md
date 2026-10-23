@@ -28,14 +28,15 @@ All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw
    - the proportions aren't the avatar's (measured on it): the head is half the figure's height (about 2 heads
      tall), wider than the shoulders; short, thick, stumpy legs, each about a quarter as wide as the head; big chunky
      shoes; small round mitten hands. Slim legs and a smaller head are the usual misses;
-   - the eyes have no white sparkle (the owner's pick: one small tilted oval high on the right of each eye; if a
-     drawing lacks it, `python add_sparkle.py <png> <eye box> <eye box>` puts it in);
+   - the eyes aren't plain black ovals (no white in them: the sparkle is added afterwards, step 5);
    - there's paper grain or texture (the avatar is flat colour);
    - it has outlines, or is more detailed, realistic or anime-like than the references;
    - the person doesn't match the description (age, hair, clothes, what they hold);
    - it isn't one full figure, facing the viewer, head to shoes;
    - there's any text, letter or number (none on the chef's jacket or the apron);
    - the backdrop isn't one flat solid magenta.
+5. Put the owner's eye sparkle in: `../sfx/.venv/Scripts/python add_sparkle.py <file>`. It finds the eyes itself and
+   draws the same sparkle in each (one small tilted oval high on the right). If it says it didn't find 2 eyes, report it.
 
 Make `cast-xiaoyu` first, then **stop and report**: the owner checks the style before the rest. Then make the others and
 report.
