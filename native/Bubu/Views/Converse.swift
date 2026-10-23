@@ -150,6 +150,7 @@ struct ChatPage: View {
     @State private var ended = false
     /// speaking freely, judged by the tutor (FreeSpeech): the phone has Apple's on-phone model, and the chat's yours to say
     @State private var free = false
+    /// the "Need help?" pop-up, with an example
     @State private var showExample = false
     /// what's heard as you speak freely
     @State private var interimText = ""
@@ -455,45 +456,32 @@ struct ChatPage: View {
 
     // MARK: your turn
 
-    /// Speaking freely: what to say, in English, to say your own way; an example to show if you want one; what's heard
-    /// as you speak; and after two tries, the example to use and move on.
+    /// Speaking freely: what to say, in English, to say your own way; what's heard as you speak; help if you want it
+    /// (the owner: "a pop up you press, need help?": the example's never on the card); after two tries, skip it.
     private func freeCard(_ t: Turn) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack {
                 Text("SAY IT YOUR WAY").font(.nunito(11, .black)).tracking(1.2).foregroundStyle(Home.teal)
                 Spacer()
-                Button(showExample ? "Hide the example" : "Show an example") { withAnimation(.easeOut(duration: 0.2)) { showExample.toggle() } }
-                    .font(.nunito(12.5, .black)).foregroundStyle(Home.teal).buttonStyle(.plain)
+                Button { showExample = true } label: {
+                    Label("Need help?", systemImage: "lightbulb.fill")
+                        .font(.nunito(12.5, .black)).foregroundStyle(Home.teal)
+                        .padding(.horizontal, 10).padding(.vertical, 5)
+                        .background(Home.tealSoft, in: Capsule())
+                }
+                .buttonStyle(.plain)
             }
             Text(t.en).font(.nunito(20, .black)).foregroundStyle(Home.ink).fixedSize(horizontal: false, vertical: true)
             if !interimText.isEmpty {
                 Text(interimText).font(.hanzi(20, .medium)).foregroundStyle(ChatLook.heard)
-            } else if tries == 0 && !showExample {
+            } else if tries == 0 {
                 Text("Any way of saying it works: 步步 will tell you how it sounds.").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted)
-            }
-            if showExample {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 1) {
-                        ToneText(hanzi: t.hanzi, pinyin: t.pinyin, size: 19, weight: .medium)
-                        PinyinText(pinyin: Self.spaced(t.pinyin), size: 12.5, weight: .semibold)
-                    }
-                    Spacer(minLength: 6)
-                    Button { Speech.shared.speak(t.hanzi) } label: {
-                        Image(systemName: "speaker.wave.2.fill").font(.system(size: 13)).foregroundStyle(Home.teal)
-                            .frame(width: 30, height: 30).background(ChatLook.card, in: Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Hear the example")
-                }
-                .padding(10)
-                .background(Home.tealSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .transition(.opacity)
             }
             if let note {
                 Text(note).font(.nunito(13, .bold)).foregroundStyle(ChatLook.red)
             }
             if tries >= 2 {
-                Button("Use the example and carry on") { skip(t) }
+                Button("Skip this one") { skip(t) }
                     .font(.nunito(14, .black)).foregroundStyle(Home.teal).padding(.top, 2)
                     .buttonStyle(.plain)
             }
@@ -508,6 +496,49 @@ struct ChatPage: View {
             }
         }
         .padding(.horizontal, 12).padding(.bottom, 12)
+        .sheet(isPresented: $showExample) { helpSheet(t) }
+    }
+
+    /// The pop-up help: one way of saying it, to hear (slowly too), then back to say it your way.
+    private func helpSheet(_ t: Turn) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("ONE WAY TO SAY IT").font(.nunito(11, .black)).tracking(1.2).foregroundStyle(Home.teal)
+            Text(t.en).font(.nunito(15, .bold)).foregroundStyle(Home.muted).fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 2) {
+                ToneText(hanzi: t.hanzi, pinyin: t.pinyin, size: 26, weight: .medium)
+                PinyinText(pinyin: Self.spaced(t.pinyin), size: 15, weight: .semibold)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Home.tealSoft, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            HStack(spacing: 10) {
+                hearButton("Hear it", "speaker.wave.2.fill") { Speech.shared.speak(t.hanzi) }
+                hearButton("Slowly", "tortoise.fill") { Speech.shared.speak(t.hanzi, slow: true) }
+                Spacer()
+                Button { showExample = false } label: {
+                    Text("Got it").font(.nunito(16, .black)).foregroundStyle(.white)
+                        .padding(.horizontal, 22).padding(.vertical, 11)
+                        .background(Home.teal, in: Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+            Text("Say it like this, or any way of your own.").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Home.bg.ignoresSafeArea())
+        .presentationDetents([.height(300)])
+        .presentationDragIndicator(.visible)
+    }
+
+    private func hearButton(_ label: String, _ icon: String, _ act: @escaping () -> Void) -> some View {
+        Button(action: act) {
+            Label(label, systemImage: icon).font(.nunito(14, .black)).foregroundStyle(Home.teal)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(ChatLook.card, in: Capsule())
+                .overlay(Capsule().stroke(Home.line, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
     }
 
     /// The line to say, over the bar: green as it's heard while you hold.
