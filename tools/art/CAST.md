@@ -8,7 +8,8 @@ All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw
 
 - `cast-xiaoyu`: 林小雨. **Done and approved** (`out/raw/cast-xiaoyu.png`, also `refs/ref-cast-xiaoyu.png`): the model
   for the others, attached to each of their jobs as the third reference. Don't make her again.
-- `cast-chenming`: 陈明, 32, chef-owner of 陈家饺子. White chef's jacket, red towel on his shoulder, a steamer of dumplings.
+- `cast-chenming`: 陈明, 32, chef-owner of 陈家饺子. **Done and approved** (version 1, black hair, hand on hip; its head
+  locked to 48% by `fit_head.py` and the sparkle added: `out/raw/cast-chenming.png`; as drawn: `cast-chenming-drawn.png`).
 - `cast-chenmama`: 陈妈妈, about 58, runs the restaurant's front. Short perm, round glasses, red apron, a bowl of soup.
 - `cast-chenbaba`: 陈爸爸, about 64, retired, loves Beijing opera and tea. Brown waistcoat, a tea flask, a walking stick.
 - `cast-duoduo`: 朵朵, 8, cheeky. Two hair buns with red ties, striped top and dungarees, yellow wellies, dumpling backpack.
@@ -33,11 +34,14 @@ All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw
    - it isn't one full figure, facing the viewer, head to shoes;
    - there's any text, letter or number (none on the chef's jacket or the apron);
    - the backdrop isn't one flat solid magenta.
-5. Put the owner's eye sparkle in: `../sfx/.venv/Scripts/python add_sparkle.py <file>`. It finds the eyes itself and
+5. Lock the head's size: `../sfx/.venv/Scripts/python fit_head.py <file>`. It measures the head as a share of the
+   figure's height and scales it about the chin to 48% (Xiaoyu's; the avatar's is 50%), so every character's head is the
+   same size whatever Codex drew. (For 朵朵, the 8-year-old, give `0.52`: a child's head is bigger for her body.)
+6. Put the owner's eye sparkle in: `../sfx/.venv/Scripts/python add_sparkle.py <file>`. It finds the eyes itself and
    draws the same sparkle in each (one small tilted oval high on the right). If it says it didn't find 2 eyes, report it.
 
-Xiaoyu is done. Make `cast-chenming` next, then **stop and report** (the first man, and the first of the Chens); then
-the others, then the lineup, and report.
+Xiaoyu and Chen Ming are done. Make `cast-chenmama`, `cast-chenbaba` and `cast-duoduo` (steps 1–6 each), then the
+lineup, and report. Two versions of each, as before, so the owner can choose.
 
 ## When all 6 are made
 
