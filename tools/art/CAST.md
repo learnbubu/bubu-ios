@@ -6,7 +6,10 @@ five he talks to, drawn as people in the app's storybook style: the same chunky 
 
 All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw/cast-*.png`:
 
-- `cast-xiaoyu`: 林小雨, 22, design student and musician. Half-up bun, mustard cardigan, teal skirt, sketchbook.
+- `cast-xiaoyu`: 林小雨, 22, design student and musician. Half-up bun, mustard cardigan, teal skirt, sketchbook. **Redo**:
+  the first try (now `cast-xiaoyu-v1.png`) was taller, slimmer, shiny-eyed and grainy next to the avatar, and the guitar
+  pin on her bag was odd. Her design is kept from that draft (attached as the third reference) and redrawn in the
+  avatar's proportions, with a plain bag.
 - `cast-chenming`: 陈明, 32, chef-owner of 陈家饺子. White chef's jacket, red towel on his shoulder, a steamer of dumplings.
 - `cast-chenmama`: 陈妈妈, about 58, runs the restaurant's front. Short perm, round glasses, red apron, a bowl of soup.
 - `cast-chenbaba`: 陈爸爸, about 64, retired, loves Beijing opera and tea. Brown waistcoat, a tea flask, a walking stick.
@@ -21,8 +24,11 @@ All 6 jobs are in the group `"cast"` in `tools/art/jobs.json`, saved as `out/raw
    - attach every image in `refs` as a reference, in order;
    - use the job's `size`.
 3. Save it as PNG at `file`.
-4. Look at it, and make it once more if any of these is true:
-   - the proportions aren't the avatar's (a big round head about as wide as the shoulders, a small body);
+4. Look at it next to the avatar (the first reference), and make it once more if any of these is true:
+   - the proportions aren't the avatar's: about 2.3 heads tall, the head wider than the shoulders, short legs,
+     big chunky shoes, small round mitten hands;
+   - the eyes have a white shine in them (the avatar's are plain black ovals);
+   - there's paper grain or texture (the avatar is flat colour);
    - it has outlines, or is more detailed, realistic or anime-like than the references;
    - the person doesn't match the description (age, hair, clothes, what they hold);
    - it isn't one full figure, facing the viewer, head to shoes;

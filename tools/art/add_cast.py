@@ -12,10 +12,15 @@ import make_prompts as mp
 
 AV = "refs/ref-player-avatar.png"
 PANDA = "refs/panda-waving.png"
-REF = ("The attached images are the app's player avatar (a person) and its mascot Bùbù: draw this person in exactly the "
-       "avatar's style and proportions: a big round head about as wide as the shoulders, a small rounded body, stubby "
-       "rounded hands and simple shoes, big dark oval eyes with a light catch, rosy cheeks, a small simple mouth, no "
-       "outlines, flat colour with two or three soft tones of shading. Do not copy the avatar's clothes or hair. ")
+# (tightened after the first try, the owner, 23 Oct 2026: "make sure it matches as close to our one we made in our
+# studio": she came out taller and slimmer than the avatar, shiny-eyed and grainy)
+REF = ("The first attached image is the app's player avatar, made in our studio: draw this person to match it as closely "
+       "as possible, as if from the same set. Its proportions exactly: about 2.3 heads tall in all, the head WIDER than "
+       "the shoulders, a short compact body, short legs set a little apart, big chunky rounded shoes, short arms with "
+       "small round mitten hands, big round flat ears. Its face exactly: the eyes plain tall black ovals with NO white "
+       "highlight, set wide apart, small arched brows, a tiny soft nose, rosy round cheeks. Its finish exactly: flat "
+       "colour, no paper grain or texture, at most one soft darker tone on the hair and the clothes' folds, no outlines. "
+       "The other attached image is the app's mascot Bùbù, for the palette. Do not copy the avatar's clothes or hair. ")
 POSE = ("Standing, facing the viewer, full figure from head to shoes, arms relaxed (one doing what's described), friendly "
         "and natural, centred, filling about 85% of the height. ")
 END = "\n\n" + mp.STYLE + "\n\n" + mp.KEY
@@ -24,9 +29,11 @@ END = "\n\n" + mp.STYLE + "\n\n" + mp.KEY
 CAST = [
     ("cast-xiaoyu", "林小雨 Lín Xiǎoyǔ, a young Chinese woman of 22 from Chengdu, a design student in London, a musician "
      "and Mark's patient teacher. Long straight black hair, half of it tied up in a small bun, a soft fringe; small gold "
-     "hoop earrings. A mustard-yellow cardigan over a white T-shirt, a teal skirt to the knee, white trainers; a canvas "
-     "tote bag with a little guitar pin on it. Kind, bright, a gentle smile; one hand holding a small sketchbook to her "
-     "chest."),
+     "hoop earrings. A mustard-yellow cardigan over a white T-shirt, a teal skirt to the knee, white trainers; a plain "
+     "cream canvas tote bag on her shoulder (nothing on it). Kind, bright, a happy open smile; one hand holding a small "
+     "sage-green spiral sketchbook to her chest. The last attached image is her first draft: keep her design from it "
+     "(the hair and bun, the cardigan, skirt, sketchbook and bag) but redraw her in the avatar's proportions, face and "
+     "finish."),
     ("cast-chenming", "陈明 Chén Míng, a Chinese man of 32 from Beijing, chef and owner of a dumpling restaurant in London's "
      "Chinatown. Short black hair a little messy, a warm teasing grin, slightly tired eyes. A white chef's jacket with "
      "red buttons and the sleeves rolled up, dark trousers, a red kitchen towel over one shoulder; he holds up a small "
@@ -50,7 +57,8 @@ if __name__ == "__main__":
     jobs = json.load(open("jobs.json", encoding="utf-8"))
     jobs = [j for j in jobs if j.get("group") != "cast"]
     for name, who in CAST:
-        jobs.append({"file": f"out/raw/{name}.png", "group": "cast", "size": "1024x1536", "refs": [AV, PANDA],
+        refs = [AV, PANDA] + (["refs/ref-xiaoyu-draft.png"] if name == "cast-xiaoyu" else [])
+        jobs.append({"file": f"out/raw/{name}.png", "group": "cast", "size": "1024x1536", "refs": refs,
                      "prompt": REF + "Draw ONLY " + who + "\n\n" + POSE + END})
     # the five together, one lineup, to check they belong to one world (and to each other's sizes)
     lineup = "; ".join(w.split(",")[0] for _, w in CAST)
