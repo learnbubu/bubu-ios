@@ -26,6 +26,11 @@ final class Recognizer {
     /// How loud the microphone is, 0…1, with every buffer heard (a few dozen times a second; the
     /// speaking button's waveform).
     var onLevel: (Float) -> Void = { _ in }
+    /// Where to keep what's heard, as a sound file (Speaking's voice notes play yours back); nil keeps nothing.
+    var recordTo: URL?
+    /// Settles by itself once you've paused (off for hold-to-talk: it waits for you to let go).
+    var settlesOnPause = true
+    private var file: AVAudioFile?
 
     var isAvailable: Bool { recognizer?.isAvailable ?? false }
 
@@ -62,8 +67,11 @@ final class Recognizer {
                 guard format.sampleRate > 0, format.channelCount > 0 else { onError(.unavailable); end(); return }
                 input.removeTap(onBus: 0)
                 let report = onLevel
+                file = recordTo.flatMap { try? AVAudioFile(forWriting: $0, settings: format.settings) }
+                let keep = file
                 input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak req] buf, _ in
                     req?.append(buf)
+                    try? keep?.write(from: buf)
                     let level = Recognizer.level(of: buf)
                     DispatchQueue.main.async { report(level) }
                 }
@@ -94,6 +102,7 @@ final class Recognizer {
             onInterim(alts)
             if acceptEarly(alts) { return deliver(alts) }
             // the recogniser doesn't stop on silence: settle once you've paused
+            guard settlesOnPause else { return }
             quiet?.cancel()
             quiet = Task { [weak self] in
                 try? await Task.sleep(for: .milliseconds(1400))
@@ -137,6 +146,7 @@ final class Recognizer {
         finished = true
         quiet?.cancel(); watchdog?.cancel()
         if engine.isRunning { engine.stop(); engine.inputNode.removeTap(onBus: 0) }
+        file = nil      // (closes the recording)
         request?.endAudio()
         task?.cancel()
         task = nil; request = nil

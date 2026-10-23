@@ -1104,7 +1104,7 @@ final class StudySession: Identifiable {
         // a lesson comes in steps (its batches of new words): one done, more to go
         let total = mode == .lesson ? Self.lessonSteps(lessonId, progress).total : 0
         let stepDone = left > 0 && stepAtStart > 0 && stepAtStart < total
-        let title = self.title == Self.flashTitle ? "Flashcards done!" : self.title == Self.matchTitle ? "Matching done!" : mode == .quiz ? "Quiz complete" : mode == .mistakes ? "Mistakes practised" : [.review, .trouble].contains(mode) ? "Review complete"
+        let title = self.title == Self.flashTitle ? "Flashcards done!" : self.title == Self.matchTitle ? "Matching done!" : self.title == Self.chatTitle ? "Chat done!" : mode == .quiz ? "Quiz complete" : mode == .mistakes ? "Mistakes practised" : [.review, .trouble].contains(mode) ? "Review complete"
             : played ? (self.title == "Chapter review" ? "Chapter review done!" : "Practice done!")
             : justFinished ? "Lesson complete!" : stepDone ? "Step \(stepAtStart) of \(total) done" : "Session complete"
         let seconds = Int(((progress.now() - start) / 1000).rounded())
@@ -1280,6 +1280,27 @@ final class StudySession: Identifiable {
     }
     static let matchTitle = "Match"
 
+    /// Speaking's chats with Bùbù kept as a session too: each line you say counts as a spoken answer, and the chat ends
+    /// on the lesson's done screen. Its words (for the session's own count) are those of your lines.
+    static func chatting(_ p: ProgressStore, _ d: Dialogue) -> StudySession {
+        let course = Course.shared
+        var seen = Set<String>()
+        let words = d.turns.filter { $0.who == "you" }.flatMap { t in
+            Sentence.segment(hanzi: t.hanzi, pinyin: t.pinyin)?.map(\.hanzi) ?? t.hanzi.filter(Course.isHan).map { String($0) }
+        }
+        let cards = words.compactMap { w in course.cards.first { $0.word.hanzi == w && !$0.isSentence } }.filter { seen.insert($0.id).inserted }
+        return StudySession(lessonId: "", progress: p, cards: cards.isEmpty ? Array(course.cards.prefix(1)) : cards, mode: .review, title: chatTitle)
+    }
+    static let chatTitle = "Chat"
+
+    /// A line of yours said in a chat: heard (right), or not after its tries (it breaks the run).
+    func spoke(right: Bool) {
+        progress.holdSaves()
+        defer { progress.releaseSaves() }
+        if !right { combo = 0 }
+        counted(right, dir: "speak")
+    }
+
     /// A pair tapped in the Classroom's Match: a right one is a right answer (scheduled, XP, the run, quests); a wrong
     /// one breaks the run and counts against the accuracy, but no word is marked forgotten (as a lesson's pairs, a
     /// wrong pair is two tiles, not a word not known).
@@ -1296,6 +1317,12 @@ final class StudySession: Identifiable {
         progress.holdSaves()
         defer { progress.releaseSaves() }
         progress.review(c.id, gotIt ? .good : .again)
+        return counted(gotIt, dir: "recognize")
+    }
+
+    /// An answer counted as a lesson's are: the day's reviews, XP and the run, a bun back, the quests.
+    @discardableResult
+    private func counted(_ gotIt: Bool, dir: String) -> Int {
         progress.recordReview()
         var xp = 0
         if gotIt {
@@ -1312,7 +1339,7 @@ final class StudySession: Identifiable {
         if gotIt && earnsBuns && progress.earnBun() { bunsEarned += 1 }
         sessionXP += xp
         let qMark = progress.xpCounter
-        progress.questEvent("recognize", correct: gotIt)
+        progress.questEvent(dir, correct: gotIt)
         xp += progress.xpCounter - qMark; sessionXP += progress.xpCounter - qMark
         answeredCount += 1
         stepsDone += 1
@@ -1330,7 +1357,7 @@ final class StudySession: Identifiable {
     /// The same words again (web: Practice again).
     func again() -> StudySession {
         // (flashcards' words again: as a review of them, its exercises, not called flashcards)
-        StudySession(lessonId: lessonId, progress: progress, focuses: focuses, cards: source, mode: mode, title: [Self.flashTitle, Self.matchTitle].contains(title) ? "Review" : title)
+        StudySession(lessonId: lessonId, progress: progress, focuses: focuses, cards: source, mode: mode, title: [Self.flashTitle, Self.matchTitle, Self.chatTitle].contains(title) ? "Review" : title)
     }
 }
 
