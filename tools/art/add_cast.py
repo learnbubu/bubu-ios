@@ -19,13 +19,12 @@ BASE = "refs/ref-cast-base.png"            # the studio avatar, no hair, on the 
 AV = "refs/ref-player-avatar.png"          # the studio avatar as he is
 PANDA = "refs/panda-waving.png"            # Bùbù, for the palette
 
-BRIEF = ("The FIRST attached image is the base: our studio avatar with no hair. Draw this person ON that base, exactly: "
-         "keep its head shape and size, its face (where the eyes, nose, mouth and cheeks sit, and how big), its ears, "
-         "its body, arms, legs and shoes, and its size and place on the canvas. Then give them their own hair, clothes "
-         "and what they hold, as described: the hair sits on top of the base's head (it may add height and cover the "
-         "tops of the ears) and its fringe comes DOWN over the forehead to the brows, as the avatar's does (the second "
-         "image): never a high bare forehead (the base's bald head is tall; the hair hides the top of it). The face "
-         "stays exactly the base's size. "
+BRIEF = ("The FIRST attached image is the base: our studio avatar with his hair as a plain GREY shape. Draw this person "
+         "ON that base, exactly: keep its head shape and size, its face (where the eyes, nose, mouth and cheeks sit, and "
+         "how big), its ears, its body, arms, legs and shoes, and its size and place on the canvas. Then replace the grey "
+         "with this person's own hair, covering at least the same area: the fringe comes down just as low over the "
+         "forehead (only as much forehead shows as on the base), and the hair may be bigger, longer or higher. Then their "
+         "own clothes and what they hold, as described. "
          "The SECOND attached image is the same avatar with his hair: the finish to match, flat colour, no paper grain "
          "or texture, at most one soft darker tone on the hair and the clothes' folds, no outlines. "
          "The THIRD is the app's mascot Bùbù, for the palette. "
