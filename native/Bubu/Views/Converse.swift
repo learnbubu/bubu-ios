@@ -692,42 +692,45 @@ struct ChatPhoto: View {
     }
 }
 
-/// A chat's photo in the list: the one person's; two people's overlapping; or for a bigger group, WeChat's grid of its
-/// members' (up to four in a square, more in threes), on a cream tile.
+/// A chat's photo in the list: the one person's, or for a group their round photos overlapping (the owner, 23 Oct 2026:
+/// "instead of the box, more like this for two people", then "overlapping for 3+ too and more"): two side by side, the
+/// second in front; three, two behind and one in front; four in a square; five or more, three and how many more.
 struct ChatGroupPhoto: View {
     let members: [String]
     var size: CGFloat
+
+    /// Each photo's place, as shares of the slot (its middle), from the back to the front, and its size.
+    private var layout: (spots: [CGPoint], d: CGFloat) {
+        switch members.count {
+        case 2: return ([CGPoint(x: 0.34, y: 0.34), CGPoint(x: 0.66, y: 0.66)], 0.68)
+        case 3: return ([CGPoint(x: 0.3, y: 0.32), CGPoint(x: 0.7, y: 0.32), CGPoint(x: 0.5, y: 0.7)], 0.6)
+        default: return ([CGPoint(x: 0.3, y: 0.3), CGPoint(x: 0.7, y: 0.3), CGPoint(x: 0.3, y: 0.7), CGPoint(x: 0.7, y: 0.7)], 0.58)
+        }
+    }
+
     var body: some View {
         if members.count <= 1 {
             ChatPhoto(who: members.first, size: size)
-        } else if members.count == 2 {
-            // two: their round photos side by side, overlapping a little, the second in front (the owner, 23 Oct 2026:
-            // "instead of the box, more like this for two people")
-            let d = size * 0.68
-            ZStack(alignment: .topLeading) {
-                ChatPhoto(who: members[0], size: d)
-                ChatPhoto(who: members[1], size: d).offset(x: size - d, y: size - d)
-            }
-            .frame(width: size, height: size, alignment: .topLeading)
         } else {
-            let cols = members.count <= 4 ? 2 : 3
-            let gap: CGFloat = 2, pad: CGFloat = 3
-            let cell = (size - pad * 2 - gap * CGFloat(cols - 1)) / CGFloat(cols)
-            let rows = Int((Double(members.count) / Double(cols)).rounded(.up))
-            VStack(spacing: gap) {
-                ForEach(0..<rows, id: \.self) { r in
-                    HStack(spacing: gap) {
-                        ForEach(Array(members.dropFirst(r * cols).prefix(cols)), id: \.self) { n in
-                            Image(ChatCast.photo(n)).resizable().scaledToFill().frame(width: cell, height: cell)
-                                .clipShape(RoundedRectangle(cornerRadius: cell * 0.22, style: .continuous))
-                        }
-                    }
+            let (spots, k) = layout
+            let d = size * k
+            // (five or more: the last place is how many more)
+            let shown = members.count > 4 ? Array(members.prefix(3)) : members
+            ZStack(alignment: .topLeading) {
+                ForEach(Array(shown.enumerated()), id: \.offset) { i, n in
+                    ChatPhoto(who: n, size: d)
+                        .offset(x: spots[i].x * size - d / 2, y: spots[i].y * size - d / 2)
+                }
+                if members.count > 4 {
+                    Text("+\(members.count - 3)").font(.nunito(d * 0.36, .black)).foregroundStyle(Home.teal)
+                        .frame(width: d, height: d)
+                        .background(Home.tealSoft, in: Circle())
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .shadow(color: Home.ink.opacity(0.08), radius: 2, y: 1)
+                        .offset(x: spots[3].x * size - d / 2, y: spots[3].y * size - d / 2)
                 }
             }
-            .frame(width: size, height: size)
-            .background(ChatLook.card, in: RoundedRectangle(cornerRadius: size * 0.26, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: size * 0.26, style: .continuous).stroke(Home.line, lineWidth: 1.5))
-            .shadow(color: Home.ink.opacity(0.08), radius: 2, y: 1)
+            .frame(width: size, height: size, alignment: .topLeading)
         }
     }
 }
