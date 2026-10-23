@@ -396,6 +396,15 @@ struct ChatPage: View {
                 if !v.spotOn {
                     Text(v.comment).font(.nunito(13.5, .bold)).foregroundStyle(Home.ink).fixedSize(horizontal: false, vertical: true)
                 }
+                // the words it's about: never characters alone (the owner, 23 Oct 2026)
+                ForEach(v.words, id: \.hanzi) { w in
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text(w.hanzi).font(.hanzi(16, .medium)).foregroundStyle(Home.ink)
+                        if let py = w.pinyin { Text(py).font(.nunito(12.5, .bold)).foregroundStyle(Color(UIColor(hex: 0xB7822E))) }
+                        Text("“\(w.en)”").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
                 if let b = v.better {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(v.works ? "ALSO NATURAL" : "TRY SAYING").font(.nunito(10.5, .black)).tracking(1).foregroundStyle(Home.teal)

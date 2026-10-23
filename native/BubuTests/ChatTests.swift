@@ -148,4 +148,22 @@ final class ChatTests: XCTestCase {
         // a character the course doesn't have: no pinyin rather than a guess
         XCTAssertNil(FreeSpeech.pinyin("龘"))
     }
+
+    func testTheTutorNeverLeavesChineseUnexplained() {
+        // a word of the course in the comment: out of the sentence, listed with its pinyin and meaning
+        let known = course.cards.first { !$0.isSentence && $0.word.hanzi.count == 2 }!
+        let (text, words) = FreeSpeech.explained(comment: "Nice try, but “\(known.word.hanzi)” doesn't fit here.", named: [])
+        XCTAssertFalse(text.contains(where: Course.isHan), text)
+        XCTAssertTrue(text.contains("that word"))
+        XCTAssertEqual(words.first?.hanzi, known.word.hanzi.filter(Course.isHan))
+        XCTAssertEqual(words.first?.en, known.word.gloss)
+        XCTAssertNotNil(words.first?.pinyin)
+        // a misheard word nobody explained: not shown at all
+        let (t2, w2) = FreeSpeech.explained(comment: "You said 龘龘 there.", named: [])
+        XCTAssertFalse(t2.contains("龘"))
+        XCTAssertTrue(w2.isEmpty)
+        // a word the tutor named, with its meaning: listed with it
+        let (_, w3) = FreeSpeech.explained(comment: "Use the word for student.", named: [("龘", "a test word")])
+        XCTAssertEqual(w3.first?.en, "a test word")
+    }
 }

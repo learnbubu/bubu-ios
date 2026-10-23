@@ -18,6 +18,15 @@ struct SpeakingVerdict: Equatable {
     var betterPinyin: String?
     /// it was the example, or near enough, without asking the tutor
     var spotOn = false
+    /// the Chinese words the comment is about, each with its pinyin and meaning (never a word left unexplained: the
+    /// owner, 23 Oct 2026, "only the hanzi, no clue what it meant")
+    var words: [SpeakingWord] = []
+}
+
+struct SpeakingWord: Equatable {
+    let hanzi: String
+    let pinyin: String?
+    let en: String
 }
 
 enum FreeSpeech {
@@ -124,6 +133,43 @@ enum FreeSpeech {
     }()
     private static let lexiconLongest = lexicon.keys.map(\.count).max() ?? 1
 
+    /// Each of the course's words, by its characters: its pinyin and its meaning.
+    private static let glossary: [String: (pinyin: String, en: String)] = {
+        var d: [String: (pinyin: String, en: String)] = [:]
+        for c in Course.shared.cards where !c.isSentence {
+            let h = c.word.hanzi.filter(Course.isHan)
+            if !h.isEmpty && d[h] == nil { d[h] = (c.word.pinyin, c.word.gloss) }
+        }
+        return d
+    }()
+
+    /// The tutor's comment kept to English, and the Chinese it's about listed with pinyin and meaning: the words it
+    /// named (their meaning from the course where it has them), then any Chinese left in the comment (taken out of it,
+    /// listed when the course knows it; a misheard word with no meaning given isn't shown at all).
+    static func explained(comment: String, named: [(hanzi: String, en: String)]) -> (String, [SpeakingWord]) {
+        var words: [SpeakingWord] = []
+        func add(_ h: String, _ en: String?) {
+            let h = h.filter(Course.isHan)
+            guard !h.isEmpty, !words.contains(where: { $0.hanzi == h }) else { return }
+            let g = glossary[h]
+            guard let meaning = g?.en ?? en.flatMap({ $0.isEmpty ? nil : $0 }) else { return }
+            words.append(SpeakingWord(hanzi: h, pinyin: g?.pinyin ?? pinyin(h), en: meaning))
+        }
+        for w in named { add(w.hanzi, w.en) }
+        // Chinese in the comment: out of the sentence ("that word"), listed below it
+        var text = ""
+        var run = ""
+        for ch in comment {
+            if Course.isHan(ch) { run.append(ch); continue }
+            if !run.isEmpty { add(run, nil); text += "that word"; run = "" }
+            text.append(ch)
+        }
+        if !run.isEmpty { add(run, nil); text += "that word" }
+        // (quotes and brackets left empty around a word taken out)
+        text = text.replacingOccurrences(of: #"[“"「『(（]\s*that word\s*[”"」』)）]"#, with: "that word", options: .regularExpression)
+        return (text, words)
+    }
+
     static let instructions = """
     You are a warm, encouraging Mandarin tutor for a beginner learning Chinese in an app. The learner is in a chat \
     conversation and speaks a reply aloud; you see what speech recognition heard (simplified characters; it may write a \
@@ -131,8 +177,11 @@ enum FreeSpeech {
     never mention them. If what was heard is not Chinese, it does not work. Decide whether their reply is sensible, \
     understandable Chinese that fits the conversation and says roughly what they meant. It does NOT have to match the \
     example: any natural way of saying it works. Be generous to a beginner: small slips still work if the meaning is \
-    clear. Write your comment in plain English, one or two short sentences, kind and specific (what was good, or what \
-    to change). Give a better version only if a native speaker would say it differently or there is a mistake.
+    clear. Write your comment in plain English only, one or two short sentences, kind and specific (what was good, or \
+    what to change). Never put Chinese characters in the comment: describe a word in English instead ("the word for \
+    teacher"), and list each Chinese word you talk about under words, with its English meaning. Speech recognition \
+    can mishear, so never repeat or dwell on a strange or rude word; just say that word doesn't fit here. Give a better \
+    version only if a native speaker would say it differently or there is a mistake.
     """
 
     static func prompt(heard: String, goal: Turn, before: Turn?) -> String {
@@ -154,9 +203,10 @@ enum FreeSpeech {
             let better = f.better.trimmingCharacters(in: .whitespacesAndNewlines)
             // (no "better" that's only what they said again)
             let same = SpeechScore.clean(better) == SpeechScore.clean(heard)
-            return SpeakingVerdict(works: f.works, comment: f.comment,
+            let (comment, words) = explained(comment: f.comment, named: f.words.map { ($0.hanzi, $0.english) })
+            return SpeakingVerdict(works: f.works, comment: comment,
                                    better: better.isEmpty || same ? nil : better,
-                                   betterPinyin: better.isEmpty || same ? nil : pinyin(better))
+                                   betterPinyin: better.isEmpty || same ? nil : pinyin(better), words: words)
         } catch {
             return nil
         }
@@ -170,9 +220,20 @@ enum FreeSpeech {
 struct TutorFeedback {
     @Guide(description: "true if the learner's reply is sensible, understandable Chinese that fits the conversation and means roughly what they wanted, even if worded differently from the example")
     var works: Bool
-    @Guide(description: "One or two short, warm sentences in English for the learner: what was good, or gently what to change")
+    @Guide(description: "One or two short, warm sentences in plain English for the learner, with no Chinese characters: what was good, or gently what to change")
     var comment: String
+    @Guide(description: "Each Chinese word the comment talks about, with its English meaning; empty if none")
+    var words: [TutorWord]
     @Guide(description: "If there's a mistake or a native speaker would say it differently, the corrected or more natural sentence in simplified Chinese characters; otherwise an empty string")
     var better: String
+}
+
+@available(iOS 26.0, *)
+@Generable
+struct TutorWord {
+    @Guide(description: "The word in simplified Chinese characters")
+    var hanzi: String
+    @Guide(description: "Its meaning in English, a few words")
+    var english: String
 }
 #endif
