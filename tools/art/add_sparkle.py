@@ -1,6 +1,6 @@
 """Puts the white sparkle back in a cast member's eyes (the owner, 23 Oct 2026: "I actually like the eye sparkle ...
-just add the white bit back"): finds each eye, a near-black oval in the face, and draws a round catch-light in its
-upper right, a smaller one under it, as the first drafts had. Usage: python add_sparkle.py <png> x0,y0,x1,y1 x0,y0,x1,y1"""
+just add the white bit back"): finds each eye, a near-black oval in the face, and draws one small tilted
+oval catch-light high on its right, as the first draft had. Usage: python add_sparkle.py <png> x0,y0,x1,y1 x0,y0,x1,y1"""
 import sys
 import numpy as np
 from PIL import Image, ImageDraw
@@ -17,10 +17,12 @@ for (x0, y0, x1, y1) in boxes:
     ex0, ex1, ey0, ey1 = xs.min() + x0, xs.max() + x0, ys.min() + y0, ys.max() + y0
     w, h = ex1 - ex0, ey1 - ey0
     print("eye", ex0, ey0, ex1, ey1)
-    # the big catch-light high on the right, a little one low on the left
-    cx, cy, r = ex0 + w * 0.62, ey0 + h * 0.30, w * 0.17
-    d.ellipse(((cx - r) * K, (cy - r) * K, (cx + r) * K, (cy + r) * K), fill=(255, 255, 255, 255))
-    cx, cy, r = ex0 + w * 0.36, ey0 + h * 0.68, w * 0.07
-    d.ellipse(((cx - r) * K, (cy - r) * K, (cx + r) * K, (cy + r) * K), fill=(255, 255, 255, 235))
+    # one catch-light high on the right, a small oval tilted along the eye's curve, as the owner's pick (the first
+    # draft) has
+    cx, cy, rx, ry = ex0 + w * 0.62, ey0 + h * 0.29, w * 0.15, w * 0.10
+    spot = Image.new("RGBA", (int(rx * 2 * K) + 8, int(rx * 2 * K) + 8))
+    ImageDraw.Draw(spot).ellipse((4, 4 + (rx - ry) * K, 4 + rx * 2 * K, 4 + (rx + ry) * K), fill=(255, 255, 255, 255))
+    spot = spot.rotate(35, resample=Image.BICUBIC)
+    big.alpha_composite(spot, (int(cx * K - spot.width / 2), int(cy * K - spot.height / 2)))
 big.resize(im.size, Image.LANCZOS).convert("RGB").save(path)
 print("ok", path)
