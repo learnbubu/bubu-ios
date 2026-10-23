@@ -148,16 +148,24 @@ struct ChatPage: View {
     @State private var quitAsk = false
     @State private var handedOn = false
     @State private var ended = false
+    /// speaking freely, judged by the tutor (FreeSpeech): the phone has Apple's on-phone model, and the chat's yours to say
+    @State private var free = false
+    @State private var showExample = false
+    /// what's heard as you speak freely
+    @State private var interimText = ""
     private let course = Course.shared
 
     struct Msg: Identifiable, Equatable {
-        enum Kind: Equatable { case bubu, you(ok: Bool), ask }
+        /// (`you` with ok nil: being judged; `tutor`: 步步's feedback on what you said freely; `thinking`: 步步 judging it)
+        enum Kind: Equatable { case bubu, you(ok: Bool?), ask, tutor(SpeakingVerdict), thinking }
         let id = UUID()
-        let kind: Kind
+        var kind: Kind
         let turn: Turn
         let seconds: Double
         var file: URL? = nil
         var marks: [SpeechScore.Mark] = []
+        /// what was heard, said freely (shown under your note)
+        var heard: String? = nil
     }
 
 
@@ -178,7 +186,10 @@ struct ChatPage: View {
                 .onChange(of: waiting) { _, _ in toEnd(reader) }
             }
             .overlay { if holding { recordingOverlay } }
-            if waiting, let t = currentTurn { replyCard(t).transition(.move(edge: .bottom).combined(with: .opacity)) }
+            if waiting, let t = currentTurn {
+                Group { if free { freeCard(t) } else { replyCard(t) } }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
             bar
         }
         .background(Home.bg.ignoresSafeArea())
@@ -199,6 +210,7 @@ struct ChatPage: View {
             guard dialogue == nil, let d = course.data.dialogues.first(where: { $0.id == dialogueId }) else { return }
             dialogue = d
             listenOnly = !course.dialogueUnlocked(d) { progress.srs[$0] != nil }
+            free = FreeSpeech.available && !listenOnly
             if !listenOnly {
                 session = StudySession.chatting(progress, d)
                 // (the microphone asked for and the audio set for recording now, once, not at every press)
@@ -291,19 +303,80 @@ struct ChatPage: View {
             VStack(alignment: .trailing, spacing: 6) {
                 HStack(alignment: .top, spacing: 8) {
                     Spacer(minLength: 40)
-                    Image(systemName: ok ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                        .font(.system(size: 17)).foregroundStyle(ok ? ChatLook.heard : ChatLook.red)
-                        .padding(.top, 11)
+                    if let ok {
+                        Image(systemName: ok ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                            .font(.system(size: 17)).foregroundStyle(ok ? ChatLook.heard : ChatLook.red)
+                            .padding(.top, 11)
+                    } else {
+                        ProgressView().controlSize(.small).padding(.top, 11)
+                    }
                     voiceBubble(m, mine: true)
                     meAvatar
                 }
-                if !m.marks.isEmpty {
+                if let heard = m.heard, !heard.isEmpty {
+                    Text(heard).font(.hanzi(16, .medium)).foregroundStyle(Home.ink)
+                        .padding(.horizontal, 11).padding(.vertical, 6)
+                        .background(Home.tealSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .padding(.trailing, 50)
+                } else if !m.marks.isEmpty {
                     marksText(m.marks, size: 16).padding(.trailing, 50)
                 } else if m.file == nil {
                     // (said for you: listening only, or a line skipped) its words, as his have
                     transcript(m.turn).padding(.trailing, 50)
                 }
             }
+        case .tutor(let v):
+            tutorCard(v)
+        case .thinking:
+            HStack(alignment: .top, spacing: 8) {
+                ChatPhoto(who: nil, size: 32)
+                TypingDots().padding(.horizontal, 14).padding(.vertical, 12).chatBubble(mine: false)
+                Spacer(minLength: 40)
+            }
+            .accessibilityLabel("步步 is thinking")
+        }
+    }
+
+    /// 步步's feedback on what you said freely: it works (and maybe another natural way), or almost (and how to say it).
+    private func tutorCard(_ v: SpeakingVerdict) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            ChatPhoto(who: nil, size: 32)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("步步 · your tutor").font(.nunito(11, .heavy)).foregroundStyle(Home.muted)
+                HStack(spacing: 6) {
+                    Image(systemName: v.works ? "checkmark.seal.fill" : "lightbulb.fill")
+                        .foregroundStyle(v.works ? ChatLook.heard : Color(UIColor(hex: 0xE0A82E)))
+                    Text(v.works ? (v.spotOn ? "Spot on!" : "That works!") : "Almost").font(.nunito(15, .black)).foregroundStyle(Home.ink)
+                }
+                if !v.spotOn {
+                    Text(v.comment).font(.nunito(13.5, .bold)).foregroundStyle(Home.ink).fixedSize(horizontal: false, vertical: true)
+                }
+                if let b = v.better {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(v.works ? "ALSO NATURAL" : "TRY SAYING").font(.nunito(10.5, .black)).tracking(1).foregroundStyle(Home.teal)
+                        HStack(alignment: .top) {
+                            Text(b).font(.hanzi(18, .medium)).foregroundStyle(Home.ink).fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 6)
+                            Button { Speech.shared.speak(b) } label: {
+                                Image(systemName: "speaker.wave.2.fill").font(.system(size: 13)).foregroundStyle(Home.teal)
+                                    .frame(width: 30, height: 30).background(ChatLook.card, in: Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Hear it")
+                        }
+                        if let py = v.betterPinyin, !py.isEmpty {
+                            Text(py).font(.nunito(12.5, .bold)).foregroundStyle(Color(UIColor(hex: 0xB7822E)))
+                        }
+                    }
+                    .padding(10)
+                    .background(Home.tealSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+            }
+            .padding(12)
+            .frame(maxWidth: 300, alignment: .leading)
+            .background(ChatLook.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(v.works ? ChatLook.mineLip : Color(UIColor(hex: 0xF0D9A8)), lineWidth: 1.5))
+            Spacer(minLength: 16)
         }
     }
 
@@ -382,6 +455,61 @@ struct ChatPage: View {
 
     // MARK: your turn
 
+    /// Speaking freely: what to say, in English, to say your own way; an example to show if you want one; what's heard
+    /// as you speak; and after two tries, the example to use and move on.
+    private func freeCard(_ t: Turn) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack {
+                Text("SAY IT YOUR WAY").font(.nunito(11, .black)).tracking(1.2).foregroundStyle(Home.teal)
+                Spacer()
+                Button(showExample ? "Hide the example" : "Show an example") { withAnimation(.easeOut(duration: 0.2)) { showExample.toggle() } }
+                    .font(.nunito(12.5, .black)).foregroundStyle(Home.teal).buttonStyle(.plain)
+            }
+            Text(t.en).font(.nunito(20, .black)).foregroundStyle(Home.ink).fixedSize(horizontal: false, vertical: true)
+            if !interimText.isEmpty {
+                Text(interimText).font(.hanzi(20, .medium)).foregroundStyle(ChatLook.heard)
+            } else if tries == 0 && !showExample {
+                Text("Any way of saying it works: 步步 will tell you how it sounds.").font(.nunito(12.5, .bold)).foregroundStyle(Home.muted)
+            }
+            if showExample {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 1) {
+                        ToneText(hanzi: t.hanzi, pinyin: t.pinyin, size: 19, weight: .medium)
+                        PinyinText(pinyin: Self.spaced(t.pinyin), size: 12.5, weight: .semibold)
+                    }
+                    Spacer(minLength: 6)
+                    Button { Speech.shared.speak(t.hanzi) } label: {
+                        Image(systemName: "speaker.wave.2.fill").font(.system(size: 13)).foregroundStyle(Home.teal)
+                            .frame(width: 30, height: 30).background(ChatLook.card, in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Hear the example")
+                }
+                .padding(10)
+                .background(Home.tealSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .transition(.opacity)
+            }
+            if let note {
+                Text(note).font(.nunito(13, .bold)).foregroundStyle(ChatLook.red)
+            }
+            if tries >= 2 {
+                Button("Use the example and carry on") { skip(t) }
+                    .font(.nunito(14, .black)).foregroundStyle(Home.teal).padding(.top, 2)
+                    .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16).padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Home.line).offset(y: 4)
+                RoundedRectangle(cornerRadius: 18, style: .continuous).fill(ChatLook.card)
+                RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Home.line, lineWidth: 1.5)
+            }
+        }
+        .padding(.horizontal, 12).padding(.bottom, 12)
+    }
+
     /// The line to say, over the bar: green as it's heard while you hold.
     private func replyCard(_ t: Turn) -> some View {
         VStack(alignment: .leading, spacing: 3) {
@@ -439,7 +567,7 @@ struct ChatPage: View {
                         Image(systemName: holding ? (cancelling ? "xmark" : "waveform") : "mic.fill").font(.system(size: 15, weight: .black))
                         Text(holding ? (cancelling ? "松开 取消" : "松开 发送") : "按住 说话").font(.hanzi(17, .bold))
                     }
-                    Text(holding ? (cancelling ? "Let go to cancel" : "Let go to send") : waiting ? "Hold to talk" : "\(talking) is talking…")
+                    Text(holding ? (cancelling ? "Let go to cancel" : "Let go to send") : waiting ? "Hold to talk" : msgs.last?.kind == .thinking ? "步步 is thinking…" : "\(talking) is talking…")
                         .font(.nunito(11, .heavy)).opacity(0.8)
                 }
                 .foregroundStyle(waiting ? Color.white : Home.muted)
@@ -539,7 +667,9 @@ struct ChatPage: View {
         recognizer.recordTo = url
         recognizer.settlesOnPause = false
         recognizer.onLevel = { level = CGFloat($0) }
-        recognizer.onInterim = { alts in interim = SpeechScore.marks(t.hanzi, alts) }
+        recognizer.onInterim = { alts in
+            if free { interimText = alts.first ?? "" } else { interim = SpeechScore.marks(t.hanzi, alts) }
+        }
         recognizer.acceptEarly = { _ in false }       // (it waits for you to let go)
         recognizer.onResult = { alts in judge(t, alts) }
         recognizer.onError = { f in
@@ -572,6 +702,50 @@ struct ChatPage: View {
     }
 
     private func judge(_ t: Turn, _ alts: [String]) {
+        if free { freeJudge(t, alts) } else { judgeLine(t, alts) }
+    }
+
+    /// Said freely: your note at once (what was heard under it), 步步 thinking, then their feedback. It works: on to the
+    /// next line (a moment to read it). Almost: try again (after two, the example to use and carry on). The tutor not
+    /// reached: judged on the line, as before.
+    private func freeJudge(_ t: Turn, _ alts: [String]) {
+        let mine = Msg(kind: .you(ok: nil), turn: t, seconds: max(1, Date().timeIntervalSince(heldAt)), file: recording, heard: alts.first)
+        interim = []; interimText = ""
+        let before = msgs.last(where: { $0.kind == .bubu })?.turn
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            msgs.append(mine)
+            msgs.append(Msg(kind: .thinking, turn: t, seconds: 0))
+            // (no talking over the tutor: the card and the bar back if it's to try again)
+            waiting = false
+        }
+        let r = run
+        Task { @MainActor in
+            let v = await FreeSpeech.judge(said: alts, goal: t, before: before)
+            guard run == r else { return }
+            withAnimation(.easeOut(duration: 0.15)) { msgs.removeAll { $0.kind == .thinking } }
+            guard let v else {
+                msgs.removeAll { $0.id == mine.id }
+                waiting = true
+                judgeLine(t, alts)
+                return
+            }
+            if let i = msgs.firstIndex(where: { $0.id == mine.id }) { msgs[i].kind = .you(ok: v.works) }
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { msgs.append(Msg(kind: .tutor(v), turn: t, seconds: 0)) }
+            if v.works {
+                Sounds.shared.play("correct")
+                session?.spoke(right: true)
+                if tries > 0 { misses += 1 }
+                next(after: v.spotOn ? 1.0 : v.better == nil ? 2.2 : 3.4)
+            } else {
+                Sounds.shared.play("wrong")
+                tries += 1
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { waiting = true }
+            }
+        }
+    }
+
+    /// Said as the line given: heard near enough, or not (asked again).
+    private func judgeLine(_ t: Turn, _ alts: [String]) {
         let ok = t.free == true ? !alts.isEmpty : SpeechScore.passes(t.hanzi, alts, keyword: nil)
         let marks = t.free == true ? [] : SpeechScore.marks(t.hanzi, alts)
         let m = Msg(kind: .you(ok: ok), turn: t, seconds: max(1, Date().timeIntervalSince(heldAt)), file: recording, marks: marks)
@@ -603,13 +777,13 @@ struct ChatPage: View {
         next()
     }
 
-    /// On to his next line.
-    private func next() {
+    /// On to his next line (`after` seconds: time to read the tutor's feedback).
+    private func next(after: Double = 0.9) {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { waiting = false }
-        tries = 0; note = nil
+        tries = 0; note = nil; showExample = false; interimText = ""
         turn += 1
         let r = run
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { if run == r { step() } }
+        DispatchQueue.main.asyncAfter(deadline: .now() + after) { if run == r { step() } }
     }
 
     /// The end: listening only, the chat simply ends; else its stars kept, and the lesson's done screen over it.
@@ -740,5 +914,22 @@ struct ChatGroupPhoto: View {
             }
             .frame(width: size, height: size, alignment: .topLeading)
         }
+    }
+}
+
+/// Three dots rising in turn: someone writing (步步 judging what you said).
+struct TypingDots: View {
+    var body: some View {
+        TimelineView(.animation) { tl in
+            let t = tl.date.timeIntervalSinceReferenceDate
+            HStack(spacing: 5) {
+                ForEach(0..<3, id: \.self) { i in
+                    Circle().fill(Home.muted).frame(width: 7, height: 7)
+                        .offset(y: -3 * max(0, sin(t * 6 - Double(i) * 0.8)))
+                        .opacity(0.45 + 0.55 * max(0, sin(t * 6 - Double(i) * 0.8)))
+                }
+            }
+        }
+        .frame(height: 14)
     }
 }

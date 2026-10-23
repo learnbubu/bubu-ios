@@ -53,4 +53,26 @@ final class ChatTests: XCTestCase {
         // (no clips under the tests: about a third of a second a character)
         XCTAssertGreaterThan(ChatPage.seconds("你好！请问，你是马克吗？"), ChatPage.seconds("你好！"))
     }
+
+    func testSpeakingFreelyIsJudgedByTheTutor() async {
+        let d = course.data.dialogues.first!
+        let goal = d.turns.first { $0.who == "you" && $0.free != true }!
+        let before = d.turns.first { $0.who == "app" }
+        // (no on-phone model under the tests: the chat keeps its set lines)
+        XCTAssertFalse(FreeSpeech.available)
+        // the example said: spot on, no need to ask
+        let v = await FreeSpeech.judge(said: [goal.hanzi], goal: goal, before: before)
+        XCTAssertEqual(v?.works, true)
+        XCTAssertEqual(v?.spotOn, true)
+        // said another way, and no tutor to ask: nil, judged as before
+        let other = await FreeSpeech.judge(said: ["我不知道"], goal: goal, before: before)
+        XCTAssertNil(other)
+        // nothing heard: nothing to judge
+        let none = await FreeSpeech.judge(said: [], goal: goal, before: before)
+        XCTAssertNil(none)
+        // the tutor's told what was said to them, what you meant and what you said
+        let p = FreeSpeech.prompt(heard: "我不知道", goal: goal, before: before)
+        XCTAssertTrue(p.contains(goal.en) && p.contains(goal.hanzi) && p.contains("我不知道"))
+        if let b = before { XCTAssertTrue(p.contains(b.hanzi)) }
+    }
 }
