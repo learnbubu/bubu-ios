@@ -370,13 +370,14 @@ struct ChatPage: View {
     }
 
     /// What was heard of a line: each character green if it was, grey if not.
-    private func marksText(_ marks: [SpeechScore.Mark], size: CGFloat) -> some View {
+    private func marksText(_ marks: [SpeechScore.Mark], size: CGFloat, plain: Bool = false) -> some View {
         marks.reduce(Text("")) { t, m in
             t + Text(String(m.char)).foregroundColor(m.heard == false ? ChatLook.faint : m.heard == true ? ChatLook.heard : Home.ink)
         }
         .font(.hanzi(size, .medium))
-        .padding(.horizontal, 11).padding(.vertical, 6)
-        .background(Home.tealSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        // (plain: the characters recoloured where they stand, as on the reply card; a box there spilt over the pinyin)
+        .padding(.horizontal, plain ? 0 : 11).padding(.vertical, plain ? 0 : 6)
+        .background(plain ? Color.clear : Home.tealSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     // MARK: your turn
@@ -397,7 +398,7 @@ struct ChatPage: View {
             }
             Group {
                 if interim.isEmpty { ToneText(hanzi: t.hanzi, pinyin: t.pinyin, size: 24, weight: .medium) }
-                else { marksText(interim, size: 24).padding(-10) }
+                else { marksText(interim, size: 24, plain: true) }
             }
             PinyinText(pinyin: Self.spaced(t.pinyin), size: 14, weight: .semibold)
             Text(t.en).font(.nunito(13.5, .bold)).foregroundStyle(Home.muted)
