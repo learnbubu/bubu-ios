@@ -60,6 +60,8 @@ struct StudyView: View {
     /// A multiple-choice exercise stays still (no scrolling); the feedback slides up over its foot.
     /// On a small phone (an SE) it scrolls instead.
     private var fixed: Bool {
+        // a chat keeps still: it scrolls its own messages
+        if case .chat = session.current { return true }
         guard session.exercise?.kind == .choice, !preStart, case .card = session.current else { return false }
         return cardHeight >= 620
     }
@@ -342,6 +344,14 @@ struct StudyView: View {
                     MeetView(cards: cards) { advance() }
                 case .match(let cards, _):
                     MatchView(session: session, cards: cards, audio: session.matchAudio) { advance() }
+                case .chat(let d, let turns):
+                    ChatPage(dialogueId: d.id, lesson: LessonChat(
+                        turns: turns, picks: session.chatPicks,
+                        line: { session.chatLine(right: $0) },
+                        cantTalk: { session.cantSpeak() },
+                        done: { session.chatDone(); advance() }))
+                        // (the chat's height: the step's, less its heading)
+                        .frame(height: max(360, scrollHeight - 100))
                 case .card:
                     if let ex = session.exercise {
                         if ex.kind == .sentence {
@@ -396,6 +406,7 @@ struct StudyView: View {
         if !tips.isEmpty { return "Before you start" }
         if case .meet = session.current { return "New word" }
         if case .match = session.current { return session.matchAudio ? "Match what you hear" : "Tap the pairs" }
+        if case .chat(let d, _) = session.current { let m = ChatCast.members(d); return m.count == 1 ? "Chat with \(m[0])" : "Group chat" }
         return session.exercise?.label ?? ""
     }
 

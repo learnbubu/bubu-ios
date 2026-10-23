@@ -30,6 +30,9 @@ final class StudySession: Identifiable {
         /// Tap the pairs (see MatchView): 4–5 words already met, Chinese beside English, or
         /// (`listen`, when every word is past its first rung) sounds beside characters.
         case match(cards: [Card], listen: Bool)
+        /// A few lines of one of the chapter's chats, replied to as in the Classroom (see ChatPage): a practice stone's
+        /// (the owner, 23 Oct 2026: "this structure ... in the actual lessons to switch things up").
+        case chat(Dialogue, turns: [Turn])
     }
 
     /// A match exercise's pairs: at most this many, and it needs at least `matchMin` words
@@ -206,7 +209,9 @@ final class StudySession: Identifiable {
         self.tonesTaught = StudySession.tonesIntroduced(lessonId, mode: mode, progress)
         // a practice stone's two matches, when it has enough words met (they replace two exercises)
         let pMatches: [[Card]] = practice ? StudySession.practiceMatchWords(lessonId, progress) : []
-        let practiceCount = StudySession.practiceLen - pMatches.count
+        // and a chat, when one of its chats has every word met (it takes the place of two exercises)
+        let pChat = practice ? StudySession.practiceChat(lessonId, progress) : nil
+        let practiceCount = StudySession.practiceLen - pMatches.count - (pChat == nil ? 0 : 2)
         let chosen = cards ?? (practice ? StudySession.practiceQueue(lessonId, progress, count: practiceCount)
                                         : StudySession.buildQueue(lessonId: lessonId, progress: progress, focuses: self.focuses))
         self.scope = scope ?? (practice ? Set(Course.shared.practiceScope(lessonId)) : mode == .lesson ? [lessonId] : Set(chosen.map(\.lessonId)))
@@ -221,6 +226,7 @@ final class StudySession: Identifiable {
         } else if shaped {
             items = StudySession.withStoneMatch(items, progress)
         }
+        if let c = pChat { items.insert(.chat(c.0, turns: c.1), at: min(items.count, max(1, items.count / 3))) }
         self.queue = items
         // the progress bar's steps: each exercise, and each match as one (see progressFraction)
         self.sessionTotal = items.filter { if case .meet = $0 { return false } else { return true } }.count
@@ -331,6 +337,52 @@ final class StudySession: Identifiable {
             out.append(.match(cards: only, listen: false))
         }
         return out
+    }
+
+    // MARK: a chat
+
+    /// How many of your lines a lesson's chat has, at most (the owner: "short: 2-3 of your lines").
+    static let chatLines = 3
+
+    /// A practice stone's chat: one of its chapter's chats so far with every word met, a few of your lines from it.
+    static func practiceChat(_ lessonId: String, _ p: ProgressStore) -> (Dialogue, [Turn])? {
+        let course = Course.shared
+        let scope = Set(course.practiceScope(lessonId))
+        let ready = course.data.dialogues.filter { scope.contains($0.lesson) && course.dialogueUnlocked($0) { p.srs[$0] != nil } }
+        guard let d = ready.randomElement() else { return nil }
+        let turns = chatSlice(d.turns)
+        return turns.isEmpty ? nil : (d, turns)
+    }
+
+    /// A stretch of a chat with `mine` of your lines (all of it, with fewer): from the line before your first (what
+    /// you're answering) to your last.
+    static func chatSlice(_ ts: [Turn], mine: Int = chatLines) -> [Turn] {
+        let yours = ts.indices.filter { ts[$0].who == "you" }
+        guard !yours.isEmpty else { return [] }
+        let k = yours.count <= mine ? 0 : Int.random(in: 0...(yours.count - mine))
+        let first = yours[k], last = yours[min(yours.count, k + mine) - 1]
+        return Array(ts[max(0, first - 1)...last])
+    }
+
+    /// The chat on screen: speaking's off ("Can't talk now" tapped, or not one of the session's kinds), so your lines
+    /// are picked rather than said.
+    var chatPicks: Bool { speakingOff || !focuses.contains("speak") }
+
+    /// A line of yours in a lesson's chat: said or picked (right), or skipped. Counted as an answer, not a step.
+    func chatLine(right: Bool) {
+        progress.holdSaves()
+        defer { progress.releaseSaves() }
+        counted(right, dir: "speak", step: false)
+    }
+
+    /// "Can't talk now" in a chat: no more speaking this session.
+    func cantSpeak() { speakingOff = true }
+
+    /// The chat on screen is over: one step.
+    func chatDone() {
+        guard case .chat = current, !answered else { return }
+        answered = true
+        stepsDone += 1
     }
 
     /// A stone's session with one match about two-thirds of the way through, after the last
@@ -1027,6 +1079,7 @@ final class StudySession: Identifiable {
             if previousMistake { retries.append(c) } else { queue.append(.card(c)) }
         }
         if !answered, let m = current, case .match = m { queue.append(m) }
+        if !answered, let m = current, case .chat = m { queue.append(m) }
         queue.shuffle()
         next()
         return true
@@ -1322,7 +1375,7 @@ final class StudySession: Identifiable {
 
     /// An answer counted as a lesson's are: the day's reviews, XP and the run, a bun back, the quests.
     @discardableResult
-    private func counted(_ gotIt: Bool, dir: String) -> Int {
+    private func counted(_ gotIt: Bool, dir: String, step: Bool = true) -> Int {
         progress.recordReview()
         var xp = 0
         if gotIt {
@@ -1342,7 +1395,7 @@ final class StudySession: Identifiable {
         progress.questEvent(dir, correct: gotIt)
         xp += progress.xpCounter - qMark; sessionXP += progress.xpCounter - qMark
         answeredCount += 1
-        stepsDone += 1
+        if step { stepsDone += 1 }
         return xp
     }
 

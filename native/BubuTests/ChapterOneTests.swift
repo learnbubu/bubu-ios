@@ -63,16 +63,19 @@ final class ChapterOneTests: XCTestCase {
         XCTAssertTrue(s.isPractice)
         XCTAssertTrue(s.earnsBuns)
         XCTAssertEqual(s.title, "Practice")
-        XCTAssertEqual(s.sessionTotal, StudySession.practiceLen)
+        // (a chat, when the chapter has one ready, takes the place of two exercises, as one step)
+        let chats = StudySession.practiceChat(practice.id, p) == nil ? 0 : 1
+        XCTAssertEqual(s.sessionTotal, StudySession.practiceLen - chats)
         let words = Set(course.practiceCards(practice.id).map(\.id))
         var asked = 0
         while s.result == nil && asked < 100 {
             if case .meet = s.current { XCTFail("a practice stone meets no new words") }
+            if case .chat = s.current { s.chatLine(right: true); s.chatDone() }
             if let c = s.card { XCTAssertTrue(words.contains(c.id), c.word.hanzi); s.answer(true); asked += 1 }
             s.next()
         }
         // two of its steps are matches (see BeginnerHelpsTests), which the loop steps past
-        XCTAssertEqual(asked, StudySession.practiceLen - StudySession.practiceMatches)
+        XCTAssertEqual(asked, StudySession.practiceLen - StudySession.practiceMatches - 2 * chats)
         XCTAssertEqual(s.bunsEaten, 0)
         XCTAssertTrue(try XCTUnwrap(s.result).lessonFinished)
         XCTAssertTrue(p.isDone(practice.id))

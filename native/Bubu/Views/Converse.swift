@@ -119,8 +119,21 @@ final class ChatRecord {
 /// cancel). Heard, it goes as your voice note (tap to hear yourself) and he carries on; not, he asks again, and after
 /// two tries you can skip it. Kept as a session (StudySession.chatting): each line counts, and the chat ends on the
 /// lesson's done screen.
+/// A chat inside a lesson (a practice stone's, see StudySession.Item.chat): its lines, and the lesson told of each of
+/// yours and of the end.
+struct LessonChat {
+    let turns: [Turn]
+    /// your lines picked rather than said (speaking off)
+    let picks: Bool
+    let line: (Bool) -> Void
+    let cantTalk: () -> Void
+    let done: () -> Void
+}
+
 struct ChatPage: View {
     let dialogueId: String
+    /// in a lesson: its few lines, no bar of its own, set lines (never free), each of yours counted by the lesson
+    var lesson: LessonChat? = nil
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
     @Environment(\.dismiss) private var dismiss
@@ -154,6 +167,12 @@ struct ChatPage: View {
     @State private var showExample = false
     /// what's heard as you speak freely
     @State private var interimText = ""
+    /// the lines played: the chat's, or the lesson's few
+    @State private var turns: [Turn] = []
+    /// your lines picked from three, not said (in a lesson, speaking off)
+    @State private var picking = false
+    @State private var options: [Turn] = []
+    @State private var wrongPicks: Set<String> = []
     private let course = Course.shared
 
     struct Msg: Identifiable, Equatable {
@@ -172,7 +191,7 @@ struct ChatPage: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            navBar
+            if lesson == nil { navBar }
             ScrollViewReader { reader in
                 ScrollView {
                     LazyVStack(spacing: 10) {
@@ -188,12 +207,13 @@ struct ChatPage: View {
             }
             .overlay { if holding { recordingOverlay } }
             if waiting, let t = currentTurn {
-                Group { if free { freeCard(t) } else { replyCard(t) } }
+                Group { if picking { pickCard(t) } else if free { freeCard(t) } else { replyCard(t) } }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-            bar
+            if !picking { bar }
         }
         .background(Home.bg.ignoresSafeArea())
+        .clipShape(RoundedRectangle(cornerRadius: lesson == nil ? 0 : 22, style: .continuous))
         .overlay {
             if quitAsk {
                 QuitAsk(keep: { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = false } },
@@ -207,9 +227,18 @@ struct ChatPage: View {
         .environment(\.colorScheme, .light)
         .sensoryFeedback(.impact(weight: .medium), trigger: holding) { _, on in on }
         .onAppear {
-            progress.holdLevelUps = true
             guard dialogue == nil, let d = course.data.dialogues.first(where: { $0.id == dialogueId }) else { return }
             dialogue = d
+            if let lesson {
+                // (the lesson holds level-ups and keeps the score)
+                turns = lesson.turns
+                picking = lesson.picks
+                if !picking { Task { if await Recognizer.authorize() { Sounds.shared.holdForRecording(true) } } }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { step() }
+                return
+            }
+            progress.holdLevelUps = true
+            turns = d.turns
             listenOnly = !course.dialogueUnlocked(d) { progress.srs[$0] != nil }
             free = FreeSpeech.available && !listenOnly
             if !listenOnly {
@@ -225,13 +254,13 @@ struct ChatPage: View {
             run += 1
             recognizer.end(); Speech.shared.stop(); player?.stop()
             Sounds.shared.holdForRecording(false)
-            guard !handedOn else { return }
+            guard !handedOn, lesson == nil else { return }
             progress.holdLevelUps = false; progress.showHeldLevelUp()
         }
     }
 
-    private var currentTurn: Turn? { dialogue.flatMap { turn < $0.turns.count ? $0.turns[turn] : nil } }
-    private var yourLines: Int { dialogue?.turns.filter { $0.who == "you" }.count ?? 0 }
+    private var currentTurn: Turn? { turn < turns.count ? turns[turn] : nil }
+    private var yourLines: Int { turns.filter { $0.who == "you" }.count }
     private var saidLines: Int { msgs.filter { if case .you = $0.kind { return true } else { return false } }.count }
 
     /// To the latest message, and again once the reply card has slid in (it takes the chat's foot: scrolled only before
@@ -564,10 +593,73 @@ struct ChatPage: View {
             if let note {
                 Text(note).font(.nunito(13, .bold)).foregroundStyle(ChatLook.red).padding(.top, 2)
             }
-            if tries >= 2 {
-                Button("Skip this line") { skip(t) }
-                    .font(.nunito(14, .black)).foregroundStyle(Home.teal).padding(.top, 4)
-                    .buttonStyle(.plain)
+            HStack(spacing: 18) {
+                if tries >= 2 {
+                    Button("Skip this line") { skip(t) }
+                        .font(.nunito(14, .black)).foregroundStyle(Home.teal)
+                        .buttonStyle(.plain)
+                }
+                if lesson != nil {
+                    Button("Can't talk now") { cantTalk() }
+                        .font(.nunito(14, .black)).foregroundStyle(Home.muted)
+                        .buttonStyle(.plain)
+                }
+            }
+            .padding(.top, 4)
+        }
+        .padding(.horizontal, 16).padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Home.line).offset(y: 4)
+                RoundedRectangle(cornerRadius: 18, style: .continuous).fill(ChatLook.card)
+                RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Home.line, lineWidth: 1.5)
+            }
+        }
+        .padding(.horizontal, 12).padding(.bottom, 12)
+    }
+
+    // MARK: picking (a lesson's chat, speaking off)
+
+    /// "Can't talk now": no more speaking this lesson; this line and the rest picked.
+    private func cantTalk() {
+        recognizer.end()
+        lesson?.cantTalk()
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { picking = true; note = nil }
+    }
+
+    /// Your line among two others of yours: from this chat, else from the course's other chats.
+    private func pickOptions(_ t: Turn) -> [Turn] {
+        var others: [Turn] = []
+        let here = (dialogue?.turns ?? turns).shuffled()
+        let more = course.data.dialogues.flatMap(\.turns).shuffled()
+        for o in here + more where others.count < 2 && o.who == "you" && o.free != true
+            && o.hanzi != t.hanzi && !others.contains(where: { $0.hanzi == o.hanzi }) {
+            others.append(o)
+        }
+        return (others + [t]).shuffled()
+    }
+
+    /// What to reply, in English, and three replies to tap: the right one sent as yours, a wrong one greyed out.
+    private func pickCard(_ t: Turn) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("TAP YOUR REPLY").font(.nunito(11, .black)).tracking(1.2).foregroundStyle(Home.teal)
+            Text(t.en).font(.nunito(18, .black)).foregroundStyle(Home.ink).fixedSize(horizontal: false, vertical: true)
+            ForEach(options, id: \.hanzi) { o in
+                let wrong = wrongPicks.contains(o.hanzi)
+                Button { picked(o, for: t) } label: {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(o.hanzi).font(.hanzi(19, .medium)).foregroundStyle(wrong ? Home.muted : Home.ink)
+                        PinyinText(pinyin: Self.spaced(o.pinyin), size: 12, weight: .semibold)
+                            .opacity(wrong ? 0.4 : 1)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 14).padding(.vertical, 9)
+                    .background(wrong ? Home.line.opacity(0.5) : ChatLook.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(wrong ? ChatLook.red.opacity(0.5) : Home.line, lineWidth: 1.5))
+                }
+                .buttonStyle(.plain)
+                .disabled(wrong)
             }
         }
         .padding(.horizontal, 16).padding(.vertical, 12)
@@ -580,6 +672,23 @@ struct ChatPage: View {
             }
         }
         .padding(.horizontal, 12).padding(.bottom, 12)
+    }
+
+    /// A reply tapped: the right one goes as your voice note (said for you); a wrong one is greyed, try another.
+    private func picked(_ o: Turn, for t: Turn) {
+        guard waiting else { return }
+        if o.hanzi == t.hanzi {
+            Sounds.shared.play("correct")
+            spoke(wrongPicks.isEmpty)
+            if !wrongPicks.isEmpty { misses += 1 }
+            let m = Msg(kind: .you(ok: true), turn: t, seconds: Self.seconds(t.hanzi, speaker: ChatCast.voice(t)))
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { msgs.append(m) }
+            play(m)
+            next(after: m.seconds + 0.5)
+        } else {
+            Sounds.shared.play("wrong")
+            withAnimation(.easeOut(duration: 0.2)) { _ = wrongPicks.insert(o.hanzi) }
+        }
     }
 
     /// WeChat's bar: hold to talk (once it's your turn), or a word while he's talking.
@@ -653,10 +762,11 @@ struct ChatPage: View {
 
     /// His lines play one after another, each as a voice note; at yours it waits for you.
     private func step() {
-        guard let d = dialogue else { return }
-        guard turn < d.turns.count else { return finish() }
-        let t = d.turns[turn]
+        guard dialogue != nil else { return }
+        guard turn < turns.count else { return finish() }
+        let t = turns[turn]
         if t.who == "you" && !listenOnly {
+            options = pickOptions(t); wrongPicks = []
             withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { waiting = true }
             return
         }
@@ -707,6 +817,8 @@ struct ChatPage: View {
             // (each counts as a try, so a line can always be skipped: with the microphone off, at once; the Mac, 23 Oct 2026)
             switch f {
             case .notAllowed:
+                // (in a lesson: picked instead)
+                if lesson != nil { cantTalk(); return }
                 note = "No problem: skip it for now, or allow the microphone and speech recognition in Settings to talk."
                 tries = max(tries, 2)
             case .unavailable:
@@ -764,7 +876,7 @@ struct ChatPage: View {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { msgs.append(Msg(kind: .tutor(v), turn: t, seconds: 0)) }
             if v.works {
                 Sounds.shared.play("correct")
-                session?.spoke(right: true)
+                spoke(true)
                 if tries > 0 { misses += 1 }
                 next(after: v.spotOn ? 1.0 : v.better == nil ? 2.2 : 3.4)
             } else {
@@ -784,7 +896,7 @@ struct ChatPage: View {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { msgs.append(m) }
         if ok {
             Sounds.shared.play("correct")
-            session?.spoke(right: true)
+            spoke(true)
             if tries > 0 { misses += 1 }
             next()
         } else {
@@ -799,7 +911,7 @@ struct ChatPage: View {
     }
 
     private func skip(_ t: Turn) {
-        session?.spoke(right: false)
+        spoke(false)
         misses += 1
         // (the line said for you, as a note of yours with its words, so the chat still reads through)
         let m = Msg(kind: .you(ok: false), turn: t, seconds: Self.seconds(t.hanzi, speaker: ChatCast.voice(t)))
@@ -817,9 +929,20 @@ struct ChatPage: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + after) { if run == r { step() } }
     }
 
-    /// The end: listening only, the chat simply ends; else its stars kept, and the lesson's done screen over it.
+    /// A line of yours counted: by the chat's session, or the lesson's.
+    private func spoke(_ right: Bool) {
+        session?.spoke(right: right)
+        lesson?.line(right)
+    }
+
+    /// The end: listening only, the chat simply ends; in a lesson, on to its next step; else its stars kept, and the
+    /// lesson's done screen over it.
     private func finish() {
         ended = true
+        if let lesson {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { lesson.done() }
+            return
+        }
         guard let d = dialogue, let s = session, !listenOnly else { return }
         ChatRecord.shared.finished(d.id, stars: misses == 0 ? 3 : misses <= 2 ? 2 : 1)
         s.finishFlashcards()

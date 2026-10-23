@@ -75,4 +75,51 @@ final class ChatTests: XCTestCase {
         XCTAssertTrue(p.contains(goal.en) && p.contains(goal.hanzi) && p.contains("我不知道"))
         if let b = before { XCTAssertTrue(p.contains(b.hanzi)) }
     }
+
+    func testAPracticeStoneHasAChatOnceItsWordsAreMet() throws {
+        let p = store()
+        // a practice stone whose chapter so far has a chat
+        let practice = try XCTUnwrap(course.lessons.first { l in
+            l.isPractice && course.data.dialogues.contains { course.practiceScope(l.id).contains($0.lesson) }
+        })
+        // nothing met: no chat
+        XCTAssertNil(StudySession.practiceChat(practice.id, p))
+        // every word of the chapter so far met: a chat, of the chapter's, with a few of your lines
+        for c in course.practiceCards(practice.id) { _ = p.answer(c.id, correct: true, dir: "recall", sessionStart: 0, mistakesMode: false) }
+        let (d, turns) = try XCTUnwrap(StudySession.practiceChat(practice.id, p))
+        XCTAssertTrue(course.practiceScope(practice.id).contains(d.lesson))
+        let mine = turns.filter { $0.who == "you" }.count
+        XCTAssertTrue((1...StudySession.chatLines).contains(mine), "\(mine) of your lines")
+        XCTAssertEqual(turns.last?.who, "you", "it ends on yours")
+        let s = try XCTUnwrap(StudySession.lesson(practice.id, p))
+        var sawChat = false
+        var guardN = 0
+        while s.result == nil && guardN < 100 {
+            guardN += 1
+            if case .chat = s.current {
+                sawChat = true
+                let xp = p.xpCounter
+                s.chatLine(right: true)
+                XCTAssertGreaterThan(p.xpCounter, xp, "a line said earns XP")
+                let steps = s.stepsDone
+                s.chatDone()
+                XCTAssertEqual(s.stepsDone, steps + 1, "the chat is one step")
+            } else if s.card != nil { s.answer(true) }
+            s.next()
+        }
+        XCTAssertTrue(sawChat)
+    }
+
+    func testAChatSliceStartsWithWhatYoureAnswering() {
+        let d = course.data.dialogues.max { $0.turns.filter { $0.who == "you" }.count < $1.turns.filter { $0.who == "you" }.count }!
+        for _ in 0..<20 {
+            let sl = StudySession.chatSlice(d.turns)
+            XCTAssertEqual(sl.filter { $0.who == "you" }.count, min(StudySession.chatLines, d.turns.filter { $0.who == "you" }.count))
+            // one stretch of the chat, opening on the line you answer (or your first, at the chat's start)
+            let at = d.turns.firstIndex(of: sl[0])!
+            XCTAssertEqual(Array(d.turns[at..<(at + sl.count)]), sl)
+            XCTAssertLessThanOrEqual(sl.firstIndex { $0.who == "you" }!, 1)
+            XCTAssertEqual(sl.last?.who, "you")
+        }
+    }
 }
