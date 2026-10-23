@@ -175,6 +175,8 @@ struct ChatPage: View {
     @State private var wrongPicks: Set<String> = []
     /// the chat's end, celebrated (its confetti)
     @State private var cheer = 0
+    /// the reply card's height (it grows with a note under it)
+    @State private var footHeight: CGFloat = 0
     /// the latest scroll asked for (only the last of a burst runs)
     @State private var scrollAsk = 0
     private let course = Course.shared
@@ -214,17 +216,28 @@ struct ChatPage: View {
                 .defaultScrollAnchor(.bottom)
                 .onChange(of: msgs.count) { _, _ in toEnd(reader) }
                 .onChange(of: waiting) { _, _ in toEnd(reader) }
+                // the reply card growing (a note under it) or the chat ending (Continue's bar): the latest kept in
+                // view, not left under them (the Mac, 0.2.22)
+                .onChange(of: footHeight) { _, _ in toEnd(reader) }
+                .onChange(of: ended) { _, _ in toEnd(reader) }
             }
             .overlay { if holding { recordingOverlay } }
             if waiting, let t = currentTurn {
                 Group { if picking { pickCard(t) } else if free { freeCard(t) } else { replyCard(t) } }
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { footHeight = $0 }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             if !picking || ended { bar }
         }
         .background(Home.bg.ignoresSafeArea())
+        // (its own layer over the whole chat, sized to it: in an overlay it never showed, the Mac, 0.2.22)
         .overlay {
-            if cheer > 0 { Confetti(count: 40).id(cheer).allowsHitTesting(false).ignoresSafeArea() }
+            ZStack {
+                if cheer > 0 { Confetti(count: 40).id(cheer) }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .allowsHitTesting(false)
+            .zIndex(10)
         }
         .clipShape(RoundedRectangle(cornerRadius: lesson == nil ? 0 : 22, style: .continuous))
         .overlay {
