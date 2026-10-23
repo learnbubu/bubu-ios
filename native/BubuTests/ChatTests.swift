@@ -122,4 +122,33 @@ final class ChatTests: XCTestCase {
             XCTAssertEqual(sl.last?.who, "you")
         }
     }
+
+    func testEnglishOrNothingIsntJudgedAsChinese() async {
+        let d = course.data.dialogues.first!
+        let goal = d.turns.first { $0.who == "you" && $0.free != true }!
+        // the owner's phone: English heard, and the tutor said it works
+        let v = FreeSpeech.noChinese(FreeSpeech.clean("呃 yes am call"), goal: goal)
+        XCTAssertEqual(v?.works, false)
+        XCTAssertEqual(v?.better, goal.hanzi)
+        let judged = await FreeSpeech.judge(said: ["呃 yes am call"], goal: goal, before: nil)
+        XCTAssertEqual(judged?.works, false, "not passed to the tutor at all")
+        // only hesitations: nothing to judge either
+        XCTAssertEqual(FreeSpeech.noChinese(FreeSpeech.clean("呃嗯"), goal: goal)?.works, false)
+        // Chinese, worded otherwise: for the tutor
+        XCTAssertNil(FreeSpeech.noChinese("对，我是马克", goal: goal))
+        // the example with hesitations is still spot on
+        let spot = await FreeSpeech.judge(said: ["呃" + goal.hanzi], goal: goal, before: nil)
+        XCTAssertEqual(spot?.spotOn, true)
+    }
+
+    func testTheTutorsPinyinIsTheCourses() {
+        // every line of the course's chats, back from its own words (马克 is Mǎkè, not the model's "mǎk")
+        for t in course.data.dialogues.flatMap(\.turns) where Sentence.segment(hanzi: t.hanzi, pinyin: t.pinyin) != nil {
+            XCTAssertNotNil(FreeSpeech.pinyin(t.hanzi), t.hanzi)
+        }
+        let mark = course.data.dialogues.flatMap(\.turns).first { $0.hanzi.contains("马克") }!
+        XCTAssertTrue(FreeSpeech.pinyin(mark.hanzi)!.lowercased().contains("mǎkè"))
+        // a character the course doesn't have: no pinyin rather than a guess
+        XCTAssertNil(FreeSpeech.pinyin("龘"))
+    }
 }

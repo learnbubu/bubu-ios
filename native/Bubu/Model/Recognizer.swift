@@ -30,6 +30,8 @@ final class Recognizer {
     var recordTo: URL?
     /// Settles by itself once you've paused (off for hold-to-talk: it waits for you to let go).
     var settlesOnPause = true
+    /// Words and names to expect (the line's, the chat's people): heard more surely, fewer added or dropped.
+    var hints: [String] = []
     private var file: AVAudioFile?
 
     var isAvailable: Bool { recognizer?.isAvailable ?? false }
@@ -59,6 +61,7 @@ final class Recognizer {
                 Sounds.shared.useForRecording(true)
                 let req = SFSpeechAudioBufferRecognitionRequest()
                 req.shouldReportPartialResults = true
+                if !hints.isEmpty { req.contextualStrings = Array(hints.prefix(100)) }
                 if recognizer.supportsOnDeviceRecognition { req.requiresOnDeviceRecognition = false }
                 request = req
                 let input = engine.inputNode

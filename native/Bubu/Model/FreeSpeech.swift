@@ -34,10 +34,13 @@ enum FreeSpeech {
     /// What you said, judged: against the example first (said near enough, no need to ask), then by the tutor.
     /// `before` is the line you're answering; nil if the tutor couldn't be reached (the chat then judges as before).
     static func judge(said alts: [String], goal: Turn, before: Turn?) async -> SpeakingVerdict? {
-        guard let heard = alts.first?.trimmingCharacters(in: .whitespacesAndNewlines), !heard.isEmpty else { return nil }
-        if SpeechScore.score(goal.hanzi, alts, keyword: nil).level == .exact {
+        guard let raw = alts.first?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else { return nil }
+        let heard = clean(raw)
+        if SpeechScore.score(goal.hanzi, alts.map(clean), keyword: nil).level == .exact {
             return SpeakingVerdict(works: true, comment: "Spot on!", spotOn: true)
         }
+        // (not asked when there's no Chinese to judge: the model passed "呃 yes am call", the owner's phone, 23 Oct 2026)
+        if let gate = noChinese(heard, goal: goal) { return gate }
         #if canImport(FoundationModels)
         if #available(iOS 26.0, *), available {
             return await ask(heard: heard, goal: goal, before: before)
@@ -46,10 +49,69 @@ enum FreeSpeech {
         return nil
     }
 
+    /// Hesitation sounds, not words: left out of what's judged.
+    static let fillers: Set<Character> = ["呃", "嗯", "啊", "额", "哦", "唔", "诶", "欸", "哎"]
+
+    /// What was heard without the hesitations.
+    static func clean(_ s: String) -> String {
+        String(s.filter { !fillers.contains($0) }).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Mostly English (or nothing but hesitations): not Chinese to judge, so try again, the example offered.
+    static func noChinese(_ heard: String, goal: Turn) -> SpeakingVerdict? {
+        let han = heard.filter(Course.isHan).count
+        let latin = heard.filter { $0.isASCII && $0.isLetter }.count
+        guard han == 0 || latin > han * 2 else { return nil }
+        return SpeakingVerdict(works: false,
+                               comment: latin > 0 ? "That sounded like English. Have a go in Chinese!" : "I didn't catch any Chinese there. Try again?",
+                               better: goal.hanzi, betterPinyin: goal.pinyin)
+    }
+
+    /// The pinyin of a sentence from the course's own words (its chats' lines, its cards, longest first), never the
+    /// model's (it wrote "mǎk" for 马克); nil if any character isn't in the course.
+    static func pinyin(_ hanzi: String) -> String? {
+        var out: [String] = []
+        let chars = Array(hanzi)
+        var i = 0
+        while i < chars.count {
+            let c = chars[i]
+            if !Course.isHan(c) {
+                if let p = punct[c] { if out.isEmpty { out.append(p) } else { out[out.count - 1] += p } }
+                i += 1; continue
+            }
+            var hit: (Int, String)? = nil
+            for n in stride(from: min(lexiconLongest, chars.count - i), through: 1, by: -1) {
+                if let p = lexicon[String(chars[i..<(i + n)])] { hit = (n, p); break }
+            }
+            guard let (n, p) = hit else { return nil }
+            out.append(p)
+            i += n
+        }
+        return out.isEmpty ? nil : out.joined(separator: " ")
+    }
+
+    private static let punct: [Character: String] = ["，": ",", "。": ".", "！": "!", "？": "?", "、": ",", "；": ";", "：": ":"]
+
+    /// Each word's pinyin, as the course has it: its chats' lines split into words, and its cards.
+    private static let lexicon: [String: String] = {
+        var d: [String: String] = [:]
+        let course = Course.shared
+        for t in course.data.dialogues.flatMap(\.turns) {
+            for w in Sentence.segment(hanzi: t.hanzi, pinyin: t.pinyin) ?? [] where d[w.hanzi] == nil { d[w.hanzi] = w.pinyin }
+        }
+        for c in course.cards where !c.isSentence {
+            let h = c.word.hanzi.filter(Course.isHan)
+            if !h.isEmpty && d[h] == nil { d[h] = c.word.pinyin }
+        }
+        return d
+    }()
+    private static let lexiconLongest = lexicon.keys.map(\.count).max() ?? 1
+
     static let instructions = """
     You are a warm, encouraging Mandarin tutor for a beginner learning Chinese in an app. The learner is in a chat \
     conversation and speaks a reply aloud; you see what speech recognition heard (simplified characters; it may write a \
-    word that sounds the same, so ignore those slips and ignore tones). Decide whether their reply is sensible, \
+    word that sounds the same, so ignore those slips). You only see text: you cannot hear tones or pronunciation, so \
+    never mention them. If what was heard is not Chinese, it does not work. Decide whether their reply is sensible, \
     understandable Chinese that fits the conversation and says roughly what they meant. It does NOT have to match the \
     example: any natural way of saying it works. Be generous to a beginner: small slips still work if the meaning is \
     clear. Write your comment in plain English, one or two short sentences, kind and specific (what was good, or what \
@@ -77,7 +139,7 @@ enum FreeSpeech {
             let same = SpeechScore.clean(better) == SpeechScore.clean(heard)
             return SpeakingVerdict(works: f.works, comment: f.comment,
                                    better: better.isEmpty || same ? nil : better,
-                                   betterPinyin: better.isEmpty || same ? nil : f.betterPinyin)
+                                   betterPinyin: better.isEmpty || same ? nil : pinyin(better))
         } catch {
             return nil
         }
@@ -95,7 +157,5 @@ struct TutorFeedback {
     var comment: String
     @Guide(description: "If there's a mistake or a native speaker would say it differently, the corrected or more natural sentence in simplified Chinese characters; otherwise an empty string")
     var better: String
-    @Guide(description: "The pinyin with tone marks for the better sentence, or an empty string")
-    var betterPinyin: String
 }
 #endif

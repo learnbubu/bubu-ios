@@ -173,6 +173,8 @@ struct ChatPage: View {
     @State private var picking = false
     @State private var options: [Turn] = []
     @State private var wrongPicks: Set<String> = []
+    /// the latest scroll asked for (only the last of a burst runs)
+    @State private var scrollAsk = 0
     private let course = Course.shared
 
     struct Msg: Identifiable, Equatable {
@@ -202,6 +204,8 @@ struct ChatPage: View {
                     .padding(.horizontal, 12).padding(.bottom, 10)
                 }
                 .scrollIndicators(.hidden)
+                // (kept at the foot as things grow: no jumping, the owner's phone, 23 Oct 2026)
+                .defaultScrollAnchor(.bottom)
                 .onChange(of: msgs.count) { _, _ in toEnd(reader) }
                 .onChange(of: waiting) { _, _ in toEnd(reader) }
             }
@@ -210,7 +214,7 @@ struct ChatPage: View {
                 Group { if picking { pickCard(t) } else if free { freeCard(t) } else { replyCard(t) } }
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-            if !picking { bar }
+            if !picking || ended { bar }
         }
         .background(Home.bg.ignoresSafeArea())
         .clipShape(RoundedRectangle(cornerRadius: lesson == nil ? 0 : 22, style: .continuous))
@@ -263,12 +267,14 @@ struct ChatPage: View {
     private var yourLines: Int { turns.filter { $0.who == "you" }.count }
     private var saidLines: Int { msgs.filter { if case .you = $0.kind { return true } else { return false } }.count }
 
-    /// To the latest message, and again once the reply card has slid in (it takes the chat's foot: scrolled only before
-    /// it was in, the line you're answering was left under it; the Mac, 23 Oct 2026).
+    /// To the latest message, once, after things have settled (the reply card slid in, a card grown): a message and
+    /// the card arriving together make one scroll, not two (it jumped up and down: the owner's phone, 23 Oct 2026).
     private func toEnd(_ reader: ScrollViewProxy) {
-        withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("end", anchor: .bottom) }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-            withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("end", anchor: .bottom) }
+        scrollAsk += 1
+        let n = scrollAsk
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            guard n == scrollAsk else { return }
+            withAnimation(.easeOut(duration: 0.3)) { reader.scrollTo("end", anchor: .bottom) }
         }
     }
 
@@ -694,7 +700,16 @@ struct ChatPage: View {
     /// WeChat's bar: hold to talk (once it's your turn), or a word while he's talking.
     private var bar: some View {
         HStack(spacing: 10) {
-            if listenOnly {
+            if ended && !listenOnly {
+                Button { leave() } label: {
+                    Text(lesson == nil ? "Finish" : "Continue").font(.nunito(17, .black)).foregroundStyle(.white)
+                        .frame(maxWidth: .infinity).frame(height: 54)
+                        .background(Home.teal, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                        .padding(.bottom, 4)
+                        .background(RoundedRectangle(cornerRadius: 17, style: .continuous).fill(Home.tealDark).padding(.top, 4))
+                }
+                .buttonStyle(.plain)
+            } else if listenOnly {
                 Text(ended ? "End of the chat" : "🔒 Learn its words to reply. Listening for now")
                     .font(.nunito(14, .bold)).foregroundStyle(Home.muted)
                     .frame(maxWidth: .infinity).frame(height: 54)
@@ -812,6 +827,11 @@ struct ChatPage: View {
             if free { interimText = alts.first ?? "" } else { interim = SpeechScore.marks(t.hanzi, alts) }
         }
         recognizer.acceptEarly = { _ in false }       // (it waits for you to let go)
+        // the words to expect: the line's, and the chat's people
+        var hints = (Sentence.segment(hanzi: t.hanzi, pinyin: t.pinyin)?.map(\.hanzi) ?? []) + [t.hanzi.filter(Course.isHan)]
+        if let d = dialogue { hints += ChatCast.members(d) }
+        hints += course.nameList
+        recognizer.hints = hints
         recognizer.onResult = { alts in judge(t, alts) }
         recognizer.onError = { f in
             // (each counts as a try, so a line can always be skipped: with the microphone off, at once; the Mac, 23 Oct 2026)
@@ -938,16 +958,18 @@ struct ChatPage: View {
     /// The end: listening only, the chat simply ends; in a lesson, on to its next step; else its stars kept, and the
     /// lesson's done screen over it.
     private func finish() {
-        ended = true
-        if let lesson {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) { lesson.done() }
-            return
-        }
-        guard let d = dialogue, let s = session, !listenOnly else { return }
+        // (a button to leave by, so it can be read back first: the owner, 23 Oct 2026)
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { ended = true }
+    }
+
+    /// Finish tapped: on to the lesson's next step, or the chat's stars kept and the done screen over it.
+    private func leave() {
+        if let lesson { lesson.done(); return }
+        guard let d = dialogue, let s = session, !listenOnly else { dismiss(); return }
         ChatRecord.shared.finished(d.id, stars: misses == 0 ? 3 : misses <= 2 ? 2 : 1)
         s.finishFlashcards()
         handedOn = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             router.study = s
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                 var t = Transaction(); t.disablesAnimations = true
