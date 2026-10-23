@@ -221,7 +221,7 @@ struct ChatPage: View {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = true }
             } else { dismiss() }
         }, ground: Home.bg) {
-            BarCount(text: listenOnly ? "Listening" : "\(saidLines) / \(yourLines)")
+            BarCount(text: listenOnly ? "🎧" : "\(saidLines) / \(yourLines)")
         }
         .overlay {
             VStack(spacing: 0) {
