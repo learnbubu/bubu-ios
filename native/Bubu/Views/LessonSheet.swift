@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// What opens when you tap a stone, as the web's lesson sheet: the lesson's coin and
-/// name, how much is mastered, Study (or the skip test when it's locked), its grammar
-/// notes, the one-skill practice chips once it's been studied, and Bùbù peeking over.
+/// What opens when you tap a stone: its coin and name, a line of how it's going, and one button (the owner, 24 Oct
+/// 2026: "sooooo much info on them … more simple", mockup A). The rest (its tips, one skill at a time, a practice
+/// stone's words) is a tap away, on the sheet's second page; Bùbù peeks over.
 struct LessonSheet: View {
     let lesson: Lesson
     var close: () -> Void
@@ -10,6 +10,8 @@ struct LessonSheet: View {
     @Environment(Router.self) private var router
     @State private var shown = false
     @State private var drag: CGFloat = 0
+    /// the second page: tips, one skill at a time, the words
+    @State private var more = false
     /// the notes opened (they start folded: the tip was shown when the stone began)
     @State private var openNotes: Set<String> = []
     private let course = Course.shared
@@ -22,8 +24,6 @@ struct LessonSheet: View {
         let studied = done || cards.contains { progress.srs[$0.id] != nil }
         let pct = cards.isEmpty ? 0 : Double(mastered) / Double(cards.count)
         let locked = !done && lesson.id != progress.currentLessonId
-        // a lesson with many new words comes in steps (its batches)
-        let steps = StudySession.lessonSteps(lesson.id, progress)
         let pose = pct >= 1 || (lesson.isPractice && done) ? "done-panda" : studied ? "panda-idle" : "sheet-waving"
         ZStack(alignment: .bottom) {
             Color.black.opacity(shown ? 0.55 : 0)
@@ -34,89 +34,13 @@ struct LessonSheet: View {
                 Capsule().fill(Color.line).frame(width: 38, height: 5)
                     .frame(maxWidth: .infinity).padding(.bottom, 14)
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        HStack(spacing: 12) {
-                            Text(course.hero[lesson.id] ?? "")
-                                .font(.hanzi(22, .semibold)).foregroundStyle(Color.onAccent)
-                                .frame(width: 52, height: 44)
-                                .background(Ellipse().fill(Color.accentDark).offset(y: 5))
-                                .background(Ellipse().fill(Color.accent))
-                            if lesson.isPractice {
-                                practiceHead(done: done)
-                            } else {
-                            VStack(alignment: .leading, spacing: 0) {
-                                Text(lesson.code.uppercased()).font(.nunito(11, .semibold)).tracking(1.2).foregroundStyle(Color.muted)
-                                Text(lesson.name).font(.nunito(16, .bold)).foregroundStyle(Color.ink).lineLimit(2)
-                                Bar(value: pct, height: 7, fill: .good).padding(.top, 3).padding(.bottom, 4)
-                                Text(studied ? "\(mastered) / \(cards.count) mastered\(due > 0 ? " · \(due) due" : "")" : "new lesson · \(cards.count) words")
-                                    .font(.nunito(11)).foregroundStyle(Color.muted)
-                                if !done && !locked && steps.total > 1 {
-                                    HStack(spacing: 8) {
-                                        Text("STEP \(steps.step) OF \(steps.total)").font(.nunitoXB(11)).tracking(0.6).foregroundStyle(Color.accent)
-                                        StepSegments(done: steps.step - 1, total: steps.total, current: true)
-                                    }
-                                    .padding(.top, 5)
-                                }
-                            }
-                            }
-                        }
-                        .padding(.bottom, 12)
-
-                        if lesson.isPractice { practiceWords }
-
-                        studyButton(locked: locked, studied: studied)
-                            .padding(.top, 6).padding(.bottom, 9)
-
-                        // the stone's notes, folded to their titles: tap one to read it again
-                        ForEach(course.notes(for: lesson.id), id: \.self) { n in
-                            let open = openNotes.contains(n.title)
-                            Button {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
-                                    if open { openNotes.remove(n.title) } else { openNotes.insert(n.title) }
-                                }
-                            } label: {
-                                VStack(alignment: .leading, spacing: 6) {
-                                    HStack {
-                                        Label { Text(n.title) } icon: { Image(systemName: "lightbulb") }
-                                            .font(.nunito(15, .bold)).foregroundStyle(Color.ink)
-                                        Spacer(minLength: 4)
-                                        Image(systemName: open ? "chevron.up" : "chevron.down")
-                                            .font(.system(size: 12, weight: .bold)).foregroundStyle(Color.muted)
-                                    }
-                                    if open {
-                                        Text(n.body).font(.nunito(15)).foregroundStyle(Color.ink).multilineTextAlignment(.leading)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                    }
-                                }
-                                .padding(.horizontal, 14).padding(.vertical, 11)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.bottom, 8)
-                        }
-
-                        // the one-skill chips below appear once any of the lesson's words is studied
-                        if !studied && !locked && !lesson.isPractice {
-                            HStack(spacing: 6) {
-                                Image(systemName: "lock.fill").font(.system(size: 10, weight: .semibold))
-                                Text("Start studying to unlock focused practice").font(.nunito(12, .medium))
-                            }
-                            .foregroundStyle(Color.muted)
-                            .padding(.top, 6).padding(.horizontal, 2)
-                        }
-
-                        if studied && !lesson.isPractice {
-                            Text("OR PRACTISE ONE SKILL").font(.nunito(11)).tracking(0.3).foregroundStyle(Color.muted)
-                                .padding(.top, 14).padding(.bottom, 8).padding(.horizontal, 2)
-                            LazyVGrid(columns: [GridItem(.flexible(), spacing: 9), GridItem(.flexible(), spacing: 9)], spacing: 9) {
-                                chip("pencil", "Write", "write")
-                                chip("character.textbox", "Pinyin", "pinyin")
-                                chip("headphones", "Listen", "listen")
-                                chip("square.stack.3d.up", "Sentences", "sentence")
-                                chip("checklist", "Quiz", "quiz")
-                                chip("book", "Browse", "browse")
-                            }
+                    Group {
+                        if more {
+                            morePage(studied: studied, locked: locked)
+                                .transition(.move(edge: .trailing).combined(with: .opacity))
+                        } else {
+                            front(studied: studied, locked: locked, done: done, pct: pct, mastered: mastered, total: cards.count, due: due)
+                                .transition(.move(edge: .leading).combined(with: .opacity))
                         }
                     }
                 }
@@ -154,6 +78,136 @@ struct LessonSheet: View {
         .sensoryFeedback(.impact(weight: .light), trigger: shown)
     }
 
+    /// The front: the coin and the name (its Chinese big, its English under), one line of how it's going, the
+    /// button, and the one link to the rest.
+    private func front(studied: Bool, locked: Bool, done: Bool, pct: Double, mastered: Int, total: Int, due: Int) -> some View {
+        let parts = lesson.nameParts
+        let steps = StudySession.lessonSteps(lesson.id, progress)
+        let notes = course.notes(for: lesson.id)
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 12) {
+                coin
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(parts.hanzi).font(.hanzi(20, .bold)).foregroundStyle(Color.ink).lineLimit(1).minimumScaleFactor(0.7)
+                    if !parts.en.isEmpty {
+                        Text(parts.en).font(.nunito(13, .semibold)).foregroundStyle(Color.muted).lineLimit(2)
+                    }
+                }
+                // (room for Bùbù, peeking over the top right)
+                Spacer(minLength: 64)
+            }
+            .padding(.bottom, 14)
+
+            // one line of how it's going
+            Group {
+                if lesson.isPractice {
+                    Text(done ? "Done · practise again any time" : "\(lesson.review == true ? "Chapter review" : "Practice") · \(course.practiceCards(lesson.id).count) words, weakest first")
+                        .font(.nunito(12, .semibold)).foregroundStyle(Color.muted)
+                } else if !done && !locked && steps.total > 1 {
+                    StepSegments(done: steps.step - 1, total: steps.total, current: true, width: 40, height: 6)
+                } else if studied {
+                    HStack(spacing: 8) {
+                        Bar(value: pct, height: 6, fill: .good)
+                        Text("\(mastered)/\(total)\(due > 0 ? " · \(due) due" : "")").font(.nunito(11, .semibold)).foregroundStyle(Color.muted)
+                            .fixedSize()
+                    }
+                } else {
+                    Text("\(total) new words").font(.nunito(12, .semibold)).foregroundStyle(Color.muted)
+                }
+            }
+            .padding(.bottom, 14)
+
+            studyButton(locked: locked, studied: studied)
+                .padding(.bottom, 4)
+
+            // the one way to the rest
+            let link: String? = lesson.isPractice ? "See the \(course.practiceCards(lesson.id).count) words"
+                : studied ? "More ways to practise"
+                : notes.isEmpty ? nil : notes.count == 1 ? "1 tip" : "\(notes.count) tips"
+            if let link, !locked {
+                Button { withAnimation(.spring(response: 0.32, dampingFraction: 0.9)) { more = true } } label: {
+                    HStack(spacing: 5) {
+                        if !studied && !lesson.isPractice { Image(systemName: "lightbulb").font(.system(size: 12, weight: .bold)) }
+                        Text(link).font(.nunito(14, .bold))
+                    }
+                    .foregroundStyle(Color.accent)
+                    .frame(maxWidth: .infinity).padding(.top, 12)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    /// The second page: back, then the stone's tips, a practice stone's words, and one skill at a time.
+    private func morePage(studied: Bool, locked: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 10) {
+                Button { withAnimation(.spring(response: 0.32, dampingFraction: 0.9)) { more = false } } label: {
+                    Image(systemName: "chevron.left").font(.system(size: 14, weight: .bold)).foregroundStyle(Color.ink)
+                        .frame(width: 32, height: 32).background(Color.bg, in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Back")
+                Text(lesson.nameParts.hanzi).font(.hanzi(17, .bold)).foregroundStyle(Color.ink).lineLimit(1)
+                Spacer(minLength: 64)
+            }
+            .padding(.bottom, 14)
+
+            if lesson.isPractice { practiceWords }
+
+            // the stone's notes, folded to their titles: tap one to read it again
+            ForEach(course.notes(for: lesson.id), id: \.self) { n in
+                let open = openNotes.contains(n.title)
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+                        if open { openNotes.remove(n.title) } else { openNotes.insert(n.title) }
+                    }
+                } label: {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Label { Text(n.title) } icon: { Image(systemName: "lightbulb") }
+                                .font(.nunito(15, .bold)).foregroundStyle(Color.ink)
+                            Spacer(minLength: 4)
+                            Image(systemName: open ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 12, weight: .bold)).foregroundStyle(Color.muted)
+                        }
+                        if open {
+                            Text(n.body).font(.nunito(15)).foregroundStyle(Color.ink).multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    .padding(.horizontal, 14).padding(.vertical, 11)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.accentSoft, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .padding(.bottom, 8)
+            }
+
+            if studied && !lesson.isPractice && !locked {
+                Text("ONE SKILL AT A TIME").font(.nunito(11, .semibold)).tracking(0.6).foregroundStyle(Color.muted)
+                    .padding(.top, 8).padding(.bottom, 8).padding(.horizontal, 2)
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 9), GridItem(.flexible(), spacing: 9)], spacing: 9) {
+                    chip("pencil", "Write", "write")
+                    chip("character.textbox", "Pinyin", "pinyin")
+                    chip("headphones", "Listen", "listen")
+                    chip("square.stack.3d.up", "Sentences", "sentence")
+                    chip("checklist", "Quiz", "quiz")
+                    chip("book", "Browse", "browse")
+                }
+            }
+        }
+    }
+
+    /// the stone's coin: its character on a raised green disc
+    private var coin: some View {
+        Text(course.hero[lesson.id] ?? "")
+            .font(.hanzi(22, .semibold)).foregroundStyle(Color.onAccent)
+            .frame(width: 52, height: 44)
+            .background(Ellipse().fill(Color.accentDark).offset(y: 5))
+            .background(Ellipse().fill(Color.accent))
+    }
+
     /// Study, or for a locked lesson the skip test that unlocks it.
     private func studyButton(locked: Bool, studied: Bool) -> some View {
         Button {
@@ -165,34 +219,17 @@ struct LessonSheet: View {
                     Label("Take the skip test", systemImage: "scope").font(.nunitoXB(16))
                     Text("pass to unlock this — and everything before it").font(.nunito(11, .medium)).opacity(0.9)
                 } else if lesson.isPractice {
-                    Text(progress.isDone(lesson.id) ? "Practise again" : "Start practice").font(.nunitoXB(16))
-                    Text("no new words · no buns needed").font(.nunito(11, .medium)).opacity(0.9)
+                    Text(progress.isDone(lesson.id) ? "Practise again" : "Start practice").font(.nunitoXB(17))
                 } else {
-                    Text(stepLabel(studied: studied)).font(.nunitoXB(16))
-                    Text("mixed skills · spaced repetition").font(.nunito(11, .medium)).opacity(0.9)
+                    Text(stepLabel(studied: studied)).font(.nunitoXB(17))
                 }
             }
             .foregroundStyle(Color.onAccent)
-            .frame(maxWidth: .infinity).padding(14)
+            .frame(maxWidth: .infinity).padding(.vertical, 15).padding(.horizontal, 14)
             .background(Color.accent, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(PressDown())
         .background(Color.accentDark, in: RoundedRectangle(cornerRadius: 14, style: .continuous).offset(y: 5))
-    }
-
-    /// A practice stone's heading: what it is and what it covers.
-    private func practiceHead(done: Bool) -> some View {
-        let n = course.practiceCards(lesson.id).count
-        let review = lesson.review == true
-        let what = review ? "About \(StudySession.practiceLen) exercises on the chapter's \(n) words, weaker ones first"
-                          : "About \(StudySession.practiceLen) exercises on the \(n) words so far, weaker ones first"
-        return VStack(alignment: .leading, spacing: 2) {
-            Text(review ? "CHAPTER REVIEW" : "PRACTICE").font(.nunito(11, .semibold)).tracking(1.2).foregroundStyle(Color.muted)
-            Text(lesson.name).font(.nunito(16, .bold)).foregroundStyle(Color.ink).lineLimit(2)
-            Text(done ? "Done · practise again any time" : what)
-                .font(.nunito(12)).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true)
-                .padding(.top, 3)
-        }
     }
 
     /// The words a practice stone covers, as small tiles.
@@ -212,7 +249,7 @@ struct LessonSheet: View {
     private func stepLabel(studied: Bool) -> String {
         let s = StudySession.lessonSteps(lesson.id, progress)
         if !progress.isDone(lesson.id) && s.total > 1 { return "Start step \(s.step) of \(s.total)" }
-        return studied ? "Study" : "Start studying"
+        return studied ? "Study" : "Start"
     }
 
     /// One skill on its own, for a lesson that's been studied (web: launchLesson with a focus).
