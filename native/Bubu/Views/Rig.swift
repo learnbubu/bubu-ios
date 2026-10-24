@@ -24,8 +24,8 @@ private func envelope(_ t: Double, _ a: Double, _ b: Double, _ inF: Double = 0.2
 struct FirecrackerBurst: View {
     let n: Int
     let bar: CGRect
-    /// how far along the bar its fill is (0…1): the strings hang from its tip, lit by the run (the owner, 24 Oct 2026:
-    /// "not attached to anything and floating on nothing"); nil: where the studio put them
+    /// how far along the bar its fill is (0…1): the strings hang from its tip; nil (as lessons have it): from just inside
+    /// the bar's end
     var at: Double? = nil
     @State private var start = Date()
     static let length = 2.2
@@ -51,10 +51,12 @@ struct FirecrackerBurst: View {
 
     /// From where the studio hung the strings to the tip of the bar's fill, kept clear of the screen's edges.
     private func shift(_ k: Double) -> Double {
-        guard let at, bar.width > 0 else { return 0 }
-        let tip = bar.minX + bar.width * min(1, max(0, at))
+        guard bar.width > 0 else { return 0 }
+        // (by default just inside the bar's own end, however long the bar is: the studio's place assumed the bar ran the
+        // width, and with the buns beside it the strings hung past its end, on nothing; the owner, 24 Oct 2026)
+        let anchor = at.map { bar.minX + bar.width * min(1, max(0, $0)) } ?? (bar.maxX - 34 * k)
         let lo = bar.minX + 40 * k, hi = bar.maxX - 20 * k
-        return min(hi, max(lo, tip)) - X(strX, k)
+        return min(hi, max(lo, anchor)) - X(strX, k)
     }
 
     /// the studio's phone units to here
