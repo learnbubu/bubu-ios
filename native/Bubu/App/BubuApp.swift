@@ -15,6 +15,10 @@ struct BubuApp: App {
     init() {
         Reminders.shared.install()
         Speech.loadVoices()          // off the main thread: listing voices can take seconds
+        // buttons in a scroll view pressed at once: it held each touch back to see if it was a scroll, and a tile's
+        // press (its sink, its tap) came late or not at all ("pressing them … and clicking things": the owner, 24 Oct
+        // 2026). Dragging still scrolls.
+        UIScrollView.appearance().delaysContentTouches = false
     }
     @Environment(\.scenePhase) private var scenePhase
 
