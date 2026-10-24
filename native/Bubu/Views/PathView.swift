@@ -123,6 +123,10 @@ struct PathView: View {
                 if now { StartBubble().offset(y: -size / 2 - 18) }
                 if now { StepBadge(lessonId: it.lesson.id).offset(x: size * 0.66, y: size * 0.3) }
             }
+            // (the stone alone takes the tap, an oval its size, whatever's drawn round it (the glow, the bubble,
+            // badges): a done chapter review wouldn't open, its taps going nowhere or to the stone before; the Mac, 0.2.26)
+            .frame(width: size * stoneRatio, height: size)
+            .contentShape(Ellipse())
         }
         .buttonStyle(StoneStyle())
         .position(x: x, y: it.y)
@@ -147,6 +151,8 @@ struct PathView: View {
         .padding(.horizontal, 22)
         .frame(width: W)
         .position(x: W / 2, y: mid)
+        // (a name across the page: never in the way of a stone's tap)
+        .allowsHitTesting(false)
     }
 
     /// The scenery composed in the path editor, anchored to its stone.
