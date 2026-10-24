@@ -17,6 +17,9 @@ struct Word: Codable, Hashable {
     /// What the word means, briefly: shown when it's met, in the options and in the feedback.
     /// The full meaning (`en`) stays on the character sheet and in the word lists.
     var gloss: String { short ?? en }
+    /// A grammar word (吧, 了, a measure word): its meaning all in brackets, "(suggestion: let's…)": what it does, not
+    /// a thing it means.
+    var isGrammar: Bool { let g = gloss; return g.hasPrefix("(") && g.hasSuffix(")") }
 }
 
 struct Lesson: Codable, Identifiable {

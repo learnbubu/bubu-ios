@@ -259,22 +259,20 @@ struct ChatPage: View {
                 // (the lesson holds level-ups and keeps the score)
                 turns = lesson.turns
                 picking = lesson.picks
-                if !picking { Task { if await Recognizer.authorize() { Sounds.shared.holdForRecording(true) } } }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { step() }
+                // the chat before the lines you're in, already there (it's how 小雨 knows you're 马克: the owner, 24 Oct
+                // 2026, "they ask for Mark's last name, but then know his first name?")
+                if let first = lesson.turns.first, let at = d.turns.firstIndex(of: first) {
+                    msgs = d.turns[..<at].map { Msg(kind: $0.who == "you" ? .you(ok: true) : .bubu, turn: $0, seconds: Self.seconds($0.hanzi, speaker: ChatCast.voice($0))) }
+                }
+                startAudio(mic: !picking)
                 return
             }
             progress.holdLevelUps = true
             turns = d.turns
             listenOnly = !course.dialogueUnlocked(d) { progress.srs[$0] != nil }
             free = FreeSpeech.available && !listenOnly
-            if !listenOnly {
-                session = StudySession.chatting(progress, d)
-                // (the microphone asked for and the audio set for recording now, once, not at every press)
-                Task {
-                    if await Recognizer.authorize() { Sounds.shared.holdForRecording(true) }
-                }
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { step() }
+            if !listenOnly { session = StudySession.chatting(progress, d) }
+            startAudio(mic: !listenOnly)
         }
         .onDisappear {
             run += 1
@@ -282,6 +280,17 @@ struct ChatPage: View {
             Sounds.shared.holdForRecording(false)
             guard !handedOn, lesson == nil else { return }
             progress.holdLevelUps = false; progress.showHeldLevelUp()
+        }
+    }
+
+    /// The microphone asked for and the audio set for recording, once, not at every press; then the first line (not
+    /// before: switching the audio over cut it off, the owner's phone, 24 Oct 2026).
+    private func startAudio(mic: Bool) {
+        let r = run
+        Task { @MainActor in
+            if mic, await Recognizer.authorize() { Sounds.shared.holdForRecording(true) }
+            try? await Task.sleep(for: .milliseconds(450))
+            if run == r { step() }
         }
     }
 
@@ -784,20 +793,29 @@ struct ChatPage: View {
     /// and the place to slide to, to cancel.
     private var recordingOverlay: some View {
         ZStack {
-            Home.ink.opacity(0.42)
-            VStack(spacing: 18) {
+            // (the chat behind dimmed and blurred, so its words don't run into these: the owner's phone, 24 Oct 2026)
+            Rectangle().fill(.ultraThinMaterial)
+            Home.ink.opacity(0.38)
+            VStack(spacing: 16) {
+                Spacer(minLength: 12)
                 Waveform(level: level, bars: 15)
                     .foregroundStyle(cancelling ? Color.white : Home.tealDark)
                     .padding(.horizontal, 26).padding(.vertical, 18)
                     .chatBubble(mine: true, fill: cancelling ? ChatLook.red : nil)
-                if !interim.isEmpty {
-                    marksText(interim, size: 24)
+                Group {
+                    if !interimText.isEmpty { Text(interimText).font(.hanzi(22, .medium)).foregroundStyle(.white) }
+                    else if !interim.isEmpty { marksText(interim, size: 24) }
                 }
-                Spacer().frame(height: 30)
-                Image(systemName: "xmark").font(.system(size: 20, weight: .bold)).foregroundStyle(cancelling ? ChatLook.red : Color.white)
-                    .frame(width: 68, height: 68)
-                    .background(cancelling ? Color.white : Color.white.opacity(0.22), in: Circle())
-                Text(cancelling ? "Let go to cancel" : "Slide up here to cancel").font(.nunito(12.5, .bold)).foregroundStyle(.white)
+                .padding(.horizontal, 14).padding(.vertical, 6)
+                .background(Color.white.opacity(interim.isEmpty && interimText.isEmpty ? 0 : 0.92), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                Spacer(minLength: 12)
+                VStack(spacing: 8) {
+                    Image(systemName: "xmark").font(.system(size: 18, weight: .bold)).foregroundStyle(cancelling ? ChatLook.red : Color.white)
+                        .frame(width: 56, height: 56)
+                        .background(cancelling ? Color.white : Color.white.opacity(0.22), in: Circle())
+                    Text(cancelling ? "Let go to cancel" : "Slide up here to cancel").font(.nunito(12.5, .bold)).foregroundStyle(.white)
+                }
+                .padding(.bottom, 14)
             }
         }
         .allowsHitTesting(false)
@@ -968,7 +986,8 @@ struct ChatPage: View {
         let m = Msg(kind: .you(ok: false), turn: t, seconds: Self.seconds(t.hanzi, speaker: ChatCast.voice(t)))
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { msgs.append(m) }
         play(m)
-        next()
+        // (heard out before the next line: it was cut off)
+        next(after: m.seconds + 0.5)
     }
 
     /// On to his next line (`after` seconds: time to read the tutor's feedback).

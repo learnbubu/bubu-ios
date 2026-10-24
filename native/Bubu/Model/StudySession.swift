@@ -1446,6 +1446,8 @@ struct Exercise {
     var isNew = false
     /// writing help, a `WriteGuidance` raw value: 0 full, 1 outline, 2 from memory
     var writeStage = 0
+    /// a grammar word asked by what it does, among other grammar words (see grammarChoice)
+    var grammar = false
 
     struct Tile: Identifiable, Hashable { let id: Int; let text: String; let pinyin: String? }
     /// How many stones away a wrong option may come from, for a stone with too few words of its own.
@@ -1453,7 +1455,7 @@ struct Exercise {
 
     var label: String {
         switch dir {
-        case "recall": return "Which characters mean this?"
+        case "recall": return grammar ? "Which word does this?" : "Which characters mean this?"
         case "pinyin": return "Which pinyin is correct?"
         case "listen": return "What did you hear?"
         case "sentence": return toChinese ? "Build the Chinese" : "Translate this sentence"
@@ -1464,13 +1466,19 @@ struct Exercise {
         case "type": return typeHanzi ? "Type it in Chinese" : "Type it in pinyin"
         case "build": return "Build the character"
         case "picture": return "Which one is “\(card.word.gloss)”?"
-        default: return "What does this mean?"
+        default: return grammar ? "What does this word do?" : "What does this mean?"
         }
     }
 
     /// `met` says whether a word (a card id) has been met: a sentence may only use met words.
     static func make(card c: Card, dir: String, scope: Set<String>, progress: ProgressStore,
                      met: ((String) -> Bool)? = nil) -> Exercise? {
+        // a grammar word has no meaning of its own to pick from "big" and "WeChat": it's asked in a sentence (fill the
+        // gap, the other grammar words its wrong answers), else by what it does, among the other grammar words (the
+        // owner, 24 Oct 2026, of 吧: "does that make sense? ba can have more meanings too")
+        if c.word.isGrammar, ["recognize", "recall", "listen"].contains(dir) {
+            return gap(c, scope: scope, met: met ?? { progress.srs[$0] != nil }) ?? grammarChoice(c, dir: dir == "recall" ? "recall" : "recognize")
+        }
         switch dir {
         case "sentence": return sentence(c, met: met ?? { progress.srs[$0] != nil })
         case "hear": return sentence(c, met: met ?? { progress.srs[$0] != nil }, hear: true)
@@ -1497,6 +1505,22 @@ struct Exercise {
         case "pinyin": return w.pinyin
         default: return w.gloss             // the short meaning, when the word has one
         }
+    }
+
+    /// A grammar word by what it does: its bracketed meaning among three other grammar words' (or, `recall`, the word
+    /// for a meaning among other grammar words), the nearest in the course first.
+    static func grammarChoice(_ c: Card, dir: String) -> Exercise {
+        let course = Course.shared
+        let here = course.lessonOrder[c.lessonId] ?? 0
+        let answer = field(c.word, dir)
+        let pool = course.cards.filter { !$0.isSentence && $0.word.isGrammar && $0.word.hanzi != c.word.hanzi }
+            .sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
+        var options: [String] = [], seen: Set<String> = [answer]
+        for x in pool.prefix(12).shuffled() + pool where options.count < 3 {
+            let v = field(x.word, dir)
+            if seen.insert(v).inserted { options.append(v) }
+        }
+        return Exercise(kind: .choice, dir: dir, card: c, options: (options + [answer]).shuffled(), answer: answer, grammar: true)
     }
 
     /// One answer and three distractors (web: buildChoiceExercise).
@@ -1709,8 +1733,11 @@ struct Exercise {
         let here = course.lessonOrder[c.lessonId] ?? 0
         let fits: (Card) -> Bool = { !inSentence.contains($0.word.hanzi) && $0.word.hanzi != word && !$0.isSentence }
         var options: [String] = [], seen = Set<String>()
-        // (the whole course is only looked through if the stones nearby don't have three)
+        // (the whole course is only looked through if the stones nearby don't have three; a grammar word's gap is
+        // offered other grammar words first: 吧, 吗 or 呢, not 吧, 茶 or 大)
+        let grammarNear: (Card) -> Bool = { c.word.isGrammar && $0.word.isGrammar && abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby * 3 }
         let groups: [(Card) -> Bool] = [
+            grammarNear,
             { scope.contains($0.lessonId) },
             { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby },
             { _ in true },
