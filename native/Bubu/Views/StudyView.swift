@@ -163,7 +163,7 @@ struct StudyView: View {
                 .allowsHitTesting(false)
             }
             if let n = burst {
-                FirecrackerBurst(n: n, bar: barFrame, at: session.progressFraction).id(n).ignoresSafeArea().zIndex(12)
+                FirecrackerBurst(n: n, bar: barFrame).id(n).ignoresSafeArea().zIndex(12)
             }
             if let c = cheer {
                 CheerView(text: c).transition(.opacity).zIndex(14)
