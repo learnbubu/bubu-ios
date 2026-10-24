@@ -190,6 +190,8 @@ final class StudySession: Identifiable {
     private var probes = 0
     static let probeSize = 3, probePass = 2, maxProbes = 8
     private(set) var quizScore = 0
+    /// a stone's lesson is set: its chances from a generator seeded by the stone (see Dice); nil: at chance
+    private var dice: SeededRNG?
 
     init(lessonId: String, progress: ProgressStore, focuses: Set<String>? = nil, cards: [Card]? = nil,
          mode: Mode = .lesson, title: String = "Study", scope: Set<String>? = nil) {
@@ -197,6 +199,8 @@ final class StudySession: Identifiable {
         self.progress = progress
         self.mode = mode
         self.title = title
+        // (a stone's own lesson, as the path opens it: set. Anything given its cards, or of another kind, at chance)
+        Dice.begin(mode == .lesson && cards == nil && !lessonId.isEmpty ? SeededRNG(lessonId) : nil)
         // a mixed session uses the skills switched on in "What to study"
         self.focuses = focuses ?? (mode == .mistakes ? Set(Self.allDirs) : progress.selectedFocuses)
         self.start = progress.now()
@@ -233,6 +237,7 @@ final class StudySession: Identifiable {
         self.onBuns = [.lesson, .listen, .write].contains(mode) && hasMeetLeft
         if mode == .lesson && !lessonId.isEmpty { stepAtStart = Self.lessonSteps(lessonId, progress).step }
         questsAtStart = Dictionary(progress.todayQuests.map { ($0.id, progress.progress(of: $0)) }, uniquingKeysWith: { a, _ in a })
+        dice = Dice.end()
         next()
     }
 
@@ -282,15 +287,15 @@ final class StudySession: Identifiable {
     /// A practice stone's exercises: about fifteen on the words its chapter has taught so far,
     /// weakest first; with fewer words than that the weakest come again, never twice in a row.
     static func practiceQueue(_ lessonId: String, _ p: ProgressStore, count: Int = practiceLen) -> [Card] {
-        let pool = Course.shared.practiceCards(lessonId).shuffled()
+        let pool = Course.shared.practiceCards(lessonId).diced()
             .sorted { weakness(p.srs[$0.id]) > weakness(p.srs[$1.id]) }
         guard !pool.isEmpty, count > 0 else { return [] }
         var picked = Array(pool.prefix(count))
         var i = 0
         while picked.count < count { picked.append(pool[i % pool.count]); i += 1 }
-        var out = picked.shuffled()
+        var out = picked.diced()
         var tries = 0
-        while tries < 50, out.indices.dropFirst().contains(where: { out[$0].id == out[$0 - 1].id }) { out.shuffle(); tries += 1 }
+        while tries < 50, out.indices.dropFirst().contains(where: { out[$0].id == out[$0 - 1].id }) { out = out.diced(); tries += 1 }
         return out
     }
 
@@ -316,12 +321,12 @@ final class StudySession: Identifiable {
     /// takes the words the first left out, then some of the first's again. Empty when there
     /// are too few words met.
     static func practiceMatchWords(_ lessonId: String, _ p: ProgressStore) -> [[Card]] {
-        let pool = Course.shared.practiceCards(lessonId).filter { p.srs[$0.id] != nil }.shuffled()
+        let pool = Course.shared.practiceCards(lessonId).filter { p.srs[$0.id] != nil }.diced()
             .sorted { weakness(p.srs[$0.id]) > weakness(p.srs[$1.id]) }
         let first = matchWords(pool)
         guard !first.isEmpty else { return [] }
         let firstIds = Set(first.map(\.id))
-        let second = matchWords(pool.filter { !firstIds.contains($0.id) } + first.shuffled())
+        let second = matchWords(pool.filter { !firstIds.contains($0.id) } + first.diced())
         guard !second.isEmpty else { return [first] }
         return [first, second]
     }
@@ -349,7 +354,7 @@ final class StudySession: Identifiable {
         let course = Course.shared
         let units = chatUnits(lessonId)
         let ready = course.data.dialogues.filter { units.contains($0.lesson) && course.dialogueUnlocked($0) { p.srs[$0] != nil } }
-        guard let d = ready.randomElement() else { return nil }
+        guard let d = ready.dicedElement() else { return nil }
         let turns = chatSlice(d.turns)
         return turns.isEmpty ? nil : (d, turns)
     }
@@ -368,7 +373,7 @@ final class StudySession: Identifiable {
     static func chatSlice(_ ts: [Turn], mine: Int = chatLines) -> [Turn] {
         let yours = ts.indices.filter { ts[$0].who == "you" }
         guard !yours.isEmpty else { return [] }
-        let k = yours.count <= mine ? 0 : Int.random(in: 0...(yours.count - mine))
+        let k = yours.count <= mine ? 0 : Dice.int(in: 0...(yours.count - mine))
         let first = yours[k], last = yours[min(yours.count, k + mine) - 1]
         return Array(ts[max(0, first - 1)...last])
     }
@@ -419,7 +424,7 @@ final class StudySession: Identifiable {
             guard case .card(let c) = it, ids.insert(c.id).inserted else { continue }
             if p.srs[c.id] != nil { known.append(c) } else if metBefore.contains(c.id) { fresh.append(c) }
         }
-        known = known.shuffled().sorted { weakness(p.srs[$0.id]) > weakness(p.srs[$1.id]) }
+        known = known.diced().sorted { weakness(p.srs[$0.id]) > weakness(p.srs[$1.id]) }
         let words = matchWords(fresh + known)
         guard !words.isEmpty else { return items }
         var out = items
@@ -499,7 +504,7 @@ final class StudySession: Identifiable {
     static func review(_ p: ProgressStore) -> StudySession? {
         let cards = p.dueReviewCards()
         guard !cards.isEmpty else { Moments.shared.toast("Nothing due yet - come back later."); return nil }
-        return StudySession(lessonId: "", progress: p, cards: Array(cards.shuffled().prefix(20)), mode: .review, title: "Review")
+        return StudySession(lessonId: "", progress: p, cards: Array(cards.diced().prefix(20)), mode: .review, title: "Review")
     }
 
     static func mistakes(_ p: ProgressStore) -> StudySession? {
@@ -519,7 +524,7 @@ final class StudySession: Identifiable {
         let studied = cards.filter { p.srs[$0.id] != nil }
         let pool = studied.isEmpty ? cards : studied
         guard !pool.isEmpty else { Moments.shared.toast("Pick at least one lesson — open “What to study”."); return nil }
-        return onBunsCheck(StudySession(lessonId: "", progress: p, focuses: ["listen"], cards: Array(pool.shuffled().prefix(20)),
+        return onBunsCheck(StudySession(lessonId: "", progress: p, focuses: ["listen"], cards: Array(pool.diced().prefix(20)),
                                         mode: .listen, title: "Listening", scope: p.selectedLessons), p)
     }
 
@@ -528,7 +533,7 @@ final class StudySession: Identifiable {
         let studied = cards.filter { p.srs[$0.id] != nil }
         let pool = studied.isEmpty ? cards : studied
         guard !pool.isEmpty else { Moments.shared.toast("Pick at least one lesson — open “What to study”."); return nil }
-        return onBunsCheck(StudySession(lessonId: "", progress: p, focuses: ["write"], cards: Array(pool.shuffled().prefix(12)),
+        return onBunsCheck(StudySession(lessonId: "", progress: p, focuses: ["write"], cards: Array(pool.diced().prefix(12)),
                                         mode: .write, title: "Writing", scope: p.selectedLessons), p)
     }
 
@@ -537,7 +542,7 @@ final class StudySession: Identifiable {
                      tooFew: String = "Pick more lessons — a quiz needs at least 3 words.") -> StudySession? {
         let cards = cards.filter { !$0.isSentence }
         guard cards.count >= 3 else { Moments.shared.toast(tooFew); return nil }
-        let items = Array(cards.shuffled().prefix(20))
+        let items = Array(cards.diced().prefix(20))
         return StudySession(lessonId: "", progress: p, focuses: focuses, cards: items, mode: .quiz, title: "Quiz · \(items.count) questions", scope: scope)
     }
 
@@ -563,7 +568,7 @@ final class StudySession: Identifiable {
             return s
         }
         let perLesson = max(2, min(5, 20 / range.count))
-        let items = range.flatMap { lid in Course.shared.cards(in: lid).filter { !$0.isSentence }.shuffled().prefix(perLesson) }.shuffled()
+        let items = range.flatMap { lid in Course.shared.cards(in: lid).filter { !$0.isSentence }.diced().prefix(perLesson) }.diced()
         let s = StudySession(lessonId: "", progress: p, focuses: ["recognize", "recall"], cards: items, mode: .placement,
                              title: "\(label) · \(items.count) question\(items.count == 1 ? "" : "s")")
         s.placeRange = Array(range); s.placeTarget = target
@@ -573,7 +578,7 @@ final class StudySession: Identifiable {
 
     /// A probe's questions: spread across the chapter's lessons, one word from each in turn.
     private static func probeCards(_ block: [String]) -> [Card] {
-        var pools = block.map { Course.shared.cards(in: $0).filter { !$0.isSentence }.shuffled() }.filter { !$0.isEmpty }.shuffled()
+        var pools = block.map { Course.shared.cards(in: $0).filter { !$0.isSentence }.diced() }.filter { !$0.isEmpty }.diced()
         var out: [Card] = []
         while out.count < probeSize, pools.contains(where: { !$0.isEmpty }) {
             for i in pools.indices where !pools[i].isEmpty && out.count < probeSize { out.append(pools[i].removeFirst()) }
@@ -691,12 +696,12 @@ final class StudySession: Identifiable {
                     reviews.append(c); seen.insert(c.id)
                 }
             }
-            add(due.filter { progress.srs[$0.id] != nil }.shuffled())
-            add(progress.dueReviewCards(excluding: lessonId).shuffled())
+            add(due.filter { progress.srs[$0.id] != nil }.diced())
+            add(progress.dueReviewCards(excluding: lessonId).diced())
             // then the earlier words met so far, weakest first
             add(reachedCards(progress).filter { $0.lessonId != lessonId && progress.srs[$0.id] != nil }
-                .shuffled().sorted { weakness(progress.srs[$0.id]) > weakness(progress.srs[$1.id]) })
-            add(cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.shuffled())
+                .diced().sorted { weakness(progress.srs[$0.id]) > weakness(progress.srs[$1.id]) })
+            add(cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.diced())
             // too few earlier words (the course's first stones): the new words come up more
             // often, up to newRepsMax each, and then the earlier ones come round again
             let spare = want - reviews.count - picked.count * (newRepsMax - baseReps(new: picked.count))
@@ -706,7 +711,7 @@ final class StudySession: Identifiable {
             }
             return picked + reviews
         }
-        let pool = (due.isEmpty ? cards : due).shuffled()
+        let pool = (due.isEmpty ? cards : due).diced()
         let n = pool.count > sessionLen
             ? Int(ceil(Double(pool.count) / ceil(Double(pool.count) / Double(sessionLen))))
             : pool.count
@@ -718,8 +723,8 @@ final class StudySession: Identifiable {
     private func sessionOrder(_ cards: [Card]) -> [Item] {
         let order = Dictionary(uniqueKeysWithValues: course.cards.enumerated().map { ($1.id, $0) })
         let fresh = cards.filter { progress.srs[$0.id] == nil }.sorted { (order[$0.id] ?? 0) < (order[$1.id] ?? 0) }
-        var known = cards.filter { progress.srs[$0.id] != nil }.shuffled()
-        if fresh.isEmpty { return cards.shuffled().map { .card($0) } }
+        var known = cards.filter { progress.srs[$0.id] != nil }.diced()
+        if fresh.isEmpty { return cards.diced().map { .card($0) } }
         if stoneShaped { return Self.stoneOrder(fresh: fresh, known: known) }
         let k = Int(ceil(Double(fresh.count) / Double(Self.meetGroup)))
         let size = Int(ceil(Double(fresh.count) / Double(k)))
@@ -728,14 +733,14 @@ final class StudySession: Identifiable {
         for (gi, g) in groups.enumerated() {
             met += g.count
             out.append(.meet(cards: g, first: gi == 0, left: fresh.count - met))
-            out += g.shuffled().map { .card($0) }
+            out += g.diced().map { .card($0) }
             if !known.isEmpty { out.append(.card(known.removeFirst())) }
             if gi > 0 {
-                out += groups[gi - 1].shuffled().map { .card($0) }
+                out += groups[gi - 1].diced().map { .card($0) }
                 if !known.isEmpty { out.append(.card(known.removeFirst())) }
             }
         }
-        out += (groups.last ?? []).shuffled().map { .card($0) }
+        out += (groups.last ?? []).diced().map { .card($0) }
         out += known.map { .card($0) }
         return out
     }
@@ -806,6 +811,8 @@ final class StudySession: Identifiable {
     private var skippedBack: Set<String> = []
 
     func next() {
+        Dice.begin(dice)
+        defer { dice = Dice.end() }
         let lastId = card?.id
         answered = false
         lastCorrect = nil
@@ -916,7 +923,7 @@ final class StudySession: Identifiable {
             let mc = focuses.filter {
                 !["write", "sentence", "speak"].contains($0) && (tonesTaught || $0 != "pinyin") && (!listeningOff || $0 != "listen")
             }
-            return mc.randomElement() ?? "recognize"
+            return mc.dicedElement() ?? "recognize"
         }
         let s = progress.srs[c.id]
         if mode == .mistakes, let m = s?.miss, dirByCard[c.id] == nil, missedDirPossible(c, m.d) {
@@ -970,12 +977,12 @@ final class StudySession: Identifiable {
         if let l = lastDir, enabled.count > 1 { enabled.removeAll { $0 == l } }
         // a word with a picture gets its picture card often, not as one kind in eight (the owner,
         // 5 Oct 2026: "not really seeing that exercise"): up to twice a session
-        if enabled.contains("picture"), (dirsUsed["picture"] ?? 0) < 2, Double.random(in: 0..<1) < 0.45 {
+        if enabled.contains("picture"), (dirsUsed["picture"] ?? 0) < 2, Dice.unit() < 0.45 {
             dirByCard[c.id] = "picture"
             lastDir = "picture"
             return "picture"
         }
-        let d = enabled.randomElement() ?? "recognize"
+        let d = enabled.dicedElement() ?? "recognize"
         dirByCard[c.id] = d
         lastDir = d
         return d
@@ -1516,11 +1523,11 @@ struct Exercise {
         let pool = course.cards.filter { !$0.isSentence && $0.word.isGrammar && $0.word.hanzi != c.word.hanzi }
             .sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
         var options: [String] = [], seen: Set<String> = [answer]
-        for x in pool.prefix(12).shuffled() + pool where options.count < 3 {
+        for x in pool.prefix(12).diced() + pool where options.count < 3 {
             let v = field(x.word, dir)
             if seen.insert(v).inserted { options.append(v) }
         }
-        return Exercise(kind: .choice, dir: dir, card: c, options: (options + [answer]).shuffled(), answer: answer, grammar: true)
+        return Exercise(kind: .choice, dir: dir, card: c, options: (options + [answer]).diced(), answer: answer, grammar: true)
     }
 
     /// One answer and three distractors (web: buildChoiceExercise).
@@ -1541,7 +1548,7 @@ struct Exercise {
         let others = { (exclude: [String]) -> [String] in
             var seen = Set<String>(), out: [String] = []
             for x in cards { let v = field(x.word, dir); if v != answer && !exclude.contains(v) && !sameSound.contains(v) && seen.insert(v).inserted { out.append(v) } }
-            return out.shuffled()
+            return out.diced()
         }
         switch dir {
         case "pinyin":
@@ -1552,7 +1559,7 @@ struct Exercise {
         case "listen":
             let bare = Pinyin.toneless(c.word.pinyin)
             var near: [String] = []
-            for x in cards.shuffled() where Pinyin.toneless(x.word.pinyin) == bare && x.word.gloss != answer && !near.contains(x.word.gloss)
+            for x in cards.diced() where Pinyin.toneless(x.word.pinyin) == bare && x.word.gloss != answer && !near.contains(x.word.gloss)
                 && !sameSound.contains(x.word.gloss) { near.append(x.word.gloss) }
             distractors = Array(near.prefix(3))
             distractors += others(distractors).prefix(3 - distractors.count)
@@ -1570,13 +1577,13 @@ struct Exercise {
             var seen = Set(distractors + [answer]).union(sameSound)
             let here = course.lessonOrder[c.lessonId] ?? 0
             let nearest = words.sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
-            for x in nearest.prefix(40).filter({ abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby }).shuffled() + nearest.shuffled()
+            for x in nearest.prefix(40).filter({ abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby }).diced() + nearest.diced()
                 where distractors.count < 3 {
                 let v = field(x.word, dir)
                 if seen.insert(v).inserted { distractors.append(v) }
             }
         }
-        return Exercise(kind: .choice, dir: dir, card: c, options: (distractors.prefix(3) + [answer]).shuffled(), answer: answer)
+        return Exercise(kind: .choice, dir: dir, card: c, options: (distractors.prefix(3) + [answer]).diced(), answer: answer)
     }
 
     /// Say it aloud: the word itself, or now and then a short sentence with it in, but only
@@ -1584,7 +1591,7 @@ struct Exercise {
     /// often a sentence is asked for when one will do.
     static func speak(_ c: Card, met: (String) -> Bool, sentenceChance: Double = 0.5) -> Exercise {
         let ok = Course.shared.speakSentences(for: c, met: met)
-        let phrase = !ok.isEmpty && Double.random(in: 0..<1) < sentenceChance ? ok.randomElement() : nil
+        let phrase = !ok.isEmpty && Dice.unit() < sentenceChance ? ok.dicedElement() : nil
         return Exercise(kind: .speak, dir: "speak", card: c, sentence: phrase)
     }
 
@@ -1599,12 +1606,12 @@ struct Exercise {
             .sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
         var options: [String] = [], pics: Set<String> = [mine], words: Set<String> = [c.word.hanzi]
         // from the nearest twelve, shuffled, so it isn't always the same three
-        for x in Array(others.prefix(12)).shuffled() + others where options.count < 3 {
+        for x in Array(others.prefix(12)).diced() + others where options.count < 3 {
             guard let p = Pictures.of(x.word.hanzi), !pics.contains(p), !words.contains(x.word.hanzi) else { continue }
             pics.insert(p); words.insert(x.word.hanzi); options.append(x.word.hanzi)
         }
         guard options.count == 3 else { return nil }
-        return Exercise(kind: .choice, dir: "picture", card: c, options: (options + [c.word.hanzi]).shuffled(), answer: c.word.hanzi)
+        return Exercise(kind: .choice, dir: "picture", card: c, options: (options + [c.word.hanzi]).diced(), answer: c.word.hanzi)
     }
 
     /// Build the character: a one-character word's parts (女 + 子 = 好) among parts of other
@@ -1620,13 +1627,13 @@ struct Exercise {
         let near = course.cards.filter { $0.word.hanzi.filter(Course.isHan).count == 1 && $0.word.hanzi != ch }
             .sorted { abs((course.lessonOrder[$0.lessonId] ?? 0) - here) < abs((course.lessonOrder[$1.lessonId] ?? 0) - here) }
         var others: [String] = [], seen = Set(parts)
-        for x in Array(near.prefix(30)).shuffled() + near where others.count < 6 - parts.count {
+        for x in Array(near.prefix(30)).diced() + near where others.count < 6 - parts.count {
             for p in CharData.shared.chars[x.word.hanzi]?.c?.map({ $0[0] }) ?? [] where others.count < 6 - parts.count {
                 if seen.insert(p).inserted { others.append(p) }
             }
         }
         guard others.count == 6 - parts.count else { return nil }
-        return Exercise(kind: .build, dir: "build", card: c, options: (parts + others).shuffled(), answer: parts.joined(separator: "|"))
+        return Exercise(kind: .build, dir: "build", card: c, options: (parts + others).diced(), answer: parts.joined(separator: "|"))
     }
 
     /// The parts picked make the character: the same parts, in any order.
@@ -1678,9 +1685,9 @@ struct Exercise {
         // tiles in all with the extra ones; a phone number of ten words ran its last row under Check, the owner,
         // 21 Oct 2026: "we really can't have ones that are going off the page")
         let fits = { (s: Sentence) in s.words.count <= Self.maxSentenceWords && Sentence.enWords(s.en).count <= Self.maxSentenceWords + 1 }
-        guard let sent = own.flatMap({ fits($0) ? $0 : nil }) ?? course.sentences(for: c, met: met).filter(fits).randomElement() else { return nil }
+        guard let sent = own.flatMap({ fits($0) ? $0 : nil }) ?? course.sentences(for: c, met: met).filter(fits).dicedElement() else { return nil }
         let enWords = Sentence.enWords(sent.en)
-        let toChinese = hear || (own == nil && (enWords.count < 2 || Bool.random()))
+        let toChinese = hear || (own == nil && (enWords.count < 2 || Dice.unit() < 0.5))
         let long = sent.words.count > 6 || enWords.count > 7
         let nDistract = max(0, min(long ? 2 : 3, Self.maxTiles - (toChinese ? sent.words.count : enWords.count)))
         var tiles: [Tile] = []
@@ -1693,7 +1700,7 @@ struct Exercise {
             let target = Set(sent.words.map(\.hanzi))
             var pool: [SentenceWord] = [], seen = Set<String>()
             for group in [known, reached] where pool.count < nDistract {
-                for x in group.shuffled() where !target.contains(x.word.hanzi) && seen.insert(x.word.hanzi).inserted {
+                for x in group.diced() where !target.contains(x.word.hanzi) && seen.insert(x.word.hanzi).inserted {
                     pool.append(SentenceWord(hanzi: x.word.hanzi, pinyin: Course.wordPy[x.word.hanzi] ?? x.word.pinyin))
                 }
             }
@@ -1705,21 +1712,21 @@ struct Exercise {
             var pool: [String] = [], seen = Set<String>()
             // the English of words already met (their one-word meanings), then of other sentences
             for group in [known, reached] where pool.count < nDistract {
-                for x in group.shuffled() {
+                for x in group.diced() {
                     let e = Sentence.enWords(x.word.gloss)
                     guard e.count == 1, let w = e.first, w.count > 1, !target.contains(w.lowercased()),
                           seen.insert(w.lowercased()).inserted else { continue }
                     pool.append(w)
                 }
             }
-            for s in course.sentences.shuffled().prefix(200) where s.en != sent.en && pool.count < nDistract {
+            for s in course.sentences.diced().prefix(200) where s.en != sent.en && pool.count < nDistract {
                 for w in Sentence.enWords(s.en) where !target.contains(w.lowercased()) && seen.insert(w.lowercased()).inserted { pool.append(w) }
             }
             let words = enWords + pool.prefix(nDistract)
             tiles = words.enumerated().map { Tile(id: $0.offset, text: $0.element, pinyin: nil) }
         }
         return Exercise(kind: .sentence, dir: hear ? "hear" : "sentence", card: c, sentence: sent, toChinese: toChinese,
-                        tiles: tiles.shuffled(), hearOnly: hear)
+                        tiles: tiles.diced(), hearOnly: hear)
     }
 
     /// Fill the gap: a sentence with the card's word missing, and four words to choose from
@@ -1727,7 +1734,7 @@ struct Exercise {
     static func gap(_ c: Card, scope: Set<String>, met: (String) -> Bool) -> Exercise? {
         let course = Course.shared
         let word = c.word.hanzi
-        guard let sent = course.gapSentences(for: c, met: met).randomElement() else { return nil }
+        guard let sent = course.gapSentences(for: c, met: met).dicedElement() else { return nil }
         // the other options: words that aren't in the sentence, from the stones in scope (or
         // near this one)
         let inSentence = Set(sent.words.map(\.hanzi))
@@ -1747,12 +1754,12 @@ struct Exercise {
             { _ in true },
         ]
         for inGroup in groups where options.count < 3 {
-            for x in course.cards.filter({ inGroup($0) && fits($0) }).shuffled() where options.count < 3 {
+            for x in course.cards.filter({ inGroup($0) && fits($0) }).diced() where options.count < 3 {
                 if seen.insert(x.word.hanzi).inserted { options.append(x.word.hanzi) }
             }
         }
         guard options.count == 3 else { return nil }
-        return Exercise(kind: .choice, dir: "gap", card: c, options: (options + [word]).shuffled(), answer: word, sentence: sent)
+        return Exercise(kind: .choice, dir: "gap", card: c, options: (options + [word]).diced(), answer: word, sentence: sent)
     }
 
     /// Whether the tiles placed, in order, make the sentence.

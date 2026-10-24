@@ -229,4 +229,28 @@ final class ChapterOneTests: XCTestCase {
         while s.result == nil && n < 300 { n += 1; if s.card != nil { s.answer(true) }; s.next() }
         return s.result
     }
+
+    func testAStonesLessonIsSet() {
+        // the same stone, opened twice from the same place: the same lesson, step for step (the owner, 24 Oct 2026)
+        let lesson = chapter1[0]
+        func steps() -> [String] {
+            let s = StudySession(lessonId: lesson.id, progress: store())
+            var out: [String] = [], n = 0
+            while s.result == nil && n < 60 {
+                n += 1
+                switch s.current {
+                case .meet(let cards, _, _)?: out.append("meet " + cards.map(\.id).joined(separator: ","))
+                case .card(let c)?: out.append("\(c.id) \(s.exercise?.dir ?? "") \(s.exercise?.options.joined(separator: "|") ?? "")"); s.answer(true)
+                case .match(let cards, _)?: out.append("match " + cards.map(\.id).joined(separator: ",")); for c in cards { _ = s.matchPair(c.id, c.id) }
+                case .chat?: out.append("chat"); s.chatDone()
+                case nil: break
+                }
+                s.next()
+            }
+            return out
+        }
+        let a = steps(), b = steps()
+        XCTAssertFalse(a.isEmpty)
+        XCTAssertEqual(a, b)
+    }
 }
