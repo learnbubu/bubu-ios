@@ -50,7 +50,9 @@ struct LessonSheet: View {
                 // (as tall as what's in it, up to two-thirds of the screen: measured, then set. It was a
                 // fixedSize'd scroll view in a maxHeight frame, and on iOS 26 opening Practise a skill looped its
                 // layout for good, the watchdog killing the app; the owner's phone, 0.2.28)
-                .frame(height: min(max(contentHeight, 1), UIScreen.main.bounds.height * 0.66))
+                .frame(height: min(max(contentHeight, 1) + 4, UIScreen.main.bounds.height * 0.66))
+                // (still when it all fits: a hair short, the first open's bottom button took no taps, the Mac)
+                .scrollDisabled(contentHeight + 4 <= UIScreen.main.bounds.height * 0.66)
             }
             .padding(.horizontal, 18).padding(.top, 10).padding(.bottom, 4)
             .background(alignment: .top) {

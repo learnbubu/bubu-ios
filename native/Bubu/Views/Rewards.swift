@@ -350,7 +350,8 @@ struct ShopCard: View {
             .scrollBounceBehavior(.basedOnSize)
             // (measured, then set, up to a cap: a fixedSize'd scroll view in a maxHeight frame looped the stone sheet's
             // layout on iOS 26 (the watchdog killed the app), and this was the same)
-            .frame(height: min(max(listHeight, 1), UIScreen.main.bounds.height * 0.6))
+            .frame(height: min(max(listHeight, 1) + 4, UIScreen.main.bounds.height * 0.6))
+            .scrollDisabled(listHeight + 4 <= UIScreen.main.bounds.height * 0.6)
             .padding(.top, 6)
             Button("Close", action: close).buttonStyle(WideButton(ghost: true)).padding(.top, 6)
         }
