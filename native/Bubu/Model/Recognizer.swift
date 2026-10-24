@@ -46,6 +46,11 @@ final class Recognizer {
     var isAvailable: Bool { recognizer?.isAvailable ?? false }
 
     /// Ask for the microphone and speech recognition. True when both are allowed.
+    /// Speech recognition and the microphone both already allowed (nothing asked).
+    static var allowed: Bool {
+        SFSpeechRecognizer.authorizationStatus() == .authorized && AVAudioApplication.shared.recordPermission == .granted
+    }
+
     static func authorize() async -> Bool {
         let speech = await withCheckedContinuation { c in
             SFSpeechRecognizer.requestAuthorization { c.resume(returning: $0 == .authorized) }

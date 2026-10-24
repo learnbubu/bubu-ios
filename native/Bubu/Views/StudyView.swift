@@ -56,6 +56,8 @@ struct StudyView: View {
     @State private var barFrame: CGRect = .zero
     @State private var cheer: String?
     @State private var cheered = false
+    /// the audio held for the microphone through the lesson (see onAppear)
+    @State private var heldAudio = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// A multiple-choice exercise stays still (no scrolling); the feedback slides up over its foot.
     /// On a small phone (an SE) it scrolls instead.
@@ -161,7 +163,7 @@ struct StudyView: View {
                 .allowsHitTesting(false)
             }
             if let n = burst {
-                FirecrackerBurst(n: n, bar: barFrame).id(n).ignoresSafeArea().zIndex(12)
+                FirecrackerBurst(n: n, bar: barFrame, at: session.progressFraction).id(n).ignoresSafeArea().zIndex(12)
             }
             if let c = cheer {
                 CheerView(text: c).transition(.opacity).zIndex(14)
@@ -183,8 +185,16 @@ struct StudyView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + FirecrackerBurst.length) { if burst == n { burst = nil } }
         }
         // a level reached during the session waits for its end (the owner, 6 Oct 2026: not mid-lesson)
-        .onAppear { progress.holdLevelUps = true }
-        .onDisappear { progress.holdLevelUps = false; progress.showHeldLevelUp() }
+        .onAppear {
+            progress.holdLevelUps = true
+            // (a lesson that may ask you to speak keeps the audio set for the microphone throughout: switched back after
+            // each answer, it cut off the chime and the word as they played, the owner's phone, 24 Oct 2026)
+            if session.focuses.contains("speak") && Recognizer.allowed { Sounds.shared.holdForRecording(true); heldAudio = true }
+        }
+        .onDisappear {
+            progress.holdLevelUps = false; progress.showHeldLevelUp()
+            if heldAudio { Sounds.shared.holdForRecording(false); heldAudio = false }
+        }
         .onChange(of: session.result != nil) { _, done in
             guard done else { return }
             progress.holdLevelUps = false
@@ -1020,7 +1030,6 @@ struct MeetView: View {
             .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
             Button(action: done) { Text("Continue") }
             .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
-            .background(Color.accentDark, in: Capsule().offset(y: 3))
             .padding(.top, 18)
         }
         .frame(maxWidth: .infinity)
@@ -1081,7 +1090,6 @@ struct TipCard: View {
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
             Button(action: done) { Text(more > 0 ? "Next tip" : "Got it") }
             .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
-            .background(Color.accentDark, in: Capsule().offset(y: 3))
             .padding(.top, 6)
         }
     }
@@ -1101,7 +1109,6 @@ struct TonesIntroCard: View {
                 .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
             Button(action: done) { Text("Got it") }
             .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
-            .background(Color.accentDark, in: Capsule().offset(y: 3))
             .padding(.top, 6)
         }
     }

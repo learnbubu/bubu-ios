@@ -227,10 +227,15 @@ final class Sounds {
     /// the next person's voice note); the owner, 23 Oct 2026: "a tad laggy pressing the button down", "things getting
     /// cut off when they are right".
     func holdForRecording(_ on: Bool) {
+        // (counted: a lesson holds it, and its chat holds it too; the chat letting go leaves the lesson's)
+        holds = max(0, holds + (on ? 1 : -1))
+        if on && holds > 1 { return }
+        if !on && holds > 0 { return }
         held = on
         useForRecording(on)
     }
     private var held = false
+    private var holds = 0
 
     func useForRecording(_ on: Bool) {
         // (held: already on, and staying on till the hold's let go)

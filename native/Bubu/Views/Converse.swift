@@ -175,6 +175,8 @@ struct ChatPage: View {
     @State private var wrongPicks: Set<String> = []
     /// the chat's end, celebrated (its confetti)
     @State private var cheer = 0
+    /// the audio held for the microphone by this chat (let go of on leaving, only if it was)
+    @State private var heldAudio = false
     /// the reply card's height (it grows with a note under it)
     @State private var footHeight: CGFloat = 0
     /// the latest scroll asked for (only the last of a burst runs)
@@ -204,7 +206,9 @@ struct ChatPage: View {
             }
             ScrollViewReader { reader in
                 ScrollView {
-                    LazyVStack(spacing: 10) {
+                    // (all of it laid out: lazily, messages were measured as they came into view and the chat
+                    // jumped, the owner's phone, 24 Oct 2026; a chat is short)
+                    VStack(spacing: 10) {
                         Text("今天").font(.hanzi(11.5, .semibold)).tracking(1.5).foregroundStyle(ChatLook.faint).padding(.top, 10)
                         ForEach(msgs) { m in message(m).id(m.id) }
                         Color.clear.frame(height: 4).id("end")
@@ -277,7 +281,7 @@ struct ChatPage: View {
         .onDisappear {
             run += 1
             recognizer.end(); Speech.shared.stop(); player?.stop()
-            Sounds.shared.holdForRecording(false)
+            if heldAudio { Sounds.shared.holdForRecording(false); heldAudio = false }
             guard !handedOn, lesson == nil else { return }
             progress.holdLevelUps = false; progress.showHeldLevelUp()
         }
@@ -288,7 +292,7 @@ struct ChatPage: View {
     private func startAudio(mic: Bool) {
         let r = run
         Task { @MainActor in
-            if mic, await Recognizer.authorize() { Sounds.shared.holdForRecording(true) }
+            if mic, await Recognizer.authorize(), run == r { Sounds.shared.holdForRecording(true); heldAudio = true }
             try? await Task.sleep(for: .milliseconds(450))
             if run == r { step() }
         }

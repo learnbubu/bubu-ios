@@ -24,6 +24,9 @@ private func envelope(_ t: Double, _ a: Double, _ b: Double, _ inF: Double = 0.2
 struct FirecrackerBurst: View {
     let n: Int
     let bar: CGRect
+    /// how far along the bar its fill is (0…1): the strings hang from its tip, lit by the run (the owner, 24 Oct 2026:
+    /// "not attached to anything and floating on nothing"); nil: where the studio put them
+    var at: Double? = nil
     @State private var start = Date()
     static let length = 2.2
 
@@ -44,6 +47,14 @@ struct FirecrackerBurst: View {
         }
         .allowsHitTesting(false)
         .onAppear { start = Date(); sounds() }
+    }
+
+    /// From where the studio hung the strings to the tip of the bar's fill, kept clear of the screen's edges.
+    private func shift(_ k: Double) -> Double {
+        guard let at, bar.width > 0 else { return 0 }
+        let tip = bar.minX + bar.width * min(1, max(0, at))
+        let lo = bar.minX + 40 * k, hi = bar.maxX - 20 * k
+        return min(hi, max(lo, tip)) - X(strX, k)
     }
 
     /// the studio's phone units to here
@@ -80,6 +91,7 @@ struct FirecrackerBurst: View {
         let fade = 1 - clamp01((t - fadeOut.0) / fadeOut.1)
         ZStack(alignment: .topLeading) {
             strings(t: t, k: k)
+                .offset(x: shift(k))
                 .mask(alignment: .top) { VStack(spacing: 0) { Color.clear.frame(height: max(0, bar.maxY)); Color.black } }
             sealView(t: t, k: k)
             captionView(t: t, k: k)
