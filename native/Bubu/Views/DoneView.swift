@@ -217,8 +217,9 @@ struct DoneView: View {
                 r.perfect ? ("star.fill", "Perfect: no mistakes, +5 XP", Color.gold) : nil,
                 r.lessonFinished ? ("bolt.fill", "Double XP for the next 15 minutes", Color.accent) : nil,
                 r.fixed > 0 ? ("checkmark.circle.fill", "\(r.fixed) mistake\(r.fixed == 1 ? "" : "s") fixed", Color.good)
-                    : r.mistakes > 0 ? ("arrow.counterclockwise.circle.fill", "\(r.mistakes) mistake\(r.mistakes == 1 ? "" : "s") saved to Fix your mistakes", Color.again)
-                    : progress.boostActive && !r.lessonFinished ? ("bolt.fill", "Double XP is on", Color.accent) : nil,
+                    : r.mistakes > 0 ? ("arrow.counterclockwise.circle.fill", "\(r.mistakes) mistake\(r.mistakes == 1 ? "" : "s") saved to Fix your mistakes", Color.again) : nil,
+                // (double XP, said here rather than in the lesson's bar: the owner, 24 Oct 2026)
+                progress.boostActive && !r.lessonFinished ? ("bolt.fill", "Double XP was on: this lesson's XP doubled", Color.accent) : nil,
             ] as [(String, String, Color)?]).compactMap { $0 }
             if !notes.isEmpty {
                 VStack(alignment: .leading, spacing: 7) {

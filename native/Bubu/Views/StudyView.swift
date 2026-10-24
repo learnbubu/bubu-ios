@@ -333,16 +333,7 @@ struct StudyView: View {
                         Color.clear.onAppear { barFrame = g.frame(in: .global) }
                             .onChange(of: g.frame(in: .global)) { _, f in barFrame = f }
                     })
-                // double XP on: a small gold badge (its minutes are on Home)
-                if progress.boostActive {
-                    HStack(spacing: 1) {
-                        Image(systemName: "bolt.fill").font(.system(size: 12, weight: .black))
-                        Text("2×").font(.nunito(14, .black))
-                    }
-                    .foregroundStyle(Color.white)
-                    .padding(.horizontal, 7).padding(.vertical, 4)
-                    .background(Color.gold, in: Capsule())
-                }
+                // (double XP isn't shown here: it's on the done screen; the owner, 24 Oct 2026, "we don't really need that")
                 // buns in a lesson, and in a review while they're being earned back
                 if session.onBuns || (session.earnsBuns && progress.buns < ProgressStore.bunsMax) {
                     BunRow(n: progress.isPlus ? ProgressStore.bunsMax : progress.bunState.n, plus: progress.isPlus, bump: session.bunsEarned)
