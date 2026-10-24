@@ -226,11 +226,16 @@ struct ChatPage: View {
                 .onChange(of: ended) { _, _ in toEnd(reader) }
             }
             .overlay { if holding { recordingOverlay } }
-            if waiting, let t = currentTurn {
-                Group { if picking { pickCard(t) } else if free { freeCard(t) } else { replyCard(t) } }
-                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { footHeight = $0 }
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            // the reply card, its room kept between turns: given back, the chat grew by it and sank to its foot, then
+            // jumped up again as the next card came (the Mac, 0.2.25: one down-up a turn)
+            ZStack(alignment: .bottom) {
+                if waiting, let t = currentTurn {
+                    Group { if picking { pickCard(t) } else if free { freeCard(t) } else { replyCard(t) } }
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { footHeight = $0 }
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
+            .frame(maxWidth: .infinity, minHeight: ended || listenOnly ? 0 : footHeight, alignment: .bottom)
             if !picking || ended { bar }
         }
         .background(Home.bg.ignoresSafeArea())
