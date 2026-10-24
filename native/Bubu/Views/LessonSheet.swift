@@ -36,10 +36,10 @@ struct LessonSheet: View {
                     Group {
                         if more {
                             morePage(studied: studied, locked: locked)
-                                .transition(.move(edge: .trailing).combined(with: .opacity))
+                                .transition(.opacity)
                         } else {
                             front(studied: studied, locked: locked, done: done, pct: pct, mastered: mastered, total: cards.count, due: due)
-                                .transition(.move(edge: .leading).combined(with: .opacity))
+                                .transition(.opacity)
                         }
                     }
                 }
@@ -182,13 +182,12 @@ struct LessonSheet: View {
             if studied && !lesson.isPractice && !locked {
                 Text("ONE SKILL AT A TIME").font(.nunito(11, .semibold)).tracking(0.6).foregroundStyle(Color.muted)
                     .padding(.top, 8).padding(.bottom, 8).padding(.horizontal, 2)
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 9), GridItem(.flexible(), spacing: 9)], spacing: 9) {
-                    chip("pencil", "Write", "write")
-                    chip("character.textbox", "Pinyin", "pinyin")
-                    chip("headphones", "Listen", "listen")
-                    chip("square.stack.3d.up", "Sentences", "sentence")
-                    chip("checklist", "Quiz", "quiz")
-                    chip("book", "Browse", "browse")
+                // (plain rows, not a lazy grid: in the sheet's measured, sliding page, the grid crashed the app; the
+                // owner's phone, 0.2.28, "hitting practise a skill crashes the program")
+                VStack(spacing: 9) {
+                    HStack(spacing: 9) { chip("pencil", "Write", "write"); chip("character.textbox", "Pinyin", "pinyin") }
+                    HStack(spacing: 9) { chip("headphones", "Listen", "listen"); chip("square.stack.3d.up", "Sentences", "sentence") }
+                    HStack(spacing: 9) { chip("checklist", "Quiz", "quiz"); chip("book", "Browse", "browse") }
                 }
             }
         }
