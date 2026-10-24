@@ -19,7 +19,14 @@ struct Word: Codable, Hashable {
     var gloss: String { short ?? en }
     /// A grammar word (吧, 了, a measure word): its meaning all in brackets, "(suggestion: let's…)": what it does, not
     /// a thing it means.
-    var isGrammar: Bool { let g = gloss; return g.hasPrefix("(") && g.hasSuffix(")") }
+    var isGrammar: Bool { let g = gloss; return (g.hasPrefix("(") && g.hasSuffix(")")) || Self.particles.contains(hanzi) }
+    /// the particles, whatever their gloss says ("and …? (asks back)" for 呢: the Mac, 24 Oct 2026)
+    static let particles: Set<String> = ["呢", "吗", "吧", "了", "的", "着", "过", "啊", "呀", "嘛", "呗", "地", "得", "们"]
+    /// the gloss without the brackets round it, to sit inside a sentence ("吗 is 'yes/no question'")
+    var plainGloss: String {
+        let g = gloss
+        return g.hasPrefix("(") && g.hasSuffix(")") && g.dropFirst().dropLast().allSatisfy({ $0 != "(" && $0 != ")" }) ? String(g.dropFirst().dropLast()) : g
+    }
 }
 
 struct Lesson: Codable, Identifiable {

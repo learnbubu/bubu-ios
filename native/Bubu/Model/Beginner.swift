@@ -229,7 +229,7 @@ enum Correction {
 
     /// The wrong meaning: "你 means 'you'. (他 is 'he')".
     static func meaningLine(_ right: Word, _ other: Word) -> String {
-        "\(right.hanzi) means '\(right.gloss)'. (\(other.hanzi) is '\(other.gloss)')"
+        "\(right.hanzi) means '\(right.plainGloss)'. (\(other.hanzi) is '\(other.plainGloss)')"
     }
 
     /// The line for a wrong multiple-choice answer, if there's something specific to say.

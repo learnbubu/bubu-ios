@@ -1526,8 +1526,9 @@ struct Exercise {
     /// One answer and three distractors (web: buildChoiceExercise).
     static func choice(_ c: Card, dir: String, scope: Set<String>) -> Exercise {
         let course = Course.shared
-        // whole sentences are never options (see Card.isSentence)
-        let words = course.cards.filter { !$0.isSentence }
+        // whole sentences are never options (see Card.isSentence); nor, for a word that means something, a grammar
+        // word ("(yes/no question)" beside "also": the Mac, 24 Oct 2026)
+        let words = course.cards.filter { !$0.isSentence && (c.word.isGrammar || !$0.word.isGrammar) }
         let inScope = words.filter { scope.contains($0.lessonId) }
         let cards = inScope.isEmpty ? words : inScope
         let answer = field(c.word, dir)
@@ -1559,7 +1560,7 @@ struct Exercise {
             var near: [String] = []
             // look-alikes the learner has reached, or nearly (not one from a later book)
             let here = course.lessonOrder[c.lessonId] ?? 0
-            let reached = course.lookalikes(c, 8).filter { !$0.isSentence && (course.lessonOrder[$0.lessonId] ?? 0) <= here + Exercise.nearby }
+            let reached = course.lookalikes(c, 8).filter { !$0.isSentence && !$0.word.isGrammar && (course.lessonOrder[$0.lessonId] ?? 0) <= here + Exercise.nearby }
             for x in reached.prefix(2) { let v = field(x.word, dir); if v != answer && !near.contains(v) { near.append(v) } }
             distractors = near + others(near).prefix(3 - near.count)
         }
@@ -1735,7 +1736,10 @@ struct Exercise {
         var options: [String] = [], seen = Set<String>()
         // (the whole course is only looked through if the stones nearby don't have three; a grammar word's gap is
         // offered other grammar words first: 吧, 吗 or 呢, not 吧, 茶 or 大)
-        let grammarNear: (Card) -> Bool = { c.word.isGrammar && $0.word.isGrammar && abs((course.lessonOrder[$0.lessonId] ?? 0) - here) <= Exercise.nearby * 3 }
+        let grammarNear: (Card) -> Bool = {
+            let at = course.lessonOrder[$0.lessonId] ?? 0
+            return c.word.isGrammar && $0.word.isGrammar && at <= here && here - at <= Exercise.nearby * 3
+        }
         let groups: [(Card) -> Bool] = [
             grammarNear,
             { scope.contains($0.lessonId) },
