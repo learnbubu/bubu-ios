@@ -204,7 +204,6 @@ struct ChatPage: View {
                 // (where the messages go under: the owner, 23 Oct 2026)
                 Rectangle().fill(Home.line).frame(height: 1).opacity(0.8)
             }
-            VStack(spacing: 0) {
             ScrollViewReader { reader in
                 ScrollView {
                     // (all of it laid out: lazily, messages were measured as they came into view and the chat
@@ -227,6 +226,9 @@ struct ChatPage: View {
                 .onChange(of: footHeight) { _, _ in toEnd(reader) }
                 .onChange(of: ended) { _, _ in toEnd(reader) }
             }
+            // (holding: over the messages, the reply card left in sight, what to say: as the first, which felt like
+            // WeChat; over the card too, what to say was gone; the owner, 24 Oct 2026)
+            .overlay { if holding { recordingOverlay } }
             // the reply card. (Its room was kept between turns, against a jump, and left the chat stuck up top with a gap
             // under it while they talked: the owner, 24 Oct 2026. Now the chat keeps to its foot as the card comes and
             // goes, gliding with it, as WeChat's does: see keepsFoot.)
@@ -238,10 +240,6 @@ struct ChatPage: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .bottom)
-            }
-            // (holding: over the messages and the card both, down to the button held: it stopped at the card, the
-            // voice far up from the finger, and felt cut off; the owner, 24 Oct 2026)
-            .overlay { if holding { recordingOverlay } }
             if !picking || ended { bar }
         }
         .background(Home.bg.ignoresSafeArea())
@@ -793,7 +791,8 @@ struct ChatPage: View {
                             if !pressed { pressed = true; startTalking() }
                             cancelling = v.translation.height < -70
                         }
-                        .onEnded { _ in pressed = false; if holding { stopTalking() } })
+                        // (cancelling cleared at every let-go: it stuck after a cancel, and the bar stayed red)
+                        .onEnded { _ in pressed = false; if holding { stopTalking() }; cancelling = false })
                     .accessibilityLabel("Hold to talk")
                     .accessibilityAddTraits(.isButton)
             }
@@ -808,34 +807,23 @@ struct ChatPage: View {
     /// and the place to slide to, to cancel.
     private var recordingOverlay: some View {
         ZStack {
-            // (the chat behind dimmed and blurred, so its words don't run into these)
-            Rectangle().fill(.ultraThinMaterial)
-            Home.ink.opacity(0.38)
-            VStack(spacing: 14) {
-                Spacer(minLength: 12)
-                // where to slide to, to cancel: above the voice, as WeChat's
-                VStack(spacing: 8) {
-                    Image(systemName: "xmark").font(.system(size: 18, weight: .bold)).foregroundStyle(cancelling ? ChatLook.red : Color.white)
-                        .frame(width: 56, height: 56)
-                        .background(cancelling ? Color.white : Color.white.opacity(0.22), in: Circle())
-                        .scaleEffect(cancelling ? 1.12 : 1)
-                    Text(cancelling ? "Let go to cancel" : "Slide up here to cancel").font(.nunito(12.5, .bold)).foregroundStyle(.white)
-                }
-                .padding(.bottom, 18)
-                Group {
-                    if !interimText.isEmpty { Text(interimText).font(.hanzi(22, .medium)).foregroundStyle(Home.ink) }
-                    else if !interim.isEmpty { marksText(interim, size: 24) }
-                }
-                .padding(.horizontal, 14).padding(.vertical, 6)
-                .background(Color.white.opacity(interim.isEmpty && interimText.isEmpty ? 0 : 0.92), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                // your voice, just over the button you're holding
+            Home.ink.opacity(0.42)
+            VStack(spacing: 18) {
                 Waveform(level: level, bars: 15)
                     .foregroundStyle(cancelling ? Color.white : Home.tealDark)
                     .padding(.horizontal, 26).padding(.vertical, 18)
                     .chatBubble(mine: true, fill: cancelling ? ChatLook.red : nil)
-                    .padding(.bottom, 16)
+                if !interimText.isEmpty {
+                    Text(interimText).font(.hanzi(22, .medium)).foregroundStyle(.white)
+                } else if !interim.isEmpty {
+                    marksText(interim, size: 24)
+                }
+                Spacer().frame(height: 30)
+                Image(systemName: "xmark").font(.system(size: 20, weight: .bold)).foregroundStyle(cancelling ? ChatLook.red : Color.white)
+                    .frame(width: 68, height: 68)
+                    .background(cancelling ? Color.white : Color.white.opacity(0.22), in: Circle())
+                Text(cancelling ? "Let go to cancel" : "Slide up here to cancel").font(.nunito(12.5, .bold)).foregroundStyle(.white)
             }
-            .animation(.spring(response: 0.25, dampingFraction: 0.8), value: cancelling)
         }
         .allowsHitTesting(false)
         .transition(.opacity)
