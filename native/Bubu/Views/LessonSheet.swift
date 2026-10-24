@@ -101,7 +101,7 @@ struct LessonSheet: View {
             // one line of how it's going
             Group {
                 if lesson.isPractice {
-                    Text(done ? "Done · practise again any time" : "\(lesson.review == true ? "Chapter review" : "Practice") · \(course.practiceCards(lesson.id).count) words, weakest first")
+                    Text(done ? "Done · practise again any time" : "\(lesson.review == true ? "Chapter review" : "Practice") · \(Self.uniqueWords(course.practiceCards(lesson.id)).count) words, weakest first")
                         .font(.nunito(12, .semibold)).foregroundStyle(Color.muted)
                 } else if !done && !locked && steps.total > 1 {
                     StepSegments(done: steps.step - 1, total: steps.total, current: true, width: 40, height: 6)
@@ -121,7 +121,7 @@ struct LessonSheet: View {
                 .padding(.bottom, 4)
 
             // the one way to the rest
-            let link: String? = lesson.isPractice ? "See the \(course.practiceCards(lesson.id).count) words"
+            let link: String? = lesson.isPractice ? "See the \(Self.uniqueWords(course.practiceCards(lesson.id)).count) words"
                 : studied ? "More ways to practise"
                 : notes.isEmpty ? nil : notes.count == 1 ? "1 tip" : "\(notes.count) tips"
             if let link, !locked {
@@ -235,7 +235,8 @@ struct LessonSheet: View {
     /// The words a practice stone covers, as small tiles.
     private var practiceWords: some View {
         FlowLayout(spacing: 6, lineSpacing: 6) {
-            ForEach(course.practiceCards(lesson.id), id: \.id) { c in
+            // (one tile a word: 零 is in two stones, as "0" and as "zero": the Mac, 0.2.25)
+            ForEach(Self.uniqueWords(course.practiceCards(lesson.id)), id: \.id) { c in
                 Text(c.word.hanzi).font(.hanzi(17, .medium)).foregroundStyle(Color.ink)
                     .padding(.horizontal, 10).padding(.vertical, 5)
                     .background(Color.bg, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -243,6 +244,12 @@ struct LessonSheet: View {
             }
         }
         .padding(.bottom, 10)
+    }
+
+    /// each word once, by its characters, in the order they come
+    static func uniqueWords(_ cards: [Card]) -> [Card] {
+        var seen = Set<String>()
+        return cards.filter { seen.insert($0.word.hanzi).inserted }
     }
 
     /// "Start studying", or for a lesson in steps "Start step 2 of 2".
