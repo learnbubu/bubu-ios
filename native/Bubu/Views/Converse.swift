@@ -218,6 +218,7 @@ struct ChatPage: View {
                 .scrollIndicators(.hidden)
                 // (kept at the foot as things grow: no jumping, the owner's phone, 23 Oct 2026)
                 .defaultScrollAnchor(.bottom)
+                .modifier(KeepsFoot())
                 .onChange(of: msgs.count) { _, _ in toEnd(reader) }
                 .onChange(of: waiting) { _, _ in toEnd(reader) }
                 // the reply card growing (a note under it) or the chat ending (Continue's bar): the latest kept in
@@ -226,8 +227,9 @@ struct ChatPage: View {
                 .onChange(of: ended) { _, _ in toEnd(reader) }
             }
             .overlay { if holding { recordingOverlay } }
-            // the reply card, its room kept between turns: given back, the chat grew by it and sank to its foot, then
-            // jumped up again as the next card came (the Mac, 0.2.25: one down-up a turn)
+            // the reply card. (Its room was kept between turns, against a jump, and left the chat stuck up top with a gap
+            // under it while they talked: the owner, 24 Oct 2026. Now the chat keeps to its foot as the card comes and
+            // goes, gliding with it, as WeChat's does: see keepsFoot.)
             ZStack(alignment: .bottom) {
                 if waiting, let t = currentTurn {
                     Group { if picking { pickCard(t) } else if free { freeCard(t) } else { replyCard(t) } }
@@ -235,7 +237,7 @@ struct ChatPage: View {
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
-            .frame(maxWidth: .infinity, minHeight: ended || listenOnly ? 0 : footHeight, alignment: .bottom)
+            .frame(maxWidth: .infinity, alignment: .bottom)
             if !picking || ended { bar }
         }
         .background(Home.bg.ignoresSafeArea())
@@ -1169,5 +1171,17 @@ struct TypingDots: View {
             }
         }
         .frame(height: 14)
+    }
+}
+
+/// A chat's scroll kept at its foot as its frame changes (the reply card coming and going), not only as messages are
+/// added: the messages glide down as the card goes and up as it comes (iOS 18 on; before it, the scroll to the end does).
+struct KeepsFoot: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content.defaultScrollAnchor(.bottom, for: .sizeChanges)
+        } else {
+            content
+        }
     }
 }
