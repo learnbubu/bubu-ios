@@ -75,7 +75,8 @@ struct LessonSheet: View {
         let notes = course.notes(for: lesson.id)
         let words = Self.uniqueWords(course.practiceCards(lesson.id)).count
         // (its place in the course, a review's too: its name already says what it is)
-        let eyebrow = lesson.code.uppercased()
+        // (a review has no code of its own (its "code" is its name): its chapter, as the pinned bar says it)
+        let eyebrow = (lesson.code != lesson.title ? lesson.code : course.chapterOf[lesson.id].map(course.chapterLabel) ?? lesson.code).uppercased()
         return VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(eyebrow).font(.nunito(12, .heavy)).tracking(1.4).foregroundStyle(Color.muted)
