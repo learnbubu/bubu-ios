@@ -92,7 +92,8 @@ struct LessonSheet: View {
                 Text(eyebrow).font(.nunito(12, .heavy)).tracking(1.4).foregroundStyle(Color.muted)
                 Text(parts.hanzi).font(.hanzi(24, .heavy)).foregroundStyle(Color.ink).lineLimit(1).minimumScaleFactor(0.7)
                 if !parts.en.isEmpty {
-                    Text(parts.en).font(.nunito(17, .black)).foregroundStyle(Color.ink.opacity(0.78)).lineLimit(2)
+                    // (its step kept with its name: "· 2" wrapped onto a line alone, the Mac, 0.2.26)
+                    Text(parts.en.replacingOccurrences(of: " · ", with: "\u{00A0}·\u{00A0}")).font(.nunito(17, .black)).foregroundStyle(Color.ink.opacity(0.78)).lineLimit(2)
                 }
             }
             // (room for Bùbù, peeking over the top right)
