@@ -294,6 +294,8 @@ struct PlusCard: View {
 struct ShopCard: View {
     let progress: ProgressStore
     var close: () -> Void
+    /// the height of the shop's list (its scroll view's set to it, up to a cap)
+    @State private var listHeight: CGFloat = 0
 
     var body: some View {
         let s = progress.bunState, plus = progress.isPlus, full = ProgressStore.bunsMax
@@ -342,11 +344,13 @@ struct ShopCard: View {
                     }
                 }
                 .padding(.bottom, 2)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { listHeight = $0 }
             }
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
-            .frame(maxHeight: UIScreen.main.bounds.height * 0.6)
-            .fixedSize(horizontal: false, vertical: true)
+            // (measured, then set, up to a cap: a fixedSize'd scroll view in a maxHeight frame looped the stone sheet's
+            // layout on iOS 26 (the watchdog killed the app), and this was the same)
+            .frame(height: min(max(listHeight, 1), UIScreen.main.bounds.height * 0.6))
             .padding(.top, 6)
             Button("Close", action: close).buttonStyle(WideButton(ghost: true)).padding(.top, 6)
         }

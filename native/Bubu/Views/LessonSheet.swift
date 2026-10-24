@@ -12,6 +12,8 @@ struct LessonSheet: View {
     @State private var drag: CGFloat = 0
     /// the second page: tips, one skill at a time, the words
     @State private var more = false
+    /// the height of what's in the sheet (its scroll view's set to it, up to a cap)
+    @State private var contentHeight: CGFloat = 0
     /// the notes opened (they start folded: the tip was shown when the stone began)
     @State private var openNotes: Set<String> = []
     private let course = Course.shared
@@ -42,10 +44,13 @@ struct LessonSheet: View {
                                 .transition(.opacity)
                         }
                     }
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
                 }
                 .scrollBounceBehavior(.basedOnSize)
-                .frame(maxHeight: UIScreen.main.bounds.height * 0.66)
-                .fixedSize(horizontal: false, vertical: true)
+                // (as tall as what's in it, up to two-thirds of the screen: measured, then set. It was a
+                // fixedSize'd scroll view in a maxHeight frame, and on iOS 26 opening Practise a skill looped its
+                // layout for good, the watchdog killing the app; the owner's phone, 0.2.28)
+                .frame(height: min(max(contentHeight, 1), UIScreen.main.bounds.height * 0.66))
             }
             .padding(.horizontal, 18).padding(.top, 10).padding(.bottom, 4)
             .background(alignment: .top) {
