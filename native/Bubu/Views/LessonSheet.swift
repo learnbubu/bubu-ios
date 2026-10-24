@@ -2,7 +2,7 @@ import SwiftUI
 
 /// What opens when you tap a stone: its name, how it's going, and one button (the owner, 24 Oct
 /// 2026: "sooooo much info on them … more simple", mockup A). The rest (its tips, one skill at a time, a practice
-/// stone's words) is a tap away, on the sheet's second page; Bùbù peeks over.
+/// stone's words) is a tap away, on the sheet's second page.
 struct LessonSheet: View {
     let lesson: Lesson
     var close: () -> Void
@@ -24,7 +24,6 @@ struct LessonSheet: View {
         let studied = done || cards.contains { progress.srs[$0.id] != nil }
         let pct = cards.isEmpty ? 0 : Double(mastered) / Double(cards.count)
         let locked = !done && lesson.id != progress.currentLessonId
-        let pose = pct >= 1 || (lesson.isPractice && done) ? "done-panda" : studied ? "panda-idle" : "sheet-waving"
         ZStack(alignment: .bottom) {
             Color.black.opacity(shown ? 0.55 : 0)
                 .ignoresSafeArea()
@@ -48,23 +47,12 @@ struct LessonSheet: View {
                 .frame(maxHeight: UIScreen.main.bounds.height * 0.66)
                 .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.horizontal, 18).padding(.top, 10).padding(.bottom, 20)
+            .padding(.horizontal, 18).padding(.top, 10).padding(.bottom, 4)
             .background(alignment: .top) {
                 UnevenRoundedRectangle(topLeadingRadius: 22, topTrailingRadius: 22, style: .continuous)
                     .fill(Color.panel)
                     .shadow(color: .black.opacity(0.2), radius: 12, y: -8)
                     .ignoresSafeArea(edges: .bottom)
-            }
-            .overlay(alignment: .topTrailing) {
-                // about 72 pt of panda, its feet ~30 pt over the sheet's top edge (web: .sheet-bubu).
-                // The waving and done art carry empty margins; the idle art is cropped tight.
-                let padded = pose != "panda-idle"
-                Image(pose).resizable().scaledToFit()
-                    .frame(width: padded ? 100 : 72, height: padded ? 150 : 110, alignment: .bottom)
-                    .shadow(color: .black.opacity(0.28), radius: 8, y: 6)
-                    .offset(x: -14, y: padded ? -90 : -80)
-                    .scaleEffect(shown ? 1 : 0.9, anchor: .bottom)
-                    .allowsHitTesting(false)
             }
             .offset(y: shown ? max(0, drag) : 700)
             .gesture(DragGesture()
@@ -86,7 +74,8 @@ struct LessonSheet: View {
         let steps = StudySession.lessonSteps(lesson.id, progress)
         let notes = course.notes(for: lesson.id)
         let words = Self.uniqueWords(course.practiceCards(lesson.id)).count
-        let eyebrow = lesson.isPractice ? (lesson.review == true ? "CHAPTER REVIEW" : "PRACTICE") : lesson.code.uppercased()
+        // (its place in the course, a review's too: its name already says what it is)
+        let eyebrow = lesson.code.uppercased()
         return VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(eyebrow).font(.nunito(12, .heavy)).tracking(1.4).foregroundStyle(Color.muted)
@@ -96,8 +85,6 @@ struct LessonSheet: View {
                     Text(parts.en.replacingOccurrences(of: " · ", with: "\u{00A0}·\u{00A0}")).font(.nunito(17, .black)).foregroundStyle(Color.ink.opacity(0.78)).lineLimit(2)
                 }
             }
-            // (room for Bùbù, peeking over the top right)
-            .padding(.trailing, 70)
             .padding(.bottom, 16)
 
             // how it's going
@@ -127,15 +114,20 @@ struct LessonSheet: View {
             studyButton(locked: locked, studied: studied)
 
             // the one way to the rest, saying what it opens
-            let second: (String, String)? = lesson.isPractice ? ("square.grid.2x2", "See the \(words) words")
-                : studied ? ("slider.horizontal.3", "Practise a skill")
-                : notes.isEmpty ? nil : ("lightbulb", notes.count == 1 ? "Read the tip" : "Read the \(notes.count) tips")
+            // (quieter than the button over it: its words smaller, no icon; the owner, 24 Oct 2026)
+            let second: String? = lesson.isPractice ? "See the \(words) words"
+                : studied ? "Practise a skill"
+                : notes.isEmpty ? nil : notes.count == 1 ? "Read the tip" : "Read the \(notes.count) tips"
             if let second, !locked {
                 Button { withAnimation(.spring(response: 0.32, dampingFraction: 0.9)) { more = true } } label: {
-                    Label(second.1, systemImage: second.0)
+                    Text(second).font(.nunito(15, .heavy)).foregroundStyle(Color.accent)
+                        .frame(maxWidth: .infinity).padding(.vertical, 11)
+                        .background(Color.panel, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
                 }
-                .buttonStyle(RaisedButton(fill: Color.panel, ink: Color.accent, edge: Color.line, sweep: false, lip: 4))
-                .padding(.top, 10)
+                .buttonStyle(PressDown(depth: 3))
+                .background(Color.line, in: RoundedRectangle(cornerRadius: 14, style: .continuous).offset(y: 3))
+                .padding(.top, 12)
             }
         }
     }
@@ -151,7 +143,7 @@ struct LessonSheet: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Back")
                 Text(lesson.nameParts.hanzi).font(.hanzi(17, .bold)).foregroundStyle(Color.ink).lineLimit(1)
-                Spacer(minLength: 64)
+                Spacer(minLength: 0)
             }
             .padding(.bottom, 14)
 
