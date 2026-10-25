@@ -20,21 +20,28 @@ struct ClassroomPage: View {
         Tile(id: "read", title: "Reading", bg: 0xFFDDC8), Tile(id: "tones", title: "Tones", bg: 0xFADBE8),
     ]
 
+    // (one screen, no scrolling, the tiles tall enough to fill it: the owner, 25 Oct 2026, "make each of the types
+    // bigger now since there's a gap at the bottom, elongate them … make this page non scrollable")
     var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                header
-                catchUp
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 11), GridItem(.flexible(), spacing: 11)], spacing: 11) {
-                    ForEach(tiles, id: \.id) { t in
-                        Button { router.practice(t.id, progress) } label: { tile(t) }
-                            .buttonStyle(PressDown(depth: 2))
+        VStack(spacing: 12) {
+            header
+            catchUp
+            GeometryReader { g in
+                // four rows of two, sharing the room left (never shorter than the studio's 106)
+                let h = max(tileH, (g.size.height - 3 * 11 - 4) / 4)
+                VStack(spacing: 11) {
+                    ForEach(0..<4, id: \.self) { r in
+                        HStack(spacing: 11) {
+                            ForEach(tiles[(r * 2)..<(r * 2 + 2)], id: \.id) { t in
+                                Button { router.practice(t.id, progress) } label: { tile(t, height: h) }
+                                    .buttonStyle(PressDown(depth: 2))
+                            }
+                        }
                     }
                 }
             }
-            .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, 20)
         }
-        .scrollIndicators(.hidden)
+        .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, 14)
         .background(Home.bg.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .environment(\.colorScheme, .light)
@@ -83,18 +90,21 @@ struct ClassroomPage: View {
 
 
     /// A tile: its picture above, its name on a pale band along the bottom (the owner's pick, 14 Oct 2026).
-    private func tile(_ t: Tile) -> some View {
+    private func tile(_ t: Tile, height: CGFloat) -> some View {
         let shape = RoundedRectangle(cornerRadius: 20, style: .continuous)
+        // (the picture grows with the tile, a little less than in proportion, so the name keeps its room)
+        let picH = min(height - 34, tileH * pic * 0.86 + (height - tileH) * 0.7)
         return VStack(spacing: 0) {
+            Spacer(minLength: 0)
             Image("class-\(t.id)").resizable().scaledToFit()
-                .frame(height: tileH * pic * 0.86)
-                .padding(.top, tileH * 0.07).padding(.horizontal, 10)
+                .frame(height: picH)
+                .padding(.horizontal, 10)
             Spacer(minLength: 0)
             Text(t.title).font(.nunito(14.5, .black)).foregroundStyle(Home.ink).lineLimit(1)
                 .frame(maxWidth: .infinity).padding(.top, 6).padding(.bottom, 7)
                 .background(Color(UIColor(hex: 0xFFFDF8)).opacity(0.62))
         }
-        .frame(maxWidth: .infinity).frame(height: tileH)
+        .frame(maxWidth: .infinity).frame(height: height)
         .background(Color(UIColor(hex: t.bg)))
         .clipShape(shape)
         .background(shape.fill(.black.opacity(0.08)).offset(y: 4))
