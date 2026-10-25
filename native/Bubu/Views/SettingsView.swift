@@ -9,6 +9,18 @@ struct SettingsView: View {
     @Environment(ProgressStore.self) private var progress
     @State private var cloud = Cloud.shared
 
+
+    /// A kind of exercise switched on or off in every lesson (meanings are always asked).
+    private func exerciseToggle(_ icon: String, _ tint: UInt32, _ title: String, _ dir: String) -> some View {
+        SettingsToggle(icon: icon, tint: tint, title: title, on: Binding(
+            get: { progress.selectedFocuses.contains(dir) },
+            set: { on in
+                var s = progress.selectedFocuses
+                if on { s.insert(dir) } else { s.remove(dir) }
+                s.formUnion(["recognize", "recall"])
+                progress.prefs.focuses = StudySession.allDirs.filter(s.contains)
+            }))
+    }
     var body: some View {
         @Bindable var p = progress
         ScrollView {
@@ -49,6 +61,19 @@ struct SettingsView: View {
                     SettingsToggle(icon: "paintpalette.fill", tint: 0xE0574A, title: "Tone colours", on: $p.prefs.toneColours)
                     SettingsDivider()
                     SettingsToggle(icon: "pencil.tip", tint: 0xC98A10, title: "Check my strokes", on: $p.prefs.checkStrokes)
+                }
+
+                // (what lessons ask of you: moved here from the Classroom's "What to study", gone; the owner, 25 Oct 2026)
+                SettingsGroup("Lesson exercises") {
+                    exerciseToggle("mic.fill", 0xE0574A, "Speaking", "speak")
+                    SettingsDivider()
+                    exerciseToggle("headphones", 0x3B82F6, "Listening", "listen")
+                    SettingsDivider()
+                    exerciseToggle("pencil.and.scribble", 0xC98A10, "Writing characters", "write")
+                    SettingsDivider()
+                    exerciseToggle("character.textbox", 0x2A8B90, "Pinyin", "pinyin")
+                    SettingsDivider()
+                    exerciseToggle("text.word.spacing", 0x7C5CD6, "Sentences", "sentence")
                 }
 
                 SettingsGroup("Sound") {

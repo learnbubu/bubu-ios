@@ -35,7 +35,9 @@ final class Router {
         switch mode {
         case "listen": start(StudySession.listening(p))
         case "write": start(StudySession.writing(p))
-        case "quiz": start(StudySession.quiz(p, cards: p.activeCards, scope: p.selectedLessons))
+        case "quiz":
+            let words = Array(p.learnedCards.prefix(60))
+            start(StudySession.quiz(p, cards: words, scope: Set(words.map(\.lessonId))))
         case "chars": push(.chars)
         case "read": push(.readings)
         case "tones": push(.tones)

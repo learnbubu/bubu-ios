@@ -16,7 +16,6 @@ enum Page: Hashable {
     case flash([String])
     case match([String])
     case avatar
-    case studyChoice             // "What to study"
     case writingSheet(String)    // a word's 字帖
     case classroom               // the practice tiles, behind Home's board
     case quests                  // today's three, behind Home's Daily quests
@@ -49,7 +48,6 @@ struct PageView: View {
         case .chat(let id): ChatPage(dialogueId: id)
         case .vocab: VocabRoom()
         case .pick: PickPage()
-        case .studyChoice: StudyChoicePage()
         case .avatar: AvatarBuilderPage()
         case .writingSheet(let h): WritingSheetPage(hanzi: h)
         case .flash(let ids): FlashPage(ids: ids)

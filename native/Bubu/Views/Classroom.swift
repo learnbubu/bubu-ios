@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The Classroom, behind the board's "Let's practise" (the studio's Classroom tab, 13 Oct 2026): Bùbù peeking
-/// over the title, the catch-up row (mistakes, review, weak words), What to study, and the eight practice
+/// over the title, the catch-up row (mistakes, review, weak words), and the eight practice
 /// tiles with their pictures. Light only for now.
 struct ClassroomPage: View {
     @Environment(ProgressStore.self) private var progress
@@ -25,7 +25,6 @@ struct ClassroomPage: View {
             VStack(spacing: 12) {
                 header
                 catchUp
-                whatToStudy
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 11), GridItem(.flexible(), spacing: 11)], spacing: 11) {
                     ForEach(tiles, id: \.id) { t in
                         Button { router.practice(t.id, progress) } label: { tile(t) }
@@ -82,21 +81,6 @@ struct ClassroomPage: View {
         .buttonStyle(PressDown(depth: 2))
     }
 
-    private var whatToStudy: some View {
-        let nL = progress.selectedLessons.count
-        return Button { router.push(.studyChoice) } label: {
-            HStack {
-                Text("What to study").font(.nunito(15, .heavy)).foregroundStyle(Home.ink)
-                Spacer()
-                Text(nL == Course.shared.lessons.count ? "All lessons" : "\(nL) lesson\(nL == 1 ? "" : "s")").font(.nunito(13, .bold)).foregroundStyle(Home.muted)
-                Image(systemName: "chevron.down").font(.system(size: 10, weight: .bold)).foregroundStyle(Home.muted)
-            }
-            .padding(.horizontal, 14).padding(.vertical, 10)
-            .background(Color(UIColor(hex: 0xFFFDF8)), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Home.line, lineWidth: 1.5))
-        }
-        .buttonStyle(.plain)
-    }
 
     /// A tile: its picture above, its name on a pale band along the bottom (the owner's pick, 14 Oct 2026).
     private func tile(_ t: Tile) -> some View {

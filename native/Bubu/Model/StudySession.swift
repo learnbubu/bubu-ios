@@ -201,7 +201,7 @@ final class StudySession: Identifiable {
         self.title = title
         // (a stone's own lesson, as the path opens it: set. Anything given its cards, or of another kind, at chance)
         Dice.begin(mode == .lesson && cards == nil && !lessonId.isEmpty ? SeededRNG(lessonId) : nil)
-        // a mixed session uses the skills switched on in "What to study"
+        // a mixed session uses the skills switched on in Settings → Lesson exercises
         self.focuses = focuses ?? (mode == .mistakes ? Set(Self.allDirs) : progress.selectedFocuses)
         self.start = progress.now()
         let practice = mode == .lesson && Course.shared.lessonById[lessonId]?.isPractice == true
@@ -520,27 +520,27 @@ final class StudySession: Identifiable {
         return StudySession(lessonId: "", progress: p, cards: Array(cards.prefix(20)), mode: .trouble, title: "Trouble words")
     }
 
+    /// Listening on what you've learned, weakest first (some of the next weakest mixed in, so it isn't always the same).
     static func listening(_ p: ProgressStore) -> StudySession? {
-        let cards = p.activeCards
-        let studied = cards.filter { p.srs[$0.id] != nil }
-        let pool = studied.isEmpty ? cards : studied
-        guard !pool.isEmpty else { Moments.shared.toast("Pick at least one lesson — open “What to study”."); return nil }
-        return onBunsCheck(StudySession(lessonId: "", progress: p, focuses: ["listen"], cards: Array(pool.diced().prefix(20)),
-                                        mode: .listen, title: "Listening", scope: p.selectedLessons), p)
+        let pool = Array(p.learnedCards.prefix(40))
+        guard !pool.isEmpty else { Moments.shared.toast("Learn a few words first."); return nil }
+        let cards = Array(pool.prefix(12)) + Array(pool.dropFirst(12).diced().prefix(8))
+        return onBunsCheck(StudySession(lessonId: "", progress: p, focuses: ["listen"], cards: cards.diced(),
+                                        mode: .listen, title: "Listening", scope: Set(pool.map(\.lessonId))), p)
     }
 
+    /// Writing what you've learned, weakest first.
     static func writing(_ p: ProgressStore) -> StudySession? {
-        let cards = p.activeCards.filter { StrokeData.shared.writable($0.word.hanzi) }
-        let studied = cards.filter { p.srs[$0.id] != nil }
-        let pool = studied.isEmpty ? cards : studied
-        guard !pool.isEmpty else { Moments.shared.toast("Pick at least one lesson — open “What to study”."); return nil }
-        return onBunsCheck(StudySession(lessonId: "", progress: p, focuses: ["write"], cards: Array(pool.diced().prefix(12)),
-                                        mode: .write, title: "Writing", scope: p.selectedLessons), p)
+        let pool = Array(p.learnedCards.filter { StrokeData.shared.writable($0.word.hanzi) }.prefix(24))
+        guard !pool.isEmpty else { Moments.shared.toast("Learn a few words first."); return nil }
+        let cards = Array(pool.prefix(8)) + Array(pool.dropFirst(8).diced().prefix(4))
+        return onBunsCheck(StudySession(lessonId: "", progress: p, focuses: ["write"], cards: cards.diced(),
+                                        mode: .write, title: "Writing", scope: Set(pool.map(\.lessonId))), p)
     }
 
     /// A quiz on some words: up to 20, multiple choice only (web: startQuiz).
     static func quiz(_ p: ProgressStore, cards: [Card], focuses: Set<String>? = nil, scope: Set<String>? = nil,
-                     tooFew: String = "Pick more lessons — a quiz needs at least 3 words.") -> StudySession? {
+                     tooFew: String = "Learn a few more words: a quiz needs at least 3.") -> StudySession? {
         let cards = cards.filter { !$0.isSentence }
         guard cards.count >= 3 else { Moments.shared.toast(tooFew); return nil }
         let items = Array(cards.diced().prefix(20))

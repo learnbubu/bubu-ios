@@ -13,7 +13,7 @@ struct Prefs: Codable, Equatable {
     var toneColours = true
     var checkStrokes = true
     var autoRelight = true      // an ember relights a missed day by itself
-    var lessons: [String]?      // "What to study": the lessons chosen (nil or empty = all)
+    var lessons: [String]?      // (was "What to study"'s lessons, gone: kept so older backups still read)
     var focuses: [String]?      // and the skills switched on (nil or empty = all)
     var avatar: AvatarConfig?   // your avatar's look
     // reminder notifications (see Reminders.swift); nil means never chosen

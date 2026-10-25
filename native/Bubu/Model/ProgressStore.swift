@@ -208,20 +208,20 @@ final class ProgressStore {
         return o
     }
 
-    // MARK: what to study
+    // MARK: what to practise
 
-    /// The lessons chosen in "What to study"; all of them unless some were picked.
-    var selectedLessons: Set<String> {
-        if let l = prefs.lessons, !l.isEmpty { return Set(l) }
-        return Set(course.lessons.map(\.id))
-    }
-    /// The skills switched on; all seven unless some were switched off.
+    /// The skills switched on (Settings → Lesson exercises); all seven unless some were switched off.
     var selectedFocuses: Set<String> {
         if let f = prefs.focuses, !f.isEmpty { return Set(f) }
         return Set(StudySession.allDirs)
     }
-    /// The words of the chosen lessons (web: activeCards).
-    var activeCards: [Card] { let s = selectedLessons; return course.cards.filter { s.contains($0.lessonId) } }
+    /// The words you've learned, weakest first: what the Classroom's Listening, Writing and Quiz draw on. (It was the
+    /// lessons picked in "What to study", gone: the owner, 25 Oct 2026.) None learned yet: the first chapter's.
+    var learnedCards: [Card] {
+        let met = course.cards.filter { !$0.isSentence && srs[$0.id] != nil }
+        if met.isEmpty { return course.cards.filter { !$0.isSentence && (course.chapters.first?.lessons.contains($0.lessonId) ?? false) } }
+        return met.sorted { StudySession.weakness(srs[$0.id]) > StudySession.weakness(srs[$1.id]) }
+    }
 
     // MARK: shortcuts into the activity record
     var xpDays: [String: Int] { activity.xpDays }
