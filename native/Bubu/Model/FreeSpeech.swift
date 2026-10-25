@@ -63,6 +63,12 @@ enum FreeSpeech {
                                        : "That's not quite this reply. It needs the words below: try again, like the example.",
                                    better: goal.hanzi, betterPinyin: goal.pinyin, words: missing)
         }
+        // (and not much more than it: most of what's said has to be the reply's, or the line it answers; "你好我是李姑姑
+        // 哈哈哈" was passed, the line's words with babble on the end; the owner, 26 Oct 2026)
+        if extra(heard, goal: goal, before: before) > 0.4 {
+            return SpeakingVerdict(works: false, comment: "There's a lot in there that isn't this reply. Say just what the line needs, like the example.",
+                                   better: goal.hanzi, betterPinyin: goal.pinyin, words: missing)
+        }
         #if canImport(FoundationModels)
         if #available(iOS 26.0, *), available {
             guard var v = await ask(heard: heard, goal: goal, before: before) else { return nil }
@@ -97,6 +103,15 @@ enum FreeSpeech {
             if let g = glossary[chars] { missing.append(SpeakingWord(hanzi: chars, pinyin: g.pinyin, en: g.en)) }
         }
         return (Double(said) / Double(words.count), missing)
+    }
+
+    /// How much of what was said (its characters, hesitations and particles left out) is in neither the reply expected
+    /// nor the line it answers (0…1).
+    static func extra(_ heard: String, goal: Turn, before: Turn?) -> Double {
+        let h = heard.filter { Course.isHan($0) && !light.contains($0) }
+        guard !h.isEmpty else { return 0 }
+        let known = Set(goal.hanzi.filter(Course.isHan)).union(before.map { Set($0.hanzi.filter(Course.isHan)) } ?? [])
+        return Double(h.filter { !known.contains($0) }.count) / Double(h.count)
     }
 
     /// A reply that works but isn't the line: what could be better, always. The example as the better way when the

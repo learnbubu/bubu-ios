@@ -68,6 +68,9 @@ final class ChatTests: XCTestCase {
         let other = await FreeSpeech.judge(said: ["我不知道"], goal: goal, before: before)
         XCTAssertEqual(other?.works, false)
         XCTAssertEqual(other?.better, goal.hanzi)
+        // the line's words with babble after them: too much that isn't the reply (the owner's phone, 26 Oct 2026)
+        XCTAssertGreaterThan(FreeSpeech.extra("你好我是李姑姑哈哈哈", goal: goal, before: before), 0.4)
+        XCTAssertEqual(FreeSpeech.extra(goal.hanzi, goal: goal, before: before), 0)
         // the line itself: every word of it said
         XCTAssertEqual(FreeSpeech.coverage(goal.hanzi, goal: goal).0, 1)
         // a reply that works but isn't the line: the example as the better way
