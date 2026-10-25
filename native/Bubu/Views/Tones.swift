@@ -538,32 +538,43 @@ struct TonesPage: View {
     private var results: some View {
         let accuracy = qs.isEmpty ? 0 : Int((Double(right) / Double(qs.count) * 100).rounded())
         let worst = misses.max { $0.value < $1.value }?.key
+        // (as a lesson's done screen: Bùbù pleased, the title, the tiles, together in the middle; the buttons pinned.
+        // No splash: the owner, 25 Oct 2026)
         return VStack(spacing: 0) {
-            SplashMoment(title: right == qs.count ? "Perfect ear!" : accuracy >= 70 ? "Nicely heard!" : "Keep listening!")
-                .frame(height: 330)
-            HStack(spacing: 10) {
-                DoneTile(value: xp, format: { "+\($0)" }, label: "XP", icon: "bolt.fill", tint: .gold, delay: 0.5)
-                DoneTile(value: accuracy, format: { "\($0)%" }, label: "Heard right", icon: "ear", tint: .good, delay: 0.64)
+            VStack(spacing: 0) {
+                Spacer(minLength: 12)
+                Image("done-panda").resizable().scaledToFit().frame(minHeight: 120, maxHeight: 260).layoutPriority(-1)
+                Text(right == qs.count ? "Perfect ear!" : accuracy >= 70 ? "Nicely heard!" : "Keep listening!")
+                    .font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).padding(.top, 2)
+                Text(level == .single ? "Single tones" : level == .pairs ? "Tone pairs" : "Tricky pairs")
+                    .font(.nunito(14.5, .semibold)).foregroundStyle(Color.muted).padding(.top, 4)
+                HStack(spacing: 10) {
+                    DoneTile(value: xp, format: { "+\($0)" }, label: "XP", icon: "bolt.fill", tint: .gold, delay: 0.2)
+                    DoneTile(value: accuracy, format: { "\($0)%" }, label: "Heard right", icon: "ear", tint: .good, delay: 0.42)
+                }
+                .padding(.top, 22)
+                if let w = worst {
+                    let ab = w.split(separator: "+").compactMap { Int($0) }
+                    HStack(spacing: 12) {
+                        if ab.count == 2 { TonePairShape(pair: (ab[0], ab[1])).frame(width: 64) }
+                        else if let t = ab.first { ToneShape(tone: t).frame(width: 46, height: 26) }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(ab.count == 2 ? "Trickiest: \(Self.names[ab[0]]!) + \(Self.names[ab[1]]!)" : "Trickiest: \(Self.names[ab.first ?? 1]!)")
+                                .font(.nunito(15, .black)).foregroundStyle(Color.ink)
+                            Text("The next rounds lean on it.").font(.nunito(13, .semibold)).foregroundStyle(Color.muted)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(14)
+                    .background(Color.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
+                    .padding(.top, 14)
+                }
+                Spacer(minLength: 12)
             }
             .padding(.horizontal, 18)
-            if let w = worst {
-                let ab = w.split(separator: "+").compactMap { Int($0) }
-                HStack(spacing: 12) {
-                    if ab.count == 2 { TonePairShape(pair: (ab[0], ab[1])).frame(width: 64) }
-                    else if let t = ab.first { ToneShape(tone: t).frame(width: 46, height: 26) }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(ab.count == 2 ? "Trickiest: \(Self.names[ab[0]]!) + \(Self.names[ab[1]]!)" : "Trickiest: \(Self.names[ab.first ?? 1]!)")
-                            .font(.nunito(15, .black)).foregroundStyle(Color.ink)
-                        Text("The next rounds lean on it.").font(.nunito(13, .semibold)).foregroundStyle(Color.muted)
-                    }
-                    Spacer(minLength: 0)
-                }
-                .padding(14)
-                .background(Color.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
-                .padding(.horizontal, 18).padding(.top, 14)
-            }
-            Spacer(minLength: 0)
+            .frame(maxHeight: .infinity)
+            .overlay { if right == qs.count { Confetti(count: 40).allowsHitTesting(false) } }
             VStack(spacing: 10) {
                 Button { finished = false; start() } label: { Text("Go again") }
                     .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))

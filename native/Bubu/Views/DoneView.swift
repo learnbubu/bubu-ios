@@ -39,7 +39,9 @@ struct DoneView: View {
     }
     /// the opening splash: the title over a tilted band with Bùbù and confetti, about a second
     /// (the owner's Duolingo recording, 6 Oct 2026); not on the debug screens past the first stage
-    @State private var splash = Launch.screen != "donenext"
+    /// (off: the owner, 25 Oct 2026, "not a fan of this animation, let's remove it from the app as an end screen".
+    /// The results come straight up.)
+    @State private var splash = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let course = Course.shared
     /// the sticker moment (made in the effects studio) plays only if its player has loaded; else
