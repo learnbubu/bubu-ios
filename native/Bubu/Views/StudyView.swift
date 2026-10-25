@@ -2109,9 +2109,7 @@ struct TypeView: View {
                 .submitLabel(.done).onSubmit(submit)
                 .onChange(of: typed) { _, t in
                     // (Return in a multi-line field adds a line: it checks instead)
-                    if t.contains("
-") { typed = t.replacingOccurrences(of: "
-", with: ""); submit() }
+                    if t.contains("\n") { typed = t.replacingOccurrences(of: "\n", with: ""); submit() }
                 }
                 .focused($focused)
                 .disabled(result != nil)
