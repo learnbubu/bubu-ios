@@ -362,14 +362,14 @@ struct TonesPage: View {
                 if q.tones.count == 1 {
                     // (one syllable: the four tones big, two by two, filling the room over Check: the Mac, 0.2.34)
                     VStack(spacing: 10) {
-                        HStack(spacing: 10) { toneTile(1, slot: 0, answer: q.tones[0], big: true); toneTile(2, slot: 0, answer: q.tones[0], big: true) }
-                        HStack(spacing: 10) { toneTile(3, slot: 0, answer: q.tones[0], big: true); toneTile(4, slot: 0, answer: q.tones[0], big: true) }
+                        HStack(spacing: 10) { toneTile(1, slot: 0, answer: shown(q)[0], big: true); toneTile(2, slot: 0, answer: shown(q)[0], big: true) }
+                        HStack(spacing: 10) { toneTile(3, slot: 0, answer: shown(q)[0], big: true); toneTile(4, slot: 0, answer: shown(q)[0], big: true) }
                     }
                 } else {
                     ForEach(Array(q.tones.indices), id: \.self) { k in
                         VStack(alignment: .leading, spacing: 7) {
                             Text(k == 0 ? "FIRST" : "SECOND").font(.nunito(11.5, .black)).tracking(1.1).foregroundStyle(Color.muted)
-                            HStack(spacing: 8) { ForEach(1...4, id: \.self) { t in toneTile(t, slot: k, answer: q.tones[k]) } }
+                            HStack(spacing: 8) { ForEach(1...4, id: \.self) { t in toneTile(t, slot: k, answer: shown(q)[k]) } }
                         }
                     }
                 }
@@ -481,7 +481,7 @@ struct TonesPage: View {
                 Text("· \(FeedbackBanner.brief(q.card.word))").font(.nunito(15, .semibold)).lineLimit(1)
             }
             .padding(.leading, 38)
-            Text(q.sandhi ? "Written dip + dip, said rising then dipping: two dips in a row, the first rises." : String(shape.prefix(1)).uppercased() + String(shape.dropFirst()))
+            Text(q.sandhi ? "Written \(q.card.word.pinyin) (dip + dip), but said rising then dip: when two dips come together, the first one rises." : String(shape.prefix(1)).uppercased() + String(shape.dropFirst()))
                 .font(.nunito(14, .bold)).opacity(0.85).padding(.leading, 38).fixedSize(horizontal: false, vertical: true)
         }
         .foregroundStyle(tint)
@@ -498,8 +498,13 @@ struct TonesPage: View {
         }
     }
 
+    /// the tones to mark right: a 3+3 word answered as written (dip + dip) shows that as right
+    private func shown(_ q: Q) -> [Int] { q.sandhi && picks.compactMap { $0 } == [3, 3] ? [3, 3] : q.tones }
+
     private func check(_ q: Q) {
-        let ok = picks.compactMap { $0 } == q.tones
+        // (a 3+3 word: as said, rising + dip, or as written, dip + dip; both right: the owner, 25 Oct 2026, read 法语's
+        // rising + dip being right as a mistake)
+        let ok = picks.compactMap { $0 } == q.tones || (q.sandhi && picks.compactMap { $0 } == [3, 3])
         let k = q.tones.count == 1 ? "\(q.tones[0])" : (q.sandhi ? "3+3" : "\(q.tones[0])+\(q.tones[1])")
         ToneRecord.add(k, right: ok)
         // (each syllable's tone on its own too, single or pair: the four tones' cards)
@@ -535,12 +540,11 @@ struct TonesPage: View {
     private var results: some View {
         let accuracy = qs.isEmpty ? 0 : Int((Double(right) / Double(qs.count) * 100).rounded())
         let worst = misses.max { $0.value < $1.value }?.key
-        // (as a lesson's done screen: Bùbù pleased, the title, the tiles, together in the middle; the buttons pinned.
-        // No splash: the owner, 25 Oct 2026)
+        // (as a lesson's done screen: the title and the tiles together in the middle, the buttons pinned; no splash
+        // and no Bùbù: the owner, 25 Oct 2026)
         return VStack(spacing: 0) {
             VStack(spacing: 0) {
                 Spacer(minLength: 12)
-                Image("done-panda").resizable().scaledToFit().frame(minHeight: 120, maxHeight: 260).layoutPriority(-1)
                 Text(right == qs.count ? "Perfect ear!" : accuracy >= 70 ? "Nicely heard!" : "Keep listening!")
                     .font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).padding(.top, 2)
                 Text(level == .single ? "Single tones" : "Tone pairs")

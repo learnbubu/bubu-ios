@@ -52,7 +52,14 @@ enum FreeSpeech {
         if let gate = noChinese(heard, goal: goal) { return gate }
         #if canImport(FoundationModels)
         if #available(iOS 26.0, *), available {
-            return await ask(heard: heard, goal: goal, before: before)
+            guard var v = await ask(heard: heard, goal: goal, before: before) else { return nil }
+            // (the model passes nonsense now and then: a reply sharing almost nothing with the example or the line
+            // it answers is told to try again)
+            if v.works && overlap(heard, goal: goal, before: before) < 0.2 {
+                v = SpeakingVerdict(works: false, comment: "That doesn't quite answer this. Try again, or tap Need help?",
+                                    better: goal.hanzi, betterPinyin: goal.pinyin)
+            }
+            return v
         }
         #endif
         return nil
@@ -68,12 +75,38 @@ enum FreeSpeech {
 
     /// Mostly English (or nothing but hesitations): not Chinese to judge, so try again, the example offered.
     static func noChinese(_ heard: String, goal: Turn) -> SpeakingVerdict? {
-        let han = heard.filter(Course.isHan).count
+        let han = heard.filter(Course.isHan)
         let latin = heard.filter { $0.isASCII && $0.isLetter }.count
-        guard han == 0 || latin > han * 2 else { return nil }
-        return SpeakingVerdict(works: false,
-                               comment: latin > 0 ? "That sounded like English. Have a go in Chinese!" : "I didn't catch any Chinese there. Try again?",
-                               better: goal.hanzi, betterPinyin: goal.pinyin)
+        // (an English word in it at all: "耶我会跟你 great" was passed; the owner, 25 Oct 2026)
+        let englishWord = heard.split(whereSeparator: { !($0.isASCII && $0.isLetter) }).contains { $0.count >= 2 }
+        let again = { (c: String) in SpeakingVerdict(works: false, comment: c, better: goal.hanzi, betterPinyin: goal.pinyin) }
+        if han.isEmpty || latin > han.count * 2 {
+            return again(latin > 0 ? "That sounded like English. Have a go in Chinese!" : "I didn't catch any Chinese there. Try again?")
+        }
+        if englishWord { return again("Some of that was English. Say it all in Chinese!") }
+        // (mostly characters from no word of the course: not words at all, babble heard as Chinese; "奥利嘎都嘎啵啵扒皮噗"
+        // was passed, the owner, 25 Oct 2026)
+        let known = han.filter { courseChars.contains($0) }.count
+        if Double(known) / Double(han.count) < 0.6 {
+            return again("I couldn't make that out as Chinese words. Try again, or tap Need help?")
+        }
+        return nil
+    }
+
+    /// every character in the course's words and lines
+    static let courseChars: Set<Character> = {
+        var s = Set<Character>()
+        for c in Course.shared.cards { for ch in c.word.hanzi where Course.isHan(ch) { s.insert(ch) } }
+        for t in Course.shared.data.dialogues.flatMap(\.turns) { for ch in t.hanzi where Course.isHan(ch) { s.insert(ch) } }
+        return s
+    }()
+
+    /// How much of the reply is the example's or the line being answered's: a reply that shares almost nothing with
+    /// either isn't an answer to it, whatever the model says.
+    static func overlap(_ heard: String, goal: Turn, before: Turn?) -> Double {
+        let h = Set(heard.filter(Course.isHan)), g = Set(goal.hanzi.filter(Course.isHan)).union(before.map { Set($0.hanzi.filter(Course.isHan)) } ?? [])
+        guard !h.isEmpty else { return 0 }
+        return Double(h.intersection(g).count) / Double(h.count)
     }
 
     /// The pinyin of a sentence from the course's own words (its chats' lines, its cards, longest first), never the

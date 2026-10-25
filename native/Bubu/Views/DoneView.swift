@@ -184,7 +184,6 @@ struct DoneView: View {
                 Color.clear
                     .frame(minHeight: 120, maxHeight: 360)
                     .frame(maxWidth: .infinity)
-                    .overlay { Image("done-panda").resizable().scaledToFit().padding(24).opacity(momentMissing && !momentDrawn ? 1 : 0) }
                     .background(GeometryReader { g in Color.clear.preference(key: MomentStickerBox.self, value: g.frame(in: .global)) })
                     .layoutPriority(-1)
                 Text(m.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color(UIColor(hex: m.color)))
@@ -192,9 +191,7 @@ struct DoneView: View {
                 Text(m.line).font(.nunito(15, .bold)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                     .padding(.top, 2)
             } else {
-                Image("done-panda").resizable().scaledToFit()
-                    .frame(minHeight: 120, maxHeight: 360)
-                    .layoutPriority(-1)
+                // (no Bùbù here: the owner, 25 Oct 2026, "no longer have this Bùbù a part of the end screens")
                 Text(r.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).multilineTextAlignment(.center)
                     .padding(.top, 2)
             }

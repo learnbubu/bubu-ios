@@ -695,10 +695,9 @@ struct MascotPrompt<Content: View>: View {
                 .frame(width: compact ? 64 : 112, height: compact ? 78 : 150, alignment: .bottom)
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)
+            // (to the screen's edge, a word's as a sentence's: the owner, 25 Oct 2026; it stopped at 200 pt)
             SpeechBubbleBox(sentence: sentence) { content }
-                .frame(maxWidth: sentence ? .infinity : 200)
-                .padding(.trailing, sentence ? 0 : 10)
-            Spacer(minLength: 0)
+                .frame(maxWidth: .infinity)
         }
         .frame(minHeight: compact ? 78 : 150)
         // never squeezed shorter than what it holds: on a full screen the bubble was cut off under the
@@ -2072,32 +2071,57 @@ struct TypeView: View {
     var submit: () -> Void
     @FocusState private var focused: Bool
 
+    // Duolingo's typing (the owner, 25 Oct 2026, "remember we were struggling to get something nice for typing? … use
+    // that"): no Bùbù and bubble, the word big with its sound beside it, a tall box to type in, the tip under it.
     var body: some View {
         let w = ex.card.word
-        // the same with the keyboard up as down: Bùbù and the card don't shrink (the owner, 20 Oct 2026)
-        VStack(spacing: 22) {
-            MascotPrompt(mood: result) {
-                if ex.isNew { NewBadge() }
+        VStack(spacing: 18) {
+            if ex.isNew { NewBadge().frame(maxWidth: .infinity, alignment: .leading) }
+            HStack(alignment: .center, spacing: 14) {
+                Button { Speech.shared.speak(w.hanzi) } label: {
+                    Image(systemName: "speaker.wave.2.fill").font(.system(size: 22, weight: .bold)).foregroundStyle(Color.onAccent)
+                        .frame(width: 54, height: 50)
+                }
+                .buttonStyle(Tile3D(fill: Color.accent, edge: Color.accentDark, radius: 14, lip: 4, line: 0))
+                .fixedSize()
+                .accessibilityLabel("Hear it")
                 if ex.typeHanzi {
                     // in characters: the meaning, and the characters once it's answered
-                    Text(w.gloss).font(.nunitoXB(22)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
-                    if result != nil { ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: 30, weight: .medium) }
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(w.gloss).font(.nunitoXB(26)).foregroundStyle(Color.ink).fixedSize(horizontal: false, vertical: true)
+                        if result != nil { ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: 30, weight: .medium) }
+                    }
                 } else {
-                    Text(w.hanzi).font(.hanzi(w.hanzi.count > 3 ? 32 : 44, .medium)).foregroundStyle(Color.ink)
-                    Text(w.gloss).font(.nunito(16)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(w.hanzi).font(.hanzi(w.hanzi.count > 3 ? 44 : 60, .bold)).foregroundStyle(Color.ink)
+                            .lineLimit(1).minimumScaleFactor(0.6)
+                        Text(w.gloss).font(.nunito(16, .semibold)).foregroundStyle(Color.muted).lineLimit(2)
+                    }
                 }
             }
-            TextField(ex.typeHanzi ? "Type it in Chinese" : "Type the pinyin", text: $typed)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 8)
+            // the box: tall, the text from its top left, as Duolingo's
+            TextField(ex.typeHanzi ? "Type it in Chinese" : "Type here", text: $typed, axis: .vertical)
+                .lineLimit(1...4)
                 .font(.nunito(22, .bold)).foregroundStyle(Color.ink)
-                .multilineTextAlignment(.center)
                 .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.default)   // (the full keyboard: its globe key switches to Chinese, and characters count)
                 .submitLabel(.done).onSubmit(submit)
+                .onChange(of: typed) { _, t in
+                    // (Return in a multi-line field adds a line: it checks instead)
+                    if t.contains("
+") { typed = t.replacingOccurrences(of: "
+", with: ""); submit() }
+                }
                 .focused($focused)
                 .disabled(result != nil)
-                .padding(.vertical, 16).padding(.horizontal, 14)
-                .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.panel))
-                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .padding(.vertical, 16).padding(.horizontal, 16)
+                .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
+                .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.panel))
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
+                .contentShape(Rectangle())
+                .onTapGesture { if result == nil { focused = true } }
                 // (what StudyView scrolls into view when the keyboard comes up, with a little room under it)
                 .background(alignment: .bottom) { Color.clear.frame(height: 1).offset(y: 12).id("type-field") }
             // (wrapping, never clipped: the Mac's check of 0.1.38 found the descenders cut off)

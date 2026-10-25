@@ -373,7 +373,9 @@ final class StudySession: Identifiable {
     static func chatSlice(_ ts: [Turn], mine: Int = chatLines) -> [Turn] {
         let yours = ts.indices.filter { ts[$0].who == "you" }
         guard !yours.isEmpty else { return [] }
-        let k = yours.count <= mine ? 0 : Dice.int(in: 0...(yours.count - mine))
+        // (from the chat's start, every line read: begun part-way, the lines before were shown unread as history; the
+        // owner, 25 Oct 2026, "misses reading one of the sentences")
+        let k = 0
         let first = yours[k], last = yours[min(yours.count, k + mine) - 1]
         return Array(ts[max(0, first - 1)...last])
     }
