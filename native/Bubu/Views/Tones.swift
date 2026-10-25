@@ -364,12 +364,18 @@ struct TonesPage: View {
                     .font(.nunito(25, .black)).tracking(-0.4).foregroundStyle(Color.ink)
                     .padding(.top, 6)
                 listenCard(q)
-                ForEach(Array(q.tones.indices), id: \.self) { k in
-                    VStack(alignment: .leading, spacing: 7) {
-                        if q.tones.count > 1 {
+                if q.tones.count == 1 {
+                    // (one syllable: the four tones big, two by two, filling the room over Check: the Mac, 0.2.34)
+                    VStack(spacing: 10) {
+                        HStack(spacing: 10) { toneTile(1, slot: 0, answer: q.tones[0], big: true); toneTile(2, slot: 0, answer: q.tones[0], big: true) }
+                        HStack(spacing: 10) { toneTile(3, slot: 0, answer: q.tones[0], big: true); toneTile(4, slot: 0, answer: q.tones[0], big: true) }
+                    }
+                } else {
+                    ForEach(Array(q.tones.indices), id: \.self) { k in
+                        VStack(alignment: .leading, spacing: 7) {
                             Text(k == 0 ? "FIRST" : "SECOND").font(.nunito(11.5, .black)).tracking(1.1).foregroundStyle(Color.muted)
+                            HStack(spacing: 8) { ForEach(1...4, id: \.self) { t in toneTile(t, slot: k, answer: q.tones[k]) } }
                         }
-                        HStack(spacing: 8) { ForEach(1...4, id: \.self) { t in toneTile(t, slot: k, answer: q.tones[k]) } }
                     }
                 }
                 Spacer(minLength: 0)
@@ -402,7 +408,8 @@ struct TonesPage: View {
                 .disabled(!ready && checked == nil)
                 .padding(.bottom, 14)
             }
-            .padding(.horizontal, 12)
+            // (the button's edges with the content's)
+            .padding(.horizontal, 18)
             .animation(.spring(response: 0.3, dampingFraction: 0.85), value: checked != nil)
         }
     }
@@ -444,7 +451,7 @@ struct TonesPage: View {
     }
 
     /// a tone to pick for one syllable: its pitch shape and its name; once checked, the right one green, a wrong pick red
-    private func toneTile(_ t: Int, slot: Int, answer: Int) -> some View {
+    private func toneTile(_ t: Int, slot: Int, answer: Int, big: Bool = false) -> some View {
         let on = picks.indices.contains(slot) && picks[slot] == t
         let state: Bool? = checked == nil ? nil : t == answer ? true : on ? false : nil
         let fill: Color = state == true ? .goodSoft : state == false ? .againSoft : on ? .accentSoft : .panel
@@ -453,11 +460,11 @@ struct TonesPage: View {
             guard checked == nil else { return }
             withAnimation(.spring(response: 0.22, dampingFraction: 0.8)) { picks[slot] = t }
         } label: {
-            VStack(spacing: 5) {
-                ToneShape(tone: t).frame(width: 46, height: 26)
-                Text(Self.short[t]!).font(.nunito(13, .heavy)).foregroundStyle(Color.ink)
+            VStack(spacing: big ? 8 : 5) {
+                ToneShape(tone: t).frame(width: big ? 76 : 46, height: big ? 42 : 26)
+                Text(big ? Self.names[t]! : Self.short[t]!).font(.nunito(big ? 16 : 13, .heavy)).foregroundStyle(Color.ink)
             }
-            .frame(maxWidth: .infinity).padding(.vertical, 14)
+            .frame(maxWidth: .infinity).padding(.vertical, big ? 26 : 14)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 14))
         .sensoryFeedback(.selection, trigger: on)

@@ -22,8 +22,13 @@ enum CharIndex {
     /// in the dictionary: the Mac, 0.2.33), else the dictionary's.
     static func reading(_ ch: String, in card: Card) -> String {
         let han = card.word.hanzi.filter(Course.isHan).map(String.init), ss = Pinyin.syllables(card.word.pinyin)
-        if han.count == ss.count, let i = han.firstIndex(of: ch) { return ss[i].lowercased() }
-        return CharData.shared.chars[ch]?.p ?? ""
+        let dict = CharData.shared.chars[ch]?.p ?? ""
+        if han.count == ss.count, let i = han.firstIndex(of: ch) {
+            // (light in that word but not a particle: its own tone, as said alone: 友 yǒu, not 朋友's you; the Mac)
+            if toneOf(ss[i]) == 5 && !Word.particles.contains(ch) && !dict.isEmpty { return dict }
+            return ss[i].lowercased()
+        }
+        return dict
     }
     /// the books in course order
     static let books: [String] = entries.map(\.book).reduce(into: []) { if !$0.contains($1) { $0.append($1) } }
