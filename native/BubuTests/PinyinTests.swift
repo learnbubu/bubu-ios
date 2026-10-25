@@ -11,7 +11,9 @@ final class PinyinTests: XCTestCase {
 
     func testTonePairsSkipTheTricky() {
         let card = { (h: String, p: String) in Card(id: "x", lessonId: "x", word: Word(hanzi: h, pinyin: p, pos: nil, en: "")) }
-        XCTAssertEqual(TonesPage.pair(card("谢谢", "xièxie")), [4, 5])
+        XCTAssertEqual(TonesPage.pair(card("谢谢", "xièxie")), nil)          // a light second syllable: the trainer asks the four tones
+        XCTAssertEqual(TonesPage.single(card("马", "mǎ")), 3)
+        XCTAssertTrue(TonesPage.sandhi(card("你好", "nǐ hǎo")))
         XCTAssertEqual(TonesPage.pair(card("中国", "Zhōngguó")), nil)          // a capitalised run stays whole: one syllable
         XCTAssertEqual(TonesPage.pair(card("你好", "nǐ hǎo")), nil)            // 3 + 3 changes when spoken
         XCTAssertEqual(TonesPage.pair(card("不是", "bú shì")), nil)            // 不 changes too
