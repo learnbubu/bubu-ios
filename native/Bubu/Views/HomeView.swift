@@ -172,7 +172,8 @@ struct HomeView: View {
     private var wordOfTheDay: some View {
         let w = dailyWord
         return HStack(spacing: 13) {
-            Text(w.hanzi).font(.hanzi(44, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.5)
+            // (36: chosen, not left to the squeeze: it showed at 19 pt squeezed, then 42 at its full 44 beside a small label)
+            Text(w.hanzi).font(.hanzi(36, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.6)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.trailing, 13)
                 .overlay(alignment: .trailing) { Rectangle().fill(Home.line).frame(width: 1) }
