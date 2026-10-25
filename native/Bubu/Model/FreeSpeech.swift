@@ -55,6 +55,14 @@ enum FreeSpeech {
             return SpeakingVerdict(works: false, comment: "I couldn't make that out. Try again, a little slower?",
                                    better: goal.hanzi, betterPinyin: goal.pinyin)
         }
+        // (a reply has to be near the one expected: at least half its words; the owner, 26 Oct 2026, "has to be some
+        // what similar to the reply that is expected and then advise what could be better")
+        let (cover, missing) = coverage(heard, goal: goal)
+        if cover < 0.5 {
+            return SpeakingVerdict(works: false, comment: missing.isEmpty ? "That's not quite this reply. Try saying it like the example."
+                                       : "That's not quite this reply. It needs the words below: try again, like the example.",
+                                   better: goal.hanzi, betterPinyin: goal.pinyin, words: missing)
+        }
         #if canImport(FoundationModels)
         if #available(iOS 26.0, *), available {
             guard var v = await ask(heard: heard, goal: goal, before: before) else { return nil }
@@ -64,10 +72,45 @@ enum FreeSpeech {
                 v = SpeakingVerdict(works: false, comment: "That doesn't quite answer this. Try again, or tap Need help?",
                                     better: goal.hanzi, betterPinyin: goal.pinyin)
             }
-            return v
+            return advised(v, missing: missing, goal: goal)
         }
         #endif
         return nil
+    }
+
+    /// Hesitations and particles: not the words a reply is judged on.
+    static let light: Set<Character> = fillers.union(["了", "吗", "呢", "吧", "的", "呀", "嘛", "啦"])
+
+    /// How much of the expected reply's words were said (0…1), and the ones left out, with pinyin and meaning. A word
+    /// counts when all its characters were heard (the recogniser can split or join words).
+    static func coverage(_ heard: String, goal: Turn) -> (Double, [SpeakingWord]) {
+        let h = Set(heard.filter(Course.isHan))
+        let words = (Sentence.segment(hanzi: goal.hanzi, pinyin: goal.pinyin) ?? [])
+            .filter { !$0.hanzi.filter(Course.isHan).allSatisfy(light.contains) }
+        guard !words.isEmpty else { return (1, []) }
+        var said = 0
+        var missing: [SpeakingWord] = []
+        for w in words {
+            let chars = w.hanzi.filter(Course.isHan)
+            if chars.allSatisfy(h.contains) { said += 1; continue }
+            guard !missing.contains(where: { $0.hanzi == chars }) else { continue }
+            if let g = glossary[chars] { missing.append(SpeakingWord(hanzi: chars, pinyin: g.pinyin, en: g.en)) }
+        }
+        return (Double(said) / Double(words.count), missing)
+    }
+
+    /// A reply that works but isn't the line: what could be better, always. The example as the better way when the
+    /// tutor gave none, and the words it left out listed under the comment.
+    static func advised(_ v: SpeakingVerdict, missing: [SpeakingWord], goal: Turn) -> SpeakingVerdict {
+        guard v.works else { return v }
+        var v = v
+        if v.better == nil { v.better = goal.hanzi; v.betterPinyin = goal.pinyin }
+        let extra = missing.filter { m in !v.words.contains { $0.hanzi == m.hanzi } }
+        if !extra.isEmpty {
+            v.words += extra
+            v.comment += v.comment.isEmpty ? "The example also uses the words below." : " The example also uses the words below."
+        }
+        return v
     }
 
     /// Hesitation sounds, not words: left out of what's judged.
@@ -213,9 +256,9 @@ enum FreeSpeech {
     conversation and speaks a reply aloud; you see what speech recognition heard (simplified characters; it may write a \
     word that sounds the same, so ignore those slips). You only see text: you cannot hear tones or pronunciation, so \
     never mention them. If what was heard is not Chinese, it does not work. Decide whether their reply is sensible, \
-    understandable Chinese that fits the conversation and says roughly what they meant. It does NOT have to match the \
-    example: any natural way of saying it works. Be generous to a beginner: small slips still work if the meaning is \
-    clear. Write your comment in plain English only, one or two short sentences, kind and specific (what was good, or \
+    understandable Chinese that fits the conversation and says what the example says. It may be worded a little \
+    differently, but it must mean the same as the example: a reply about something else does not work, even if it is \
+    good Chinese. Small slips still work if the meaning is clear. Write your comment in plain English only, one or two short sentences, kind and specific (what was good, or \
     what to change). Never put Chinese characters in the comment: describe a word in English instead ("the word for \
     teacher"), and list each Chinese word you talk about under words, with its English meaning. Speech recognition \
     can mishear, so never repeat or dwell on a strange or rude word; just say that word doesn't fit here. Give a better \
@@ -256,7 +299,7 @@ enum FreeSpeech {
 @available(iOS 26.0, *)
 @Generable
 struct TutorFeedback {
-    @Guide(description: "true if the learner's reply is sensible, understandable Chinese that fits the conversation and means roughly what they wanted, even if worded differently from the example")
+    @Guide(description: "true if the learner's reply is sensible, understandable Chinese that fits the conversation and means the same as the example answer, even if worded a little differently")
     var works: Bool
     @Guide(description: "One or two short, warm sentences in plain English for the learner, with no Chinese characters: what was good, or gently what to change")
     var comment: String

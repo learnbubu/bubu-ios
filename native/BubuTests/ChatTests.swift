@@ -64,9 +64,15 @@ final class ChatTests: XCTestCase {
         let v = await FreeSpeech.judge(said: [goal.hanzi], goal: goal, before: before)
         XCTAssertEqual(v?.works, true)
         XCTAssertEqual(v?.spotOn, true)
-        // said another way, and no tutor to ask: nil, judged as before
+        // something else altogether: not near the reply expected, so try again, the example offered
         let other = await FreeSpeech.judge(said: ["我不知道"], goal: goal, before: before)
-        XCTAssertNil(other)
+        XCTAssertEqual(other?.works, false)
+        XCTAssertEqual(other?.better, goal.hanzi)
+        // the line itself: every word of it said
+        XCTAssertEqual(FreeSpeech.coverage(goal.hanzi, goal: goal).0, 1)
+        // a reply that works but isn't the line: the example as the better way
+        let fine = FreeSpeech.advised(SpeakingVerdict(works: true, comment: "Nice."), missing: [], goal: goal)
+        XCTAssertEqual(fine.better, goal.hanzi)
         // nothing heard: nothing to judge
         let none = await FreeSpeech.judge(said: [], goal: goal, before: before)
         XCTAssertNil(none)
