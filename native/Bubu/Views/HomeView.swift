@@ -104,6 +104,8 @@ struct HomeView: View {
                 }
                 // (the app's raised button, as every other: it was its own, in another case with an arrow; the Mac's audit)
                 .buttonStyle(RaisedButton(fill: Home.teal, ink: .white, edge: nil))
+                // (its own height kept: Home fits one screen and squeezed it, and its label shrank to 13 pt; the Mac)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 15)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
