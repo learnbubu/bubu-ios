@@ -27,11 +27,11 @@ enum Pinyin {
         while out.count < n && guardN < 60 {
             guardN += 1
             var arr = chars
-            let k = 1 + Int.random(in: 0..<min(2, marks.count))
-            for idx in marks.shuffled().prefix(k) {
+            let k = 1 + Dice.int(in: 0..<min(2, marks.count))
+            for idx in marks.diced().prefix(k) {
                 let (base, tone) = decode[chars[idx]]!
                 var t2 = tone
-                while t2 == tone { t2 = Int.random(in: 0..<4) }
+                while t2 == tone { t2 = Dice.int(in: 0..<4) }
                 arr[idx] = toneVowels[base]![t2]
             }
             let v = String(arr)
@@ -463,7 +463,7 @@ extension Course {
         return cards.filter { $0.word.en != c.word.en && $0.word.hanzi != c.word.hanzi }
             .map { ($0, cd.wordSim(c.word.hanzi, $0.word.hanzi)) }
             .filter { $0.1 >= 1.5 }
-            .shuffled()
+            .diced()
             .sorted { $0.1 > $1.1 }
             .prefix(n).map(\.0)
     }

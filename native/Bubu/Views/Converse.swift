@@ -206,7 +206,7 @@ struct ChatPage: View {
                     Rectangle().fill(Home.line).frame(height: 1).opacity(0.8)
                 }
                 // (greyed with the rest while you hold)
-                .overlay { holdDim.opacity(holding ? 1 : 0).animation(.easeOut(duration: 0.15), value: holding).allowsHitTesting(false) }
+                .overlay { holdDim.opacity(holding ? 1 : 0).allowsHitTesting(false) }
             }
             ScrollViewReader { reader in
                 ScrollView {
@@ -254,7 +254,7 @@ struct ChatPage: View {
         .background {
             ZStack {
                 Home.bg
-                holdDim.opacity(holding ? 1 : 0).animation(.easeOut(duration: 0.15), value: holding)
+                holdDim.opacity(holding ? 1 : 0)
             }
             .ignoresSafeArea()
         }
