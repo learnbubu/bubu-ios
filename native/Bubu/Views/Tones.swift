@@ -175,9 +175,12 @@ struct TonesPage: View {
     /// shape, how often you hear it right and an example to tap and hear (the quick reference "How tones work" was);
     /// the few pairs that trip you up; Single tones or Pairs; Practise pinned at the foot.
     private var home: some View {
-        let weak = (1...4).flatMap { a in (1...4).map { b in "\(a)+\(b)" } }.filter { $0 != "3+3" }
-            .compactMap { k in ToneRecord.share(record, k).map { (k, $0) } }.filter { $0.1 < 0.85 }
-            .sorted { $0.1 < $1.1 }.prefix(3)
+        // (in steps, typed: as one chain it was too much for the compiler, the Mac's build of 0.2.36)
+        var keys: [String] = []
+        for a in 1...4 { for b in 1...4 where !(a == 3 && b == 3) { keys.append("\(a)+\(b)") } }
+        var shares: [(String, Double)] = []
+        for k in keys { if let v = ToneRecord.share(record, k), v < 0.85 { shares.append((k, v)) } }
+        let weak: [(String, Double)] = Array(shares.sorted { $0.1 < $1.1 }.prefix(3))
         let pairsTried = record.keys.contains { $0.contains("+") }
         return VStack(spacing: 0) {
             PageBar(title: "Tones") { EmptyView() }
@@ -196,7 +199,7 @@ struct TonesPage: View {
                             .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 14).padding(.vertical, 12)
                             .background(Color.line.opacity(0.45), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     } else {
-                        ForEach(Array(weak), id: \.0) { w in
+                        ForEach(weak, id: \.0) { w in
                             let ab = w.0.split(separator: "+").compactMap { Int($0) }
                             HStack(spacing: 12) {
                                 TonePairShape(pair: (ab[0], ab[1])).frame(width: 58)
