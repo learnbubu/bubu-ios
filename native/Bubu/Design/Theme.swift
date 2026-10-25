@@ -16,6 +16,8 @@ extension Color {
     static let accentDark = Color(light: 0x1D645C, dark: 0x4F7FDC)
     static let onAccent = Color(light: 0xFFFFFF, dark: 0x0B1626)
     static let gold = Color(light: 0xB7822E, dark: 0xF0B95A)
+    /// gold's pale ground: due things (a due character's tile)
+    static let goldSoft = Color(light: 0xFBF1DC, dark: 0x2A2416)
     static let good = Color(light: 0x1F8A6D, dark: 0x4CE1AD)
     static let again = Color(light: 0xD9695A, dark: 0xF08A7A)
     static let goodSoft = Color(light: 0xDAF1E3, dark: 0x112A2D)
