@@ -769,14 +769,9 @@ struct ChatPage: View {
     private var bar: some View {
         HStack(spacing: 10) {
             if ended && !listenOnly {
-                Button { leave() } label: {
-                    Text(lesson == nil ? "Finish" : "Continue").font(.nunito(17, .black)).foregroundStyle(.white)
-                        .frame(maxWidth: .infinity).frame(height: 54)
-                        .background(Home.teal, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
-                        .padding(.bottom, 4)
-                        .background(RoundedRectangle(cornerRadius: 17, style: .continuous).fill(Home.tealDark).padding(.top, 4))
-                }
-                .buttonStyle(.plain)
+                // (the app's own raised button, its lip and its shine: it was drawn by hand here, and didn't match)
+                Button { leave() } label: { Text(lesson == nil ? "Finish" : "Continue") }
+                    .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
             } else if listenOnly {
                 Text(ended ? "End of the chat" : "🔒 Learn its words to reply. Listening for now")
                     .font(.nunito(14, .bold)).foregroundStyle(Home.muted)
