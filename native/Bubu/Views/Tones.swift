@@ -459,7 +459,9 @@ struct TonesPage: View {
                 ToneShape(tone: t).frame(width: big ? 76 : 46, height: big ? 42 : 26)
                 Text(big ? Self.names[t]! : Self.short[t]!).font(.nunito(big ? 16 : 13, .heavy)).foregroundStyle(Color.ink)
             }
-            .frame(maxWidth: .infinity).padding(.vertical, big ? 26 : 14)
+            // (the big ones a little shorter, the same before and after Check, so the feedback clears the lower row: the
+            // Mac's check of 0.2.39)
+            .frame(maxWidth: .infinity).padding(.vertical, big ? 17 : 14)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge, radius: 14))
         .sensoryFeedback(.selection, trigger: on)
@@ -544,7 +546,8 @@ struct TonesPage: View {
         // and no Bùbù: the owner, 25 Oct 2026)
         return VStack(spacing: 0) {
             VStack(spacing: 0) {
-                Spacer(minLength: 12)
+                // (in the top third, not the middle: the middle left it looking top-light; the Mac's check of 0.2.39)
+                Spacer(minLength: 12).frame(maxHeight: 110)
                 Text(right == qs.count ? "Perfect ear!" : accuracy >= 70 ? "Nicely heard!" : "Keep listening!")
                     .font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).padding(.top, 2)
                 Text(level == .single ? "Single tones" : "Tone pairs")

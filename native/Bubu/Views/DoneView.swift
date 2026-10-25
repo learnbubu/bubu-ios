@@ -191,7 +191,9 @@ struct DoneView: View {
                 Text(m.line).font(.nunito(15, .bold)).foregroundStyle(Color.ink).multilineTextAlignment(.center)
                     .padding(.top, 2)
             } else {
-                // (no Bùbù here: the owner, 25 Oct 2026, "no longer have this Bùbù a part of the end screens")
+                // (no Bùbù here: the owner, 25 Oct 2026, "no longer have this Bùbù a part of the end screens"; the block
+                // sits in the top third rather than the middle, which left it looking top-light: the Mac's check of 0.2.39)
+                Spacer(minLength: 0).frame(maxHeight: 110)
                 Text(r.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).multilineTextAlignment(.center)
                     .padding(.top, 2)
             }
@@ -229,6 +231,7 @@ struct DoneView: View {
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
                 .padding(.top, 12)
             }
+            if moment == nil { Spacer(minLength: 0) }
         }
     }
 
