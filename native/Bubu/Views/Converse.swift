@@ -240,6 +240,9 @@ struct ChatPage: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .bottom)
+            // (holding: the ground round the card dimmed as the messages are, the card itself left bright; the owner,
+            // 25 Oct 2026, "this area needs to go that greyout colour too")
+            .background { if holding { holdDim.transition(.opacity) } }
             if !picking || ended { bar }
         }
         .background(Home.bg.ignoresSafeArea())
@@ -798,16 +801,19 @@ struct ChatPage: View {
             }
         }
         .padding(.horizontal, 16).padding(.top, 4).padding(.bottom, 10)
-        .background(Home.bg.ignoresSafeArea(edges: .bottom))
+        .background { ZStack { Home.bg; if holding { holdDim.transition(.opacity) } }.ignoresSafeArea(edges: .bottom) }
         .animation(.spring(response: 0.16, dampingFraction: 0.7), value: holding)
         .animation(.easeOut(duration: 0.15), value: cancelling)
     }
 
     /// While you hold: the chat dimmed, a green voice bubble moving with your voice, the line filling in as it's heard,
     /// and the place to slide to, to cancel.
+    /// the grey over the chat while you hold
+    private var holdDim: some View { Home.ink.opacity(0.42) }
+
     private var recordingOverlay: some View {
         ZStack {
-            Home.ink.opacity(0.42)
+            holdDim
             VStack(spacing: 18) {
                 Waveform(level: level, bars: 15)
                     .foregroundStyle(cancelling ? Color.white : Home.tealDark)
