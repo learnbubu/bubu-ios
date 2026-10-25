@@ -100,8 +100,8 @@ enum ToneRecord {
 }
 
 /// The tone trainer (the owner, 25 Oct 2026: "any way we could improve on it?"): in the lessons' look (raised tiles,
-/// the shiny bar and its run, the feedback over the foot, the button pinned at the bottom). Its home is your ear (every
-/// tone pair, shaded by how often you hear it right) and three levels: single tones, pairs, the tricky ones. A round:
+/// the shiny bar and its run, the feedback over the foot, the button pinned at the bottom). Its home is your four tones
+/// (how often you hear each right, an example to hear), the pairs that trip you up, and single tones or pairs. A round:
 /// hear a word, pick each syllable's tone in turn (no guessing from four whole answers), check; then its pitch line
 /// draws in its tones' colours as it's said again. Rounds lean on the pairs you miss.
 struct TonesPage: View {
@@ -111,10 +111,11 @@ struct TonesPage: View {
     static let rounds = 10
     static let names = [1: "high", 2: "rising", 3: "dipping", 4: "falling", 5: "light"]
     static let short = [1: "high", 2: "rising", 3: "dip", 4: "falling"]
-    /// the pairs that trip learners up most, the tricky level's
-    static let tricky: Set<String> = ["2+3", "3+2", "2+1", "3+4", "1+2", "4+3"]
+    /// each tone's example to hear, as the primer's: 妈 麻 马 骂
+    static let examples: [(hanzi: String, pinyin: String, en: String)] = [("妈", "mā", "mother"), ("麻", "má", "numb"), ("马", "mǎ", "horse"), ("骂", "mà", "to scold")]
 
-    enum Level: String { case single, pairs, tricky }
+    /// (Tricky is gone: Pairs already leans on the ones you miss, and 3+3 words come up in it; the owner, 25 Oct 2026)
+    enum Level: String { case single, pairs }
     struct Q { let card: Card; let tones: [Int]; let sandhi: Bool }
 
     @State private var record: [String: [Int]] = [:]
@@ -133,7 +134,6 @@ struct TonesPage: View {
     @State private var drawn: Double = 0          // the pitch line drawn, 0…1
     @State private var barFrame: CGRect = .zero
     @State private var burst: Int?
-    @State private var primer = false
 
     /// A word's two tones, when what you hear matches what's written (no 3+3, 不 or 一).
     static func pair(_ c: Card) -> [Int]? {
@@ -166,74 +166,50 @@ struct TonesPage: View {
         .overlay { if let n = burst { FirecrackerBurst(n: n, bar: barFrame).id(n).ignoresSafeArea().allowsHitTesting(false) } }
         .toolbar(.hidden, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)
-        .sheet(isPresented: $primer) {
-            NavigationStack {
-                ScrollView { TonesPrimer().padding(20) }
-                    .pageBar("The four tones", back: false) { BarButton(label: "Done") { primer = false } }
-            }
-            .presentationDetents([.medium, .large])
-        }
         .onAppear { record = ToneRecord.load(); if record.isEmpty { level = .single } }
     }
 
-    // MARK: home: your ear, and the levels
+    // MARK: home: your four tones, the pairs to work on, single or pairs
 
+    /// The tones home (the owner, 25 Oct 2026: the grid confused; then, less empty space): four cards, one a tone, its
+    /// shape, how often you hear it right and an example to tap and hear (the quick reference "How tones work" was);
+    /// the few pairs that trip you up; Single tones or Pairs; Practise pinned at the foot.
     private var home: some View {
-        let pairsDone = (1...4).flatMap { a in (1...4).map { b in record["\(a)+\(b)"]?[1] ?? 0 } }.reduce(0, +)
-        let singles = (1...4).map { record["\($0)"] ?? [0, 0] }
-        let singleShare = singles.map { $0[1] }.reduce(0, +) >= 10
-            ? Double(singles.map { $0[0] }.reduce(0, +)) / Double(singles.map { $0[1] }.reduce(0, +)) : nil
-        let all = record.values.reduce([0, 0]) { [$0[0] + $1[0], $0[1] + $1[1]] }
-        let worst = (1...4).flatMap { a in (1...4).map { b in "\(a)+\(b)" } }.filter { $0 != "3+3" }
-            .compactMap { k in ToneRecord.share(record, k).map { (k, $0) } }.min { $0.1 < $1.1 }
-        let trickyOpen = pairsDone >= 30
+        let weak = (1...4).flatMap { a in (1...4).map { b in "\(a)+\(b)" } }.filter { $0 != "3+3" }
+            .compactMap { k in ToneRecord.share(record, k).map { (k, $0) } }.filter { $0.1 < 0.85 }
+            .sorted { $0.1 < $1.1 }.prefix(3)
+        let pairsTried = record.keys.contains { $0.contains("+") }
         return VStack(spacing: 0) {
-            PageBar(title: "Tones") {
-                Button { primer = true } label: {
-                    Text("How tones work").font(.nunito(13, .black)).foregroundStyle(Color.accent)
-                        .padding(.horizontal, 12).padding(.vertical, 8).background(Color.accentSoft, in: Capsule())
-                }
-                .buttonStyle(PressDown(depth: 2))
-            }
+            PageBar(title: "Tones") { EmptyView() }
             ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    // your ear
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack(alignment: .firstTextBaseline) {
-                            Text(all[1] == 0 ? "Your ear" : "\(Int((Double(all[0]) / Double(all[1]) * 100).rounded()))% right")
-                                .font(.nunito(22, .black)).foregroundStyle(Color.ink)
-                            Spacer()
-                            Text("FIRST ↓ · SECOND →").font(.nunito(10.5, .black)).tracking(0.8).foregroundStyle(Color.muted)
-                        }
-                        earGrid
-                        if let w = worst, w.1 < 0.85 {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("YOUR FOUR TONES · TAP TO HEAR").font(.nunito(11.5, .black)).tracking(1.1).foregroundStyle(Color.muted).padding(.horizontal, 2)
+                    VStack(spacing: 10) {
+                        HStack(spacing: 10) { toneCard(1); toneCard(2) }
+                        HStack(spacing: 10) { toneCard(3); toneCard(4) }
+                    }
+                    Text("PAIRS TO WORK ON").font(.nunito(11.5, .black)).tracking(1.1).foregroundStyle(Color.muted)
+                        .padding(.horizontal, 2).padding(.top, 8)
+                    if weak.isEmpty {
+                        Text(pairsTried ? "None trip you up just now. Nice ear!" : "Practise a few rounds of pairs, and the ones that trip you up show here.")
+                            .font(.nunito(13.5, .semibold)).foregroundStyle(Color.muted)
+                            .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 14).padding(.vertical, 12)
+                            .background(Color.line.opacity(0.45), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    } else {
+                        ForEach(Array(weak), id: \.0) { w in
                             let ab = w.0.split(separator: "+").compactMap { Int($0) }
-                            HStack(spacing: 6) {
-                                Image(systemName: "scope").font(.system(size: 13, weight: .bold))
-                                Text("Trickiest: \(Self.names[ab[0]]!) + \(Self.names[ab[1]]!) (\(w.0))").font(.nunito(13.5, .heavy))
+                            HStack(spacing: 12) {
+                                TonePairShape(pair: (ab[0], ab[1])).frame(width: 58)
+                                Text("\(Self.names[ab[0]]!) + \(Self.names[ab[1]]!)").font(.nunito(14.5, .heavy)).foregroundStyle(Color.ink)
+                                Spacer(minLength: 4)
+                                Text("\(Int((w.1 * 100).rounded()))%").font(.nunito(14, .black)).foregroundStyle(Self.shade(w.1))
                             }
-                            .foregroundStyle(Color.gold)
-                        } else if all[1] == 0 {
-                            Text("Each square fills in as you practise: green you hear it, red it trips you up.")
-                                .font(.nunito(13, .semibold)).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, 14).padding(.vertical, 10)
+                            .background(Color.panel, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
                         }
                     }
-                    .padding(14)
-                    .background(Color.panel, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
-                    .background(Color.line, in: RoundedRectangle(cornerRadius: 18, style: .continuous).offset(y: 4))
-
-                    Text("LEVEL").font(.nunito(11.5, .black)).tracking(1.1).foregroundStyle(Color.muted).padding(.horizontal, 2)
-                    HStack(spacing: 8) {
-                        levelTile(.single, "Single", done: (singleShare ?? 0) >= 0.8, open: true)
-                        levelTile(.pairs, "Pairs", done: false, open: true)
-                        levelTile(.tricky, "Tricky", done: false, open: trickyOpen)
-                    }
-                    Text(level == .single ? "One syllable: which of the four tones is it?"
-                         : level == .pairs ? "Two syllables: the tone of each, in turn."
-                         : "The pairs that trip people up, and 3+3, where the first dip rises.")
-                        .font(.nunito(13, .semibold)).foregroundStyle(Color.muted).padding(.horizontal, 2)
-                        .fixedSize(horizontal: false, vertical: true)
+                    levelSwitch.padding(.top, 8)
                 }
                 .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, 12)
             }
@@ -243,43 +219,60 @@ struct TonesPage: View {
         }
     }
 
-    /// every pair, first tone down the side and second along the top: its share right, coloured
-    private var earGrid: some View {
-        Grid(horizontalSpacing: 5, verticalSpacing: 5) {
-            GridRow {
-                Color.clear.frame(width: 18, height: 1)
-                ForEach(1...4, id: \.self) { b in Text("\(b)").font(.nunito(12, .black)).foregroundStyle(Color.tones[b - 1]).frame(maxWidth: .infinity) }
+    /// green when heard well, gold getting there, red when it trips you up
+    static func shade(_ s: Double) -> Color { s >= 0.85 ? .good : s >= 0.65 ? .gold : .again }
+
+    /// A tone's card: its shape, how often you hear it right, its example to tap and hear, a bar.
+    private func toneCard(_ t: Int) -> some View {
+        let s = ToneRecord.share(record, "t\(t)") ?? ToneRecord.share(record, "\(t)")
+        let ex = Self.examples[t - 1]
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                ToneShape(tone: t).frame(width: 44, height: 24)
+                Spacer()
+                Text(s.map { "\(Int(($0 * 100).rounded()))%" } ?? "–").font(.nunito(14, .black)).foregroundStyle(s.map(Self.shade) ?? Color.muted)
             }
-            ForEach(1...4, id: \.self) { a in
-                GridRow {
-                    Text("\(a)").font(.nunito(12, .black)).foregroundStyle(Color.tones[a - 1]).frame(width: 18)
-                    ForEach(1...4, id: \.self) { b in
-                        let k = "\(a)+\(b)", s = ToneRecord.share(record, k)
-                        let fill: Color = a == 3 && b == 3 ? Color.line.opacity(0.6) : s == nil ? Color.line.opacity(0.45)
-                            : s! >= 0.85 ? Color.good.opacity(0.35) : s! >= 0.65 ? Color.goodSoft : Color.againSoft
-                        Text(a == 3 && b == 3 ? "3+3" : s.map { "\(Int(($0 * 100).rounded()))" } ?? "–")
-                            .font(.nunito(12.5, .heavy)).foregroundStyle(Color.ink.opacity(s == nil ? 0.45 : 1))
-                            .frame(maxWidth: .infinity).padding(.vertical, 10)
-                            .background(fill, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                    }
+            Text(Self.names[t]!.prefix(1).uppercased() + Self.names[t]!.dropFirst()).font(.nunito(16, .black)).foregroundStyle(Color.ink)
+            Button { Speech.shared.speak(ex.hanzi) } label: {
+                HStack(spacing: 6) {
+                    Text(ex.hanzi).font(.hanzi(21, .bold)).foregroundStyle(Color.ink)
+                    Text("\(ex.pinyin) · \(ex.en)").font(.nunito(12, .bold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.8)
+                    Spacer(minLength: 2)
+                    Image(systemName: "speaker.wave.2.fill").font(.system(size: 13)).foregroundStyle(Color.accent)
                 }
+                .padding(.horizontal, 9).padding(.vertical, 6)
+                .background(Color.bg, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             }
+            .buttonStyle(PressDown(depth: 1))
+            .accessibilityLabel("Hear \(ex.hanzi), \(ex.pinyin)")
+            Bar(value: s ?? 0, height: 7, fill: s.map(Self.shade) ?? Color.line)
         }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
+        .background(Color.line, in: RoundedRectangle(cornerRadius: 16, style: .continuous).offset(y: 3))
     }
 
-    private func levelTile(_ l: Level, _ name: String, done: Bool, open: Bool) -> some View {
-        let on = level == l
-        return Button { withAnimation(.spring(response: 0.28, dampingFraction: 0.85)) { level = l } } label: {
-            HStack(spacing: 5) {
-                Text(name).font(.nunito(14.5, .black))
-                if done { Image(systemName: "checkmark").font(.system(size: 11, weight: .black)) }
-                if !open { Image(systemName: "lock.fill").font(.system(size: 11, weight: .bold)) }
+    /// Single tones or Pairs
+    private var levelSwitch: some View {
+        HStack(spacing: 3) {
+            ForEach([(Level.single, "Single tones"), (Level.pairs, "Pairs")], id: \.0) { l in
+                Button { withAnimation(.spring(response: 0.28, dampingFraction: 0.9)) { level = l.0 } } label: {
+                    Text(l.1).font(.nunito(14, .black)).foregroundStyle(level == l.0 ? Color.ink : Color.muted)
+                        .frame(maxWidth: .infinity).padding(.vertical, 9)
+                        .background {
+                            if level == l.0 {
+                                RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.panel)
+                                    .shadow(color: .black.opacity(0.08), radius: 2, y: 1)
+                            }
+                        }
+                }
+                .buttonStyle(.plain)
             }
-            .foregroundStyle(open ? (on ? Color.accent : Color.ink) : Color.muted)
-            .frame(maxWidth: .infinity).padding(.vertical, 12)
         }
-        .buttonStyle(Tile3D(fill: on ? Color.accentSoft : Color.panel, edge: on ? Color.accent : Color.line, radius: 14))
-        .disabled(!open)
+        .padding(3)
+        .background(Color.line.opacity(0.7), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
     }
 
     // MARK: the rounds
@@ -296,12 +289,11 @@ struct TonesPage: View {
         var candidates: [Q]
         switch level {
         case .single: candidates = pool { c in Self.single(c).map { Q(card: c, tones: [$0], sandhi: false) } }
-        case .pairs: candidates = pool { c in Self.pair(c).map { Q(card: c, tones: $0, sandhi: false) } }
-        case .tricky:
+        case .pairs:
+            // (3+3 words among them, heard rising then dipping, with why)
             candidates = pool { c in
                 if Self.sandhi(c) { return Q(card: c, tones: [2, 3], sandhi: true) }
-                guard let p = Self.pair(c), Self.tricky.contains("\(p[0])+\(p[1])") else { return nil }
-                return Q(card: c, tones: p, sandhi: false)
+                return Self.pair(c).map { Q(card: c, tones: $0, sandhi: false) }
             }
         }
         guard !candidates.isEmpty else { Moments.shared.toast("Learn a few more words first."); return }
@@ -507,6 +499,8 @@ struct TonesPage: View {
         let ok = picks.compactMap { $0 } == q.tones
         let k = q.tones.count == 1 ? "\(q.tones[0])" : (q.sandhi ? "3+3" : "\(q.tones[0])+\(q.tones[1])")
         ToneRecord.add(k, right: ok)
+        // (each syllable's tone on its own too, single or pair: the four tones' cards)
+        for (i, t) in q.tones.enumerated() { ToneRecord.add("t\(t)", right: picks.indices.contains(i) && picks[i] == t) }
         record = ToneRecord.load()
         if ok {
             right += 1; combo += 1
@@ -546,7 +540,7 @@ struct TonesPage: View {
                 Image("done-panda").resizable().scaledToFit().frame(minHeight: 120, maxHeight: 260).layoutPriority(-1)
                 Text(right == qs.count ? "Perfect ear!" : accuracy >= 70 ? "Nicely heard!" : "Keep listening!")
                     .font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color.gold).padding(.top, 2)
-                Text(level == .single ? "Single tones" : level == .pairs ? "Tone pairs" : "Tricky pairs")
+                Text(level == .single ? "Single tones" : "Tone pairs")
                     .font(.nunito(14.5, .semibold)).foregroundStyle(Color.muted).padding(.top, 4)
                 HStack(spacing: 10) {
                     DoneTile(value: xp, format: { "+\($0)" }, label: "XP", icon: "bolt.fill", tint: .gold, delay: 0.2)
