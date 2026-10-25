@@ -378,9 +378,10 @@ final class StudySession: Identifiable {
         return Array(ts[max(0, first - 1)...last])
     }
 
-    /// The chat on screen: speaking's off ("Can't talk now" tapped, or not one of the session's kinds), so your lines
-    /// are picked rather than said.
-    var chatPicks: Bool { speakingOff || !focuses.contains("speak") }
+    /// The chat's lines picked rather than said: only when speaking isn't one of the session's kinds. (Not because a
+    /// speaking exercise earlier was skipped: the chat opened on picking, with no chance to talk; the owner, 25 Oct
+    /// 2026. Its own "Can't talk now", or a microphone not allowed, still switch it.)
+    var chatPicks: Bool { !focuses.contains("speak") }
 
     /// A line of yours in a lesson's chat: said or picked (right), or skipped. Counted as an answer, not a step.
     func chatLine(right: Bool) {

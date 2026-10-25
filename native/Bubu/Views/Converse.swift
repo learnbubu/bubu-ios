@@ -177,6 +177,8 @@ struct ChatPage: View {
     @State private var cheer = 0
     /// the audio held for the microphone by this chat (let go of on leaving, only if it was)
     @State private var heldAudio = false
+    /// the chat's visible height (a short chat fills it from the top)
+    @State private var viewport: CGFloat = 0
     /// the reply card's height (it grows with a note under it)
     @State private var footHeight: CGFloat = 0
     /// the latest scroll asked for (only the last of a burst runs)
@@ -218,7 +220,11 @@ struct ChatPage: View {
                         Color.clear.frame(height: 4).id("end")
                     }
                     .padding(.horizontal, 12).padding(.bottom, 10)
+                    // (a short chat from the top, as WeChat's, and still as the card comes and goes; a long one kept at
+                    // its foot: a short one sank to the middle and sprang back each turn, the owner's video, 25 Oct 2026)
+                    .frame(minHeight: viewport, alignment: .top)
                 }
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewport = $0 }
                 .scrollIndicators(.hidden)
                 // (kept at the foot as things grow: no jumping, the owner's phone, 23 Oct 2026)
                 .defaultScrollAnchor(.bottom)
@@ -267,7 +273,9 @@ struct ChatPage: View {
             .allowsHitTesting(false)
             .zIndex(10)
         }
-        .clipShape(RoundedRectangle(cornerRadius: lesson == nil ? 0 : 22, style: .continuous))
+        // (rounded in a lesson's panel; not clipped at all on its own page, or the hold's grey stopped short of the
+        // status bar and the foot: the owner, 25 Oct 2026)
+        .modifier(PanelClip(on: lesson != nil))
         .overlay {
             if quitAsk {
                 QuitAsk(keep: { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = false } },
@@ -1192,5 +1200,13 @@ struct KeepsFoot: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+/// A lesson's chat sits in a rounded panel; on its own page it isn't clipped (its grey reaches the screen's edges).
+struct PanelClip: ViewModifier {
+    let on: Bool
+    func body(content: Content) -> some View {
+        if on { content.clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous)) } else { content }
     }
 }
