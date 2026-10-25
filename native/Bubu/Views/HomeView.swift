@@ -82,7 +82,7 @@ struct HomeView: View {
         let chapter = ci.map { course.chapterLabel($0).components(separatedBy: " · ").last ?? "" } ?? ""
         let kicker = lesson == nil ? "Course complete" : "Up next · \(chapter)"
         let progressShare: Double = cards.isEmpty ? 0 : Double(learned) / Double(cards.count)
-        let action = lesson == nil ? "Review your words →" : started ? "Continue lesson →" : "Start lesson →"
+        let action = lesson == nil ? "Review your words" : started ? "Continue lesson" : "Start lesson"
         VStack(alignment: .leading, spacing: 0) {
                 Text(kicker)
                     .font(.nunito(12, .black)).tracking(1.4).textCase(.uppercase).foregroundStyle(Home.teal)
@@ -100,10 +100,10 @@ struct HomeView: View {
                 Button {
                     if lesson != nil { router.toPath() } else { router.start(StudySession.review(progress)) }
                 } label: {
-                    Text(action).font(.nunito(18, .black)).foregroundStyle(.white)
+                    Text(action)
                 }
-                .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 17, depth: 4))
-                .frame(height: 56)
+                // (the app's raised button, as every other: it was its own, in another case with an arrow; the Mac's audit)
+                .buttonStyle(RaisedButton(fill: Home.teal, ink: .white, edge: nil))
                 .padding(.top, 15)
             }
             .frame(maxWidth: .infinity, alignment: .leading)

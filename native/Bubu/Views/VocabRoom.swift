@@ -152,10 +152,10 @@ struct VocabRoom: View {
             Button {
                 if g.today.isEmpty { router.toPath() } else { flash(g.today, g.today.count) }
             } label: {
-                Text(g.today.isEmpty ? "To the path →" : "Start flashcards →").font(.nunito(18, .black)).foregroundStyle(.white)
+                Text(g.today.isEmpty ? "To the path" : "Start flashcards")
             }
-            .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 17, depth: 4))
-            .frame(height: 56)
+            // (the app's raised button, as every other: the Mac's audit)
+            .buttonStyle(RaisedButton(fill: Home.teal, ink: .white, edge: nil))
             .padding(.top, 15)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -323,10 +323,9 @@ struct VocabRoom: View {
             .buttonStyle(PressDown(depth: 1))
             .accessibilityLabel("Clear your list")
             Button { router.push(.flash(course.cards.filter { picks.ids.contains($0.id) }.map(\.id))) } label: {
-                Text("Practise your \(picks.ids.count) word\(picks.ids.count == 1 ? "" : "s")").font(.nunito(17, .black)).foregroundStyle(.white)
+                Text("Practise your \(picks.ids.count) word\(picks.ids.count == 1 ? "" : "s")")
             }
-            .buttonStyle(LipButton(face: Home.teal, lip: Home.tealDark, radius: 17, depth: 4))
-            .frame(height: 56)
+            .buttonStyle(RaisedButton(fill: Home.teal, ink: .white, edge: nil, radius: 15))
         }
         .padding(.horizontal, 18).padding(.top, 10).padding(.bottom, 12)
         .background(Home.bg.shadow(color: .black.opacity(0.06), radius: 8, y: -3).ignoresSafeArea(edges: .bottom))

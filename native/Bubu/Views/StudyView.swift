@@ -56,6 +56,9 @@ struct StudyView: View {
     @State private var barFrame: CGRect = .zero
     @State private var cheer: String?
     @State private var cheered = false
+    /// a lesson's chat: holding to talk (everything round its panel greyed), and where the panel is
+    @State private var chatHolding = false
+    @State private var chatPanel: CGRect = .zero
     /// the audio held for the microphone through the lesson (see onAppear)
     @State private var heldAudio = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -79,8 +82,10 @@ struct StudyView: View {
                 turns: turns, picks: session.chatPicks,
                 line: { session.chatLine(right: $0) },
                 cantTalk: { session.cantSpeak() },
-                done: { session.chatDone(); advance() }))
+                done: { session.chatDone(); advance() },
+                holding: { h in chatHolding = h }))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { chatPanel = $0 }
                 .padding(.bottom, 12)
         }
         .padding(.horizontal, 12).padding(.top, 15)
@@ -173,6 +178,13 @@ struct StudyView: View {
                         quit: { quitAsk = false; close() })
                     .transition(.opacity)
                     .zIndex(20)
+            }
+        }
+        // (holding to talk in a lesson's chat: all round its panel greyed, the bar and heading too, the panel greying
+        // itself; the Mac's audit: only the panel greyed, the rest left bright)
+        .overlay {
+            if chatHolding, case .chat = session.current {
+                HoleDim(hole: chatPanel).ignoresSafeArea().allowsHitTesting(false)
             }
         }
         .coordinateSpace(.named("study"))

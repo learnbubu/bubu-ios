@@ -128,6 +128,8 @@ struct LessonChat {
     let line: (Bool) -> Void
     let cantTalk: () -> Void
     let done: () -> Void
+    /// holding to talk, or not: the lesson greys all round the chat's panel while you do
+    var holding: (Bool) -> Void = { _ in }
 }
 
 struct ChatPage: View {
@@ -245,7 +247,7 @@ struct ChatPage: View {
             // WeChat; over the card too, what to say was gone; the owner, 24 Oct 2026)
             // (its own plain ground under the hold's grey, so it's greyed once, as the page is: not twice)
             .background(Home.bg)
-            .overlay { if holding { recordingOverlay } }
+            .overlay { if holding { recordingOverlay.zIndex(2) } }
             // the reply card. (Its room was kept between turns, against a jump, and left the chat stuck up top with a gap
             // under it while they talked: the owner, 24 Oct 2026. Now the chat keeps to its foot as the card comes and
             // goes, gliding with it, as WeChat's does: see keepsFoot.)
@@ -281,6 +283,7 @@ struct ChatPage: View {
         // (rounded in a lesson's panel; not clipped at all on its own page, or the hold's grey stopped short of the
         // status bar and the foot: the owner, 25 Oct 2026)
         .modifier(PanelClip(on: lesson != nil))
+        .onChange(of: holding) { _, h in lesson?.holding(h) }
         .overlay {
             if quitAsk {
                 QuitAsk(keep: { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { quitAsk = false } },
@@ -920,7 +923,11 @@ struct ChatPage: View {
             switch f {
             case .notAllowed:
                 // (in a lesson: picked instead)
-                if lesson != nil { cantTalk(); return }
+                if lesson != nil {
+                    var t = Transaction(); t.disablesAnimations = true
+                    withTransaction(t) { holding = false; pressed = false; cancelling = false; interim = []; interimText = "" }
+                    cantTalk(); return
+                }
                 note = "No problem: skip it for now, or allow the microphone and speech recognition in Settings to talk."
                 tries = max(tries, 2)
             case .unavailable:
@@ -1213,5 +1220,20 @@ struct PanelClip: ViewModifier {
     let on: Bool
     func body(content: Content) -> some View {
         if on { content.clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous)) } else { content }
+    }
+}
+
+/// The hold's grey over everything but one place (a lesson's chat panel, which greys itself), in global coordinates.
+struct HoleDim: View {
+    let hole: CGRect
+    var body: some View {
+        GeometryReader { g in
+            let f = g.frame(in: .global)
+            Path { p in
+                p.addRect(CGRect(origin: .zero, size: g.size))
+                p.addRoundedRect(in: hole.offsetBy(dx: -f.minX, dy: -f.minY), cornerSize: CGSize(width: 22, height: 22), style: .continuous)
+            }
+            .fill(Home.ink.opacity(0.42), style: FillStyle(eoFill: true))
+        }
     }
 }
