@@ -235,7 +235,7 @@ struct TonesPage: View {
                 Spacer()
                 Text(s.map { "\(Int(($0 * 100).rounded()))%" } ?? "–").font(.nunito(14, .black)).foregroundStyle(s.map(Self.shade) ?? Color.muted)
             }
-            Text(Self.names[t]!.prefix(1).uppercased() + Self.names[t]!.dropFirst()).font(.nunito(16, .black)).foregroundStyle(Color.ink)
+            Text(Self.names[t]!.capitalized).font(.nunito(16, .black)).foregroundStyle(Color.ink)
             Button { Speech.shared.speak(ex.hanzi) } label: {
                 HStack(spacing: 6) {
                     Text(ex.hanzi).font(.hanzi(21, .bold)).foregroundStyle(Color.ink)
@@ -481,7 +481,7 @@ struct TonesPage: View {
                 Text("· \(FeedbackBanner.brief(q.card.word))").font(.nunito(15, .semibold)).lineLimit(1)
             }
             .padding(.leading, 38)
-            Text(q.sandhi ? "Written dip + dip, said rising then dipping: two dips in a row, the first rises." : shape.prefix(1).uppercased() + shape.dropFirst())
+            Text(q.sandhi ? "Written dip + dip, said rising then dipping: two dips in a row, the first rises." : String(shape.prefix(1)).uppercased() + String(shape.dropFirst()))
                 .font(.nunito(14, .bold)).opacity(0.85).padding(.leading, 38).fixedSize(horizontal: false, vertical: true)
         }
         .foregroundStyle(tint)
