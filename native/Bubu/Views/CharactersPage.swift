@@ -113,15 +113,17 @@ struct CharactersPage: View {
                 Text("\(due.count) due today").font(.nunito(18, .black)).foregroundStyle(Color.ink)
                 HStack(spacing: 6) {
                     ForEach(due.prefix(5), id: \.self) { ch in
+                        // (chip-sized, however few: one alone stretched the card's width, the Mac)
                         Text(ch).font(.hanzi(21, .bold)).foregroundStyle(Color.ink)
-                            .frame(maxWidth: .infinity).padding(.vertical, 6)
+                            .frame(width: 52).padding(.vertical, 6)
                             .background(Color.goldSoft, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
                             .overlay(RoundedRectangle(cornerRadius: 11, style: .continuous).strokeBorder(Color.gold.opacity(0.45), lineWidth: 1.5))
                     }
                     if due.count > 5 {
                         Text("+\(due.count - 5)").font(.nunito(14, .black)).foregroundStyle(Color.muted)
-                            .frame(maxWidth: .infinity).padding(.vertical, 9)
+                            .padding(.leading, 4)
                     }
+                    Spacer(minLength: 0)
                 }
                 Button { router.start(Self.practice(progress, due: Set(due))) } label: { Text("Practise them") }
                     .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
