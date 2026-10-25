@@ -27,8 +27,9 @@ struct ClassroomPage: View {
             header
             catchUp
             GeometryReader { g in
-                // four rows of two, sharing the room left (never shorter than the studio's 106)
-                let h = max(tileH, (g.size.height - 3 * 11 - 4) / 4)
+                // four rows of two, sharing the room left: taller on a tall phone, shorter on a small one (on the SE, held
+                // at the studio's 106, the last row ran under the tab bar: the Mac)
+                let h = max(72, (g.size.height - 3 * 11 - 4) / 4)
                 VStack(spacing: 11) {
                     ForEach(0..<4, id: \.self) { r in
                         HStack(spacing: 11) {
@@ -93,7 +94,7 @@ struct ClassroomPage: View {
     private func tile(_ t: Tile, height: CGFloat) -> some View {
         let shape = RoundedRectangle(cornerRadius: 20, style: .continuous)
         // (the picture grows with the tile, a little less than in proportion, so the name keeps its room)
-        let picH = min(height - 34, tileH * pic * 0.86 + (height - tileH) * 0.7)
+        let picH = max(30, min(height - 34, tileH * pic * 0.86 + (height - tileH) * 0.7))
         return VStack(spacing: 0) {
             Spacer(minLength: 0)
             Image("class-\(t.id)").resizable().scaledToFit()
