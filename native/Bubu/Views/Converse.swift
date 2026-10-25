@@ -216,7 +216,12 @@ struct ChatPage: View {
                     // jumped, the owner's phone, 24 Oct 2026; a chat is short)
                     VStack(spacing: 10) {
                         Text("今天").font(.hanzi(11.5, .semibold)).tracking(1.5).foregroundStyle(ChatLook.faint).padding(.top, 10)
-                        ForEach(msgs) { m in message(m).id(m.id) }
+                        ForEach(msgs) { m in
+                            message(m).id(m.id)
+                                // (each new message rises a little as it fades in, as WeChat's: smoother than appearing)
+                                .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity).combined(with: .scale(scale: 0.96, anchor: .bottom)),
+                                                        removal: .opacity))
+                        }
                         Color.clear.frame(height: 4).id("end")
                     }
                     .padding(.horizontal, 12).padding(.bottom, 10)
