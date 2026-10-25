@@ -13,7 +13,9 @@ struct HomeView: View {
         GeometryReader { geo in
             let W = geo.size.width, H = geo.size.height
             // everything on one screen, no scrolling (the owner, 14 Oct 2026): the board takes what's left
-            let rest = H - 455
+            // (the board gives way, not the words: 470 the rest's room, with the button and the word of the day at
+            // their own heights; the Mac, the word's characters shrank to 19 pt at 455)
+            let rest = H - 470
             let boardW = min(W - 28, max(180, rest * HomeArt.frame.width / HomeArt.frame.height))
             VStack(spacing: 0) {
                 topBar
@@ -171,6 +173,7 @@ struct HomeView: View {
         let w = dailyWord
         return HStack(spacing: 13) {
             Text(w.hanzi).font(.hanzi(44, .black)).foregroundStyle(Home.ink).lineLimit(1).minimumScaleFactor(0.5)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.trailing, 13)
                 .overlay(alignment: .trailing) { Rectangle().fill(Home.line).frame(width: 1) }
             VStack(alignment: .leading, spacing: 1) {
