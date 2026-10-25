@@ -23,6 +23,9 @@ final class Recognizer {
     private var releasing = false
     private var task: SFSpeechRecognitionTask?
     private var last: [String] = []
+    /// How sure the recogniser was of its final words, 0…1 (0: not told). Random sounds come out as Chinese-looking
+    /// words, but unsurely: the owner, 25 Oct 2026, babbling and being told it works.
+    private(set) var confidence: Float = 0
     private var quiet: Task<Void, Never>?
     private var watchdog: Task<Void, Never>?
     private var finished = true
@@ -62,7 +65,7 @@ final class Recognizer {
     func start() {
         guard finished else { return }
         finished = false
-        last = []
+        last = []; confidence = 0
         carried = ""; restarts = 0; releasing = false
         generation += 1
         let gen = generation
@@ -154,6 +157,8 @@ final class Recognizer {
             guard !alts.isEmpty else { return }
             last = alts
             if result.isFinal {
+                let segs = result.bestTranscription.segments
+                if !segs.isEmpty { confidence = segs.map(\.confidence).reduce(0, +) / Float(segs.count) }
                 if carryOn() { return }
                 return deliver(alts)
             }

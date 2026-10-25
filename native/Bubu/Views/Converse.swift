@@ -973,7 +973,7 @@ struct ChatPage: View {
         }
         let r = run
         Task { @MainActor in
-            let v = await FreeSpeech.judge(said: alts, goal: t, before: before)
+            let v = await FreeSpeech.judge(said: alts, goal: t, before: before, confidence: recognizer.confidence)
             guard run == r else { return }
             withAnimation(.easeOut(duration: 0.15)) { msgs.removeAll { $0.kind == .thinking } }
             guard let v else {

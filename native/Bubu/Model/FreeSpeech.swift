@@ -42,7 +42,7 @@ enum FreeSpeech {
 
     /// What you said, judged: against the example first (said near enough, no need to ask), then by the tutor.
     /// `before` is the line you're answering; nil if the tutor couldn't be reached (the chat then judges as before).
-    static func judge(said alts: [String], goal: Turn, before: Turn?) async -> SpeakingVerdict? {
+    static func judge(said alts: [String], goal: Turn, before: Turn?, confidence: Float = 0) async -> SpeakingVerdict? {
         guard let raw = alts.first?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else { return nil }
         let heard = clean(raw)
         if SpeechScore.score(goal.hanzi, alts.map(clean), keyword: nil).level == .exact {
@@ -50,6 +50,11 @@ enum FreeSpeech {
         }
         // (not asked when there's no Chinese to judge: the model passed "呃 yes am call", the owner's phone, 23 Oct 2026)
         if let gate = noChinese(heard, goal: goal) { return gate }
+        // (the recogniser unsure of what it wrote: sounds, not words)
+        if confidence > 0 && confidence < 0.45 {
+            return SpeakingVerdict(works: false, comment: "I couldn't make that out. Try again, a little slower?",
+                                   better: goal.hanzi, betterPinyin: goal.pinyin)
+        }
         #if canImport(FoundationModels)
         if #available(iOS 26.0, *), available {
             guard var v = await ask(heard: heard, goal: goal, before: before) else { return nil }
