@@ -139,6 +139,8 @@ struct BarButton: View {
 struct SearchField: View {
     @Binding var text: String
     let prompt: String
+    /// opened on purpose (a magnifier tapped): the keyboard up at once, and kept up through a clear
+    var autofocus = false
     @FocusState private var focused: Bool
     var body: some View {
         HStack(spacing: 8) {
@@ -148,7 +150,7 @@ struct SearchField: View {
                 .textInputAutocapitalization(.never).autocorrectionDisabled()
                 .focused($focused).submitLabel(.search)
             if !text.isEmpty {
-                Button { text = ""; focused = false } label: {
+                Button { text = ""; focused = autofocus } label: {
                     Image(systemName: "xmark.circle.fill").font(.system(size: 17)).foregroundStyle(Color.muted)
                         .frame(width: 44, height: 46).contentShape(Rectangle())
                 }
@@ -158,6 +160,7 @@ struct SearchField: View {
             }
         }
         .padding(.horizontal, 14).frame(height: 46)
+        .onAppear { if autofocus { DispatchQueue.main.async { focused = true } } }
         .background(PageBar<EmptyView>.pill, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(focused ? Color.accent : Color.line, lineWidth: 1.5))
     }

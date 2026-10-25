@@ -8,14 +8,23 @@ import SwiftUI
 
 /// Where each character first comes in the course: its chapter and its book.
 enum CharIndex {
-    struct Entry { let ch: String; let chapter: Int; let book: String }
+    struct Entry { let ch: String; let chapter: Int; let book: String; let pinyin: String }
     static let entries: [Entry] = {
         let course = Course.shared
         return Course.allChars.compactMap { item in
             guard let card = Course.cardsWithChar[item.ch]?.first, let ci = course.chapterOf[card.lessonId] else { return nil }
-            return Entry(ch: item.ch, chapter: ci, book: course.chapters[ci].unit)
+            return Entry(ch: item.ch, chapter: ci, book: course.chapters[ci].unit, pinyin: reading(item.ch, in: card))
         }
     }()
+    static let pinyin: [String: String] = Dictionary(entries.map { ($0.ch, $0.pinyin) }, uniquingKeysWith: { a, _ in a })
+
+    /// A character's reading as the course has it: its syllable in the first word it comes in (呢 is "ne" there, "né"
+    /// in the dictionary: the Mac, 0.2.33), else the dictionary's.
+    static func reading(_ ch: String, in card: Card) -> String {
+        let han = card.word.hanzi.filter(Course.isHan).map(String.init), ss = Pinyin.syllables(card.word.pinyin)
+        if han.count == ss.count, let i = han.firstIndex(of: ch) { return ss[i].lowercased() }
+        return CharData.shared.chars[ch]?.p ?? ""
+    }
     /// the books in course order
     static let books: [String] = entries.map(\.book).reduce(into: []) { if !$0.contains($1) { $0.append($1) } }
     static let byBook: [String: [Entry]] = Dictionary(grouping: entries, by: \.book)
@@ -51,7 +60,7 @@ struct CharactersPage: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 if searching {
-                    SearchField(text: $query, prompt: "Search 字, pinyin or meaning").padding(.bottom, 12)
+                    SearchField(text: $query, prompt: "Search 字, pinyin or meaning", autofocus: true).padding(.bottom, 12)
                 }
                 if searching && !query.trimmingCharacters(in: .whitespaces).isEmpty {
                     CharResults(query: query, stats: stats)
@@ -258,10 +267,13 @@ struct CharGrid: View {
     private func tile(_ ch: String) -> some View {
         let lv = stats.lv(ch)
         let edge: Color = lv == 3 ? .good : lv == 2 ? .good.opacity(0.55) : .line
-        return Button { CharNav.shared.open(ch) } label: {
+        return Button {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            CharNav.shared.open(ch)
+        } label: {
             VStack(spacing: 1) {
                 Text(ch).font(.hanzi(22, .bold)).foregroundStyle(lv == 0 ? Color.muted : Color.ink)
-                Text(cd.chars[ch]?.p ?? "").font(.nunito(10.5, .bold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.7)
+                Text(CharIndex.pinyin[ch] ?? cd.chars[ch]?.p ?? "").font(.nunito(10.5, .bold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.7)
             }
             .frame(maxWidth: .infinity).padding(.vertical, 7)
             .overlay(alignment: .topTrailing) {
@@ -294,7 +306,7 @@ struct CharResults: View {
             let strip = { (s: String) in Pinyin.toneless(s.lowercased()).replacingOccurrences(of: "ü", with: "v") }
             let q = query.trimmingCharacters(in: .whitespaces).lowercased(), sq = strip(q)
             hits = Array(CharIndex.entries.lazy.filter { e in
-                e.ch.contains(q) || strip(cd.chars[e.ch]?.p ?? "").contains(sq) || cd.meaning(e.ch).lowercased().contains(q)
+                e.ch.contains(q) || strip(e.pinyin).contains(sq) || strip(cd.chars[e.ch]?.p ?? "").contains(sq) || cd.meaning(e.ch).lowercased().contains(q)
             }.map(\.ch).prefix(80))
         }
     }
