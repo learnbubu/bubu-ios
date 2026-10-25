@@ -200,9 +200,13 @@ struct ChatPage: View {
     var body: some View {
         VStack(spacing: 0) {
             if lesson == nil {
-                navBar
-                // (where the messages go under: the owner, 23 Oct 2026)
-                Rectangle().fill(Home.line).frame(height: 1).opacity(0.8)
+                VStack(spacing: 0) {
+                    navBar
+                    // (where the messages go under: the owner, 23 Oct 2026)
+                    Rectangle().fill(Home.line).frame(height: 1).opacity(0.8)
+                }
+                // (greyed with the rest while you hold)
+                .overlay { holdDim.opacity(holding ? 1 : 0).animation(.easeOut(duration: 0.15), value: holding).allowsHitTesting(false) }
             }
             ScrollViewReader { reader in
                 ScrollView {
@@ -228,6 +232,8 @@ struct ChatPage: View {
             }
             // (holding: over the messages, the reply card left in sight, what to say: as the first, which felt like
             // WeChat; over the card too, what to say was gone; the owner, 24 Oct 2026)
+            // (its own plain ground under the hold's grey, so it's greyed once, as the page is: not twice)
+            .background(Home.bg)
             .overlay { if holding { recordingOverlay } }
             // the reply card. (Its room was kept between turns, against a jump, and left the chat stuck up top with a gap
             // under it while they talked: the owner, 24 Oct 2026. Now the chat keeps to its foot as the card comes and
@@ -240,12 +246,18 @@ struct ChatPage: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .bottom)
-            // (holding: the ground round the card dimmed as the messages are, the card itself left bright; the owner,
-            // 25 Oct 2026, "this area needs to go that greyout colour too")
-            .background { if holding { holdDim.transition(.opacity) } }
             if !picking || ended { bar }
         }
-        .background(Home.bg.ignoresSafeArea())
+        // (holding: the whole page greyed, edge to edge, the card and the button left bright on it; the owner, 25 Oct
+        // 2026. Always there, only fading: put in and taken out, it rebuilt the button under the finger, the hold broke
+        // and began again, and the colours flickered)
+        .background {
+            ZStack {
+                Home.bg
+                holdDim.opacity(holding ? 1 : 0).animation(.easeOut(duration: 0.15), value: holding)
+            }
+            .ignoresSafeArea()
+        }
         // (its own layer over the whole chat, sized to it: in an overlay it never showed, the Mac, 0.2.22)
         .overlay {
             ZStack {
@@ -801,7 +813,7 @@ struct ChatPage: View {
             }
         }
         .padding(.horizontal, 16).padding(.top, 4).padding(.bottom, 10)
-        .background { ZStack { Home.bg; if holding { holdDim.transition(.opacity) } }.ignoresSafeArea(edges: .bottom) }
+        // (no ground of its own: the page's shows through, greyed while you hold)
         .animation(.spring(response: 0.16, dampingFraction: 0.7), value: holding)
         .animation(.easeOut(duration: 0.15), value: cancelling)
     }
