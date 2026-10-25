@@ -210,7 +210,8 @@ struct ChatPage: View {
                     Rectangle().fill(Home.line).frame(height: 1).opacity(0.8)
                 }
                 // (greyed with the rest while you hold)
-                .overlay { holdDim.opacity(holding ? 1 : 0).allowsHitTesting(false) }
+                // (up behind the status bar too: the bar's own ground reaches there, and it stayed light; the owner)
+                .overlay { holdDim.opacity(holding ? 1 : 0).ignoresSafeArea(edges: .top).allowsHitTesting(false) }
             }
             ScrollViewReader { reader in
                 ScrollView {
