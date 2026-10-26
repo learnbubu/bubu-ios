@@ -10,6 +10,10 @@ struct ClassroomPage: View {
 
     // the studio's save (tuning/classroom): Bùbù leaning over the catch-up row (his left edge along it, how far
     // his bottom comes down onto it, his width; pt), the tiles' pictures (%) and height (pt)
+    /// the tiles' room with the tab bar up: kept, so coming back from a page that hid the bar (Tones), the tiles
+    /// don't come in tall and then shrink as the bar returns (the owner's video, 0.2.43)
+    @State private var room: CGFloat = 0
+
     private let peekX: CGFloat = 243, peekY: CGFloat = 5, peekW: CGFloat = 109, pic: CGFloat = 0.64, tileH: CGFloat = 106
 
     private struct Tile { let id: String; let title: String; let bg: UInt32 }
@@ -29,7 +33,8 @@ struct ClassroomPage: View {
             GeometryReader { g in
                 // four rows of two, sharing the room left: taller on a tall phone, shorter on a small one (on the SE, held
                 // at the studio's 106, the last row ran under the tab bar: the Mac)
-                let h = max(72, (g.size.height - 3 * 11 - 4) / 4)
+                let fit = room > 0 ? min(room, g.size.height) : g.size.height
+                let h = max(72, (fit - 3 * 11 - 4) / 4)
                 VStack(spacing: 11) {
                     ForEach(0..<4, id: \.self) { r in
                         HStack(spacing: 11) {
@@ -41,6 +46,7 @@ struct ClassroomPage: View {
                     }
                 }
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { if room == 0 || $0 < room { room = $0 } }
         }
         .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, 14)
         .background(Home.bg.ignoresSafeArea())
