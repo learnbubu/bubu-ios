@@ -182,44 +182,56 @@ struct TonesPage: View {
         for k in keys { if let v = ToneRecord.share(record, k), v < 0.85 { shares.append((k, v)) } }
         let weak: [(String, Double)] = Array(shares.sorted { $0.1 < $1.1 }.prefix(3))
         let pairsTried = record.keys.contains { $0.contains("+") }
+        // (no empty room under it all: the four cards grow to fill the page, their shapes drawn big, and Single or
+        // Pairs sits with Practise at the foot; scrolled only where it can't fit, a small phone. The owner, 26 Oct 2026)
         return VStack(spacing: 0) {
             PageBar(title: "Tones") { EmptyView() }
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("YOUR FOUR TONES · TAP TO HEAR").font(.nunito(11.5, .black)).tracking(1.1).foregroundStyle(Color.muted).padding(.horizontal, 2)
-                    VStack(spacing: 10) {
-                        HStack(spacing: 10) { toneCard(1); toneCard(2) }
-                        HStack(spacing: 10) { toneCard(3); toneCard(4) }
-                    }
-                    Text("PAIRS TO WORK ON").font(.nunito(11.5, .black)).tracking(1.1).foregroundStyle(Color.muted)
-                        .padding(.horizontal, 2).padding(.top, 8)
-                    if weak.isEmpty {
-                        Text(pairsTried ? "None trip you up just now. Nice ear!" : "Practise a few rounds of pairs, and the ones that trip you up show here.")
-                            .font(.nunito(13.5, .semibold)).foregroundStyle(Color.muted)
-                            .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 14).padding(.vertical, 12)
-                            .background(Color.line.opacity(0.45), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    } else {
-                        ForEach(weak, id: \.0) { w in
-                            let ab = w.0.split(separator: "+").compactMap { Int($0) }
-                            HStack(spacing: 12) {
-                                TonePairShape(pair: (ab[0], ab[1])).frame(width: 58)
-                                Text("\(Self.names[ab[0]]!) + \(Self.names[ab[1]]!)").font(.nunito(14.5, .heavy)).foregroundStyle(Color.ink)
-                                Spacer(minLength: 4)
-                                Text("\(Int((w.1 * 100).rounded()))%").font(.nunito(14, .black)).foregroundStyle(Self.shade(w.1))
-                            }
-                            .padding(.horizontal, 14).padding(.vertical, 10)
-                            .background(Color.panel, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
-                        }
-                    }
-                    levelSwitch.padding(.top, 8)
-                }
-                .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, 12)
+            ViewThatFits(in: .vertical) {
+                homePage(weak: weak, pairsTried: pairsTried)
+                ScrollView { homePage(weak: weak, pairsTried: pairsTried) }
             }
-            Button { start() } label: { Text("Practise · \(Self.rounds) rounds") }
-                .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
-                .padding(.horizontal, 18).padding(.bottom, 14)
+            VStack(spacing: 12) {
+                levelSwitch
+                Button { start() } label: { Text("Practise · \(Self.rounds) rounds") }
+                    .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
+            }
+            .padding(.horizontal, 18).padding(.bottom, 14)
         }
+    }
+
+    /// The tones home above its foot: the four cards (growing to fill), the pairs to work on.
+    private func homePage(weak: [(String, Double)], pairsTried: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("YOUR FOUR TONES · TAP TO HEAR").font(.nunito(11.5, .black)).tracking(1.1).foregroundStyle(Color.muted).padding(.horizontal, 2)
+            VStack(spacing: 10) {
+                HStack(spacing: 10) { toneCard(1); toneCard(2) }
+                HStack(spacing: 10) { toneCard(3); toneCard(4) }
+            }
+            .frame(maxHeight: 520)
+            Text("PAIRS TO WORK ON").font(.nunito(11.5, .black)).tracking(1.1).foregroundStyle(Color.muted)
+                .padding(.horizontal, 2).padding(.top, 8)
+            if weak.isEmpty {
+                Text(pairsTried ? "None trip you up just now. Nice ear!" : "Practise a few rounds of pairs, and the ones that trip you up show here.")
+                    .font(.nunito(13.5, .semibold)).foregroundStyle(Color.muted)
+                    .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 14).padding(.vertical, 12)
+                    .background(Color.line.opacity(0.45), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            } else {
+                ForEach(weak, id: \.0) { w in
+                    let ab = w.0.split(separator: "+").compactMap { Int($0) }
+                    HStack(spacing: 12) {
+                        TonePairShape(pair: (ab[0], ab[1])).frame(width: 58)
+                        Text("\(Self.names[ab[0]]!) + \(Self.names[ab[1]]!)").font(.nunito(14.5, .heavy)).foregroundStyle(Color.ink)
+                        Spacer(minLength: 4)
+                        Text("\(Int((w.1 * 100).rounded()))%").font(.nunito(14, .black)).foregroundStyle(Self.shade(w.1))
+                    }
+                    .padding(.horizontal, 14).padding(.vertical, 10)
+                    .background(Color.panel, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
+                }
+            }
+        }
+        .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, 12)
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 
     /// green when heard well, gold getting there, red when it trips you up
@@ -231,11 +243,12 @@ struct TonesPage: View {
         let ex = Self.examples[t - 1]
         return VStack(alignment: .leading, spacing: 6) {
             HStack {
-                ToneShape(tone: t).frame(width: 44, height: 24)
+                Text(Self.names[t]!.capitalized).font(.nunito(16, .black)).foregroundStyle(Color.ink)
                 Spacer()
                 Text(s.map { "\(Int(($0 * 100).rounded()))%" } ?? "–").font(.nunito(14, .black)).foregroundStyle(s.map(Self.shade) ?? Color.muted)
             }
-            Text(Self.names[t]!.capitalized).font(.nunito(16, .black)).foregroundStyle(Color.ink)
+            // the tone's shape, as big as the card has room for (the cards grow to fill the page)
+            ToneShape(tone: t, line: 5).frame(maxWidth: .infinity, minHeight: 26, maxHeight: .infinity).padding(.horizontal, 10)
             Button { Speech.shared.speak(ex.hanzi) } label: {
                 HStack(spacing: 6) {
                     Text(ex.hanzi).font(.hanzi(21, .bold)).foregroundStyle(Color.ink)
@@ -251,7 +264,7 @@ struct TonesPage: View {
             Bar(value: s ?? 0, height: 7, fill: s.map(Self.shade) ?? Color.line)
         }
         .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background(Color.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
         .background(Color.line, in: RoundedRectangle(cornerRadius: 16, style: .continuous).offset(y: 3))
@@ -593,6 +606,7 @@ struct TonesPage: View {
 /// One tone's pitch, small: level, rising, the dip, falling (a dot for the light tone).
 struct ToneShape: View {
     let tone: Int
+    var line: CGFloat = 3.6
     var body: some View {
         Canvas { ctx, size in
             let w = size.width, h = size.height, c = Color.tones[max(0, min(4, tone - 1))]
@@ -608,7 +622,7 @@ struct ToneShape: View {
             default:
                 ctx.fill(Path(ellipseIn: CGRect(x: w / 2 - 3.5, y: h * 0.6 - 3.5, width: 7, height: 7)), with: .color(c)); return
             }
-            ctx.stroke(p, with: .color(c), style: StrokeStyle(lineWidth: 3.6, lineCap: .round, lineJoin: .round))
+            ctx.stroke(p, with: .color(c), style: StrokeStyle(lineWidth: line, lineCap: .round, lineJoin: .round))
         }
     }
 }
