@@ -221,7 +221,12 @@ final class CharData {
         if let url = Bundle.main.url(forResource: "chars", withExtension: "json"),
            let data = try? Data(contentsOf: url),
            let f = try? JSONDecoder().decode(File.self, from: data) {
-            chars = f.chars; partNames = (f.parts ?? [:]).mapValues { $0.map { $0 ?? "" } }
+            chars = f.chars
+            var names = (f.parts ?? [:]).mapValues { $0.map { $0 ?? "" } }
+            // (components the data has no meaning for: their tile in Build the character showed no name; the Mac, 0.2.48)
+            for (p, n) in ["⺌": ["small", "xiǎo"], "⺍": ["small", "xiǎo"], "⺮": ["bamboo", "zhú"], "丷": ["eight", "bā"]]
+            where (names[p]?.first ?? "").isEmpty { names[p] = n }
+            partNames = names
         } else {
             chars = [:]; partNames = [:]
         }
