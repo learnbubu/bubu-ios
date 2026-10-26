@@ -165,7 +165,9 @@ struct TonesPage: View {
         .background(Color.bg.ignoresSafeArea())
         .overlay { if let n = burst { FirecrackerBurst(n: n, bar: barFrame).id(n).ignoresSafeArea().allowsHitTesting(false) } }
         .toolbar(.hidden, for: .navigationBar)
-        .toolbar(.hidden, for: .tabBar)
+        // (the tab bar hidden only in the rounds and their end: hidden on the home too, iOS brought it back only once
+        // the way back to the Classroom had finished, a beat late; the owner, 26 Oct 2026)
+        .toolbar(playing || finished ? .hidden : .visible, for: .tabBar)
         .onAppear { record = ToneRecord.load(); if record.isEmpty { level = .single } }
     }
 
