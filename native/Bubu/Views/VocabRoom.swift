@@ -81,7 +81,7 @@ struct VocabRoom: View {
                 .padding(.bottom, 4).allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .frame(height: compact ? 78 : 100)
+        .frame(height: compact ? 86 : 100)
     }
 
     /// a small phone (the SE): the header and the gaps tighter, so the room fits one screen (the Mac, 0.2.48)

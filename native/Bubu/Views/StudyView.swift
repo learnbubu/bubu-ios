@@ -2222,7 +2222,7 @@ struct BuildView: View {
             let tall = BuildView.tallScreen
             VStack(spacing: 3) {
                 Text(part).font(.hanzi(tall ? 40 : 30, .medium)).foregroundStyle(Color.ink)
-                Text(name).font(.nunito(tall ? 12.5 : 11.5, .semibold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.7)
+                Text(name).font(.nunito(tall ? 12.5 : 11.5, .semibold)).foregroundStyle(Color.muted).lineLimit(2).multilineTextAlignment(.center).minimumScaleFactor(0.7).padding(.horizontal, 4)
             }
             .frame(maxWidth: .infinity).padding(.vertical, tall ? 22 : 10)
         }
