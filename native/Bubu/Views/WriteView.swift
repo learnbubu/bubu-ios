@@ -110,7 +110,8 @@ struct WriteView: View {
     /// below (the page scrolls, so it can't take the height that's left: it's measured off the screen).
     static var boxMax: CGFloat {
         let h = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.bounds.height ?? 852
-        return min(312, max(200, h - 545))
+        // (bigger on a tall screen: at 312, 70 pt sat empty over Continue on the iPhone 16; the Mac, 0.2.47)
+        return min(380, max(200, h - 485))
     }
 
 }

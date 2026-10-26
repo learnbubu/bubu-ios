@@ -2213,11 +2213,12 @@ struct BuildView: View {
             guard result == nil else { return }
             if on { picked.remove(part) } else if picked.count < parts.count { picked.insert(part) }
         } label: {
-            VStack(spacing: 2) {
-                Text(part).font(.hanzi(30, .medium)).foregroundStyle(Color.ink)
-                Text(name).font(.nunito(11.5, .semibold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.7)
+            // (bigger: 180 pt sat empty over Check with them small; the Mac, 0.2.47)
+            VStack(spacing: 3) {
+                Text(part).font(.hanzi(40, .medium)).foregroundStyle(Color.ink)
+                Text(name).font(.nunito(12.5, .semibold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.7)
             }
-            .frame(maxWidth: .infinity).padding(.vertical, 10)
+            .frame(maxWidth: .infinity).padding(.vertical, 22)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge))
         .disabled(result != nil)

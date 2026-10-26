@@ -283,7 +283,8 @@ struct FlashPage: View {
             }
             .sensoryFeedback(.impact(weight: .light), trigger: flipped)
             .padding(.top, 14)
-            .frame(maxHeight: 440)
+            // (the card as tall as the room allows: at 440, 145 pt sat empty over the buttons; the Mac, 0.2.47)
+            .frame(maxHeight: 620)
             .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .move(edge: .leading).combined(with: .opacity)))
 
             Spacer(minLength: 18)
@@ -409,15 +410,18 @@ struct MatchPage: View {
                 topBar
                 Text("Tap the matching pairs").font(.nunito(25, .black)).tracking(-0.4).foregroundStyle(Color.ink)
                     .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 18)
-                Spacer(minLength: 12)
+                // (the pairs taller to fill the page, not centred in it: 90 pt sat empty under the title and 100 under
+                // the note; the Mac, 0.2.47)
                 HStack(alignment: .top, spacing: 12) {
                     VStack(spacing: 10) { ForEach(left, id: \.id) { c in tile(.left, c) } }
                     VStack(spacing: 10) { ForEach(right, id: \.id) { c in tile(.right, c) } }
                 }
+                .frame(maxHeight: CGFloat(Self.perRound) * 112)
+                .padding(.top, 16)
                 .id(done / Self.perRound)
                 .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
                 Text("Tap a word, then its meaning.").font(.nunito(12.5)).foregroundStyle(Color.muted).padding(.top, 10)
-                Spacer(minLength: 12)
+                Spacer(minLength: 0)
             }
             .padding(.horizontal, 16).padding(.bottom, 12)
             if let n = burst {
@@ -496,7 +500,7 @@ struct MatchPage: View {
         let fill: Color = isWrong ? .againSoft : isDone ? .goodSoft : isPicked ? .accentSoft : .panel
         return Button { tap(side, c) } label: {
             face(side, c)
-                .frame(maxWidth: .infinity, minHeight: 64)
+                .frame(maxWidth: .infinity, minHeight: 64, maxHeight: .infinity)
                 .padding(.horizontal, 8).padding(.vertical, 6)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge))

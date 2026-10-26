@@ -21,6 +21,11 @@ struct VocabRoom: View {
     /// the typing the results are for
     @State private var resultsFor = ""
     @FocusState private var searching: Bool
+    /// the practice tiles' height: the studio's 106, taller to take up whatever room is left under them (85 pt sat
+    /// bare at the foot: the Mac, 0.2.47); the screen's height and the room's, to work it out
+    @State private var tileH: CGFloat = 106
+    @State private var viewH: CGFloat = 0
+    @State private var contentH: CGFloat = 0
     private let course = Course.shared
 
     var body: some View {
@@ -35,7 +40,9 @@ struct VocabRoom: View {
                 }
             }
             .padding(.horizontal, 18).padding(.top, 4).padding(.bottom, picks.ids.isEmpty ? 24 : 96)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentH = $0; fitTiles() }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewH = $0; fitTiles() }
         .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.immediately)
         .overlay(alignment: .bottom) { if !picks.ids.isEmpty { myList } }
@@ -226,12 +233,21 @@ struct VocabRoom: View {
         .accessibilityLabel("\(label) words: \(n). Practise them")
     }
 
+    /// The tiles as tall as the room left allows (106 to 190), worked out from the room as it would be at 106: one
+    /// step, no going round. Not while searching (the room isn't shown).
+    private func fitTiles() {
+        guard viewH > 0, contentH > 0, query.trimmingCharacters(in: .whitespaces).isEmpty, garden != nil else { return }
+        let base = contentH - (tileH - 106)
+        let want = min(190, 106 + max(0, viewH - base - 2))
+        if abs(want - tileH) > 1 { tileH = want }
+    }
+
     /// A picture, or the one standing in for it until it's in.
     static func art(_ name: String, or stand: String) -> String { UIImage(named: name) != nil ? name : stand }
 
     /// A practice tile, as the Classroom's: its picture above, its name on a pale band along the bottom.
     private func tile(_ art: String, _ title: String, bg: UInt32, go: @escaping () -> Void) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 20, style: .continuous), h: CGFloat = 106
+        let shape = RoundedRectangle(cornerRadius: 20, style: .continuous), h = tileH
         return Button(action: go) {
             VStack(spacing: 0) {
                 Image(art).resizable().scaledToFit()
@@ -366,7 +382,14 @@ struct VocabGarden {
         take(growing, 9)
         take(fresh, 12)
         take(growing, 12)
-        self.today = today.shuffled()
+        // (in an order that holds for the day, not a new one each time the room opens: the Mac, 0.2.47)
+        let day = Int(p.now() / 86_400_000)
+        func mix(_ id: String) -> UInt64 {
+            var h: UInt64 = 0xcbf29ce484222325
+            for b in "\(day)|\(id)".utf8 { h = (h ^ UInt64(b)) &* 0x100000001b3 }
+            return h
+        }
+        self.today = today.sorted { mix($0.id) < mix($1.id) }
     }
 }
 
