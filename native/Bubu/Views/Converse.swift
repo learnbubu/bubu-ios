@@ -10,7 +10,10 @@ import AVFoundation
 struct ConversePage: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var sysDismiss
+    @Environment(\.coverBack) private var coverBack
+    /// back a page: in the Classroom's slide-over, its own way back (see Router.cover); elsewhere the usual
+    private func dismiss() { if let coverBack { coverBack() } else { sysDismiss() } }
     @State private var rows: [Row] = []
     @State private var record = ChatRecord.shared
     private let course = Course.shared
@@ -138,7 +141,10 @@ struct ChatPage: View {
     var lesson: LessonChat? = nil
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var sysDismiss
+    @Environment(\.coverBack) private var coverBack
+    /// back a page: in the Classroom's slide-over, its own way back (see Router.cover); elsewhere the usual
+    private func dismiss() { if let coverBack { coverBack() } else { sysDismiss() } }
     @State private var dialogue: Dialogue?
     @State private var listenOnly = false
     @State private var session: StudySession?

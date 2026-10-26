@@ -106,7 +106,10 @@ enum ToneRecord {
 /// draws in its tones' colours as it's said again. Rounds lean on the pairs you miss.
 struct TonesPage: View {
     @Environment(ProgressStore.self) private var progress
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var sysDismiss
+    @Environment(\.coverBack) private var coverBack
+    /// back a page: in the Classroom's slide-over, its own way back (see Router.cover); elsewhere the usual
+    private func dismiss() { if let coverBack { coverBack() } else { sysDismiss() } }
     private let course = Course.shared
     static let rounds = 10
     static let names = [1: "high", 2: "rising", 3: "dipping", 4: "falling", 5: "light"]
@@ -184,8 +187,7 @@ struct TonesPage: View {
         // (no empty room under it all: the four cards grow to fill the page, their shapes drawn big, and Single or
         // Pairs sits with Practise at the foot; scrolled only where it can't fit, a small phone. The owner, 26 Oct 2026)
         return VStack(spacing: 0) {
-            // (shown over everything, as Listening is: back closes it; see Router.tonesOpen)
-            PageBar(title: "Tones", onBack: { dismiss() }) { EmptyView() }
+            PageBar(title: "Tones") { EmptyView() }
             ViewThatFits(in: .vertical) {
                 homePage(weak: weak, pairsTried: pairsTried)
                 ScrollView { homePage(weak: weak, pairsTried: pairsTried) }

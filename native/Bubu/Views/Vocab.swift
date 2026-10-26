@@ -141,7 +141,10 @@ struct FlashPage: View {
     let ids: [String]
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var sysDismiss
+    @Environment(\.coverBack) private var coverBack
+    /// back a page: in the Classroom's slide-over, its own way back (see Router.cover); elsewhere the usual
+    private func dismiss() { if let coverBack { coverBack() } else { sysDismiss() } }
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var session: StudySession?
     /// the run's firecrackers, out from behind the bar
@@ -370,7 +373,10 @@ struct MatchPage: View {
     let ids: [String]
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var sysDismiss
+    @Environment(\.coverBack) private var coverBack
+    /// back a page: in the Classroom's slide-over, its own way back (see Router.cover); elsewhere the usual
+    private func dismiss() { if let coverBack { coverBack() } else { sysDismiss() } }
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var session: StudySession?
     @State private var queue: [Card] = []

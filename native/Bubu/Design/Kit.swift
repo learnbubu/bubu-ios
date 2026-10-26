@@ -77,6 +77,7 @@ struct PageBar<Trailing: View>: View {
     var ground: Color = .bg
     @ViewBuilder var trailing: Trailing
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.coverBack) private var coverBack
 
     static var pill: Color { Color(light: 0xFFFDF8, dark: 0x16263A) }
 
@@ -87,7 +88,7 @@ struct PageBar<Trailing: View>: View {
                 .padding(.horizontal, 104)
             HStack(spacing: 0) {
                 if back {
-                    Button { if let onBack { onBack() } else { dismiss() } } label: {
+                    Button { if let onBack { onBack() } else if let coverBack { coverBack() } else { dismiss() } } label: {
                         Image(systemName: "chevron.left").font(.system(size: 16, weight: .heavy)).foregroundStyle(Color.accent)
                             .frame(width: 40, height: 40)
                             .background(Self.pill, in: Circle())

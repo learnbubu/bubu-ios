@@ -9,15 +9,28 @@ final class Router {
     var tab: Tab
     var lesson: Lesson?
     var study: StudySession?
-    /// Tones, over everything as a session is (a page pushed on the Classroom hid the tab bar, and iOS brought it back
-    /// only once the way back had finished, a beat late; the owner, 26 Oct 2026, "can't we do it how the listening does")
-    var tonesOpen = false
+    /// The Classroom's slide-over (see CoverHost): the room open over everything, its pages, and a session started
+    /// from it, slid in from the side too
+    var cover: Page?
+    var coverPath: [Page] = []
+    var coverStudy: StudySession?
+    static let slide = Animation.spring(response: 0.38, dampingFraction: 0.92)
+
+    /// Slide one of the Classroom's rooms in over everything.
+    func open(_ p: Page) { coverPath = []; withAnimation(Self.slide) { cover = p } }
+    /// Back a page in the slide-over, or out of it.
+    func coverBack() {
+        if !coverPath.isEmpty { coverPath.removeLast() } else { withAnimation(Self.slide) { cover = nil } }
+    }
+    /// A session slid in from the side, as the Classroom's rooms are.
+    func slideIn(_ s: StudySession?) { if let s { lesson = nil; withAnimation(Self.slide) { coverStudy = s } } }
     var homePath: [Page] = []
     var learnPath: [Page] = []
     var profilePath: [Page] = []
 
     /// Slide a page in on the tab you're on (Settings has none: it goes to Home's).
     func push(_ p: Page) {
+        if cover != nil { coverPath.append(p); return }
         switch tab {
         case .learn: learnPath.append(p)
         case .profile: profilePath.append(p)
@@ -26,7 +39,11 @@ final class Router {
     }
 
     /// Open a session, if there was one to start.
-    func start(_ s: StudySession?) { if let s { lesson = nil; study = s } }
+    func start(_ s: StudySession?) {
+        guard let s else { return }
+        // (from the Classroom's slide-over: slid in from the side as well)
+        if cover != nil { slideIn(s) } else { lesson = nil; study = s }
+    }
 
     /// Asks the path to show the current stone (bumped each time: the path scrolls to it).
     var showCurrent = 0
@@ -36,17 +53,18 @@ final class Router {
     /// A practice tile on Home (web: runMode).
     func practice(_ mode: String, _ p: ProgressStore) {
         switch mode {
-        case "listen": start(StudySession.listening(p))
-        case "write": start(StudySession.writing(p))
+        // (every one from the side, over the tab bar: the owner, 26 Oct 2026)
+        case "listen": slideIn(StudySession.listening(p))
+        case "write": slideIn(StudySession.writing(p))
         case "quiz":
             let words = Array(p.learnedCards.prefix(60))
-            start(StudySession.quiz(p, cards: words, scope: Set(words.map(\.lessonId))))
-        case "chars": push(.chars)
-        case "read": push(.readings)
-        case "tones": tonesOpen = true
-        case "speak": push(.converse)
-        case "pick": push(.pick)
-        case "vocab": push(.vocab)
+            slideIn(StudySession.quiz(p, cards: words, scope: Set(words.map(\.lessonId))))
+        case "chars": open(.chars)
+        case "read": open(.readings)
+        case "tones": open(.tones)
+        case "speak": open(.converse)
+        case "pick": open(.pick)
+        case "vocab": open(.vocab)
         default: Moments.shared.toast("Coming in the next build.")
         }
     }
@@ -91,10 +109,10 @@ struct RootView: View {
         guard !Self.debugShown else { return }
         Self.debugShown = true
         if Launch.screen == "avatar" { router.tab = .profile; router.profilePath = [.avatar]; return }
-        if Launch.screen == "tones" { router.tonesOpen = true; return }
+        if Launch.screen == "tones" { router.tab = .home; router.homePath = [.classroom]; router.cover = .tones; return }
         if Launch.screen == "guide" { router.tab = .learn; router.learnPath = [.guide(1)]; return }
         if Launch.screen == "story", let r = Course.shared.data.readings.first { router.tab = .home; router.homePath = [.story(r.id)]; return }
-        if Launch.screen == "chars" { router.tab = .home; router.homePath = [.chars]; return }
+        if Launch.screen == "chars" { router.tab = .home; router.homePath = [.classroom]; router.cover = .chars; return }
         if Launch.screen == "char" { router.tab = .learn; CharNav.shared.open("好"); return }
         // the rewards: the shop, and a red pocket opened (it opens itself for this)
         if Launch.screen == "shop" { DispatchQueue.main.asyncAfter(deadline: .now() + 1) { Moments.shared.show(.shop) }; return }
@@ -170,6 +188,20 @@ struct RootView: View {
         // the Streak saved moment a relit day shows on opening (it was 2 s in: the Mac, 20 Oct 2026)
         // (not under the tests: the web view kept the test host busy, ~28 min a run instead of ~4: the Mac, 0.1.60)
         .task { guard !Launch.underTests else { return }; try? await Task.sleep(for: .milliseconds(500)); MomentPlayer.shared.warm() }
+        // the Classroom's rooms and their sessions, slid in from the side over everything (see CoverHost)
+        .overlay {
+            ZStack {
+                if let p = router.cover {
+                    CoverHost(root: p).transition(.move(edge: .trailing)).zIndex(1)
+                }
+                if let s = router.coverStudy {
+                    StudyView(session: s) { withAnimation(Router.slide) { router.coverStudy = nil } }
+                        .momentsHost(study: true)
+                        .background(Color.bg.ignoresSafeArea())
+                        .transition(.move(edge: .trailing)).zIndex(2)
+                }
+            }
+        }
         .overlay {
             if let lesson = router.lesson {
                 LessonSheet(lesson: lesson) { withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) { router.lesson = nil } }
@@ -183,14 +215,6 @@ struct RootView: View {
         .fullScreenCover(item: $router.study) { s in
             StudyView(session: s) { router.study = nil }
                 .environment(progress)
-                .charSheetHost()
-                .momentsHost(study: true)
-                .preferredColorScheme(progress.prefs.colorScheme)
-        }
-        .fullScreenCover(isPresented: $router.tonesOpen) {
-            TonesPage()
-                .environment(progress)
-                .environment(router)
                 .charSheetHost()
                 .momentsHost(study: true)
                 .preferredColorScheme(progress.prefs.colorScheme)

@@ -10,7 +10,10 @@ import SwiftUI
 struct VocabRoom: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var sysDismiss
+    @Environment(\.coverBack) private var coverBack
+    /// back a page: in the Classroom's slide-over, its own way back (see Router.cover); elsewhere the usual
+    private func dismiss() { if let coverBack { coverBack() } else { sysDismiss() } }
     @State private var picks = Picks.shared
     @State private var garden: VocabGarden?
     @State private var query = ""

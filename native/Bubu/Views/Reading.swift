@@ -124,7 +124,10 @@ struct ReadingsPage: View {
 struct StoryPage: View {
     let storyId: String
     @Environment(ProgressStore.self) private var progress
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var sysDismiss
+    @Environment(\.coverBack) private var coverBack
+    /// back a page: in the Classroom's slide-over, its own way back (see Router.cover); elsewhere the usual
+    private func dismiss() { if let coverBack { coverBack() } else { sysDismiss() } }
     @State private var pinyinOn = false
     @State private var englishOn = false
     @State private var wrong: Set<Int> = []
