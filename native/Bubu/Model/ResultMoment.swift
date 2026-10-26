@@ -10,6 +10,8 @@ struct ResultMoment: Equatable {
     let line: String
     /// the title's colour (the studio's)
     let color: UInt32
+    /// the plain well done (brain's sticker, but not brain gains: not counted for the achievements)
+    var plain = false
 
     /// What a session did, as far as choosing its moment goes.
     struct Facts {
@@ -39,9 +41,11 @@ struct ResultMoment: Equatable {
     static let brainWords = 4
 
     /// The moment for a session, the rarest first: a streak milestone, every mistake fixed, every
-    /// answer right, a long run, a quick one, lots of new words, then the time of day.
+    /// answer right, a long run, a quick one, lots of new words, then the time of day; and when none of those, a plain
+    /// well done. Every session with an answer in it ends on one (a Classroom chat of three lines ended on none, and
+    /// with Bùbù gone from the end screens that was no animation at all: the owner, 26 Oct 2026).
     static func pick(_ f: Facts) -> ResultMoment? {
-        guard f.mode != .placement, f.answered >= 5 else { return nil }
+        guard f.mode != .placement, f.answered >= 1 else { return nil }
         if f.milestone && f.streak >= 3 {
             return .init(key: "onfire", title: "On fire!", line: "A \(f.streak) day streak!", color: 0xF0742F)
         }
@@ -67,6 +71,6 @@ struct ResultMoment: Equatable {
         if (5..<9).contains(f.hour) {
             return .init(key: "earlybird", title: "Early bird!", line: "Up with the sun, 早上好!", color: 0xF0742F)
         }
-        return nil
+        return .init(key: "brain", title: "Nicely done!", line: "Another step forward. 加油!", color: 0xA78BFA, plain: true)
     }
 }

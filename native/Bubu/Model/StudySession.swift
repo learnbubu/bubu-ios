@@ -1205,7 +1205,7 @@ final class StudySession: Identifiable {
                                                      seconds: seconds, bestRun: bestRun, mistakes: mistakes, fixed: fixedCount,
                                                      learned: learnedWords.count, hour: hour, streak: fire?.streak ?? progress.streak,
                                                      milestone: fire?.milestone ?? false))
-            if let k = result?.moment?.key { progress.countMoment(k) }   // (the achievements count them)
+            if let m = result?.moment, !m.plain { progress.countMoment(m.key) }   // (the achievements count them)
         }
         if !idle { Coach.sessionFinished() }
     }

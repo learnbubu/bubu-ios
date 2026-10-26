@@ -9,12 +9,15 @@ final class MomentTests: XCTestCase {
         return ResultMoment.pick(f)?.key
     }
 
-    func testAnOrdinarySessionGetsNone() {
-        XCTAssertNil(pick { _ in })
+    func testAnOrdinarySessionGetsAPlainWellDone() {
+        XCTAssertEqual(pick { _ in }, "brain")
+        XCTAssertEqual(ResultMoment.pick(.init(mode: .lesson, answered: 12, accuracy: 75, seconds: 300, hour: 14))?.title, "Nicely done!")
     }
 
-    func testTooShortOrTheSkipTestGetsNone() {
-        XCTAssertNil(pick { $0.answered = 3; $0.perfect = true })
+    func testAShortOneGetsOneTooButNotNothingOrTheSkipTest() {
+        // (a Classroom chat: three lines, every one right)
+        XCTAssertEqual(pick { $0.answered = 3; $0.perfect = true }, "flawless")
+        XCTAssertNil(pick { $0.answered = 0 })
         XCTAssertNil(pick { $0.mode = .placement; $0.perfect = true })
     }
 
@@ -40,8 +43,8 @@ final class MomentTests: XCTestCase {
     }
 
     func testSlowOrSloppyIsntSpeedy() {
-        XCTAssertNil(pick { $0.seconds = 130; $0.accuracy = 90 })
-        XCTAssertNil(pick { $0.seconds = 90; $0.accuracy = 60 })
+        XCTAssertNotEqual(pick { $0.seconds = 130; $0.accuracy = 90 }, "speedy")
+        XCTAssertNotEqual(pick { $0.seconds = 90; $0.accuracy = 60 }, "speedy")
     }
 
     func testLines() {
