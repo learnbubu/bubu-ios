@@ -2180,6 +2180,10 @@ struct BuildView: View {
     let result: Bool?
 
     private var parts: [String] { ex.answer.components(separatedBy: "|") }
+    /// a screen with room for the bigger parts (not the SE's 667)
+    static var tallScreen: Bool {
+        ((UIApplication.shared.connectedScenes.first as? UIWindowScene)?.screen.bounds.height ?? 852) >= 780
+    }
 
     var body: some View {
         let w = ex.card.word
@@ -2213,12 +2217,14 @@ struct BuildView: View {
             guard result == nil else { return }
             if on { picked.remove(part) } else if picked.count < parts.count { picked.insert(part) }
         } label: {
-            // (bigger: 180 pt sat empty over Check with them small; the Mac, 0.2.47)
+            // (bigger on a tall screen: 180 pt sat empty over Check with them small, the Mac, 0.2.47; as they were on a
+            // small one, where the bigger ones ran under Check, the Mac's SE, 0.2.48)
+            let tall = BuildView.tallScreen
             VStack(spacing: 3) {
-                Text(part).font(.hanzi(40, .medium)).foregroundStyle(Color.ink)
-                Text(name).font(.nunito(12.5, .semibold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.7)
+                Text(part).font(.hanzi(tall ? 40 : 30, .medium)).foregroundStyle(Color.ink)
+                Text(name).font(.nunito(tall ? 12.5 : 11.5, .semibold)).foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.7)
             }
-            .frame(maxWidth: .infinity).padding(.vertical, 22)
+            .frame(maxWidth: .infinity).padding(.vertical, tall ? 22 : 10)
         }
         .buttonStyle(Tile3D(fill: fill, edge: edge))
         .disabled(result != nil)

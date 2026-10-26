@@ -233,12 +233,13 @@ struct VocabRoom: View {
         .accessibilityLabel("\(label) words: \(n). Practise them")
     }
 
-    /// The tiles as tall as the room left allows (106 to 190), worked out from the room as it would be at 106: one
-    /// step, no going round. Not while searching (the room isn't shown).
+    /// The tiles as tall as the room left allows (84 to 190: shorter than the studio's 106 on a small phone, so the
+    /// room still fits one screen; on the SE they ran off the foot, the Mac, 0.2.48), worked out from the room without
+    /// them: one step, no going round. Not while searching (the room isn't shown).
     private func fitTiles() {
         guard viewH > 0, contentH > 0, query.trimmingCharacters(in: .whitespaces).isEmpty, garden != nil else { return }
-        let base = contentH - (tileH - 106)
-        let want = min(190, 106 + max(0, viewH - base - 2))
+        let base = contentH - tileH
+        let want = min(190, max(84, viewH - base - 2))
         if abs(want - tileH) > 1 { tileH = want }
     }
 
