@@ -76,13 +76,16 @@ struct VocabRoom: View {
                 .frame(maxHeight: .infinity, alignment: .bottom).padding(.leading, 2).padding(.bottom, 6)
             // (inside the header, his feet on its foot: hung below it, he covered the search field's end; the Mac,
             // 22 Oct 2026)
-            Image("panda-flashcards").resizable().scaledToFit().frame(height: 94)
+            Image("panda-flashcards").resizable().scaledToFit().frame(height: compact ? 72 : 94)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                 .padding(.bottom, 4).allowsHitTesting(false)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
-        .frame(height: 100)
+        .frame(height: compact ? 78 : 100)
     }
+
+    /// a small phone (the SE): the header and the gaps tighter, so the room fits one screen (the Mac, 0.2.48)
+    private var compact: Bool { viewH > 0 && viewH < 700 }
 
     private var searchField: some View {
         HStack(spacing: 8) {
@@ -207,7 +210,7 @@ struct VocabRoom: View {
     }
 
     private func section(_ t: String) -> some View {
-        Text(t).font(.nunito(15, .heavy)).foregroundStyle(Home.ink).padding(.top, 18).padding(.bottom, 8)
+        Text(t).font(.nunito(15, .heavy)).foregroundStyle(Home.ink).padding(.top, compact ? 10 : 18).padding(.bottom, compact ? 6 : 8)
     }
 
     /// A catch-up cell, as the Classroom's: the number in its colour, its name under it.
