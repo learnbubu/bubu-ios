@@ -112,6 +112,12 @@ struct StudyView: View {
                     VStack(spacing: 0) {
                         if let c = chatStep {
                             chatView(c.0, c.1)
+                        } else if typingFits {
+                            // typing: not in the scroll view, so with the keyboard up the page stays put and the box
+                            // gives up the room (the page scrolled instead, the title off the top and the box's foot cut:
+                            // the owner's phone, 0.2.43)
+                            content.padding(.horizontal, 12).padding(.top, 15).padding(.bottom, 12)
+                                .frame(maxHeight: .infinity, alignment: .top)
                         } else {
                         ScrollViewReader { reader in
                             ScrollView(fixed ? [] : .vertical) {
@@ -131,12 +137,6 @@ struct StudyView: View {
                             .onPreferenceChange(PickedTopKey.self) { pickedTop = $0; relift() }
                             .scrollIndicators(.hidden)
                             .scrollBounceBehavior(.basedOnSize)
-                            // typing: with the keyboard up the exercise keeps its size, so it's scrolled to keep the box
-                            // in view over Check (its foot was covered: the owner, 20 Oct 2026)
-                            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
-                                guard session.exercise?.kind == .type, feedback == nil else { return }
-                                withAnimation(.easeOut(duration: 0.25)) { reader.scrollTo("type-field", anchor: .bottom) }
-                            }
                             // the feedback takes room from the exercise: keep the answers in view
                             .onChange(of: feedback != nil) { _, shown in
                                 if !shown { lift = 0 }
@@ -374,7 +374,8 @@ struct StudyView: View {
             // the instruction big and bold, with room above, as Duolingo's (about 26 pt on theirs)
             Text(promptLabel).font(.nunito(25, .black)).tracking(-0.4).foregroundStyle(Color.ink)
                 .lineLimit(1).minimumScaleFactor(0.75)
-                .padding(.top, 14).padding(.bottom, 18)
+                // (typing: less room above it, the keyboard takes so much; the owner, 0.2.43, "a lot of empty space")
+                .padding(.top, typingFits ? 0 : 14).padding(.bottom, typingFits ? 12 : 18)
             Group {
                 if tonesIntro {
                     TonesIntroCard { dismissTonesIntro() }
@@ -435,6 +436,12 @@ struct StudyView: View {
         guard hidden > tall * 0.5 else { return }
         let need = bottom + 10 - sheetTop
         if need > lift + 1 { withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) { lift = need } }
+    }
+
+    /// A typing exercise on screen, with no tip over it: laid out to fit above the keyboard rather than scrolled.
+    private var typingFits: Bool {
+        guard !preStart, !tonesIntro, tips.isEmpty, case .card = session.current else { return false }
+        return session.exercise?.kind == .type
     }
 
     private var promptLabel: String {
@@ -2075,7 +2082,7 @@ struct TypeView: View {
     // that"): no Bùbù and bubble, the word big with its sound beside it, a tall box to type in, the tip under it.
     var body: some View {
         let w = ex.card.word
-        VStack(spacing: 18) {
+        VStack(spacing: 14) {
             if ex.isNew { NewBadge().frame(maxWidth: .infinity, alignment: .leading) }
             HStack(alignment: .center, spacing: 14) {
                 Button { Speech.shared.speak(w.hanzi) } label: {
@@ -2100,8 +2107,8 @@ struct TypeView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.top, 8)
-            // the box: tall, the text from its top left, as Duolingo's
+            // the box: tall, the text from its top left, as Duolingo's; as tall as the room above the keyboard allows
+            // (StudyView lays typing out to fit, not scrolled: the owner's phone, 0.2.43)
             TextField(ex.typeHanzi ? "Type it in Chinese" : "Type here", text: $typed, axis: .vertical)
                 .lineLimit(1...4)
                 .font(.nunito(22, .bold)).foregroundStyle(Color.ink)
@@ -2114,14 +2121,12 @@ struct TypeView: View {
                 .focused($focused)
                 .disabled(result != nil)
                 .padding(.vertical, 16).padding(.horizontal, 16)
-                .frame(maxWidth: .infinity, minHeight: 150, alignment: .topLeading)
+                .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 150, alignment: .topLeading)
                 .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.panel))
                 .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
                 .contentShape(Rectangle())
                 .onTapGesture { if result == nil { focused = true } }
-                // (what StudyView scrolls into view when the keyboard comes up, with a little room under it)
-                .background(alignment: .bottom) { Color.clear.frame(height: 1).offset(y: 12).id("type-field") }
             // (wrapping, never clipped: the Mac's check of 0.1.38 found the descenders cut off)
             // (an SF Symbol, not the 🌐 emoji: the emoji's fallback font clipped Nunito's descenders)
             (ex.typeHanzi ? Text("Use the ") + Text(Image(systemName: "globe")) + Text(" key for the Chinese keyboard")
