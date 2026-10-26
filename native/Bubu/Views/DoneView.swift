@@ -100,9 +100,12 @@ struct DoneView: View {
             }
         }
         .onPreferenceChange(MomentStickerBox.self) { stickerBox = $0; if let m = moment { place(m) } }
-        // the player finished loading while the opening splash is still up: the moment takes over
+        // the player finished loading after the screen came up: the moment comes in then (it waited for a splash that's
+        // gone, so a player not ready in time meant no moment at all: the Mac, 0.2.42)
         .onReceive(NotificationCenter.default.publisher(for: MomentPlayer.readyNote)) { _ in
-            if stage == 0 && !momentStarted && splash { playerReady = true }
+            if stage == 0 && !momentStarted {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) { playerReady = true }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: MomentPlayer.playingNote)) { _ in
             guard momentStarted else { return }
@@ -122,6 +125,8 @@ struct DoneView: View {
             }
         }
         .onAppear {
+            // (ready between the screen being made and shown)
+            if !playerReady && MomentPlayer.shared.ready { playerReady = true }
             guard splash else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0.6 : 1.35)) {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) { splash = false }

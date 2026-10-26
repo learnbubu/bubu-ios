@@ -71,6 +71,10 @@ struct ResultMoment: Equatable {
         if (5..<9).contains(f.hour) {
             return .init(key: "earlybird", title: "Early bird!", line: "Up with the sun, 早上好!", color: 0xF0742F)
         }
+        // (a hard one, mostly missed or skipped: not "nicely done"; the Mac's chat, 0% and told so)
+        if f.accuracy < 50 {
+            return .init(key: "brain", title: "Keep going!", line: "Every go makes the next one easier.", color: 0xA78BFA, plain: true)
+        }
         return .init(key: "brain", title: "Nicely done!", line: "Another step forward. 加油!", color: 0xA78BFA, plain: true)
     }
 }

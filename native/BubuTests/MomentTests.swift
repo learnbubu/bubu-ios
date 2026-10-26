@@ -18,6 +18,8 @@ final class MomentTests: XCTestCase {
         // (a Classroom chat: three lines, every one right)
         XCTAssertEqual(pick { $0.answered = 3; $0.perfect = true }, "flawless")
         XCTAssertNil(pick { $0.answered = 0 })
+        // mostly missed: kept going, not well done
+        XCTAssertEqual(ResultMoment.pick(.init(mode: .lesson, answered: 4, accuracy: 0, seconds: 300, hour: 14))?.title, "Keep going!")
         XCTAssertNil(pick { $0.mode = .placement; $0.perfect = true })
     }
 
