@@ -9,6 +9,9 @@ final class Router {
     var tab: Tab
     var lesson: Lesson?
     var study: StudySession?
+    /// Tones, over everything as a session is (a page pushed on the Classroom hid the tab bar, and iOS brought it back
+    /// only once the way back had finished, a beat late; the owner, 26 Oct 2026, "can't we do it how the listening does")
+    var tonesOpen = false
     var homePath: [Page] = []
     var learnPath: [Page] = []
     var profilePath: [Page] = []
@@ -40,7 +43,7 @@ final class Router {
             start(StudySession.quiz(p, cards: words, scope: Set(words.map(\.lessonId))))
         case "chars": push(.chars)
         case "read": push(.readings)
-        case "tones": push(.tones)
+        case "tones": tonesOpen = true
         case "speak": push(.converse)
         case "pick": push(.pick)
         case "vocab": push(.vocab)
@@ -88,7 +91,7 @@ struct RootView: View {
         guard !Self.debugShown else { return }
         Self.debugShown = true
         if Launch.screen == "avatar" { router.tab = .profile; router.profilePath = [.avatar]; return }
-        if Launch.screen == "tones" { router.homePath = [.tones]; return }
+        if Launch.screen == "tones" { router.tonesOpen = true; return }
         if Launch.screen == "guide" { router.tab = .learn; router.learnPath = [.guide(1)]; return }
         if Launch.screen == "story", let r = Course.shared.data.readings.first { router.tab = .home; router.homePath = [.story(r.id)]; return }
         if Launch.screen == "chars" { router.tab = .home; router.homePath = [.chars]; return }
@@ -180,6 +183,14 @@ struct RootView: View {
         .fullScreenCover(item: $router.study) { s in
             StudyView(session: s) { router.study = nil }
                 .environment(progress)
+                .charSheetHost()
+                .momentsHost(study: true)
+                .preferredColorScheme(progress.prefs.colorScheme)
+        }
+        .fullScreenCover(isPresented: $router.tonesOpen) {
+            TonesPage()
+                .environment(progress)
+                .environment(router)
                 .charSheetHost()
                 .momentsHost(study: true)
                 .preferredColorScheme(progress.prefs.colorScheme)

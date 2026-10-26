@@ -121,8 +121,6 @@ struct TonesPage: View {
     @State private var record: [String: [Int]] = [:]
     @State private var level: Level = .pairs
     @State private var playing = false            // the rounds, or the home
-    /// going back: the tab bar asked back as the page leaves, not once it's gone
-    @State private var leaving = false
     @State private var qs: [Q] = []
     @State private var index = 0
     @State private var picks: [Int?] = []
@@ -167,9 +165,6 @@ struct TonesPage: View {
         .background(Color.bg.ignoresSafeArea())
         .overlay { if let n = burst { FirecrackerBurst(n: n, bar: barFrame).id(n).ignoresSafeArea().allowsHitTesting(false) } }
         .toolbar(.hidden, for: .navigationBar)
-        // (no tab bar here, but asked back as you leave: left hidden till then, iOS brought it back only once the way back
-        // to the Classroom had finished, a beat late; the owner, 26 Oct 2026, not wanting it on Tones either)
-        .toolbar(leaving ? .visible : .hidden, for: .tabBar)
         .onAppear { record = ToneRecord.load(); if record.isEmpty { level = .single } }
     }
 
@@ -189,7 +184,8 @@ struct TonesPage: View {
         // (no empty room under it all: the four cards grow to fill the page, their shapes drawn big, and Single or
         // Pairs sits with Practise at the foot; scrolled only where it can't fit, a small phone. The owner, 26 Oct 2026)
         return VStack(spacing: 0) {
-            PageBar(title: "Tones", onBack: { leaving = true; dismiss() }) { EmptyView() }
+            // (shown over everything, as Listening is: back closes it; see Router.tonesOpen)
+            PageBar(title: "Tones", onBack: { dismiss() }) { EmptyView() }
             ViewThatFits(in: .vertical) {
                 homePage(weak: weak, pairsTried: pairsTried)
                 ScrollView { homePage(weak: weak, pairsTried: pairsTried) }
