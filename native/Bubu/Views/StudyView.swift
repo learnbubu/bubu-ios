@@ -2076,7 +2076,9 @@ struct TypeView: View {
     @Binding var typed: String
     let result: Bool?
     var submit: () -> Void
-    @FocusState private var focused: Bool
+    @State private var focused = false
+    /// the keyboard asked for: Chinese to start, every time
+    @State private var chinese = true
 
     // Duolingo's typing (the owner, 25 Oct 2026, "remember we were struggling to get something nice for typing? … use
     // that"): no Bùbù and bubble, the word big with its sound beside it, a tall box to type in, the tip under it.
@@ -2109,17 +2111,13 @@ struct TypeView: View {
             .frame(maxWidth: .infinity)
             // the box: tall, the text from its top left, as Duolingo's; as tall as the room above the keyboard allows
             // (StudyView lays typing out to fit, not scrolled: the owner's phone, 0.2.43)
-            TextField(ex.typeHanzi ? "Type it in Chinese" : "Type here", text: $typed, axis: .vertical)
-                .lineLimit(1...4)
-                .font(.nunito(22, .bold)).foregroundStyle(Color.ink)
-                .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.default)   // (the full keyboard: its globe key switches to Chinese, and characters count)
-                .submitLabel(.done).onSubmit(submit)
-                .onChange(of: typed) { _, t in
-                    // (Return in a multi-line field adds a line: it checks instead)
-                    if t.contains("\n") { typed = t.replacingOccurrences(of: "\n", with: ""); submit() }
+            KeyboardField(text: $typed, chinese: chinese, focused: $focused, enabled: result == nil, submit: submit)
+                .overlay(alignment: .topLeading) {
+                    if typed.isEmpty {
+                        Text(ex.typeHanzi ? "Type it in Chinese" : "Type here").font(.nunito(22, .bold)).foregroundStyle(Color.muted.opacity(0.55))
+                            .allowsHitTesting(false)
+                    }
                 }
-                .focused($focused)
-                .disabled(result != nil)
                 .padding(.vertical, 16).padding(.horizontal, 16)
                 .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 150, alignment: .topLeading)
                 .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.panel))
@@ -2127,15 +2125,50 @@ struct TypeView: View {
                     .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
                 .contentShape(Rectangle())
                 .onTapGesture { if result == nil { focused = true } }
-            // (wrapping, never clipped: the Mac's check of 0.1.38 found the descenders cut off)
-            // (an SF Symbol, not the 🌐 emoji: the emoji's fallback font clipped Nunito's descenders)
-            (ex.typeHanzi ? Text("Use the ") + Text(Image(systemName: "globe")) + Text(" key for the Chinese keyboard")
-                          : Text("Tones are optional: ni hao or ni3 hao3. Or type the characters: the ") + Text(Image(systemName: "globe")) + Text(" key switches to Chinese."))
-                .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
-                .lineLimit(3).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 8)
+            // the keyboard: Chinese to start, English a tap away (the owner, 26 Oct 2026, "a button to switch to
+            // english/chinese? and always start in chinese"); the tip under it
+            if result == nil {
+                VStack(spacing: 8) {
+                    keyboardSwitch
+                    Group {
+                        if chinese && !KeyboardField.hasChinese {
+                            Text("Add the Chinese (Pinyin) keyboard in iPhone Settings → General → Keyboard → Keyboards.")
+                        } else if ex.typeHanzi {
+                            Text("Type the characters, or their pinyin.")
+                        } else {
+                            Text("Tones are optional: ni hao or ni3 hao3. Characters count too.")
+                        }
+                    }
+                    // (wrapping, never clipped: the Mac's check of 0.1.38 found the descenders cut off)
+                    .font(.nunito(12.5)).foregroundStyle(Color.muted).multilineTextAlignment(.center)
+                    .lineLimit(3).fixedSize(horizontal: false, vertical: true).padding(.horizontal, 8)
+                }
+            }
         }
         .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { focused = true } }
         .onChange(of: result) { _, r in if r != nil { focused = false } }
+    }
+
+    /// 中文 or English: which keyboard the box asks for
+    private var keyboardSwitch: some View {
+        HStack(spacing: 3) {
+            ForEach([(true, "中文"), (false, "English")], id: \.0) { l in
+                Button { withAnimation(.spring(response: 0.28, dampingFraction: 0.9)) { chinese = l.0 } } label: {
+                    Text(l.1).font(l.0 ? .hanzi(15, .bold) : .nunito(14, .black)).foregroundStyle(chinese == l.0 ? Color.ink : Color.muted)
+                        .frame(width: 92).padding(.vertical, 7)
+                        .background {
+                            if chinese == l.0 {
+                                RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.panel)
+                                    .shadow(color: .black.opacity(0.08), radius: 2, y: 1)
+                            }
+                        }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(l.0 ? "Chinese keyboard" : "English keyboard")
+            }
+        }
+        .padding(3)
+        .background(Color.line.opacity(0.7), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
     }
 }
 
