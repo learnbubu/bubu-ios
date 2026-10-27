@@ -262,6 +262,8 @@ struct PathModel {
     private static let notOnThePath: Set<String> = ["panda-peek", "panda-peeking-from-the-right", "panda-blank-sign", "panda-sad"]
     /// what the path shows, placed by hand or by itself: Bùbù, and the pieces hanging in from the side
     static let sceneryKinds = ["panda-", "hang-"]
+    /// whether the path plants a piece at each bend by itself
+    static let plantsBends = false
     /// a hanging piece's tallest: about two stones apart (a long one, the firecracker string, ran down most of
     /// a screen)
     private static let hangMaxH: CGFloat = gap * 1.9
@@ -415,7 +417,9 @@ struct PathModel {
     /// The scenery the path plants itself: one piece at each bend (see above).
     private static func bends(_ course: Course, _ items: [Item], _ xs: [CGFloat], _ mids: [Int: CGFloat], _ W: CGFloat,
                               composed: [Piece], firstId: Int) -> [Piece] {
-        guard let last = items.last else { return [] }
+        // (off while the owner sets the scale by hand from one Bùbù and one hanging piece: 27 Oct 2026, "clear all
+        // the bubu and side art. first I want to place 1 bubu and 1 side art piece")
+        guard plantsBends, let last = items.last else { return [] }
         let art = course.data.art.merging(NewArt.art) { old, _ in old }
         // everything scenery keeps out of: the stones, and the dividers, right across the page
         var obstacles = Grid<Box>()

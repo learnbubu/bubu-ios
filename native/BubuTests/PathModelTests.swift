@@ -101,7 +101,8 @@ final class PathModelTests: XCTestCase {
 
     /// The path plants one thing at each bend, on its open side: Bùbù and the scenery taking turns (so both
     /// turn up on both sides), real art only, clear of the dividers, Bùbù whole on the screen, the same every build.
-    func testThePathPlantsOneThingAtEachBend() {
+    func testThePathPlantsOneThingAtEachBend() throws {
+        try XCTSkipUnless(PathModel.plantsBends, "planting at the bends is off while the scale is set by hand")
         let composed = course.data.pathLayout.pieces.count
         for width in [375, 393, 402, 430] as [CGFloat] {
             let m = PathModel(course: course, width: width, current: course.lessons[0].id)
