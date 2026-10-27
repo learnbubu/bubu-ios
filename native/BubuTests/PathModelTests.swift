@@ -1,4 +1,6 @@
 import XCTest
+import UIKit
+import CoreText
 @testable import Bubu
 
 /// The learning path's layout: built once, quickly, and drawn only near the screen.
@@ -8,6 +10,19 @@ final class PathModelTests: XCTestCase {
 
     private func ms(_ block: () -> Void) -> Double {
         let t0 = CFAbsoluteTimeGetCurrent(); block(); return (CFAbsoluteTimeGetCurrent() - t0) * 1000
+    }
+
+    /// The stones' storybook lettering is in the app under the name the path asks for, with every stone's character
+    /// (a wrong name or a missing character falls back to the system font without a word).
+    func testTheStoneLetteringHasEveryStonesCharacter() throws {
+        let font = try XCTUnwrap(UIFont(name: "ZCOOLKuaiLe-Regular", size: 20), "the stone font isn't installed under that name")
+        let ct = font as CTFont
+        let missing = Set(course.lessons.compactMap { course.hero[$0.id] }.joined()).filter { ch in
+            var glyphs = [CGGlyph](repeating: 0, count: 2)
+            let units = Array(String(ch).utf16)
+            return !CTFontGetGlyphsForCharacters(ct, units, &glyphs, units.count)
+        }
+        XCTAssertTrue(missing.isEmpty, "not in the stone font: \(String(missing))")
     }
 
     func testEveryStoneIsLaidOutInOrder() {

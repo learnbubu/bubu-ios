@@ -22,7 +22,8 @@ extension Color {
     static let again = Color(light: 0xD9695A, dark: 0xF08A7A)
     static let goodSoft = Color(light: 0xDAF1E3, dark: 0x112A2D)
     static let againSoft = Color(light: 0xFDE7E5, dark: 0x2B2230)
-    static let todoHero = Color(light: 0x1D6B5C, dark: 0xA9C6FB)
+    /// the lettering on a path stone still to come: white like the others (the grey stone says it's still to come)
+    static let stoneLetter = Color(light: 0xFFFFFF, dark: 0xDFE6EE)
     // practice tiles: pastel ground and ink, one per skill
     struct Tile { let bg: Color; let ink: Color }
     static let tiles: [String: Tile] = [
@@ -51,7 +52,7 @@ extension UIColor {
 }
 
 // Nunito for everything written in English, the system's PingFang for Chinese,
-// Long Cang for the brush characters on the path stones.
+// ZCOOL KuaiLe for the storybook characters on the path stones.
 extension Font {
     static func nunito(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
         let face: String
@@ -66,7 +67,8 @@ extension Font {
     }
     static func nunitoXB(_ size: CGFloat) -> Font { .custom("Nunito-ExtraBold", size: size) }
     static func hanzi(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font { .system(size: size, weight: weight) }
-    static func brush(_ size: CGFloat) -> Font { .custom("LongCang-Regular", size: size) }
+    /// the path stones' storybook lettering (ZCOOL KuaiLe, cut down to the course's characters: ZCOOLKuaiLe-Bubu.ttf)
+    static func stone(_ size: CGFloat) -> Font { .custom("ZCOOLKuaiLe-Regular", size: size) }
 }
 
 /// The tone (1–4, 5 = neutral) of one pinyin syllable, from its mark.

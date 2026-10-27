@@ -11,6 +11,7 @@ import SwiftUI
 struct PathView: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
+    @Environment(\.colorScheme) private var scheme
     private let course = Course.shared
     @State private var cache = PathModel.Cache()
     /// the scroll band the drawn stretch is centred on (nil until the first scroll report)
@@ -112,12 +113,15 @@ struct PathView: View {
                     .resizable()
                     .frame(width: size * stoneRatio, height: size)
                     .shadow(color: .black.opacity(0.2), radius: 3, y: 3)
+                // the storybook lettering, laid on the stone's top face: tipped back 40° (the stone art is drawn from
+                // above at a slant), white with a dark shadow on every stone, as if cut in (the owner's pick, 27 Oct
+                // 2026, from the stone lettering mock-ups; by night the lit stones' lettering is dark)
                 Text(course.hero[it.lesson.id] ?? "")
-                    .font(.brush(35))
-                    .foregroundStyle(done || now ? Color.onAccent : Color.todoHero)
-                    .shadow(color: .black.opacity(done || now ? 0.3 : 0), radius: 0, y: -1.5)
-                    .shadow(color: .white.opacity(done || now ? 0.2 : 0.5), radius: 0, y: 1.5)
-                    .offset(y: -7.5)
+                    .font(.stone(38))
+                    .foregroundStyle(done || now ? Color.onAccent : Color.stoneLetter)
+                    .shadow(color: scheme == .dark && (done || now) ? .white.opacity(0.18) : .black.opacity(scheme == .dark ? 0.35 : 0.22), radius: 0, y: 2)
+                    .rotation3DEffect(.degrees(40), axis: (x: 1, y: 0, z: 0), perspective: 0.25)
+                    .offset(y: -6.5)
                 // a practice stone: its 练 (or 复 for the chapter review) and a small repeat mark
                 if it.lesson.isPractice { PracticeMark(active: done || now).offset(x: -size * 0.62, y: size * 0.28) }
                 if now { StartBubble().offset(y: -size / 2 - 18) }
