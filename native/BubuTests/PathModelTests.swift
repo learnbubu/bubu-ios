@@ -129,9 +129,8 @@ final class PathModelTests: XCTestCase {
             XCTAssertEqual(sides["panda"], [true, false], "Bùbù only on one side at \(width)")
             XCTAssertEqual(sides["scenery"], [true, false], "scenery only on one side at \(width)")
             XCTAssertTrue(generated.contains { $0.art.hasPrefix("hang-") }, "no hanging pieces at \(width)")
-            // only Bùbù and the hanging pieces, placed or planted; none taller than two stones apart
+            // only Bùbù and the hanging pieces, placed or planted
             for p in m.pieces { XCTAssertTrue(PathModel.sceneryKinds.contains { p.art.hasPrefix($0) }, "\(p.art) isn't Bùbù or a hanging piece") }
-            for p in generated where p.art.hasPrefix("hang-") { XCTAssertLessThanOrEqual(p.h, PathModel.gap * 1.9 + 0.5, "\(p.art) too tall at \(width)") }
             XCTAssertGreaterThan(Set(generated.filter { $0.art.hasPrefix("panda") }.map(\.art)).count, 5, "too few of Bùbù's poses at \(width)")
             // stable between launches
             let again = PathModel(course: course, width: width, current: course.lessons[0].id)

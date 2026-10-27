@@ -264,9 +264,6 @@ struct PathModel {
     static let sceneryKinds = ["panda-", "hang-"]
     /// whether the path plants a piece at each bend by itself
     static let plantsBends = false
-    /// a hanging piece's tallest: about two stones apart (a long one, the firecracker string, ran down most of
-    /// a screen)
-    private static let hangMaxH: CGFloat = gap * 1.9
 
     /// Where each piece is actually painted: ten strips top to bottom, each the opaque extent
     /// as a fraction of the width. Measured from the artwork (the web's SLABS).
@@ -450,7 +447,8 @@ struct PathModel {
                 let name = pandas[(np * 7) % pandas.count]
                 np += 1
                 guard let a = art[name] else { continue }
-                let w = W * 0.26, h = w * CGFloat(a.ar)
+                // (each pose's own width, sized so every Bùbù's head matches: tools/path-editor, 27 Oct 2026)
+                let w = W * CGFloat(a.w) / 100, h = w * CGFloat(a.ar)
                 let cx = left ? w / 2 + 12 : W - w / 2 - 12
                 if let yb = planter.settle(name, cx, it.y + h * 0.4, w, h, !left, reach: gap * 0.45) {
                     out.append(Piece(id: firstId + out.count, art: name, x: cx, y: yb - h / 2, w: w, h: h, flip: !left, behind: false, ground: true))
@@ -461,8 +459,8 @@ struct PathModel {
                 let name = hanging[(nh * 7) % hanging.count]
                 nh += 1
                 guard let a = art[name] else { continue }
-                // (no taller than two stones apart: a long one is drawn narrower)
-                let full = min(W * CGFloat(a.w) / 100, hangMaxH / CGFloat(a.ar))
+                // (each piece's own width, sized so every hanging piece is the same height)
+                let full = W * CGFloat(a.w) / 100
                 for scale in [1, 0.85, 0.72] as [CGFloat] {
                     let cw = full * scale, ch = cw * CGFloat(a.ar)
                     // (drawn for the left edge: mirrored for the right; hung across the bend)
