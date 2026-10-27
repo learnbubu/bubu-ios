@@ -106,11 +106,9 @@ struct PathModel {
             guard let it = byId[p.stone], let a = course.data.art[p.art] else { continue }
             composedUntil = max(composedUntil, it.index)
             let w = W * p.w / 100, h = w * a.ar
-            var cx = xs[it.index] + p.dx * kx
-            // a panda stands whole on the screen (a stone nearer the middle than the one it was
-            // composed beside would otherwise push it off); landmarks and clusters may run off
-            // their edge, as they were drawn to
-            if p.art.hasPrefix("panda") { cx = max(w / 2, min(W - w / 2, cx)) }
+            // (exactly where the editor shows it: the planter keeps Bùbù's painted body on the screen, and his
+            // picture's empty edges may run off it)
+            let cx = xs[it.index] + p.dx * kx
             let base = it.y + p.dy
             pieces.append(Piece(id: n, art: p.art, x: cx, y: base - h / 2, w: w, h: h, flip: p.flip, behind: p.behind))
         }
