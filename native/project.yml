@@ -9,7 +9,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.2.52"
+    MARKETING_VERSION: "0.2.53"
     CURRENT_PROJECT_VERSION: "1"
 targets:
   Bubu:
@@ -31,7 +31,7 @@ targets:
           - Nunito-Bold.ttf
           - Nunito-ExtraBold.ttf
           - Nunito-Black.ttf
-          - ZCOOLKuaiLe-Bubu.ttf
+          - MaShanZheng-Bubu.ttf
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         NSMicrophoneUsageDescription: Bùbù listens when you practise speaking, to check your pronunciation.

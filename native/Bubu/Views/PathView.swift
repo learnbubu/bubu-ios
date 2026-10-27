@@ -113,15 +113,17 @@ struct PathView: View {
                     .resizable()
                     .frame(width: size * stoneRatio, height: size)
                     .shadow(color: .black.opacity(0.2), radius: 3, y: 3)
-                // the storybook lettering, laid on the stone's top face: tipped back 40° (the stone art is drawn from
-                // above at a slant), white with a dark shadow on every stone, as if cut in (the owner's pick, 27 Oct
-                // 2026, from the stone lettering mock-ups; by night the lit stones' lettering is dark)
+                // the character carved into the stone (the owner's pick, 28 Oct 2026, from Codex's carved stones): a
+                // brush hand cut in a deeper shade of the stone's own colour, shadowed along the top of each cut, a thin
+                // lit lip below; laid on the stone's top face, tipped back 40° (the art is drawn from above at a slant),
+                // and centred on that face, a little left of and above the middle of the stone's picture
                 Text(course.hero[it.lesson.id] ?? "")
-                    .font(.stone(38))
-                    .foregroundStyle(done || now ? Color.onAccent : Color.stoneLetter)
-                    .shadow(color: scheme == .dark && (done || now) ? .white.opacity(0.18) : .black.opacity(scheme == .dark ? 0.35 : 0.22), radius: 0, y: 2)
+                    .font(.stone(40))
+                    .foregroundStyle((done ? Color.stoneCutDone : now ? Color.stoneCutNow : Color.stoneCutLocked)
+                        .shadow(.inner(color: .black.opacity(scheme == .dark ? 0.7 : 0.62), radius: 0.7, x: 0, y: 2.1)))
+                    .shadow(color: .white.opacity(scheme == .dark ? 0.16 : 0.45), radius: 0, y: 1.3)
                     .rotation3DEffect(.degrees(40), axis: (x: 1, y: 0, z: 0), perspective: 0.25)
-                    .offset(y: -6.5)
+                    .offset(x: -3, y: -6.5)
                 // a practice stone: its 练 (or 复 for the chapter review) and a small repeat mark
                 if it.lesson.isPractice { PracticeMark(active: done || now).offset(x: -size * 0.62, y: size * 0.28) }
                 if now { StartBubble().offset(y: -size / 2 - 18) }

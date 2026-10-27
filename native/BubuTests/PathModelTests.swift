@@ -15,7 +15,7 @@ final class PathModelTests: XCTestCase {
     /// The stones' storybook lettering is in the app under the name the path asks for, with every stone's character
     /// (a wrong name or a missing character falls back to the system font without a word).
     func testTheStoneLetteringHasEveryStonesCharacter() throws {
-        let font = try XCTUnwrap(UIFont(name: "ZCOOLKuaiLe-Regular", size: 20), "the stone font isn't installed under that name")
+        let font = try XCTUnwrap(UIFont(name: "MaShanZheng-Regular", size: 20), "the stone font isn't installed under that name")
         let ct = font as CTFont
         let missing = Set(course.lessons.compactMap { course.hero[$0.id] }.joined()).filter { ch in
             var glyphs = [CGGlyph](repeating: 0, count: 2)

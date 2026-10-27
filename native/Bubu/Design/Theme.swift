@@ -22,8 +22,10 @@ extension Color {
     static let again = Color(light: 0xD9695A, dark: 0xF08A7A)
     static let goodSoft = Color(light: 0xDAF1E3, dark: 0x112A2D)
     static let againSoft = Color(light: 0xFDE7E5, dark: 0x2B2230)
-    /// the lettering on a path stone still to come: white like the others (the grey stone says it's still to come)
-    static let stoneLetter = Color(light: 0xFFFFFF, dark: 0xDFE6EE)
+    /// a path stone's carved lettering: a deeper shade of the stone's own colour (from Codex's carved stones)
+    static let stoneCutDone = Color(light: 0x18473C, dark: 0x0B3240)
+    static let stoneCutNow = Color(light: 0x95281D, dark: 0x5E1D13)
+    static let stoneCutLocked = Color(light: 0x666358, dark: 0x1C2C40)
     // practice tiles: pastel ground and ink, one per skill
     struct Tile { let bg: Color; let ink: Color }
     static let tiles: [String: Tile] = [
@@ -52,7 +54,7 @@ extension UIColor {
 }
 
 // Nunito for everything written in English, the system's PingFang for Chinese,
-// ZCOOL KuaiLe for the storybook characters on the path stones.
+// Ma Shan Zheng for the brush characters carved into the path stones.
 extension Font {
     static func nunito(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font {
         let face: String
@@ -67,8 +69,8 @@ extension Font {
     }
     static func nunitoXB(_ size: CGFloat) -> Font { .custom("Nunito-ExtraBold", size: size) }
     static func hanzi(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font { .system(size: size, weight: weight) }
-    /// the path stones' storybook lettering (ZCOOL KuaiLe, cut down to the course's characters: ZCOOLKuaiLe-Bubu.ttf)
-    static func stone(_ size: CGFloat) -> Font { .custom("ZCOOLKuaiLe-Regular", size: size) }
+    /// the path stones' carved brush lettering (Ma Shan Zheng, cut down to the course's characters: MaShanZheng-Bubu.ttf)
+    static func stone(_ size: CGFloat) -> Font { .custom("MaShanZheng-Regular", size: size) }
 }
 
 /// The tone (1–4, 5 = neutral) of one pinyin syllable, from its mark.
