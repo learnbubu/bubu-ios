@@ -29,43 +29,22 @@ extension EnvironmentValues {
 }
 
 /// The Classroom's slide-over: one of its rooms (Characters, Tones, Vocabulary…) over everything, the tab bar too,
-/// slid in from the side and out again, with its own pages. (Pushed on Home's stack they kept the tab bar, or hid it
-/// and iOS brought it back only after the way back had finished; the owner, 26 Oct 2026, "all the classroom … from
-/// the side … none have the UI at the bottom".) A swipe from the left edge goes back, as a pushed page's.
+/// up from the bottom and down again, with its own pages. (Pushed on Home's stack they kept the tab bar, or hid it and
+/// iOS brought it back only after the way back had finished; the owner, 26 Oct 2026, "none have the UI at the bottom";
+/// then, 27 Oct, up from the bottom rather than the side.)
 struct CoverHost: View {
     let root: Page
     @Environment(Router.self) private var router
-    @State private var drag: CGFloat = 0
 
     var body: some View {
         @Bindable var r = router
-        GeometryReader { g in
-            NavigationStack(path: $r.coverPath) {
-                PageView(page: root).toolbar(.hidden, for: .navigationBar).pageDestinations()
-                    .background(Color.bg.ignoresSafeArea())
-            }
-            .environment(\.coverBack, { router.coverBack() })
-            // (a room that fits doesn't scroll at all: the owner, 26 Oct 2026, "non scrollable the page unless necessary")
-            .scrollBounceBehavior(.basedOnSize, axes: .vertical)
-            .offset(x: drag)
-            .overlay(alignment: .leading) {
-                // the edge swipe back, on the room itself (its own pages have the stack's)
-                if router.coverPath.isEmpty {
-                    Color.clear.frame(width: 22).contentShape(Rectangle())
-                        .gesture(DragGesture(minimumDistance: 8, coordinateSpace: .global)
-                            .onChanged { drag = max(0, $0.translation.width) }
-                            .onEnded { v in
-                                if v.translation.width > g.size.width * 0.33 || v.predictedEndTranslation.width > g.size.width * 0.6 {
-                                    router.coverBack()
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { drag = 0 }
-                                } else {
-                                    withAnimation(Router.slide) { drag = 0 }
-                                }
-                            })
-                }
-            }
+        NavigationStack(path: $r.coverPath) {
+            PageView(page: root).toolbar(.hidden, for: .navigationBar).pageDestinations()
+                .background(Color.bg.ignoresSafeArea())
         }
-        .shadow(color: .black.opacity(0.12), radius: 12, x: -4)
+        .environment(\.coverBack, { router.coverBack() })
+        // (a room that fits doesn't scroll at all: the owner, 26 Oct 2026, "non scrollable the page unless necessary")
+        .scrollBounceBehavior(.basedOnSize, axes: .vertical)
     }
 }
 

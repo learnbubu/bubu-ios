@@ -22,7 +22,7 @@ final class Router {
     func coverBack() {
         if !coverPath.isEmpty { coverPath.removeLast() } else { withAnimation(Self.slide) { cover = nil } }
     }
-    /// A session slid in from the side, as the Classroom's rooms are.
+    /// A session up from the bottom, as the Classroom's rooms are.
     func slideIn(_ s: StudySession?) { if let s { lesson = nil; withAnimation(Self.slide) { coverStudy = s } } }
     var homePath: [Page] = []
     var learnPath: [Page] = []
@@ -41,7 +41,7 @@ final class Router {
     /// Open a session, if there was one to start.
     func start(_ s: StudySession?) {
         guard let s else { return }
-        // (from the Classroom's slide-over: slid in from the side as well)
+        // (from the Classroom's slide-over: in its way as well)
         if cover != nil { slideIn(s) } else { lesson = nil; study = s }
     }
 
@@ -53,7 +53,7 @@ final class Router {
     /// A practice tile on Home (web: runMode).
     func practice(_ mode: String, _ p: ProgressStore) {
         switch mode {
-        // (every one from the side, over the tab bar: the owner, 26 Oct 2026)
+        // (every one up from the bottom, over the tab bar: the owner, 26-27 Oct 2026)
         case "listen": slideIn(StudySession.listening(p))
         case "write": slideIn(StudySession.writing(p))
         case "quiz":
@@ -188,17 +188,17 @@ struct RootView: View {
         // the Streak saved moment a relit day shows on opening (it was 2 s in: the Mac, 20 Oct 2026)
         // (not under the tests: the web view kept the test host busy, ~28 min a run instead of ~4: the Mac, 0.1.60)
         .task { guard !Launch.underTests else { return }; try? await Task.sleep(for: .milliseconds(500)); MomentPlayer.shared.warm() }
-        // the Classroom's rooms and their sessions, slid in from the side over everything (see CoverHost)
+        // the Classroom's rooms and their sessions, up from the bottom over everything (see CoverHost)
         .overlay {
             ZStack {
                 if let p = router.cover {
-                    CoverHost(root: p).transition(.move(edge: .trailing)).zIndex(1)
+                    CoverHost(root: p).transition(.move(edge: .bottom)).zIndex(1)
                 }
                 if let s = router.coverStudy {
                     StudyView(session: s) { withAnimation(Router.slide) { router.coverStudy = nil } }
                         .momentsHost(study: true)
                         .background(Color.bg.ignoresSafeArea())
-                        .transition(.move(edge: .trailing)).zIndex(2)
+                        .transition(.move(edge: .bottom)).zIndex(2)
                 }
             }
         }
