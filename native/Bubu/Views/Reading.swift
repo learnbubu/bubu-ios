@@ -85,7 +85,8 @@ struct ReadingsPage: View {
     var body: some View {
         let reads = course.data.readings
         ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
+            // (lazy: there are 76 stories, and building every row at once made the room stutter as it slid up)
+            LazyVStack(alignment: .leading, spacing: 10) {
                 Text("Finish a chapter and its story opens here. Every word in it is one you've learnt.")
                     .font(.nunito(14.5)).foregroundStyle(Color.muted).padding(.bottom, 4)
                 ForEach(reads, id: \.id) { r in
