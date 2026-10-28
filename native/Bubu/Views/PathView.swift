@@ -467,16 +467,16 @@ struct HUD: View {
         let lit = progress.litOn(progress.today), plus = progress.isPlus, n = progress.buns
         HStack(spacing: 0) {
             segment("Streak, view progress") { router.tab = .profile } label: {
-                LanternMark(lit: lit, size: 22).opacity(lit ? 1 : 0.75)
+                hudIcon(lit ? "hud-lantern-lit" : "hud-lantern-unlit", 24)
                 Text("\(progress.streak)")
             }
             .foregroundStyle(lit ? Color.ember : Color.muted)
             segment("Coins, open the shop") { Moments.shared.show(.shop) } label: {
-                CoinIcon(size: 23)
+                hudIcon("hud-coin", 23)
                 Text("\(progress.coins)").foregroundStyle(Color.gold)
             }
             segment("Buns") { Moments.shared.show(.buns(.init(ctx: .hud))) } label: {
-                BunIcon(width: 27)
+                hudIcon("hud-bun", 27)
                 Text(plus ? "∞" : "\(n)").foregroundStyle(!plus && n <= 1 ? Color.again : Color.bunBrown)
             }
         }
@@ -485,6 +485,12 @@ struct HUD: View {
         // (the band runs on down behind the top half of the pinned chapter card, so nothing scrolls through a gap
         // between the two: the art goes in under the card and is cut off by the card itself)
         .background(Color.bg.padding(.bottom, -38).ignoresSafeArea(edges: .top))
+    }
+
+    /// The bar's own icons, flat 2D like Duolingo's (the owner's pick, 28 Oct 2026; Codex's "hudflat" batch): a
+    /// lantern with nothing hanging from it, the coin, the bun. `width` in points; each keeps its own shape.
+    private func hudIcon(_ name: String, _ width: CGFloat) -> some View {
+        Image(name).resizable().scaledToFit().frame(width: width, height: 24)
     }
 
     private func segment<L: View>(_ label: String, _ action: @escaping () -> Void, @ViewBuilder label content: () -> L) -> some View {
