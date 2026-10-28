@@ -1,4 +1,4 @@
-﻿# The native BÃ¹bÃ¹ app. XcodeGen turns this into Bubu.xcodeproj (on the Mac or in Codemagic):
+# The native BÃ¹bÃ¹ app. XcodeGen turns this into Bubu.xcodeproj (on the Mac or in Codemagic):
 #   brew install xcodegen && cd native && xcodegen generate
 name: Bubu
 options:
