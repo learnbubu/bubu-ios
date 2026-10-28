@@ -43,7 +43,7 @@ struct PathView: View {
                         }
                         scenery(model, win, behind: false)
                         // the dividers go over the art, so their names always read
-                        ForEach(model.items(in: win).filter { $0.chapter != nil && $0.index > 0 }, id: \.lesson.id) { it in
+                        ForEach(model.items(in: win).filter { $0.chapter != nil }, id: \.lesson.id) { it in
                             divider(it.chapter!, mid: model.dividers[it.index] ?? it.y, W: W)
                         }
                         // a marker at the current stone, for the scroll to land on: positioned

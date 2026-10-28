@@ -67,8 +67,9 @@ final class PathModelTests: XCTestCase {
         XCTAssertEqual(m.xs.count, m.items.count)
         for (a, b) in zip(m.items, m.items.dropFirst()) { XCTAssertLessThan(a.y, b.y) }
         XCTAssertEqual(m.currentY, m.items[3].y)
-        // a divider before every chapter but the first
-        XCTAssertEqual(m.dividers.count, m.items.filter { $0.chapter != nil }.count - 1)
+        // a divider before every chapter, the first above its first stone
+        XCTAssertEqual(m.dividers.count, m.items.filter { $0.chapter != nil }.count)
+        XCTAssertLessThan(m.dividers[0]! + PathModel.divH / 2, m.items[0].y - PathModel.size / 2)
         // every composed piece of the kinds the path shows (Bùbù, hanging pieces), then the scenery it planted itself
         let composed = course.data.pathLayout.pieces.count
         let shown = course.data.pathLayout.pieces.filter { p in PathModel.sceneryKinds.contains { p.art.hasPrefix($0) } }.count

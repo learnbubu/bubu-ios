@@ -18,6 +18,9 @@ struct PathModel {
     /// the pinned chapter under the HUD (its room at the top of the path), and the space a chapter break adds
     /// between two stones, its divider (`divH` tall) in the middle of it
     static let pinH: CGFloat = 84, divGap: CGFloat = 104, divH: CGFloat = 46
+    /// the room the first chapter's name takes above its first stone (its divider centred `firstMid` down it), as
+    /// every chapter after it has one (the owner, 28 Oct 2026)
+    static let firstDiv: CGFloat = 76, firstMid: CGFloat = 30
     static let stoneRatio: CGFloat = 1.62
 
     // scenery constants, from the path composer (SC in the web app)
@@ -40,8 +43,8 @@ struct PathModel {
     let items: [Item]
     /// each stone's x, by index
     let xs: [CGFloat]
-    /// where each divider is centred, by the index of the first stone of the chapter it starts (every chapter
-    /// but the first: the pinned header names that one)
+    /// where each divider is centred, by the index of the first stone of the chapter it starts (every chapter,
+    /// the first included)
     let dividers: [Int: CGFloat]
     /// each chapter's first stone's index and where its stretch of the page begins (its divider; the first, 0):
     /// for the chapter pinned at the top as the path scrolls
@@ -149,7 +152,7 @@ struct PathModel {
             let lessons = ch.lessons.compactMap { course.lessonById[$0] }
             for (li, lesson) in lessons.enumerated() {
                 // (the first stone below the HUD and the pinned chapter; each chapter after a divider)
-                if i == 0 { y = hud + pinH + 12 + bub(lesson.id) + size / 2 }
+                if i == 0 { y = hud + pinH + 12 + firstDiv + bub(lesson.id) + size / 2 }
                 else if li == 0 { y += divGap + bub(lesson.id) }
                 items.append(Item(lesson: lesson, index: i, chapter: li == 0 ? ci : nil, ci: ci, j: li, n: lessons.count, y: y))
                 y += gap; i += 1
@@ -184,9 +187,10 @@ struct PathModel {
     }
 
     /// Where each divider is centred: halfway between the stone above and the top of the chapter's first
-    /// stone, START bubble included. Every chapter but the first.
+    /// stone, START bubble included; the first chapter's, in the room above its first stone.
     private static func dividerMids(_ items: [Item], current: String?) -> [Int: CGFloat] {
         var out: [Int: CGFloat] = [:]
+        if !items.isEmpty { out[0] = hud + pinH + 12 + firstMid }
         for it in items where it.chapter != nil && it.index > 0 {
             let top = it.y - size / 2 - (it.lesson.id == current ? bubble : 0)
             out[it.index] = (items[it.index - 1].y + size / 2 + top) / 2
