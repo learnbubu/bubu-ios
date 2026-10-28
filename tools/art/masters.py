@@ -19,7 +19,7 @@ OUT = os.path.join(HERE, "masters")
 
 # master name -> the picture kept for it (the review's name, in out/final)
 MASTERS = {
-    "roof-eave": "mount-roof-eave-ring",        # take 2, its red loop swapped for a brass ring (group "rings")
+    "roof-eave": "mount-roof-eave-tie",         # take 2, a red cord tied round its tip (group "rings"; the ring looked fake)
     "bamboo-pole": "mount-bamboo-pole-ring",    # its red loop swapped for a brass ring (group "rings")
     "iron-scroll": "mount-iron-scroll-take2",
     "cloud-bracket": "mount-cloud-bracket",
@@ -29,14 +29,27 @@ MASTERS = {
     "stone-corbel": "mount-stone-corbel",
 }
 # until the ring swaps are made, the pictures they're made from
-FALLBACK = {"mount-roof-eave-ring": "mount-roof-eave-take2", "mount-bamboo-pole-ring": "mount-bamboo-pole"}
-TIE = {"roof-eave": (403, 240)}   # master name -> (x, y) by hand, where the found one is wrong (the eave's orange woodwork reads as brass)
+FALLBACK = {"mount-roof-eave-tie": "mount-roof-eave-ring", "mount-bamboo-pole-ring": "mount-bamboo-pole"}
+TIE = {"mount-roof-eave-ring": (403, 240)}   # picture -> (x, y) by hand, where the found one is wrong (the eave's orange woodwork reads as brass)
+CORD_END = {"mount-roof-eave-tie"}           # tied with a cord, not a ring: the tie point is the cord's end
 
 
 def brass(a):
     """Brass and gold pixels: warm, bright, low blue."""
     r, g, b = (a[..., i].astype(int) for i in range(3))
     return (a[..., 3] > 128) & (r > 150) & (g > 100) & (b < 0.6 * g) & (r - b > 90)
+
+
+def find_cord_end(im):
+    """The bottom of a red cord hanging from the mount's outer end (in its right quarter, clear of the eave's woodwork)."""
+    a = np.asarray(im)
+    r, g, b = (a[..., i].astype(int) for i in range(3))
+    m = (a[..., 3] > 128) & (r > 160) & (g < 110) & (b < 110) & (r - g > 90)
+    m[:, : a.shape[1] * 3 // 4] = False
+    ys, xs = np.nonzero(m)
+    if not len(ys):
+        return None
+    return (int(round(xs[ys >= ys.max() - 2].mean())), int(ys.max()))
 
 
 def find_tie(im):
@@ -72,7 +85,8 @@ def main():
             f = os.path.join(FINAL, FALLBACK.get(src, src) + ".png")
         im = Image.open(f).convert("RGBA")
         im.save(os.path.join(OUT, name + ".png"))
-        tie = TIE.get(name) or find_tie(im)
+        pic = os.path.basename(f)[:-4]
+        tie = TIE.get(pic) or (find_cord_end(im) if pic in CORD_END else find_tie(im))
         meta[name] = {"file": name + ".png", "from": os.path.basename(f)[:-4], "size": list(im.size), "tie": list(tie) if tie else None}
         shot = Image.new("RGBA", im.size, (246, 241, 228, 255))
         shot.alpha_composite(im)

@@ -4392,6 +4392,15 @@
   "prompt": "The FIRST attached image is a mount for hanging decorations. EDIT it: replace ONLY the small red cord loop at its outer end with ONE round brass ring, exactly like the brass ring in the SECOND attached image (the same colour, thickness and size relative to the mount), hanging straight down from that same spot on a short brass link. Keep everything else EXACTLY as it is: the same size, the same place on the canvas, the same shapes and colours. Nothing hangs from the ring. No text, no letters.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
+  "file": "out/raw/mount-roof-eave-tie.png",
+  "group": "rings",
+  "size": "1122x1402",
+  "refs": [
+   "out/raw/mount-roof-eave-take2.png"
+  ],
+  "prompt": "The attached image is a roof eave for hanging decorations. EDIT it: remove the small red cord loop on the end of the tiles. Instead, tie ONE short red cord around the very TIP of the upturned eave corner (at the top right): wrapped twice around the tip, with a small neat knot just under it, and the cord's end hanging STRAIGHT DOWN from the knot for a short way (about the height of one roof tile), then ending cleanly. It hangs in the open air to the right of the tiles, touching nothing below the tip. Keep everything else EXACTLY as it is: the same size, the same place on the canvas, the same shapes and colours. Nothing hangs from the cord. No text, no letters.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
   "file": "out/raw/obj-bronze-bell.png",
   "out": "hang-bronze-bell",
   "mount": "roof-eave",

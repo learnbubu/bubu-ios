@@ -51,6 +51,14 @@ RING_PROMPT = ("The FIRST attached image is a mount for hanging decorations. EDI
                "brass link. Keep everything else EXACTLY as it is: the same size, the same place on the canvas, the same "
                "shapes and colours. Nothing hangs from the ring. No text, no letters.")
 RINGS = [("roof-eave", "mount-roof-eave-take2"), ("bamboo-pole", "mount-bamboo-pole")]
+# the eave's ring looked fake (the owner: "looks kinda fake"; picked: "tie the cord around the tip")
+TIE_PROMPT = ("The attached image is a roof eave for hanging decorations. EDIT it: remove the small red cord loop on the end "
+              "of the tiles. Instead, tie ONE short red cord around the very TIP of the upturned eave corner (at the top "
+              "right): wrapped twice around the tip, with a small neat knot just under it, and the cord's end hanging "
+              "STRAIGHT DOWN from the knot for a short way (about the height of one roof tile), then ending cleanly. It "
+              "hangs in the open air to the right of the tiles, touching nothing below the tip. Keep everything else "
+              "EXACTLY as it is: the same size, the same place on the canvas, the same shapes and colours. Nothing hangs "
+              "from the cord. No text, no letters.")
 
 
 def main():
@@ -60,13 +68,15 @@ def main():
         add.append({"file": f"out/raw/mount-{name}-ring.png", "group": "rings", "size": "1122x1402",
                     "refs": [f"out/raw/{src}.png", "out/raw/mount-iron-scroll-take2.png"],
                     "prompt": RING_PROMPT + "\n\n" + mp.KEY})
+    add.append({"file": "out/raw/mount-roof-eave-tie.png", "group": "rings", "size": "1122x1402",
+                "refs": ["out/raw/mount-roof-eave-take2.png"], "prompt": TIE_PROMPT + "\n\n" + mp.KEY})
     for t, d, mount in OBJECTS:
         s = slug(t)
         add.append({"file": f"out/raw/obj-{s}.png", "out": f"hang-{s}", "mount": mount, "group": "path4", "size": "1024x1536",
                     "refs": ["refs/ref-hang-hanging-lanterns.png", "refs/ref-hang-chinese-knot.png"],
                     "prompt": f"{NOTE}\n\n{mp.STYLE}\n\n{SIMPLE}\n\nCreate a hanging decoration: {d}. {SHAPE}\n\n{AVOID}\n\n{mp.KEY}"})
     json.dump(jobs + add, open("jobs.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    print(len(add), "jobs (2 rings, %d objects);" % len(OBJECTS), len(jobs) + len(add), "in all")
+    print(len(add), "jobs (2 rings, the eave tie, %d objects);" % len(OBJECTS), len(jobs) + len(add), "in all")
 
 
 if __name__ == "__main__":

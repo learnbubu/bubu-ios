@@ -1,6 +1,6 @@
 # Path art, batch 4: hook pieces, and two brass rings
 
-**Jobs:** the 16 jobs in `tools/art/jobs.json` with `"group": "rings"` or `"group": "path4"`. Make **only** those.
+**Jobs:** the 17 jobs in `tools/art/jobs.json` with `"group": "rings"` or `"group": "path4"`. Make **only** those.
 
 Each job gives:
 - `file`: where to save the image, relative to `tools/art`;
@@ -18,8 +18,9 @@ Each job gives:
 3. Save it as PNG at `file`.
 4. Look at it, and make it once more if any of these is wrong.
 
-   For the 2 `rings` jobs (edits of a mount):
-   - the red loop is still there, or there's no brass ring;
+   For the 3 `rings` jobs (edits of a mount):
+   - a ring job: the red loop is still there, or there's no brass ring;
+   - the eave tie (`mount-roof-eave-tie`): there's still a ring or the old loop, the cord isn't tied round the upturned tip, or its end doesn't hang straight down in open air;
    - the mount has moved, changed size or changed shape;
    - anything hangs from the ring.
 
@@ -43,4 +44,4 @@ Report progress every 5 images.
 
 The owner picked nine mounts as masters, so every bracket matches every time. Codex now draws only the object;
 `hang.py` hangs it from the master's ring. The roof eave and bamboo pole masters ended in a red loop; the owner asked
-for brass rings like the rest.
+for brass rings like the rest. On the eave the ring looked fake, so it gets a cord tied round its tip instead.
