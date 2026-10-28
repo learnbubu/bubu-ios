@@ -166,6 +166,12 @@ def main():
         src = os.path.join(FINAL, "pictures", same + ".png")
         if os.path.exists(src):
             shutil.copy(src, os.path.join(FINAL, "pictures", w + ".png"))
+    # the mount masters (from the kept mounts), then the hook pieces hung from them
+    import sys
+    sys.path.insert(0, HERE)   # (run with -I, the script's own folder isn't on the path)
+    import masters, hang
+    masters.main()
+    hang.main()
     rows = "".join(
         f'<figure><div class="ck"><img src="final/{f}"></div><div class="cr"><img src="final/{f}"></div>'
         f'<figcaption>{f}{" · " + d if d else ""}{" · <b>pink " + format(pk, ".1%") + "</b>" if pk > 0.002 else ""}</figcaption></figure>'

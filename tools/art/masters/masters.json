@@ -1,0 +1,107 @@
+{
+ "roof-eave": {
+  "file": "roof-eave.png",
+  "from": "mount-roof-eave-take2",
+  "size": [
+   482,
+   485
+  ],
+  "tie": [
+   252,
+   334
+  ]
+ },
+ "bamboo-pole": {
+  "file": "bamboo-pole.png",
+  "from": "mount-bamboo-pole",
+  "size": [
+   455,
+   136
+  ],
+  "tie": null
+ },
+ "iron-scroll": {
+  "file": "iron-scroll.png",
+  "from": "mount-iron-scroll-take2",
+  "size": [
+   678,
+   352
+  ],
+  "tie": [
+   544,
+   261
+  ]
+ },
+ "cloud-bracket": {
+  "file": "cloud-bracket.png",
+  "from": "mount-cloud-bracket",
+  "size": [
+   591,
+   377
+  ],
+  "tie": [
+   470,
+   211
+  ]
+ },
+ "dragon-head": {
+  "file": "dragon-head.png",
+  "from": "mount-dragon-head",
+  "size": [
+   683,
+   358
+  ],
+  "tie": [
+   617,
+   299
+  ]
+ },
+ "jade-bracket": {
+  "file": "jade-bracket.png",
+  "from": "mount-jade-bracket-take2",
+  "size": [
+   617,
+   417
+  ],
+  "tie": [
+   498,
+   265
+  ]
+ },
+ "brass-rod": {
+  "file": "brass-rod.png",
+  "from": "mount-brass-rod",
+  "size": [
+   599,
+   354
+  ],
+  "tie": [
+   489,
+   245
+  ]
+ },
+ "stone-corbel": {
+  "file": "stone-corbel.png",
+  "from": "mount-stone-corbel",
+  "size": [
+   587,
+   396
+  ],
+  "tie": [
+   473,
+   276
+  ]
+ },
+ "fishing-rod": {
+  "file": "fishing-rod.png",
+  "from": "mount-fishing-rod-take2",
+  "size": [
+   682,
+   422
+  ],
+  "tie": [
+   610,
+   167
+  ]
+ }
+}

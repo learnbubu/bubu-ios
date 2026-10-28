@@ -10,7 +10,7 @@ import re
 
 from PIL import Image
 
-from install import slabs
+from install import slabs, chosen
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FINAL = os.path.join(HERE, "out", "final")
@@ -35,9 +35,13 @@ def main():
     for f in sorted(os.listdir(FINAL)):
         if not f.endswith(".png"):
             continue
-        name = f[:-4]
+        if f.endswith("-right.png") and f.startswith(("corner-", "hang-")):
+            continue
+        name = chosen(f[:-4])
+        if not name:
+            continue
         kind = name.split("-")[0]
-        if kind not in SIZE or name in have or (name.endswith("-right") and kind in ("corner", "hang")):
+        if kind not in SIZE or name in have:
             continue
         w, side, longest = SIZE[kind]
         if "-tall-" in name:

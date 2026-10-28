@@ -10,6 +10,7 @@ Re-running replaces what it installed before.
 """
 import json
 import os
+import re
 import shutil
 
 import numpy as np
@@ -40,6 +41,28 @@ def imageset(name, im, longest):
     return im
 
 
+# the owner's verdicts from the path editor's art review: from the batches reviewed there before installing, only
+# what was kept goes in (a kept take, e.g. panda-watering-take2, as panda-watering-2); everything else as before
+REVIEW = os.path.join(HERE, "..", "..", "..", "chineseLearning", "app", "tools", "path-editor", "art-review.json")
+REVIEWED = ("path3", "path4")
+PARTS = ("panda-spare-lantern-",)   # a pose cut into parts to animate, not poses of their own
+
+
+def chosen(name):
+    """The name a picture in out/final goes into the app under, or None to leave it out."""
+    if name.startswith(PARTS):
+        return None
+    base = re.sub(r"-take\d+$", "", name)
+    jobs = json.load(open(os.path.join(HERE, "jobs.json"), encoding="utf-8"))
+    reviewed = {j.get("out") or os.path.basename(j["file"])[:-4] for j in jobs if j["group"] in REVIEWED}
+    if base not in reviewed:
+        return name if base == name else None
+    review = json.load(open(REVIEW, encoding="utf-8")) if os.path.exists(REVIEW) else {}
+    if (review.get(name) or {}).get("verdict") != "keep":
+        return None
+    return re.sub(r"-take(\d+)$", r"-\1", name)
+
+
 def slabs(im):
     """Ten strips top to bottom: the opaque extent of each as a fraction of the width."""
     a = np.asarray(im.getchannel("A")) > 40
@@ -68,7 +91,9 @@ def main():
     for f in sorted(os.listdir(FINAL)):
         if not f.endswith(".png") or (f.endswith("-right.png") and f.startswith(("corner-", "hang-"))):
             continue
-        name = f[:-4]
+        name = chosen(f[:-4])
+        if not name:
+            continue
         kind = name.split("-")[0]
         if kind == "panda":
             if name in existing and name not in installed_pandas():
