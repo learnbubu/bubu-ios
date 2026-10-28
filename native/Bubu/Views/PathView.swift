@@ -455,8 +455,10 @@ struct GuidePill: View {
     }
 }
 
-/// Streak, coins and buns in one bar across the top of the path (web: .hud-bar).
-/// The lantern opens Profile, the coins the shop, the buns the buns sheet.
+/// Streak, coins and buns across the top of the path, as an open strip (the owner's pick, 28 Oct 2026, from
+/// Duolingo's): no box and no dividers, just each icon and its number in the icon's own colour, on a solid band of
+/// the path's paper that runs up under the status bar, so the path scrolls under it and is cut off clean (no fade:
+/// the owner didn't want one). The lantern opens Profile, the coins the shop, the buns the buns sheet.
 struct HUD: View {
     @Environment(ProgressStore.self) private var progress
     @Environment(Router.self) private var router
@@ -464,40 +466,29 @@ struct HUD: View {
         let lit = progress.litOn(progress.today), plus = progress.isPlus, n = progress.buns
         HStack(spacing: 0) {
             segment("Streak, view progress") { router.tab = .profile } label: {
-                LanternMark(lit: lit, size: 18).opacity(lit ? 1 : 0.75)
+                LanternMark(lit: lit, size: 22).opacity(lit ? 1 : 0.75)
                 Text("\(progress.streak)")
             }
             .foregroundStyle(lit ? Color.ember : Color.muted)
-            divider
             segment("Coins, open the shop") { Moments.shared.show(.shop) } label: {
-                CoinIcon(size: 20)
+                CoinIcon(size: 23)
                 Text("\(progress.coins)").foregroundStyle(Color.gold)
             }
-            divider
             segment("Buns") { Moments.shared.show(.buns(.init(ctx: .hud))) } label: {
-                BunIcon(width: 24)
+                BunIcon(width: 27)
                 Text(plus ? "∞" : "\(n)").foregroundStyle(!plus && n <= 1 ? Color.again : Color.bunBrown)
             }
         }
-        .fixedSize(horizontal: false, vertical: true)     // the dividers take the bar's height, no more
-        .padding(2)
-        .background {
-            ZStack {
-                Capsule().fill(Color.line).offset(y: 1)
-                Capsule().fill(Color.panel)
-                Capsule().strokeBorder(Color.line, lineWidth: 2)
-            }
-        }
-        .padding(.horizontal, 14).padding(.top, 10)
+        .padding(.horizontal, 10).padding(.top, 8).padding(.bottom, 2)
+        .frame(maxWidth: .infinity)
+        .background(Color.bg.ignoresSafeArea(edges: .top))
     }
-
-    private var divider: some View { Rectangle().fill(Color.line).frame(width: 2) }
 
     private func segment<L: View>(_ label: String, _ action: @escaping () -> Void, @ViewBuilder label content: () -> L) -> some View {
         Button(action: action) {
-            HStack(spacing: 6, content: content)
-                .font(.nunito(15, .black)).monospacedDigit()
-                .frame(maxWidth: .infinity).padding(.vertical, 6)
+            HStack(spacing: 7, content: content)
+                .font(.nunito(18, .black)).monospacedDigit()
+                .frame(maxWidth: .infinity).padding(.vertical, 8)
                 .contentShape(Rectangle())
         }
         .buttonStyle(PressDown(depth: 1))
