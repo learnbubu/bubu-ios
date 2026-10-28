@@ -1,12 +1,13 @@
 {
-  "info": {
-    "author": "xcode",
-    "version": 1
-  },
   "images": [
     {
       "idiom": "universal",
-      "filename": "chip-lantern-unlit.png"
+      "filename": "chip-lantern-unlit.png",
+      "scale": "3x"
     }
-  ]
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
 }

@@ -467,16 +467,16 @@ struct HUD: View {
         let lit = progress.litOn(progress.today), plus = progress.isPlus, n = progress.buns
         HStack(spacing: 0) {
             segment("Streak, view progress") { router.tab = .profile } label: {
-                hudIcon(lit ? "hud-lantern-lit" : "hud-lantern-unlit", 24)
+                hudIcon(lit ? "licon-lit" : "licon-unlit", 24)
                 Text("\(progress.streak)")
             }
             .foregroundStyle(lit ? Color.ember : Color.muted)
             segment("Coins, open the shop") { Moments.shared.show(.shop) } label: {
-                hudIcon("hud-coin", 23)
+                hudIcon("coin", 23)
                 Text("\(progress.coins)").foregroundStyle(Color.gold)
             }
             segment("Buns") { Moments.shared.show(.buns(.init(ctx: .hud))) } label: {
-                hudIcon("hud-bun", 27)
+                hudIcon("bun", 27)
                 Text(plus ? "∞" : "\(n)").foregroundStyle(!plus && n <= 1 ? Color.again : Color.bunBrown)
             }
         }
@@ -487,8 +487,8 @@ struct HUD: View {
         .background(Color.bg.padding(.bottom, -38).ignoresSafeArea(edges: .top))
     }
 
-    /// The bar's own icons, flat 2D like Duolingo's (the owner's pick, 28 Oct 2026; Codex's "hudflat" batch): a
-    /// lantern with nothing hanging from it and the coin; the bun is Codex's painted one (the owner's pick over the flat).
+    /// The bar's icons, the app's own lantern, coin and bun (since 28 Oct 2026 the owner's picks everywhere: Codex's
+    /// flat 2D lantern with nothing hanging from it and flat coin, and its painted bun), at a common 24 pt height.
     /// `width` in points; each keeps its own shape.
     private func hudIcon(_ name: String, _ width: CGFloat) -> some View {
         Image(name).resizable().scaledToFit().frame(width: width, height: 24)
