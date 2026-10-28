@@ -1,4 +1,4 @@
-# The native Bùbù app. XcodeGen turns this into Bubu.xcodeproj (on the Mac or in Codemagic):
+﻿# The native BÃ¹bÃ¹ app. XcodeGen turns this into Bubu.xcodeproj (on the Mac or in Codemagic):
 #   brew install xcodegen && cd native && xcodegen generate
 name: Bubu
 options:
@@ -9,7 +9,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.2.56"
+    MARKETING_VERSION: "0.2.57"
     CURRENT_PROJECT_VERSION: "1"
 targets:
   Bubu:
@@ -20,7 +20,7 @@ targets:
     info:
       path: Bubu/Info.plist
       properties:
-        CFBundleDisplayName: 步步 Bùbù
+        CFBundleDisplayName: æ­¥æ­¥ BÃ¹bÃ¹
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen:
@@ -34,8 +34,8 @@ targets:
           - MaShanZheng-Bubu.ttf
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
-        NSMicrophoneUsageDescription: Bùbù listens when you practise speaking, to check your pronunciation.
-        NSSpeechRecognitionUsageDescription: Bùbù uses speech recognition to check the Chinese you say in speaking practice.
+        NSMicrophoneUsageDescription: BÃ¹bÃ¹ listens when you practise speaking, to check your pronunciation.
+        NSSpeechRecognitionUsageDescription: BÃ¹bÃ¹ uses speech recognition to check the Chinese you say in speaking practice.
         ITSAppUsesNonExemptEncryption: false
         # let the pen (and animations) run at 120 Hz on ProMotion iPhones
         CADisableMinimumFrameDurationOnPhone: true
