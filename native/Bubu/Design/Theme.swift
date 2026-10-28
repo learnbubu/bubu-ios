@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import CoreText
 
 // The web app's colour tokens, day and night.
 extension Color {
@@ -71,6 +72,69 @@ extension Font {
     static func hanzi(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font { .system(size: size, weight: weight) }
     /// the path stones' carved brush lettering (Ma Shan Zheng, cut down to the course's characters: MaShanZheng-Bubu.ttf)
     static func stone(_ size: CGFloat) -> Font { .custom("MaShanZheng-Regular", size: size) }
+}
+
+/// Centring a stone's character by eye rather than by its box: a brush character's ink rarely sits in the middle of its
+/// square (乙 leans right and down, 电 hangs low), so each is moved until its optical centre (halfway between its ink's
+/// bounding box and its ink's centre of mass) is where the middle of its text box was. Measured from the font's outline
+/// once per character.
+@MainActor enum StoneLettering {
+    private static var unit: [String: CGSize] = [:]
+
+    /// The offset (points, y down) that brings `s`'s optical centre to the middle of its text, at `size`.
+    static func centring(_ s: String, size: CGFloat) -> CGSize {
+        let u = unit[s] ?? measure(s)
+        unit[s] = u
+        return CGSize(width: u.width * size, height: u.height * size)
+    }
+
+    /// The same, per point of font size (font units over 1000).
+    static func measure(_ s: String) -> CGSize {
+        let font = CTFontCreateWithName("MaShanZheng-Regular" as CFString, 1000, nil)
+        let units = Array(s.utf16)
+        var glyphs = [CGGlyph](repeating: 0, count: units.count)
+        guard !units.isEmpty, CTFontGetGlyphsForCharacters(font, units, &glyphs, units.count),
+              let path = CTFontCreatePathForGlyph(font, glyphs[0], nil), !path.isEmpty else { return .zero }
+        var adv = CGSize.zero
+        CTFontGetAdvancesForGlyphs(font, .horizontal, glyphs, &adv, 1)
+        // the outline's signed area and first moments (Green's theorem; holes wind the other way), curves in 8 steps
+        var a = 0.0, mx = 0.0, my = 0.0, start = CGPoint.zero, last = CGPoint.zero
+        func edge(to q: CGPoint) {
+            let c = Double(last.x * q.y - q.x * last.y)
+            a += c; mx += Double(last.x + q.x) * c; my += Double(last.y + q.y) * c
+            last = q
+        }
+        path.applyWithBlock { el in
+            let p = el.pointee.points
+            switch el.pointee.type {
+            case .moveToPoint: start = p[0]; last = p[0]
+            case .addLineToPoint: edge(to: p[0])
+            case .addQuadCurveToPoint:
+                let p0 = last
+                for i in 1...8 {
+                    let t = CGFloat(i) / 8, u = 1 - t
+                    edge(to: CGPoint(x: u * u * p0.x + 2 * u * t * p[0].x + t * t * p[1].x,
+                                     y: u * u * p0.y + 2 * u * t * p[0].y + t * t * p[1].y))
+                }
+            case .addCurveToPoint:
+                let p0 = last
+                for i in 1...8 {
+                    let t = CGFloat(i) / 8, u = 1 - t
+                    let b0 = u * u * u, b1 = 3 * u * u * t, b2 = 3 * u * t * t, b3 = t * t * t
+                    edge(to: CGPoint(x: b0 * p0.x + b1 * p[0].x + b2 * p[1].x + b3 * p[2].x,
+                                     y: b0 * p0.y + b1 * p[0].y + b2 * p[1].y + b3 * p[2].y))
+                }
+            case .closeSubpath: edge(to: start)
+            @unknown default: break
+            }
+        }
+        guard abs(a) > 1 else { return .zero }
+        let box = path.boundingBoxOfPath
+        let inkX = (box.midX + CGFloat(mx / (3 * a))) / 2, inkY = (box.midY + CGFloat(my / (3 * a))) / 2
+        // font units are y up from the baseline; the text's box runs from the ascent down to the descent
+        let asc = CTFontGetAscent(font), desc = CTFontGetDescent(font)
+        return CGSize(width: (adv.width / 2 - inkX) / 1000, height: (inkY - (asc - desc) / 2) / 1000)
+    }
 }
 
 /// The tone (1–4, 5 = neutral) of one pinyin syllable, from its mark.

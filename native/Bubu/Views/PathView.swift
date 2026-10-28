@@ -116,14 +116,18 @@ struct PathView: View {
                 // the character carved into the stone (the owner's pick, 28 Oct 2026, from Codex's carved stones): a
                 // brush hand cut in a deeper shade of the stone's own colour, shadowed along the top of each cut, a thin
                 // lit lip below; laid on the stone's top face, tipped back 40° (the art is drawn from above at a slant),
-                // and centred on that face, a little left of and above the middle of the stone's picture
-                Text(course.hero[it.lesson.id] ?? "")
+                // and centred on that face, a little left of and above the middle of the stone's picture. Each character
+                // is centred by eye first (StoneLettering): its ink, not its box, sits on the face's centre
+                let hero = course.hero[it.lesson.id] ?? ""
+                Text(hero)
                     .font(.stone(40))
                     .foregroundStyle((done ? Color.stoneCutDone : now ? Color.stoneCutNow : Color.stoneCutLocked)
                         .shadow(.inner(color: .black.opacity(scheme == .dark ? 0.7 : 0.62), radius: 0.7, x: 0, y: 2.1)))
                     .shadow(color: .white.opacity(scheme == .dark ? 0.16 : 0.45), radius: 0, y: 1.3)
+                    .offset(StoneLettering.centring(hero, size: 40))
                     .rotation3DEffect(.degrees(40), axis: (x: 1, y: 0, z: 0), perspective: 0.25)
-                    .offset(x: -3, y: -6.5)
+                    // (−5.5, not −6.5: the centring lifts the brush's ink a point on average, so the face's spot stays put)
+                    .offset(x: -3, y: -5.5)
                 // a practice stone: its 练 (or 复 for the chapter review) and a small repeat mark
                 if it.lesson.isPractice { PracticeMark(active: done || now).offset(x: -size * 0.62, y: size * 0.28) }
                 if now { StartBubble().offset(y: -size / 2 - 18) }

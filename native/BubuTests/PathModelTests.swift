@@ -25,6 +25,18 @@ final class PathModelTests: XCTestCase {
         XCTAssertTrue(missing.isEmpty, "not in the stone font: \(String(missing))")
     }
 
+    /// Each stone's character is centred by its ink: an odd shape moves (乙 sits right and low in its square, so it comes
+    /// left and up, as measured from the font with fontTools), and none moves far.
+    @MainActor func testTheStoneCharactersAreCentredByTheirInk() {
+        let yi = StoneLettering.centring("乙", size: 40)
+        XCTAssertEqual(yi.width, -1.8, accuracy: 0.6)
+        XCTAssertEqual(yi.height, -5.0, accuracy: 0.8)
+        for ch in Set(course.lessons.compactMap { course.hero[$0.id] }) {
+            let c = StoneLettering.centring(ch, size: 40)
+            XCTAssertLessThan(hypot(c.width, c.height), 8, "\(ch) moves too far: \(c)")
+        }
+    }
+
     func testEveryStoneIsLaidOutInOrder() {
         let m = PathModel(course: course, width: W, current: course.lessons[3].id)
         XCTAssertEqual(m.items.count, course.lessons.count)
