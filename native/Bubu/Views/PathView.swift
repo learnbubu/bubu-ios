@@ -488,7 +488,8 @@ struct HUD: View {
     }
 
     /// The bar's own icons, flat 2D like Duolingo's (the owner's pick, 28 Oct 2026; Codex's "hudflat" batch): a
-    /// lantern with nothing hanging from it, the coin, the bun. `width` in points; each keeps its own shape.
+    /// lantern with nothing hanging from it and the coin; the bun is Codex's painted one (the owner's pick over the flat).
+    /// `width` in points; each keeps its own shape.
     private func hudIcon(_ name: String, _ width: CGFloat) -> some View {
         Image(name).resizable().scaledToFit().frame(width: width, height: 24)
     }
