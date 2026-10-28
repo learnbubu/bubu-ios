@@ -84,14 +84,17 @@ extension Font {
 @MainActor enum StoneLettering {
     private static var unit: [String: CGSize] = [:]
 
-    private struct Placed: Decodable { let faces: [[CGFloat]]; let stones: [String: [CGFloat]] }
+    /// `learned`: every stone the owner didn't place, filled from how they placed the others (the page's "Learn from
+    /// my placing")
+    private struct Placed: Decodable { let faces: [[CGFloat]]; let stones: [String: [CGFloat]]; let learned: [String: [CGFloat]]? }
     private static let placed: Placed? = Bundle.main.url(forResource: "stone-lettering", withExtension: "json")
         .flatMap { try? Data(contentsOf: $0) }.flatMap { try? JSONDecoder().decode(Placed.self, from: $0) }
 
     /// Where lesson `lessonId`'s character sits on its stone, of shape `shape` (0–4), after the tilt: the shape's face
     /// centre and the stone's own hand placing.
     static func placing(_ lessonId: String, shape: Int) -> CGSize {
-        let faces = placed?.faces ?? [], n = placed?.stones[lessonId].flatMap { $0.count == 2 ? $0 : nil } ?? [0, 0]
+        let faces = placed?.faces ?? []
+        let n = (placed?.stones[lessonId] ?? placed?.learned?[lessonId]).flatMap { $0.count == 2 ? $0 : nil } ?? [0, 0]
         let f = faces.indices.contains(shape) && faces[shape].count == 2 ? faces[shape] : [-3, -5.5]
         return CGSize(width: f[0] + n[0], height: f[1] + n[1])
     }

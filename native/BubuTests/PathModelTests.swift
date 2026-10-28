@@ -48,6 +48,14 @@ final class PathModelTests: XCTestCase {
         // every stone placed by hand is one of the path's, and one nobody placed sits on its shape's centre
         let ids = Set(course.lessons.map(\.id))
         XCTAssertTrue(stones.keys.allSatisfy(ids.contains), "placed stones the course doesn't have")
+        // the learned ones too, and never a stone the owner placed
+        let learned = o["learned"] as? [String: [Double]] ?? [:]
+        XCTAssertTrue(learned.keys.allSatisfy(ids.contains), "learned stones the course doesn't have")
+        XCTAssertTrue(Set(learned.keys).isDisjoint(with: stones.keys))
+        if let (id, v) = learned.first {
+            let shape = try XCTUnwrap(PathModel(course: course, width: W, current: nil).items.first { $0.lesson.id == id }).index % 5
+            XCTAssertEqual(Double(StoneLettering.placing(id, shape: shape).width), faces[shape][0] + v[0], accuracy: 0.01)
+        }
         let unplaced = "no-such-lesson"
         XCTAssertEqual(Double(StoneLettering.placing(unplaced, shape: 2).width), faces[2][0], accuracy: 0.01)
         XCTAssertEqual(Double(StoneLettering.placing(unplaced, shape: 2).height), faces[2][1], accuracy: 0.01)
