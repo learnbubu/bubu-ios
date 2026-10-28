@@ -47,6 +47,26 @@ def cord_and_body(im):
     return cx, body, cw, end
 
 
+def clean_cord(obj):
+    """The cord Codex drew between the object's bead or knot and the object itself, taken out (the owner: "up to the knot
+    we need to remove the rope"), so the one rope, drawn behind, shows there instead. Only rows as narrow as the cord
+    (nothing else is beside it), only red, only near the cord's line: beads, knots and the object stay. In place: it
+    runs on every hang, and the Hook pieces page (hooks.html) reads the cleaned picture too."""
+    a = np.asarray(obj).copy()
+    cx, body, cw, end = cord_and_body(obj)
+    rows = (a[..., 3] > 100).sum(axis=1)
+    r, g, b = (a[..., i].astype(int) for i in range(3))
+    red = (r > 140) & (g < 130) & (b < 120) & (r - g > 60)
+    x0, x1 = int(cx - 2 * cw), int(cx + 2 * cw) + 1
+    n = 0
+    for y in range(end, body):
+        if rows[y] <= 2 * cw:
+            m = red[y, x0:x1]
+            a[y, x0:x1, 3][m] = 0
+            n += int(m.sum())
+    return Image.fromarray(a), n
+
+
 def rope(W, H, x, y0, y1, knot=None):
     """A rope ROPE_W wide down x from y0 to y1, on a W x H layer, and a knot centred at (x, knot) if given: drawn 4x
     and scaled down, so its edges are smooth."""
@@ -91,7 +111,8 @@ def hang(obj, master, tie, cord=CORD, size=1.0, band=0):
     left = min(0, ox)
     W = max(CANVAS_W, master.width, ox + o.width) - left
     H = max(master.height, oy + o.height)
-    out = rope(W, H, tie[0] - left, tie[1], oy + 6)   # runs a little into the object's top, behind it
+    # behind the object: down past its bead to where the object itself starts, as the drawn cord there is gone
+    out = rope(W, H, tie[0] - left, tie[1], oy + round((body - end) * s) + 6)
     out.alpha_composite(o, (ox - left, oy))
     out.alpha_composite(master, (-left, 0))
     # tied on: over a ring, the rope wraps its bottom band (never up through the hole) with a knot under it; on the
@@ -116,7 +137,10 @@ def main():
         if not os.path.exists(f) or not m or not m["tie"]:
             continue
         own = (st.get("pieces") or {}).get(j["out"], {})
-        out = hang(Image.open(f).convert("RGBA"), Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"), m["tie"],
+        obj, gone = clean_cord(Image.open(f).convert("RGBA"))
+        if gone:
+            obj.save(f)
+        out = hang(obj, Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"), m["tie"],
                    cord=own.get("cord", st.get("cord", CORD)), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0))
         out.save(os.path.join(FINAL, j["out"] + ".png"))
         out.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(FINAL, j["out"] + "-right.png"))
