@@ -6,8 +6,9 @@ by process.py) hangs on a cord that runs up to its top edge. Here:
     first row clearly wider than the cord);
   - the object is scaled so its body is BODY_W wide (or BODY_H tall, whichever is smaller), the same for every piece,
     since the masters all come from the same canvas at the same scale;
-  - the cord is cut to CORD long, and its top tucked up behind the master's ring, at the tie point in
-    masters/masters.json (masters.py);
+  - the cord Codex drew is cut off (its thickness changed with each object's scale; the owner: "make sure that all the
+    ropes are the same thickness and match to the ring"), and one rope, ROPE_W wide in ROPE red, runs CORD long from
+    behind the master's ring, at the tie point in masters/masters.json (masters.py), down to the object;
   - the master is laid over it, and the piece is saved as out/final/<job's out>.png, with a mirrored -right copy for
     the other side of the path, like every hanging piece.
 
@@ -30,15 +31,37 @@ CANVAS_W = 520              # every hook piece this wide (mount at the left), so
 MOUNT = 0.65                # the masters, scaled to the size of the brackets in the pieces already in the app
 
 
+ROPE_W = 8                  # every rope this wide, whatever the object's size (the eave master's tied cord, scaled)
+ROPE = "#c8391d"            # and this red (the eave's cord), so all ropes match each other and the eave
+
+
 def cord_and_body(im):
-    """(cord's x at the top, the row where the object starts, the cord's width)."""
+    """(cord's x at the top, the row where the object starts, the cord's width, the row where the cord ends)."""
     a = np.asarray(im)[..., 3] > 100
     rows = a.sum(axis=1)
     top = [x for y in range(min(8, a.shape[0])) for x in np.nonzero(a[y])[0]]
     cx = float(np.mean(top)) if top else a.shape[1] / 2
     cw = max(2, int(np.median([r for r in rows[:20] if r]) if rows[:20].any() else 4))
     body = next((y for y in range(a.shape[0]) if rows[y] > 4 * cw), 0)
-    return cx, body, cw
+    end = next((y for y in range(a.shape[0]) if rows[y] > 2 * cw), body)   # the first bead, loop or knot under the cord
+    return cx, body, cw, end
+
+
+def rope(W, H, x, y0, y1, knot=None):
+    """A rope ROPE_W wide down x from y0 to y1, on a W x H layer, and a knot centred at (x, knot) if given: drawn 4x
+    and scaled down, so its edges are smooth."""
+    k = 4
+    big = Image.new("RGBA", (W * k, H * k))
+    from PIL import ImageDraw
+    d = ImageDraw.Draw(big)
+    c = tuple(int(ROPE[i:i + 2], 16) for i in (1, 3, 5)) + (255,)
+    shade = tuple(round(v * 0.78) for v in c[:3]) + (255,)   # a darker right edge, as the drawn cords have
+    d.rectangle((round((x - ROPE_W / 2) * k), round(y0 * k), round((x + ROPE_W / 2) * k), round(y1 * k)), fill=c)
+    d.rectangle((round((x + ROPE_W / 2 - 2) * k), round(y0 * k), round((x + ROPE_W / 2) * k), round(y1 * k)), fill=shade)
+    if knot is not None:
+        kw, kh = ROPE_W * 1.0, ROPE_W * 0.75
+        d.ellipse((round((x - kw) * k), round((knot - kh) * k), round((x + kw) * k), round((knot + kh) * k)), fill=c, outline=shade, width=2 * k)
+    return big.resize((W, H), Image.LANCZOS)
 
 
 # the owner's rope and ornament size, set in the path editor's Hook pieces page (hooks.html): for all pieces, and
@@ -53,31 +76,30 @@ def settings():
         return {}
 
 
-def hang(obj, master, tie, cord=CORD, size=1.0):
+def hang(obj, master, tie, cord=CORD, size=1.0, band=0):
     master = master.resize((round(master.width * MOUNT), round(master.height * MOUNT)), Image.LANCZOS)
-    tie = (tie[0] * MOUNT, round(tie[1] * MOUNT))
-    cx, body, _ = cord_and_body(obj)
-    # the cord, cut to length: drop the rows above (body - CORD - TUCK in the scaled object)
+    tie, band = (tie[0] * MOUNT, round(tie[1] * MOUNT)), band * MOUNT
+    cx, body, _, end = cord_and_body(obj)
+    # the object, without the cord Codex drew (its thickness changes with each object's scale): it starts at the
+    # first bead or knot under the cord, CORD below the ring; one drawn rope, the same for every piece, joins them
     bw, bh = obj.width, obj.height - body
     s = min(BODY_W * size / max(1, bw), BODY_H * size / max(1, bh))
-    o = obj.resize((max(1, round(obj.width * s)), max(1, round(obj.height * s))), Image.LANCZOS)
-    cx, body = cx * s, round(body * s)
-    keep = round(cord) + TUCK
-    if body > keep:
-        o = o.crop((0, body - keep, o.width, o.height))
-    else:                                    # a short cord: extend it with its own top row
-        pad = keep - body
-        top = o.crop((0, 0, o.width, 1)).resize((o.width, pad))
-        ext = Image.new("RGBA", (o.width, o.height + pad))
-        ext.paste(top, (0, 0)); ext.paste(o, (0, pad))
-        o = ext
-    ox, oy = round(tie[0] - cx), tie[1] - TUCK
+    o = obj.crop((0, end, obj.width, obj.height))
+    o = o.resize((max(1, round(o.width * s)), max(1, round(o.height * s))), Image.LANCZOS)
+    cx = cx * s
+    ox, oy = round(tie[0] - cx), tie[1] + round(cord)
     left = min(0, ox)
     W = max(CANVAS_W, master.width, ox + o.width) - left
     H = max(master.height, oy + o.height)
-    out = Image.new("RGBA", (W, H))
+    out = rope(W, H, tie[0] - left, tie[1], oy + 6)   # runs a little into the object's top, behind it
     out.alpha_composite(o, (ox - left, oy))
     out.alpha_composite(master, (-left, 0))
+    # tied on: over a ring, the rope wraps its bottom band (never up through the hole) with a knot under it; on the
+    # eave's cord, it just carries on from the cord's end
+    if band:
+        out.alpha_composite(rope(W, H, tie[0] - left, tie[1] - band, tie[1], knot=tie[1] + ROPE_W * 0.4))
+    else:
+        out.alpha_composite(rope(W, H, tie[0] - left, tie[1] - 3, tie[1] + 1))
     return out
 
 
@@ -95,7 +117,7 @@ def main():
             continue
         own = (st.get("pieces") or {}).get(j["out"], {})
         out = hang(Image.open(f).convert("RGBA"), Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"), m["tie"],
-                   cord=own.get("cord", st.get("cord", CORD)), size=own.get("size", st.get("size", 1.0)))
+                   cord=own.get("cord", st.get("cord", CORD)), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0))
         out.save(os.path.join(FINAL, j["out"] + ".png"))
         out.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(FINAL, j["out"] + "-right.png"))
         n += 1

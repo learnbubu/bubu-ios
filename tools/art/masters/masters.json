@@ -1,15 +1,16 @@
 {
  "roof-eave": {
   "file": "roof-eave.png",
-  "from": "mount-roof-eave-ring",
+  "from": "mount-roof-eave-tie",
   "size": [
-   482,
-   485
+   489,
+   486
   ],
   "tie": [
-   403,
-   240
-  ]
+   478,
+   162
+  ],
+  "band": 0
  },
  "bamboo-pole": {
   "file": "bamboo-pole.png",
@@ -21,7 +22,8 @@
   "tie": [
    372,
    187
-  ]
+  ],
+  "band": 20
  },
  "iron-scroll": {
   "file": "iron-scroll.png",
@@ -33,7 +35,8 @@
   "tie": [
    544,
    261
-  ]
+  ],
+  "band": 26
  },
  "cloud-bracket": {
   "file": "cloud-bracket.png",
@@ -45,7 +48,8 @@
   "tie": [
    470,
    211
-  ]
+  ],
+  "band": 12
  },
  "dragon-head": {
   "file": "dragon-head.png",
@@ -57,7 +61,8 @@
   "tie": [
    617,
    299
-  ]
+  ],
+  "band": 19
  },
  "jade-bracket": {
   "file": "jade-bracket.png",
@@ -69,7 +74,8 @@
   "tie": [
    498,
    265
-  ]
+  ],
+  "band": 25
  },
  "brass-rod": {
   "file": "brass-rod.png",
@@ -81,7 +87,8 @@
   "tie": [
    489,
    245
-  ]
+  ],
+  "band": 16
  },
  "stone-corbel": {
   "file": "stone-corbel.png",
@@ -93,6 +100,7 @@
   "tie": [
    473,
    276
-  ]
+  ],
+  "band": 30
  }
 }

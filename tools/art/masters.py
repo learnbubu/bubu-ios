@@ -87,7 +87,14 @@ def main():
         im.save(os.path.join(OUT, name + ".png"))
         pic = os.path.basename(f)[:-4]
         tie = TIE.get(pic) or (find_cord_end(im) if pic in CORD_END else find_tie(im))
-        meta[name] = {"file": name + ".png", "from": os.path.basename(f)[:-4], "size": list(im.size), "tie": list(tie) if tie else None}
+        # how thick the ring's bottom is at the tie point: the rope wraps over just that band, not up through the hole
+        band = 0
+        if tie and pic not in CORD_END:
+            a = np.asarray(im)[:, tie[0], 3] > 128
+            while tie[1] - band >= 0 and a[tie[1] - band]:
+                band += 1
+        meta[name] = {"file": name + ".png", "from": os.path.basename(f)[:-4], "size": list(im.size), "tie": list(tie) if tie else None,
+                      "band": band}
         shot = Image.new("RGBA", im.size, (246, 241, 228, 255))
         shot.alpha_composite(im)
         if tie:

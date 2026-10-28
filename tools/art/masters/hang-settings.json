@@ -4,25 +4,31 @@
  "pieces": {
   "hang-bronze-bell": {
    "cord": 500,
-   "size": 1.22
+   "size": 0.66
   },
   "hang-brass-gong": {
-   "cord": 450,
+   "cord": 340,
    "size": 0.96
   },
   "hang-steamer-stack": {
-   "cord": 405,
-   "size": 1.32
+   "cord": 350,
+   "size": 1.2
   },
   "hang-straw-hat": {
-   "cord": 440,
+   "cord": 355,
    "size": 1.06
   },
   "hang-birdhouse": {
-   "cord": 290
+   "cord": 295
   },
   "hang-rabbit-lantern": {
-   "cord": 230
+   "cord": 315
+  },
+  "hang-butterfly-kite": {
+   "cord": 350
+  },
+  "hang-fishing-basket": {
+   "cord": 320
   }
  }
 }
