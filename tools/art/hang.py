@@ -26,6 +26,7 @@ MASTERS = os.path.join(HERE, "masters")
 BODY_W, BODY_H = 300, 420   # the object (not its cord), in the masters' pixels
 CORD = 70                   # visible cord, from the bottom of the ring to the object's top
 TUCK = 14                   # how far the cord runs up behind the ring
+MOUNT = 0.65                # the masters, scaled to the size of the brackets in the pieces already in the app
 
 
 def cord_and_body(im):
@@ -40,6 +41,8 @@ def cord_and_body(im):
 
 
 def hang(obj, master, tie):
+    master = master.resize((round(master.width * MOUNT), round(master.height * MOUNT)), Image.LANCZOS)
+    tie = (tie[0] * MOUNT, round(tie[1] * MOUNT))
     cx, body, _ = cord_and_body(obj)
     # the cord, cut to length: drop the rows above (body - CORD - TUCK in the scaled object)
     bw, bh = obj.width, obj.height - body

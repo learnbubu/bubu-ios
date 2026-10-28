@@ -1,24 +1,27 @@
 {
  "roof-eave": {
   "file": "roof-eave.png",
-  "from": "mount-roof-eave-take2",
+  "from": "mount-roof-eave-ring",
   "size": [
    482,
    485
   ],
   "tie": [
-   252,
+   251,
    334
   ]
  },
  "bamboo-pole": {
   "file": "bamboo-pole.png",
-  "from": "mount-bamboo-pole",
+  "from": "mount-bamboo-pole-ring",
   "size": [
    455,
-   136
+   189
   ],
-  "tie": null
+  "tie": [
+   372,
+   187
+  ]
  },
  "iron-scroll": {
   "file": "iron-scroll.png",
