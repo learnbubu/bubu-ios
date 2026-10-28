@@ -26,6 +26,7 @@ MASTERS = os.path.join(HERE, "masters")
 BODY_W, BODY_H = 220, 310   # the object (not its cord), in the masters' pixels (owner: "smaller and on a longer rope")
 CORD = 150                  # visible cord, from the bottom of the ring to the object's top
 TUCK = 14                   # how far the cord runs up behind the ring
+CANVAS_W = 520              # every hook piece this wide (mount at the left), so one width on the path is one scale
 MOUNT = 0.65                # the masters, scaled to the size of the brackets in the pieces already in the app
 
 
@@ -40,16 +41,28 @@ def cord_and_body(im):
     return cx, body, cw
 
 
-def hang(obj, master, tie):
+# the owner's rope and ornament size, set in the path editor's Hook pieces page (hooks.html): for all pieces, and
+# per piece ({"cord": 150, "size": 1, "pieces": {"hang-bronze-bell": {"cord": 200, "size": 0.8}}})
+SETTINGS = os.path.join(MASTERS, "hang-settings.json")
+
+
+def settings():
+    try:
+        return json.load(open(SETTINGS))
+    except (OSError, ValueError):
+        return {}
+
+
+def hang(obj, master, tie, cord=CORD, size=1.0):
     master = master.resize((round(master.width * MOUNT), round(master.height * MOUNT)), Image.LANCZOS)
     tie = (tie[0] * MOUNT, round(tie[1] * MOUNT))
     cx, body, _ = cord_and_body(obj)
     # the cord, cut to length: drop the rows above (body - CORD - TUCK in the scaled object)
     bw, bh = obj.width, obj.height - body
-    s = min(BODY_W / max(1, bw), BODY_H / max(1, bh))
+    s = min(BODY_W * size / max(1, bw), BODY_H * size / max(1, bh))
     o = obj.resize((max(1, round(obj.width * s)), max(1, round(obj.height * s))), Image.LANCZOS)
     cx, body = cx * s, round(body * s)
-    keep = CORD + TUCK
+    keep = round(cord) + TUCK
     if body > keep:
         o = o.crop((0, body - keep, o.width, o.height))
     else:                                    # a short cord: extend it with its own top row
@@ -60,7 +73,7 @@ def hang(obj, master, tie):
         o = ext
     ox, oy = round(tie[0] - cx), tie[1] - TUCK
     left = min(0, ox)
-    W = max(master.width, ox + o.width) - left
+    W = max(CANVAS_W, master.width, ox + o.width) - left
     H = max(master.height, oy + o.height)
     out = Image.new("RGBA", (W, H))
     out.alpha_composite(o, (ox - left, oy))
@@ -71,6 +84,7 @@ def hang(obj, master, tie):
 def main():
     jobs = json.load(open(os.path.join(HERE, "jobs.json"), encoding="utf-8"))
     meta = json.load(open(os.path.join(MASTERS, "masters.json")))
+    st = settings()
     n = 0
     for j in jobs:
         if not j.get("mount"):
@@ -79,7 +93,9 @@ def main():
         m = meta.get(j["mount"])
         if not os.path.exists(f) or not m or not m["tie"]:
             continue
-        out = hang(Image.open(f).convert("RGBA"), Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"), m["tie"])
+        own = (st.get("pieces") or {}).get(j["out"], {})
+        out = hang(Image.open(f).convert("RGBA"), Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"), m["tie"],
+                   cord=own.get("cord", st.get("cord", CORD)), size=own.get("size", st.get("size", 1.0)))
         out.save(os.path.join(FINAL, j["out"] + ".png"))
         out.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(FINAL, j["out"] + "-right.png"))
         n += 1

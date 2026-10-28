@@ -45,9 +45,9 @@ def main():
             continue
         w, side, longest = SIZE[kind]
         if "-tall-" in name:
-            w = 48
+            w = 48                      # the tall, slim corners take less of the screen's width
         if os.path.exists(os.path.join(FINAL, "obj-" + name[5:] + ".png")):
-            w = 32                      # a hook piece (hang.py): a smaller object on a longer cord                      # the tall, slim corners take less of the screen's width
+            w = 40                      # a hook piece (hang.py): all 520 wide, so its bracket matches the knot's
         im = Image.open(os.path.join(FINAL, f)).convert("RGBA")
         im.thumbnail((longest, longest), Image.LANCZOS)
         im.save(os.path.join(WEB, "images", "path", name + ".webp"), "WEBP", quality=88, method=6)
@@ -82,6 +82,28 @@ def css_vars():
             n += 1
     open(html_p, "w", encoding="utf-8", newline=chr(10)).write(chr(10).join(out))
     print(f"{len(missing)} CSS variables added in {n} theme blocks")
+
+
+def refresh_hooks():
+    """The hook pieces already in the palette, redrawn after the owner changes their rope or size (hooks.html): each
+    picture, and its ar and strips in ART and SLABS, in place. Its width on the path stays as the owner set it."""
+    jobs = json.load(open(os.path.join(HERE, "jobs.json"), encoding="utf-8"))
+    src = open(APPJS, encoding="utf-8").read()
+    n = 0
+    for j in jobs:
+        name = j.get("out")
+        f = os.path.join(FINAL, (name or "") + ".png")
+        if not j.get("mount") or not os.path.exists(f) or f'\n    "{name}": {{' not in src:
+            continue
+        im = Image.open(f).convert("RGBA")
+        im.thumbnail((900, 900), Image.LANCZOS)
+        im.save(os.path.join(WEB, "images", "path", name + ".webp"), "WEBP", quality=88, method=6)
+        src = re.sub(r'(\n    "' + name + r'": \{ w: [\d.]+, ar: )[\d.]+', lambda m: m.group(1) + f"{im.height / im.width:.3f}", src)
+        src = re.sub(r'(\n    "' + name + r'": )\[\[[^\n]*?\]\](?=,?\n)',
+                     lambda m: m.group(1) + json.dumps([[float(a), float(b)] for a, b in slabs(im)]), src)
+        n += 1
+    open(APPJS, "w", encoding="utf-8", newline="\n").write(src)
+    print(n, "hook pieces redrawn in the palette")
 
 
 if __name__ == "__main__":
