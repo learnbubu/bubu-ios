@@ -4430,7 +4430,7 @@
  {
   "file": "out/raw/obj-straw-hat.png",
   "out": "hang-straw-hat",
-  "mount": "fishing-rod",
+  "mount": "bamboo-pole",
   "group": "path4",
   "size": "1024x1536",
   "refs": [
@@ -4478,7 +4478,7 @@
  {
   "file": "out/raw/obj-fishing-basket.png",
   "out": "hang-fishing-basket",
-  "mount": "fishing-rod",
+  "mount": "bamboo-pole",
   "group": "path4",
   "size": "1024x1536",
   "refs": [

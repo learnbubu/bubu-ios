@@ -27,11 +27,10 @@ MASTERS = {
     "jade-bracket": "mount-jade-bracket-take2",
     "brass-rod": "mount-brass-rod",
     "stone-corbel": "mount-stone-corbel",
-    "fishing-rod": "mount-fishing-rod-take2",
 }
 # until the ring swaps are made, the pictures they're made from
 FALLBACK = {"mount-roof-eave-ring": "mount-roof-eave-take2", "mount-bamboo-pole-ring": "mount-bamboo-pole"}
-TIE = {}   # master name -> (x, y) by hand, where the found one is wrong
+TIE = {"roof-eave": (403, 240)}   # master name -> (x, y) by hand, where the found one is wrong (the eave's orange woodwork reads as brass)
 
 
 def brass(a):

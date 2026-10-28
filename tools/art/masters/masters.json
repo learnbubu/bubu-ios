@@ -94,17 +94,5 @@
    473,
    276
   ]
- },
- "fishing-rod": {
-  "file": "fishing-rod.png",
-  "from": "mount-fishing-rod-take2",
-  "size": [
-   682,
-   422
-  ],
-  "tie": [
-   610,
-   167
-  ]
  }
 }

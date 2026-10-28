@@ -1,5 +1,28 @@
 {
  "cord": 150,
  "size": 1,
- "pieces": {}
+ "pieces": {
+  "hang-bronze-bell": {
+   "cord": 500,
+   "size": 1.22
+  },
+  "hang-brass-gong": {
+   "cord": 450,
+   "size": 0.96
+  },
+  "hang-steamer-stack": {
+   "cord": 405,
+   "size": 1.32
+  },
+  "hang-straw-hat": {
+   "cord": 440,
+   "size": 1.06
+  },
+  "hang-birdhouse": {
+   "cord": 290
+  },
+  "hang-rabbit-lantern": {
+   "cord": 230
+  }
+ }
 }
