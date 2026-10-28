@@ -149,12 +149,13 @@ struct PathView: View {
         let line = Capsule().fill(Color.line).frame(minWidth: 16, maxWidth: .infinity).frame(height: 2)
         HStack(spacing: 12) {
             line
-            // (the name first: the lines give way to it, so it keeps to one line where it fits)
+            // (the name first: the lines give way to it, so it keeps to one line where it fits; only as wide as its
+            // words, so the lines run right up to it. A frame with a maxWidth here took the whole width, and the lines
+            // were left as stubs at the page's edges: the Mac's check, 28 Oct 2026)
             Text(course.chapters[ci].title)
                 .font(.nunitoXB(15)).foregroundStyle(Color.muted)
                 .multilineTextAlignment(.center).lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: W - 44 - 2 * 28)
                 .layoutPriority(1)
             line
         }
@@ -481,7 +482,9 @@ struct HUD: View {
         }
         .padding(.horizontal, 10).padding(.top, 8).padding(.bottom, 2)
         .frame(maxWidth: .infinity)
-        .background(Color.bg.ignoresSafeArea(edges: .top))
+        // (the band runs on down behind the top half of the pinned chapter card, so nothing scrolls through a gap
+        // between the two: the art goes in under the card and is cut off by the card itself)
+        .background(Color.bg.padding(.bottom, -38).ignoresSafeArea(edges: .top))
     }
 
     private func segment<L: View>(_ label: String, _ action: @escaping () -> Void, @ViewBuilder label content: () -> L) -> some View {
