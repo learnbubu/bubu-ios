@@ -126,8 +126,8 @@ struct PathView: View {
                     .shadow(color: .white.opacity(scheme == .dark ? 0.16 : 0.45), radius: 0, y: 1.3)
                     .offset(StoneLettering.centring(hero, size: 40))
                     .rotation3DEffect(.degrees(40), axis: (x: 1, y: 0, z: 0), perspective: 0.25)
-                    // then onto the face's centre for this shape, and any placing by hand (the editor's Stone Lettering)
-                    .offset(StoneLettering.placing(hero, shape: it.index % 5))
+                    // then onto the face's centre for this shape, and any placing by hand (the editor's Stone Lettering, stone by stone)
+                    .offset(StoneLettering.placing(it.lesson.id, shape: it.index % 5))
                 // a practice stone: its 练 (or 复 for the chapter review) and a small repeat mark
                 if it.lesson.isPractice { PracticeMark(active: done || now).offset(x: -size * 0.62, y: size * 0.28) }
                 if now { StartBubble().offset(y: -size / 2 - 18) }

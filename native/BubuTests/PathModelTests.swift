@@ -37,16 +37,18 @@ final class PathModelTests: XCTestCase {
         }
     }
 
-    /// The owner's hand placing (the editor's Stone Lettering page) is in the app, and a stone uses its shape's centre.
+    /// The owner's hand placing (the editor's Stone Lettering page, stone by stone) is in the app, and a stone uses its
+    /// shape's centre.
     @MainActor func testTheHandPlacedLetteringIsInTheApp() throws {
         let url = try XCTUnwrap(Bundle.main.url(forResource: "stone-lettering", withExtension: "json"))
         let o = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
         let faces = try XCTUnwrap(o["faces"] as? [[Double]])
         XCTAssertEqual(faces.count, 5)
-        let chars = try XCTUnwrap(o["chars"] as? [String: [Double]])
-        // a character nobody placed sits on its shape's centre
-        let unplaced = "\u{E000}"
-        XCTAssertNil(chars[unplaced])
+        let stones = try XCTUnwrap(o["stones"] as? [String: [Double]])
+        // every stone placed by hand is one of the path's, and one nobody placed sits on its shape's centre
+        let ids = Set(course.lessons.map(\.id))
+        XCTAssertTrue(stones.keys.allSatisfy(ids.contains), "placed stones the course doesn't have")
+        let unplaced = "no-such-lesson"
         XCTAssertEqual(Double(StoneLettering.placing(unplaced, shape: 2).width), faces[2][0], accuracy: 0.01)
         XCTAssertEqual(Double(StoneLettering.placing(unplaced, shape: 2).height), faces[2][1], accuracy: 0.01)
     }
