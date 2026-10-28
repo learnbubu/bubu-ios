@@ -23,8 +23,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FINAL = os.path.join(HERE, "out", "final")
 MASTERS = os.path.join(HERE, "masters")
 
-BODY_W, BODY_H = 300, 420   # the object (not its cord), in the masters' pixels
-CORD = 70                   # visible cord, from the bottom of the ring to the object's top
+BODY_W, BODY_H = 220, 310   # the object (not its cord), in the masters' pixels (owner: "smaller and on a longer rope")
+CORD = 150                  # visible cord, from the bottom of the ring to the object's top
 TUCK = 14                   # how far the cord runs up behind the ring
 MOUNT = 0.65                # the masters, scaled to the size of the brackets in the pieces already in the app
 

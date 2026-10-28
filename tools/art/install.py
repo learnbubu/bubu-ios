@@ -48,8 +48,9 @@ REVIEWED = ("path3", "path4")
 PARTS = ("panda-spare-lantern-",)   # a pose cut into parts to animate, not poses of their own
 
 
-def chosen(name):
-    """The name a picture in out/final goes into the app under, or None to leave it out."""
+def chosen(name, preview=False):
+    """The name a picture in out/final goes into the app under, or None to leave it out. With preview (the path
+    editor's palette, to see a piece on the path before deciding), what isn't decided yet goes in too."""
     if name.startswith(PARTS):
         return None
     base = re.sub(r"-take\d+$", "", name)
@@ -58,7 +59,8 @@ def chosen(name):
     if base not in reviewed:
         return name if base == name else None
     review = json.load(open(REVIEW, encoding="utf-8")) if os.path.exists(REVIEW) else {}
-    if (review.get(name) or {}).get("verdict") != "keep":
+    verdict = (review.get(name) or {}).get("verdict")
+    if verdict != "keep" and not (preview and not verdict):
         return None
     return re.sub(r"-take(\d+)$", r"-\1", name)
 
