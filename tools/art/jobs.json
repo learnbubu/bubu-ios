@@ -4345,5 +4345,150 @@
    "refs/ref-hang-chinese-knot.png"
   ],
   "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nKeep it SIMPLE, like the attached references: a few big simple shapes, each a flat fill with at most one soft lighter tone; no fine texture, no tiny repeated details; generous empty space.\n\nCreate a hanging decoration: a round clay teapot hanging by its handle from a small iron hook on a cord. It hangs from a short carved dark-wood bracket (or the upturned corner of a grey-tiled roof eave, where said) that comes in from the TOP-LEFT edge, on a red cord: NOT a branch, no leaves, no plants. Anchor it to the TOP-LEFT corner; it occupies the top-left area only (about the left half and the top two-thirds at most), with plenty of empty magenta. Portrait canvas, 4:5.\n\nAvoid: nothing abstract or symbolic (no swirls, waves, waterfalls or patterns), no text or calligraphy, no jumbles of mixed objects. One clear, real thing a child would name at a glance, made of a few big simple shapes; if it repeats (lanterns, fruit, bells), no more than three to five of them. Make it BIG: it should fill most of the top-left area described below, not sit small in it.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-carved-bracket.png",
+  "group": "mounts",
+  "size": "1122x1402",
+  "refs": [
+   "out/raw/hang-chinese-knot.png"
+  ],
+  "prompt": "The attached image is a finished hanging decoration from the app. EDIT it to make its MOUNT on its own: keep ONLY the carved dark-wood scroll bracket at the top left EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything that hangs from it (the cord, the knots, the hanging object, any tassels), leaving flat magenta (#FF00FF) where they were. Where the cord was tied, keep a small neat tie point or ring on the mount, so it's clear where a cord would hang from. Where something removed was covering part of the mount, draw that hidden part in, continuing it naturally. No text, no letters.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-red-pole.png",
+  "group": "mounts",
+  "size": "1122x1402",
+  "refs": [
+   "out/raw/hang-lantern-cluster.png"
+  ],
+  "prompt": "The attached image is a finished hanging decoration from the app. EDIT it to make its MOUNT on its own: keep ONLY the red-lacquered pole at the top EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything that hangs from it (the cord, the knots, the hanging object, any tassels), leaving flat magenta (#FF00FF) where they were. Where the cord was tied, keep a small neat tie point or ring on the mount, so it's clear where a cord would hang from. Where something removed was covering part of the mount, draw that hidden part in, continuing it naturally. No text, no letters.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-red-bracket.png",
+  "group": "mounts",
+  "size": "1122x1402",
+  "refs": [
+   "out/raw/hang-fish-kite.png"
+  ],
+  "prompt": "The attached image is a finished hanging decoration from the app. EDIT it to make its MOUNT on its own: keep ONLY the red bracket with its gold cap at the top left EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything that hangs from it (the cord, the knots, the hanging object, any tassels), leaving flat magenta (#FF00FF) where they were. Where the cord was tied, keep a small neat tie point or ring on the mount, so it's clear where a cord would hang from. Where something removed was covering part of the mount, draw that hidden part in, continuing it naturally. No text, no letters.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-roof-eave.png",
+  "group": "mounts",
+  "size": "1122x1402",
+  "refs": [
+   "out/raw/hang-gourd.png"
+  ],
+  "prompt": "The attached image is a finished hanging decoration from the app. EDIT it to make its MOUNT on its own: keep ONLY the grey-tiled roof eave corner and its red woodwork at the top left EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything that hangs from it (the cord, the knots, the hanging object, any tassels), leaving flat magenta (#FF00FF) where they were. Where the cord was tied, keep a small neat tie point or ring on the mount, so it's clear where a cord would hang from. Where something removed was covering part of the mount, draw that hidden part in, continuing it naturally. No text, no letters.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-bamboo-pole.png",
+  "group": "mounts",
+  "size": "1122x1402",
+  "refs": [
+   "out/raw/hang-jade-pendant.png"
+  ],
+  "prompt": "The attached image is a finished hanging decoration from the app. EDIT it to make its MOUNT on its own: keep ONLY the green bamboo pole at the top EXACTLY as it is - the same size, the same place on the canvas, the same shapes and colours - and remove everything that hangs from it (the cord, the knots, the hanging object, any tassels), leaving flat magenta (#FF00FF) where they were. Where the cord was tied, keep a small neat tie point or ring on the mount, so it's clear where a cord would hang from. Where something removed was covering part of the mount, draw that hidden part in, continuing it naturally. No text, no letters.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-iron-scroll.png",
+  "group": "mounts",
+  "size": "1024x1536",
+  "refs": [
+   "refs/ref-hang-chinese-knot.png",
+   "refs/ref-hang-hanging-lanterns.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a mount for hanging things from: a black wrought-iron bracket fixed to the edge, its arm curling into one neat scroll underneath. Draw ONLY the mount, with nothing hanging from it: it comes in from the LEFT edge of the canvas near the TOP, reaching about 40–45% of the way across, and sits in the top fifth of the canvas; everything below and to the right is empty magenta. Under its outer end is ONE small round brass ring, clearly visible, where a cord will be tied later; nothing hangs from the ring. Simple and bold like the attached art: a few big shapes, flat fills with one soft lighter tone, no fine texture. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-cloud-bracket.png",
+  "group": "mounts",
+  "size": "1024x1536",
+  "refs": [
+   "refs/ref-hang-chinese-knot.png",
+   "refs/ref-hang-hanging-lanterns.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a mount for hanging things from: a carved dark-wood bracket whose support is shaped like a rounded ruyi cloud. Draw ONLY the mount, with nothing hanging from it: it comes in from the LEFT edge of the canvas near the TOP, reaching about 40–45% of the way across, and sits in the top fifth of the canvas; everything below and to the right is empty magenta. Under its outer end is ONE small round brass ring, clearly visible, where a cord will be tied later; nothing hangs from the ring. Simple and bold like the attached art: a few big shapes, flat fills with one soft lighter tone, no fine texture. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-dragon-head.png",
+  "group": "mounts",
+  "size": "1024x1536",
+  "refs": [
+   "refs/ref-hang-chinese-knot.png",
+   "refs/ref-hang-hanging-lanterns.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a mount for hanging things from: a carved wooden bracket ending in a small friendly stylised dragon head, gold and red, the ring held in its mouth. Draw ONLY the mount, with nothing hanging from it: it comes in from the LEFT edge of the canvas near the TOP, reaching about 40–45% of the way across, and sits in the top fifth of the canvas; everything below and to the right is empty magenta. Under its outer end is ONE small round brass ring, clearly visible, where a cord will be tied later; nothing hangs from the ring. Simple and bold like the attached art: a few big shapes, flat fills with one soft lighter tone, no fine texture. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-archway-beam.png",
+  "group": "mounts",
+  "size": "1024x1536",
+  "refs": [
+   "refs/ref-hang-chinese-knot.png",
+   "refs/ref-hang-hanging-lanterns.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a mount for hanging things from: the corner of a Chinese memorial archway: a red-lacquered crossbeam with a gold-trimmed end and a little grey-tiled cap above it. Draw ONLY the mount, with nothing hanging from it: it comes in from the LEFT edge of the canvas near the TOP, reaching about 40–45% of the way across, and sits in the top fifth of the canvas; everything below and to the right is empty magenta. Under its outer end is ONE small round brass ring, clearly visible, where a cord will be tied later; nothing hangs from the ring. Simple and bold like the attached art: a few big shapes, flat fills with one soft lighter tone, no fine texture. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-jade-bracket.png",
+  "group": "mounts",
+  "size": "1024x1536",
+  "refs": [
+   "refs/ref-hang-chinese-knot.png",
+   "refs/ref-hang-hanging-lanterns.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a mount for hanging things from: a carved wooden bracket painted soft jade green with a cream trim, a simple scrolled support underneath. Draw ONLY the mount, with nothing hanging from it: it comes in from the LEFT edge of the canvas near the TOP, reaching about 40–45% of the way across, and sits in the top fifth of the canvas; everything below and to the right is empty magenta. Under its outer end is ONE small round brass ring, clearly visible, where a cord will be tied later; nothing hangs from the ring. Simple and bold like the attached art: a few big shapes, flat fills with one soft lighter tone, no fine texture. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-bamboo-frame.png",
+  "group": "mounts",
+  "size": "1024x1536",
+  "refs": [
+   "refs/ref-hang-chinese-knot.png",
+   "refs/ref-hang-hanging-lanterns.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a mount for hanging things from: a green bamboo pole lashed with a few turns of brown rope to a short upright bamboo post at the edge. Draw ONLY the mount, with nothing hanging from it: it comes in from the LEFT edge of the canvas near the TOP, reaching about 40–45% of the way across, and sits in the top fifth of the canvas; everything below and to the right is empty magenta. Under its outer end is ONE small round brass ring, clearly visible, where a cord will be tied later; nothing hangs from the ring. Simple and bold like the attached art: a few big shapes, flat fills with one soft lighter tone, no fine texture. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-brass-rod.png",
+  "group": "mounts",
+  "size": "1024x1536",
+  "refs": [
+   "refs/ref-hang-chinese-knot.png",
+   "refs/ref-hang-hanging-lanterns.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a mount for hanging things from: a slim polished brass rod coming in from the edge, a round brass knob on its end. Draw ONLY the mount, with nothing hanging from it: it comes in from the LEFT edge of the canvas near the TOP, reaching about 40–45% of the way across, and sits in the top fifth of the canvas; everything below and to the right is empty magenta. Under its outer end is ONE small round brass ring, clearly visible, where a cord will be tied later; nothing hangs from the ring. Simple and bold like the attached art: a few big shapes, flat fills with one soft lighter tone, no fine texture. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-wall-coping.png",
+  "group": "mounts",
+  "size": "1024x1536",
+  "refs": [
+   "refs/ref-hang-chinese-knot.png",
+   "refs/ref-hang-hanging-lanterns.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a mount for hanging things from: the top of a white plastered garden wall with grey tile coping, a short wooden peg sticking out from it. Draw ONLY the mount, with nothing hanging from it: it comes in from the LEFT edge of the canvas near the TOP, reaching about 40–45% of the way across, and sits in the top fifth of the canvas; everything below and to the right is empty magenta. Under its outer end is ONE small round brass ring, clearly visible, where a cord will be tied later; nothing hangs from the ring. Simple and bold like the attached art: a few big shapes, flat fills with one soft lighter tone, no fine texture. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-stone-corbel.png",
+  "group": "mounts",
+  "size": "1024x1536",
+  "refs": [
+   "refs/ref-hang-chinese-knot.png",
+   "refs/ref-hang-hanging-lanterns.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a mount for hanging things from: a smooth grey stone bracket (a corbel) set into the edge, rounded and chunky. Draw ONLY the mount, with nothing hanging from it: it comes in from the LEFT edge of the canvas near the TOP, reaching about 40–45% of the way across, and sits in the top fifth of the canvas; everything below and to the right is empty magenta. Under its outer end is ONE small round brass ring, clearly visible, where a cord will be tied later; nothing hangs from the ring. Simple and bold like the attached art: a few big shapes, flat fills with one soft lighter tone, no fine texture. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-fishing-rod.png",
+  "group": "mounts",
+  "size": "1024x1536",
+  "refs": [
+   "refs/ref-hang-chinese-knot.png",
+   "refs/ref-hang-hanging-lanterns.png"
+  ],
+  "prompt": "The attached images are existing art from the same app: match their illustration style, palette, texture and level of detail exactly. Do not copy their subjects or composition; draw only what is described below.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nCreate a mount for hanging things from: a slim bamboo fishing rod reaching in from the left at a gentle upward angle, its tip bending slightly. Draw ONLY the mount, with nothing hanging from it: it comes in from the LEFT edge of the canvas near the TOP, reaching about 40–45% of the way across, and sits in the top fifth of the canvas; everything below and to the right is empty magenta. Under its outer end is ONE small round brass ring, clearly visible, where a cord will be tied later; nothing hangs from the ring. Simple and bold like the attached art: a few big shapes, flat fills with one soft lighter tone, no fine texture. Portrait canvas, 4:5.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
