@@ -137,11 +137,12 @@ def main():
         if not os.path.exists(f) or not m or not m["tie"]:
             continue
         own = (st.get("pieces") or {}).get(j["out"], {})
+        # (a cord the master's tied cord was cut back to its knot by, added on, so the object hangs where it did)
         obj, gone = clean_cord(Image.open(f).convert("RGBA"))
         if gone:
             obj.save(f)
         out = hang(obj, Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"), m["tie"],
-                   cord=own.get("cord", st.get("cord", CORD)), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0))
+                   cord=own.get("cord", st.get("cord", CORD)) + round(m.get("drop", 0) * MOUNT), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0))
         out.save(os.path.join(FINAL, j["out"] + ".png"))
         out.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(FINAL, j["out"] + "-right.png"))
         n += 1

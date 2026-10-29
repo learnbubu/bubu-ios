@@ -8,9 +8,10 @@
   ],
   "tie": [
    478,
-   162
+   85
   ],
-  "band": 0
+  "band": 0,
+  "drop": 77
  },
  "bamboo-pole": {
   "file": "bamboo-pole.png",
@@ -23,7 +24,8 @@
    372,
    187
   ],
-  "band": 20
+  "band": 20,
+  "drop": 0
  },
  "iron-scroll": {
   "file": "iron-scroll.png",
@@ -36,7 +38,8 @@
    544,
    261
   ],
-  "band": 26
+  "band": 26,
+  "drop": 0
  },
  "cloud-bracket": {
   "file": "cloud-bracket.png",
@@ -49,7 +52,8 @@
    470,
    211
   ],
-  "band": 12
+  "band": 12,
+  "drop": 0
  },
  "dragon-head": {
   "file": "dragon-head.png",
@@ -62,7 +66,8 @@
    617,
    299
   ],
-  "band": 19
+  "band": 19,
+  "drop": 0
  },
  "jade-bracket": {
   "file": "jade-bracket.png",
@@ -75,7 +80,8 @@
    498,
    265
   ],
-  "band": 25
+  "band": 25,
+  "drop": 0
  },
  "brass-rod": {
   "file": "brass-rod.png",
@@ -88,7 +94,8 @@
    489,
    245
   ],
-  "band": 16
+  "band": 16,
+  "drop": 0
  },
  "stone-corbel": {
   "file": "stone-corbel.png",
@@ -101,6 +108,7 @@
    473,
    276
   ],
-  "band": 30
+  "band": 30,
+  "drop": 0
  }
 }

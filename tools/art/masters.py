@@ -52,6 +52,23 @@ def find_cord_end(im):
     return (int(round(xs[ys >= ys.max() - 2].mean())), int(ys.max()))
 
 
+def cut_at_knot(im, end):
+    """A tied cord's drawn tail, from the knot down to its end, rubbed out: hang.py's rope starts at the knot instead,
+    so there's no join on the open cord (the owner: "can see the connection point here, lets cut it higher at the
+    knot"). Returns the picture and the new tie point, the knot's bottom middle."""
+    a = np.asarray(im).copy()
+    r, g, b = (a[..., i].astype(int) for i in range(3))
+    m = (a[..., 3] > 0) & (r > 120) & (r - g > 60)
+    x, y = end
+    cw = m[y - 20, x - 20:x + 20].sum()                       # the tail's width, well above its rounded end
+    k = y
+    while k > 0 and m[k, x - 20:x + 20].sum() <= cw + 3:     # up the tail until the knot widens it
+        k -= 1
+    k += 2                                                    # just inside the knot's bottom edge
+    a[k:y + 3, x - 20:x + 20][m[k:y + 3, x - 20:x + 20]] = 0
+    return Image.fromarray(a), (x, k)
+
+
 def find_tie(im):
     """The bottom middle of the ring: the lowest brass blob in the right half, its lowest row's middle."""
     from scipy import ndimage
@@ -84,9 +101,13 @@ def main():
         if not os.path.exists(f):
             f = os.path.join(FINAL, FALLBACK.get(src, src) + ".png")
         im = Image.open(f).convert("RGBA")
-        im.save(os.path.join(OUT, name + ".png"))
         pic = os.path.basename(f)[:-4]
         tie = TIE.get(pic) or (find_cord_end(im) if pic in CORD_END else find_tie(im))
+        drop = 0                                  # how much higher the tie point sits than the drawn cord's end
+        if tie and pic in CORD_END:
+            im, knot = cut_at_knot(im, tie)
+            drop, tie = tie[1] - knot[1], knot
+        im.save(os.path.join(OUT, name + ".png"))
         # how thick the ring's bottom is at the tie point: the rope wraps over just that band, not up through the hole
         band = 0
         if tie and pic not in CORD_END:
@@ -94,7 +115,7 @@ def main():
             while tie[1] - band >= 0 and a[tie[1] - band]:
                 band += 1
         meta[name] = {"file": name + ".png", "from": os.path.basename(f)[:-4], "size": list(im.size), "tie": list(tie) if tie else None,
-                      "band": band}
+                      "band": band, "drop": drop}
         shot = Image.new("RGBA", im.size, (246, 241, 228, 255))
         shot.alpha_composite(im)
         if tie:
