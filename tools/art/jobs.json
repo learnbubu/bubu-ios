@@ -4463,7 +4463,7 @@
  {
   "file": "out/raw/obj-rabbit-lantern.png",
   "out": "hang-rabbit-lantern",
-  "mount": "jade-bracket",
+  "mount": "roof-eave",
   "group": "path4",
   "size": "1024x1536",
   "refs": [
@@ -4475,7 +4475,7 @@
  {
   "file": "out/raw/obj-butterfly-kite.png",
   "out": "hang-butterfly-kite",
-  "mount": "bamboo-pole",
+  "mount": "dragon-head",
   "group": "path4",
   "size": "1024x1536",
   "refs": [
@@ -4499,7 +4499,7 @@
  {
   "file": "out/raw/obj-lucky-coins.png",
   "out": "hang-lucky-coins",
-  "mount": "brass-rod",
+  "mount": "dragon-head",
   "group": "path4",
   "size": "1024x1536",
   "refs": [
@@ -4535,7 +4535,7 @@
  {
   "file": "out/raw/obj-embroidered-sachet.png",
   "out": "hang-embroidered-sachet",
-  "mount": "jade-bracket",
+  "mount": "cloud-bracket",
   "group": "path4",
   "size": "1024x1536",
   "refs": [
@@ -4583,7 +4583,7 @@
  {
   "file": "out/raw/obj-cone-wind-chime.png",
   "out": "hang-cone-wind-chime",
-  "mount": "iron-scroll",
+  "mount": "roof-eave",
   "group": "path5",
   "size": "1024x1536",
   "refs": [
@@ -4619,7 +4619,7 @@
  {
   "file": "out/raw/obj-ruyi-jade.png",
   "out": "hang-ruyi-jade",
-  "mount": "jade-bracket",
+  "mount": "cloud-bracket",
   "group": "path5",
   "size": "1024x1536",
   "refs": [
@@ -4631,7 +4631,7 @@
  {
   "file": "out/raw/obj-jade-rings.png",
   "out": "hang-jade-rings",
-  "mount": "bamboo-pole",
+  "mount": "cloud-bracket",
   "group": "path5",
   "size": "1024x1536",
   "refs": [
@@ -4655,7 +4655,7 @@
  {
   "file": "out/raw/obj-koi-charm.png",
   "out": "hang-koi-charm",
-  "mount": "brass-rod",
+  "mount": "dragon-head",
   "group": "path5",
   "size": "1024x1536",
   "refs": [
@@ -4667,7 +4667,7 @@
  {
   "file": "out/raw/obj-flower-medallion.png",
   "out": "hang-flower-medallion",
-  "mount": "stone-corbel",
+  "mount": "cloud-bracket",
   "group": "path5",
   "size": "1024x1536",
   "refs": [
@@ -4679,7 +4679,7 @@
  {
   "file": "out/raw/obj-lotus-fan-charm.png",
   "out": "hang-lotus-fan-charm",
-  "mount": "jade-bracket",
+  "mount": "cloud-bracket",
   "group": "path5",
   "size": "1024x1536",
   "refs": [
@@ -4715,7 +4715,7 @@
  {
   "file": "out/raw/obj-bamboo-sachet.png",
   "out": "hang-bamboo-sachet",
-  "mount": "bamboo-pole",
+  "mount": "cloud-bracket",
   "group": "path5",
   "size": "1024x1536",
   "refs": [
