@@ -8,71 +8,74 @@
   },
   "hang-rabbit-lantern": {
    "cord": 215,
-   "size": 0.96
+   "size": 0.66
   },
   "hang-butterfly-kite": {
-   "cord": 350
+   "cord": 350,
+   "size": 0.67
   },
   "hang-lucky-coins": {
    "cord": 225,
-   "size": 1.04
+   "size": 1.23
   },
   "hang-embroidered-sachet": {
    "cord": 285,
-   "size": 1.06
+   "size": 0.97
   },
   "hang-lotus-lantern": {
    "cord": 380,
-   "size": 0.78
+   "size": 0.66
   },
   "hang-twin-wind-bells": {
-   "size": 1.22
+   "size": 1.1
   },
   "hang-jade-disc": {
    "cord": 235,
-   "size": 1.42
+   "size": 1.07
   },
   "hang-ruyi-jade": {
    "cord": 245,
-   "size": 1.38
+   "size": 1.06
   },
   "hang-cone-wind-chime": {
    "cord": 290,
-   "size": 0.94
+   "size": 0.87
   },
   "hang-palace-lantern": {
    "cord": 290,
-   "size": 0.94
+   "size": 0.73
   },
   "hang-jade-rings": {
    "cord": 225,
-   "size": 1.48
+   "size": 1.25
   },
   "hang-persimmon-charm": {
-   "cord": 185
+   "cord": 185,
+   "size": 0.98
   },
   "hang-koi-charm": {
    "cord": 135,
-   "size": 1.22
+   "size": 0.99
   },
   "hang-flower-medallion": {
    "cord": 195,
-   "size": 1.18
+   "size": 0.84
   },
   "hang-lotus-fan-charm": {
-   "cord": 250
+   "cord": 250,
+   "size": 0.74
   },
   "hang-moon-rabbit-charm": {
    "cord": 200,
-   "size": 1.1
+   "size": 0.78
   },
   "hang-plum-lantern-charm": {
    "cord": 165,
-   "size": 1.06
+   "size": 0.74
   },
   "hang-bamboo-sachet": {
    "cord": 145,
-   "size": 1.3
+   "size": 1.01
   }
  }
 }
