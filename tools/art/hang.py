@@ -97,26 +97,6 @@ def clean_cord(obj):
     return Image.fromarray(a), n
 
 
-def clean_master(im):
-    """The masters come with a blotchy grain in their flat colour (the owner: "this weird artifact pattern", and on the
-    redrawn ones, "there's still some"), and a pink line round the edge from the magenta they were keyed off. Four
-    bilateral passes flatten each tone and keep the edges between them (the redrawn masters are a few flat tones, like
-    the branches); the edge pixels take the colour of the nearest solid pixel inside."""
-    import cv2
-    from scipy import ndimage
-    a = np.asarray(im).copy()
-    rgb = np.ascontiguousarray(a[..., :3])
-    for _ in range(4):
-        rgb = cv2.bilateralFilter(rgb, 9, 35, 6)
-    solid = ndimage.binary_erosion(a[..., 3] == 255, iterations=2)
-    if solid.any():
-        _, (iy, ix) = ndimage.distance_transform_edt(~solid, return_indices=True)
-        edge = ~solid & (a[..., 3] > 0)
-        rgb[edge] = rgb[iy[edge], ix[edge]]
-    a[..., :3] = rgb
-    return Image.fromarray(a)
-
-
 def rope(W, H, x, y0, y1, knot=None):
     """A rope ROPE_W wide down x from y0 to y1, on a W x H layer, and a knot centred at (x, knot) if given: drawn 4x
     and scaled down, so its edges are smooth."""
@@ -216,9 +196,8 @@ def main():
         top = None if j["out"] in NO_TASSEL else TASSEL_TOP.get(j["out"]) or tassel_top(obj)
         src = GREEN if j["out"] in GREENS else RED
         tops[j["out"]] = top and {"top": top, "from": os.path.basename(by_out[src]["file"]), "fromTop": two[src][1]}
-        if m["file"] not in cleaned:   # cleaned once, and saved for the path editor's pages to draw
-            cleaned[m["file"]] = clean_master(Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"))
-            cleaned[m["file"]].save(os.path.join(MASTERS, "clean-" + m["file"]))
+        if m["file"] not in cleaned:   # each master read once
+            cleaned[m["file"]] = Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA")
         out = hang(obj, cleaned[m["file"]], m["tie"],
                    cord=own.get("cord", st.get("cord", CORD)) + round(m.get("drop", 0) * MOUNT), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0),
                    tassel=top, tassel_h=TASSEL_H * st.get("tassel", 1.0) * own.get("tassel", 1.0), tassel_from=two[src])

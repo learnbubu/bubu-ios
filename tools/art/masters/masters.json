@@ -1,13 +1,13 @@
 {
  "roof-eave": {
   "file": "roof-eave.png",
-  "from": "mount-roof-eave-flat",
+  "from": "mount-roof-eave-tie",
   "size": [
-   490,
-   485
+   489,
+   486
   ],
   "tie": [
-   479,
+   478,
    85
   ],
   "band": 0,
@@ -43,10 +43,10 @@
  },
  "cloud-bracket": {
   "file": "cloud-bracket.png",
-  "from": "mount-cloud-bracket-flat",
+  "from": "mount-cloud-bracket",
   "size": [
    591,
-   376
+   377
   ],
   "tie": [
    470,
@@ -57,13 +57,13 @@
  },
  "dragon-head": {
   "file": "dragon-head.png",
-  "from": "mount-dragon-head-flat",
+  "from": "mount-dragon-head",
   "size": [
    683,
    358
   ],
   "tie": [
-   616,
+   617,
    299
   ],
   "band": 19,

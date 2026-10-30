@@ -19,11 +19,11 @@ OUT = os.path.join(HERE, "masters")
 
 # master name -> the picture kept for it (the review's name, in out/final)
 MASTERS = {
-    "roof-eave": "mount-roof-eave-flat",        # redrawn in the branches' style (group "mounts2"; the painted one, mount-roof-eave-tie, felt too soft)
+    "roof-eave": "mount-roof-eave-tie",         # take 2, a red cord tied round its tip (group "rings"; the ring looked fake)
     "bamboo-pole": "mount-bamboo-pole-ring",    # its red loop swapped for a brass ring (group "rings")
     "iron-scroll": "mount-iron-scroll-take2",
-    "cloud-bracket": "mount-cloud-bracket-flat",   # redrawn in the branches' style (group "mounts2")
-    "dragon-head": "mount-dragon-head-flat",       # redrawn in the branches' style (group "mounts2")
+    "cloud-bracket": "mount-cloud-bracket",
+    "dragon-head": "mount-dragon-head",
     "jade-bracket": "mount-jade-bracket-take2",
     "brass-rod": "mount-brass-rod",
     "stone-corbel": "mount-stone-corbel",
@@ -31,7 +31,7 @@ MASTERS = {
 # until the ring swaps are made, the pictures they're made from
 FALLBACK = {"mount-roof-eave-tie": "mount-roof-eave-ring", "mount-bamboo-pole-ring": "mount-bamboo-pole"}
 TIE = {"mount-roof-eave-ring": (403, 240)}   # picture -> (x, y) by hand, where the found one is wrong (the eave's orange woodwork reads as brass)
-CORD_END = {"mount-roof-eave-tie", "mount-roof-eave-flat"}           # tied with a cord, not a ring: the tie point is the cord's end
+CORD_END = {"mount-roof-eave-tie"}           # tied with a cord, not a ring: the tie point is the cord's end
 
 
 def brass(a):
