@@ -218,6 +218,10 @@ def main():
         if m["file"] not in cleaned:   # cleaned once, and saved for the path editor's pages to draw
             cleaned[m["file"]] = clean_master(Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"))
             cleaned[m["file"]].save(os.path.join(MASTERS, "clean-" + m["file"]))
+            # traced into flat shapes, where it has been (masters/tools/trace.py; the owner chose it over the smoothing)
+            vec = os.path.join(MASTERS, "vec-" + m["file"])
+            if os.path.exists(vec):
+                cleaned[m["file"]] = Image.open(vec).convert("RGBA")
         out = hang(obj, cleaned[m["file"]], m["tie"],
                    cord=own.get("cord", st.get("cord", CORD)) + round(m.get("drop", 0) * MOUNT), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0),
                    tassel=top, tassel_h=TASSEL_H * st.get("tassel", 1.0) * own.get("tassel", 1.0), tassel_from=two[src])
