@@ -4756,5 +4756,38 @@
    "out/raw/hang-hanging-plum-branch.png"
   ],
   "prompt": "The FIRST attached image is a mount the app hangs decorations from: a red-lacquered wall bracket with gold cloud scrolls along it, ending in a friendly smiling gold-and-orange dragon head holding a brass ring in its mouth. REDRAW it in the style of the other attached images (the flowering branches): the same crisp flat illustration style - clean, smooth vector-like shapes with sharp edges, a few flat tones per colour (one light, one mid, one shadow) with simple shading, strong clear saturated colours, the same weight of detail. No painterly texture, no grain, no blotches, no brush strokes, no soft or fuzzy edges, no noise. Keep the mount EXACTLY where it is on the canvas, the same size, the same outline and the same parts (the brass ring in the same place); change only how it is drawn. Nothing hangs from it.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-roof-eave-flat-take2.png",
+  "group": "mounts3",
+  "size": "1122x1402",
+  "refs": [
+   "out/raw/mount-roof-eave-flat.png",
+   "out/raw/hang-camellia-branch-take2.png",
+   "out/raw/hang-hanging-plum-branch.png"
+  ],
+  "prompt": "The FIRST attached image is a mount the app hangs decorations from. EDIT it to clean up how it is painted, and change nothing else: keep it EXACTLY where it is on the canvas, the same size, the same outline, the same parts (the red cord tied round the tip and its knot too) and the same colours. Every area of colour must be ONE perfectly flat, solid fill: remove all the faint stripes, streaks, banding, grain, mottling, speckles and soft gradients inside the shapes. Where it is shaded, use a separate flat shape of a darker tone with a sharp edge, like the other attached images (the flowering branches). All edges razor-sharp, nothing blurred or soft. Nothing hangs from it.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-cloud-bracket-flat-take2.png",
+  "group": "mounts3",
+  "size": "1122x1402",
+  "refs": [
+   "out/raw/mount-cloud-bracket-flat.png",
+   "out/raw/hang-camellia-branch-take2.png",
+   "out/raw/hang-hanging-plum-branch.png"
+  ],
+  "prompt": "The FIRST attached image is a mount the app hangs decorations from. EDIT it to clean up how it is painted, and change nothing else: keep it EXACTLY where it is on the canvas, the same size, the same outline, the same parts (the brass ring too) and the same colours. Every area of colour must be ONE perfectly flat, solid fill: remove all the faint stripes, streaks, banding, grain, mottling, speckles and soft gradients inside the shapes. Where it is shaded, use a separate flat shape of a darker tone with a sharp edge, like the other attached images (the flowering branches). All edges razor-sharp, nothing blurred or soft. Nothing hangs from it.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/mount-dragon-head-flat-take2.png",
+  "group": "mounts3",
+  "size": "1122x1402",
+  "refs": [
+   "out/raw/mount-dragon-head-flat.png",
+   "out/raw/hang-camellia-branch-take2.png",
+   "out/raw/hang-hanging-plum-branch.png"
+  ],
+  "prompt": "The FIRST attached image is a mount the app hangs decorations from. EDIT it to clean up how it is painted, and change nothing else: keep it EXACTLY where it is on the canvas, the same size, the same outline, the same parts (the brass ring too) and the same colours. Every area of colour must be ONE perfectly flat, solid fill: remove all the faint stripes, streaks, banding, grain, mottling, speckles and soft gradients inside the shapes. Where it is shaded, use a separate flat shape of a darker tone with a sharp edge, like the other attached images (the flowering branches). All edges razor-sharp, nothing blurred or soft. Nothing hangs from it.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
