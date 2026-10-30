@@ -167,7 +167,9 @@ def hang(obj, master, tie, cord=CORD, size=1.0, band=0, tassel=None, tassel_h=TA
     if band:
         out.alpha_composite(rope(W, H, tie[0] - left, tie[1] - band, tie[1], knot=tie[1] + ROPE_W * 0.4))
     else:
-        out.alpha_composite(rope(W, H, tie[0] - left, tie[1] - 3, tie[1] + 1))
+        # (in front of the roof all the way down to the object: hung from the knot's middle, it passes the roof's edge,
+        # and behind it, it looked to go into the roof; the owner: "rope looks like it's going behind the roof")
+        out.alpha_composite(rope(W, H, tie[0] - left, tie[1] - 3, oy))
     return out
 
 

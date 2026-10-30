@@ -69,8 +69,19 @@ def cut_at_knot(im, end):
     while k > 0 and m[k, x - 20:x + 20].sum() <= cw + 3:     # up the tail until the knot widens it
         k -= 1
     k += 2                                                    # just inside the knot's bottom edge
+    # the tail's own columns (its middle is where the rope hangs from), and its outline: the cleaned roof (ESR) drew a
+    # thin dark line down the tail's side, which isn't red, so it stayed hanging under the knot (the owner: "the rope
+    # on the roof … we were supposed to cut it at the knot"). Everything in those columns goes, but the roof's grey.
+    xs = np.nonzero(m[y - 20, x - 20:x + 20])[0] + x - 20
+    x0, x1 = int(xs.min()) - 4, int(xs.max()) + 5
+    lum = (r + g + b) / 3
+    roof = (abs(r - g) < 25) & (abs(g - b) < 25) & (lum > 95)
+    cut = (a[..., 3] > 0) & ~roof
+    a[k:y + 3, x0:x1][cut[k:y + 3, x0:x1]] = 0
     a[k:y + 3, x - 20:x + 20][m[k:y + 3, x - 20:x + 20]] = 0
-    return Image.fromarray(a), (x, k)
+    # the rope hangs from the middle of the knot's bottom (the drawn tail came out of its right side)
+    kx = np.nonzero(m[k - 4, x - 30:x + 20])[0] + x - 30
+    return Image.fromarray(a), (int(round(kx.mean())) if len(kx) else int(round(xs.mean())), k)
 
 
 def find_tie(im):
