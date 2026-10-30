@@ -1,81 +1,100 @@
 {
  "cord": 150,
  "size": 1,
+ "tassel": 1,
  "pieces": {
   "hang-bronze-bell": {
-   "cord": 230,
+   "cord": 215,
    "size": 0.8
   },
   "hang-rabbit-lantern": {
-   "cord": 215,
-   "size": 0.66
+   "cord": 235,
+   "size": 0.66,
+   "tassel": 1.0
   },
   "hang-butterfly-kite": {
    "cord": 350,
    "size": 0.67
   },
   "hang-lucky-coins": {
-   "cord": 225,
-   "size": 1.23
+   "cord": 145,
+   "size": 1.48,
+   "tassel": 1.2
   },
   "hang-embroidered-sachet": {
-   "cord": 285,
-   "size": 0.97
+   "cord": 245,
+   "size": 1.17,
+   "tassel": 1.2
   },
   "hang-lotus-lantern": {
-   "cord": 380,
-   "size": 0.66
+   "cord": 225,
+   "size": 0.79,
+   "tassel": 1.2
   },
   "hang-twin-wind-bells": {
-   "size": 1.1
+   "size": 1.1,
+   "cord": 150,
+   "tassel": 1.0
   },
   "hang-jade-disc": {
-   "cord": 235,
-   "size": 1.07
+   "cord": 225,
+   "size": 1.28,
+   "tassel": 1.2
   },
   "hang-ruyi-jade": {
-   "cord": 245,
-   "size": 1.06
+   "cord": 225,
+   "size": 1.27,
+   "tassel": 1.2
   },
   "hang-cone-wind-chime": {
-   "cord": 290,
-   "size": 0.87
+   "cord": 205,
+   "size": 0.87,
+   "tassel": 1.0
   },
   "hang-palace-lantern": {
-   "cord": 290,
-   "size": 0.73
+   "cord": 235,
+   "size": 0.73,
+   "tassel": 1.0
   },
   "hang-jade-rings": {
-   "cord": 225,
-   "size": 1.25
+   "cord": 210,
+   "size": 1.49,
+   "tassel": 1.2
   },
   "hang-persimmon-charm": {
-   "cord": 185,
-   "size": 0.98
+   "cord": 180,
+   "size": 1.17,
+   "tassel": 1.2
   },
   "hang-koi-charm": {
-   "cord": 135,
-   "size": 0.99
+   "cord": 170,
+   "size": 1.19,
+   "tassel": 1.2
   },
   "hang-flower-medallion": {
-   "cord": 195,
-   "size": 0.84
+   "cord": 245,
+   "size": 1.0,
+   "tassel": 1.2
   },
   "hang-lotus-fan-charm": {
    "cord": 250,
-   "size": 0.74
+   "size": 0.88,
+   "tassel": 1.2
   },
   "hang-moon-rabbit-charm": {
-   "cord": 200,
-   "size": 0.78
+   "cord": 240,
+   "size": 0.93,
+   "tassel": 1.2
   },
   "hang-plum-lantern-charm": {
-   "cord": 165,
-   "size": 0.74
+   "cord": 185,
+   "size": 0.89,
+   "tassel": 1.2
   },
   "hang-bamboo-sachet": {
-   "cord": 145,
-   "size": 1.01
+   "cord": 210,
+   "size": 1.21,
+   "tassel": 1.2
   }
  }
 }

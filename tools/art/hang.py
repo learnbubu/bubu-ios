@@ -36,7 +36,8 @@ ROPE = "#c8391d"            # and this red (the eave's cord), so all ropes match
 
 # the tassel: Codex drew one under each object, but it grew and shrank with the object's scale (the owner: "the
 # tassels are all different sizes"). Cut off at its head (the gold cap, or the knot on it) and drawn TASSEL_H tall
-# on every piece, whatever the ornament's size; the owner's "tassel" setting scales them all.
+# on every piece, whatever the ornament's size; the owner's "tassel" setting scales them all, and a piece's own
+# "tassel" makes up for its mount's width on the path, so on the phone they all match (the owner: "tassels all the same size")
 TASSEL_H = 120
 TASSEL_TOP = {"hang-persimmon-charm": 897, "hang-plum-lantern-charm": 1126}   # heads that aren't gold, set by eye
 NO_TASSEL = {"hang-butterfly-kite"}                                            # ribbons, not a tassel
@@ -197,7 +198,7 @@ def main():
         tops[j["out"]] = top and {"top": top, "from": os.path.basename(by_out[src]["file"]), "fromTop": two[src][1]}
         out = hang(obj, Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"), m["tie"],
                    cord=own.get("cord", st.get("cord", CORD)) + round(m.get("drop", 0) * MOUNT), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0),
-                   tassel=top, tassel_h=TASSEL_H * st.get("tassel", 1.0), tassel_from=two[src])
+                   tassel=top, tassel_h=TASSEL_H * st.get("tassel", 1.0) * own.get("tassel", 1.0), tassel_from=two[src])
         out.save(os.path.join(FINAL, j["out"] + ".png"))
         out.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(FINAL, j["out"] + "-right.png"))
         n += 1
