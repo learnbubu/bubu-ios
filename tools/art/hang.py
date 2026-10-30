@@ -98,15 +98,16 @@ def clean_cord(obj):
 
 
 def clean_master(im):
-    """The master as drawn had a blotchy, patchy texture in its flat colour (the owner: "this weird artifact pattern",
-    plainest on the roof), and a pink line round its edge from the magenta it was keyed off. Three bilateral passes
-    smooth the colour but keep its edges; the edge pixels take the colour of the nearest solid pixel inside."""
+    """The masters come with a blotchy grain in their flat colour (the owner: "this weird artifact pattern", and on the
+    redrawn ones, "there's still some"), and a pink line round the edge from the magenta they were keyed off. Four
+    bilateral passes flatten each tone and keep the edges between them (the redrawn masters are a few flat tones, like
+    the branches); the edge pixels take the colour of the nearest solid pixel inside."""
     import cv2
     from scipy import ndimage
     a = np.asarray(im).copy()
     rgb = np.ascontiguousarray(a[..., :3])
-    for _ in range(3):
-        rgb = cv2.bilateralFilter(rgb, 9, 22, 6)
+    for _ in range(4):
+        rgb = cv2.bilateralFilter(rgb, 9, 35, 6)
     solid = ndimage.binary_erosion(a[..., 3] == 255, iterations=2)
     if solid.any():
         _, (iy, ix) = ndimage.distance_transform_edt(~solid, return_indices=True)
@@ -218,12 +219,6 @@ def main():
         if m["file"] not in cleaned:   # cleaned once, and saved for the path editor's pages to draw
             cleaned[m["file"]] = clean_master(Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"))
             cleaned[m["file"]].save(os.path.join(MASTERS, "clean-" + m["file"]))
-            # traced into flat shapes, where it has been (the owner chose it over the smoothing): bubu-studio/tools/vectorise.py
-            # {"detail": 0.8, "smooth": 0.4, "double": true}, its outlines smoothed by masters/tools/smoothsvg.js (sigma 4),
-            # rendered 4x and shrunk to the master's size
-            vec = os.path.join(MASTERS, "vec-" + m["file"])
-            if os.path.exists(vec):
-                cleaned[m["file"]] = Image.open(vec).convert("RGBA")
         out = hang(obj, cleaned[m["file"]], m["tie"],
                    cord=own.get("cord", st.get("cord", CORD)) + round(m.get("drop", 0) * MOUNT), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0),
                    tassel=top, tassel_h=TASSEL_H * st.get("tassel", 1.0) * own.get("tassel", 1.0), tassel_from=two[src])
