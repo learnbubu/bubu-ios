@@ -218,7 +218,9 @@ def main():
         if m["file"] not in cleaned:   # cleaned once, and saved for the path editor's pages to draw
             cleaned[m["file"]] = clean_master(Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"))
             cleaned[m["file"]].save(os.path.join(MASTERS, "clean-" + m["file"]))
-            # traced into flat shapes, where it has been (masters/tools/trace.py; the owner chose it over the smoothing)
+            # traced into flat shapes, where it has been (the owner chose it over the smoothing): bubu-studio/tools/vectorise.py
+            # {"detail": 0.8, "smooth": 0.4, "double": true}, its outlines smoothed by masters/tools/smoothsvg.js (sigma 4),
+            # rendered 4x and shrunk to the master's size
             vec = os.path.join(MASTERS, "vec-" + m["file"])
             if os.path.exists(vec):
                 cleaned[m["file"]] = Image.open(vec).convert("RGBA")
