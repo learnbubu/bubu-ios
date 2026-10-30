@@ -1,17 +1,17 @@
 {
  "roof-eave": {
   "file": "roof-eave.png",
-  "from": "mount-roof-eave-tie",
+  "from": "mount-roof-eave-esr",
   "size": [
-   489,
-   486
+   488,
+   484
   ],
   "tie": [
-   478,
-   85
+   480,
+   83
   ],
   "band": 0,
-  "drop": 77
+  "drop": 78
  },
  "bamboo-pole": {
   "file": "bamboo-pole.png",
@@ -43,24 +43,24 @@
  },
  "cloud-bracket": {
   "file": "cloud-bracket.png",
-  "from": "mount-cloud-bracket",
+  "from": "mount-cloud-bracket-esr",
   "size": [
    591,
-   377
+   375
   ],
   "tie": [
    470,
-   211
+   210
   ],
   "band": 12,
   "drop": 0
  },
  "dragon-head": {
   "file": "dragon-head.png",
-  "from": "mount-dragon-head",
+  "from": "mount-dragon-head-esr",
   "size": [
    683,
-   358
+   357
   ],
   "tie": [
    617,

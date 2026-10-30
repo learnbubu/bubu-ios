@@ -19,11 +19,11 @@ OUT = os.path.join(HERE, "masters")
 
 # master name -> the picture kept for it (the review's name, in out/final)
 MASTERS = {
-    "roof-eave": "mount-roof-eave-tie",         # take 2, a red cord tied round its tip (group "rings"; the ring looked fake)
+    "roof-eave": "mount-roof-eave-esr",         # mount-roof-eave-tie (take 2, a red cord tied round its tip), cleaned (ESR below)
     "bamboo-pole": "mount-bamboo-pole-ring",    # its red loop swapped for a brass ring (group "rings")
     "iron-scroll": "mount-iron-scroll-take2",
-    "cloud-bracket": "mount-cloud-bracket",
-    "dragon-head": "mount-dragon-head",
+    "cloud-bracket": "mount-cloud-bracket-esr",   # mount-cloud-bracket, cleaned (ESR below)
+    "dragon-head": "mount-dragon-head-esr",       # mount-dragon-head, cleaned (ESR below)
     "jade-bracket": "mount-jade-bracket-take2",
     "brass-rod": "mount-brass-rod",
     "stone-corbel": "mount-stone-corbel",
@@ -31,7 +31,11 @@ MASTERS = {
 # until the ring swaps are made, the pictures they're made from
 FALLBACK = {"mount-roof-eave-tie": "mount-roof-eave-ring", "mount-bamboo-pole-ring": "mount-bamboo-pole"}
 TIE = {"mount-roof-eave-ring": (403, 240)}   # picture -> (x, y) by hand, where the found one is wrong (the eave's orange woodwork reads as brass)
-CORD_END = {"mount-roof-eave-tie"}           # tied with a cord, not a ring: the tie point is the cord's end
+CORD_END = {"mount-roof-eave-tie", "mount-roof-eave-esr"}
+# ESR: the three mounts on the path had a blotchy grain in their colour (the owner: "this weird artifact pattern").
+# Cleaned with Real-ESRGAN (realesrgan-ncnn-vulkan, model realesrgan-x4plus-anime): each raw picture shrunk to half,
+# redrawn 4x and brought back to its size, so the model redraws the colour flat and the edges crisp; the roof twice
+# (its shadows kept some grain; the owner: "a little more love in these areas"). Saved as out/raw/mount-*-esr.png.           # tied with a cord, not a ring: the tie point is the cord's end
 
 
 def brass(a):
