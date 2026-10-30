@@ -34,6 +34,31 @@ MOUNT = 0.65                # the masters, scaled to the size of the brackets in
 ROPE_W = 8                  # every rope this wide, whatever the object's size (the eave master's tied cord, scaled)
 ROPE = "#c8391d"            # and this red (the eave's cord), so all ropes match each other and the eave
 
+# the tassel: Codex drew one under each object, but it grew and shrank with the object's scale (the owner: "the
+# tassels are all different sizes"). Cut off at its head (the gold cap, or the knot on it) and drawn TASSEL_H tall
+# on every piece, whatever the ornament's size; the owner's "tassel" setting scales them all.
+TASSEL_H = 120
+TASSEL_TOP = {"hang-persimmon-charm": 897, "hang-plum-lantern-charm": 1126}   # heads that aren't gold, set by eye
+NO_TASSEL = {"hang-butterfly-kite"}                                            # ribbons, not a tassel
+TASSELS = os.path.join(HERE, "masters", "tassels.json")   # each piece's tassel top, for the path editor's pages
+
+
+def tassel_top(im):
+    """The row each tassel starts at: up from the bottom to its gold cap, then up the cap to where it narrows (the
+    bead or the cord above it)."""
+    _, body, cw, _ = cord_and_body(im)
+    a = np.asarray(im).astype(int)
+    op = a[..., 3] > 100
+    gold = op & (a[..., 0] > 190) & (a[..., 1] > 140) & (a[..., 2] < 140) & (a[..., 1] - a[..., 2] > 50)
+    rows, grows = op.sum(1), gold.sum(1)
+    bottom = int(np.nonzero(rows)[0][-1])
+    y = bottom - int(0.05 * (bottom - body))
+    while y > body and not (grows[y] > 0.5 * rows[y] and rows[y] > 2.5 * cw):
+        y -= 1
+    while y > body and grows[y - 1] > 0.4 * rows[y - 1] and rows[y - 1] >= 0.6 * rows[y:y + 6].max():
+        y -= 1
+    return y if y > body else None
+
 
 def cord_and_body(im):
     """(cord's x at the top, the row where the object starts, the cord's width, the row where the cord ends)."""
@@ -96,7 +121,7 @@ def settings():
         return {}
 
 
-def hang(obj, master, tie, cord=CORD, size=1.0, band=0):
+def hang(obj, master, tie, cord=CORD, size=1.0, band=0, tassel=None, tassel_h=TASSEL_H):
     master = master.resize((round(master.width * MOUNT), round(master.height * MOUNT)), Image.LANCZOS)
     tie, band = (tie[0] * MOUNT, round(tie[1] * MOUNT)), band * MOUNT
     cx, body, _, end = cord_and_body(obj)
@@ -104,16 +129,30 @@ def hang(obj, master, tie, cord=CORD, size=1.0, band=0):
     # first bead or knot under the cord, CORD below the ring; one drawn rope, the same for every piece, joins them
     bw, bh = obj.width, obj.height - body
     s = min(BODY_W * size / max(1, bw), BODY_H * size / max(1, bh))
-    o = obj.crop((0, end, obj.width, obj.height))
+    o = obj.crop((0, end, obj.width, tassel or obj.height))
     o = o.resize((max(1, round(o.width * s)), max(1, round(o.height * s))), Image.LANCZOS)
+    # the tassel on its own, tassel_h tall whatever the object's scale, its middle under the object's at its top
+    t = None
+    if tassel:
+        t = obj.crop((0, tassel, obj.width, obj.height))
+        t = t.crop(t.getbbox())
+        xs = np.nonzero(np.asarray(obj)[tassel, :, 3] > 100)[0]
+        tx_obj = float(xs.mean()) if len(xs) else cx                        # the tassel's middle, in the object
+        x0 = obj.crop((0, tassel, obj.width, obj.height)).getbbox()[0]
+        ts = tassel_h / t.height
+        t = t.resize((max(1, round(t.width * ts)), max(1, round(t.height * ts))), Image.LANCZOS)
     cx = cx * s
     ox, oy = round(tie[0] - cx), tie[1] + round(cord)
-    left = min(0, ox)
-    W = max(CANVAS_W, master.width, ox + o.width) - left
-    H = max(master.height, oy + o.height)
+    if t:
+        tox, toy = round(ox + tx_obj * s - (tx_obj - x0) * ts), oy + round((tassel - end) * s)
+    left = min(0, ox, tox if t else 0)
+    W = max(CANVAS_W, master.width, ox + o.width, tox + t.width if t else 0) - left
+    H = max(master.height, oy + o.height, toy + t.height if t else 0)
     # behind the object: down past its bead to where the object itself starts, as the drawn cord there is gone
     out = rope(W, H, tie[0] - left, tie[1], oy + round((body - end) * s) + 6)
     out.alpha_composite(o, (ox - left, oy))
+    if t:
+        out.alpha_composite(t, (tox - left, toy))
     out.alpha_composite(master, (-left, 0))
     # tied on: over a ring, the rope wraps its bottom band (never up through the hole) with a knot under it; on the
     # eave's cord, it just carries on from the cord's end
@@ -128,7 +167,7 @@ def main():
     jobs = json.load(open(os.path.join(HERE, "jobs.json"), encoding="utf-8"))
     meta = json.load(open(os.path.join(MASTERS, "masters.json")))
     st = settings()
-    n = 0
+    n, tops = 0, {}
     for j in jobs:
         if not j.get("mount"):
             continue
@@ -141,11 +180,15 @@ def main():
         obj, gone = clean_cord(Image.open(f).convert("RGBA"))
         if gone:
             obj.save(f)
+        top = None if j["out"] in NO_TASSEL else TASSEL_TOP.get(j["out"]) or tassel_top(obj)
+        tops[j["out"]] = top
         out = hang(obj, Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"), m["tie"],
-                   cord=own.get("cord", st.get("cord", CORD)) + round(m.get("drop", 0) * MOUNT), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0))
+                   cord=own.get("cord", st.get("cord", CORD)) + round(m.get("drop", 0) * MOUNT), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0),
+                   tassel=top, tassel_h=TASSEL_H * st.get("tassel", 1.0))
         out.save(os.path.join(FINAL, j["out"] + ".png"))
         out.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(FINAL, j["out"] + "-right.png"))
         n += 1
+    json.dump(tops, open(TASSELS, "w"), indent=1)
     print(n, "hook pieces hung from their masters")
 
 
