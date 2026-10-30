@@ -40,6 +40,10 @@ ROPE = "#c8391d"            # and this red (the eave's cord), so all ropes match
 TASSEL_H = 120
 TASSEL_TOP = {"hang-persimmon-charm": 897, "hang-plum-lantern-charm": 1126}   # heads that aren't gold, set by eye
 NO_TASSEL = {"hang-butterfly-kite"}                                            # ribbons, not a tassel
+# and only two tassels, the jade disc's red one and the ruyi jade's green one (the owner: "can we just use these two
+# tassels for all of them?"): green where Codex drew a green one, red everywhere else
+RED, GREEN = "hang-jade-disc", "hang-ruyi-jade"
+GREENS = {"hang-ruyi-jade", "hang-persimmon-charm", "hang-lotus-fan-charm", "hang-bamboo-sachet"}
 TASSELS = os.path.join(HERE, "masters", "tassels.json")   # each piece's tassel top, for the path editor's pages
 
 
@@ -121,7 +125,7 @@ def settings():
         return {}
 
 
-def hang(obj, master, tie, cord=CORD, size=1.0, band=0, tassel=None, tassel_h=TASSEL_H):
+def hang(obj, master, tie, cord=CORD, size=1.0, band=0, tassel=None, tassel_h=TASSEL_H, tassel_from=None):
     master = master.resize((round(master.width * MOUNT), round(master.height * MOUNT)), Image.LANCZOS)
     tie, band = (tie[0] * MOUNT, round(tie[1] * MOUNT)), band * MOUNT
     cx, body, _, end = cord_and_body(obj)
@@ -134,11 +138,14 @@ def hang(obj, master, tie, cord=CORD, size=1.0, band=0, tassel=None, tassel_h=TA
     # the tassel on its own, tassel_h tall whatever the object's scale, its middle under the object's at its top
     t = None
     if tassel:
-        t = obj.crop((0, tassel, obj.width, obj.height))
-        t = t.crop(t.getbbox())
+        src, stop = tassel_from or (obj, tassel)                            # the tassel drawn: its own, or one of the two
         xs = np.nonzero(np.asarray(obj)[tassel, :, 3] > 100)[0]
-        tx_obj = float(xs.mean()) if len(xs) else cx                        # the tassel's middle, in the object
-        x0 = obj.crop((0, tassel, obj.width, obj.height)).getbbox()[0]
+        tx_obj = float(xs.mean()) if len(xs) else cx                        # where it hangs: the middle of its own top
+        sx = np.nonzero(np.asarray(src)[stop, :, 3] > 100)[0]
+        t = src.crop((0, stop, src.width, src.height))
+        x0 = t.getbbox()[0]
+        t = t.crop(t.getbbox())
+        x0 = x0 - (float(sx.mean()) - tx_obj) if len(sx) else x0           # the drawn tassel's middle under that
         ts = tassel_h / t.height
         t = t.resize((max(1, round(t.width * ts)), max(1, round(t.height * ts))), Image.LANCZOS)
     cx = cx * s
@@ -168,6 +175,11 @@ def main():
     meta = json.load(open(os.path.join(MASTERS, "masters.json")))
     st = settings()
     n, tops = 0, {}
+    by_out = {j["out"]: j for j in jobs if "out" in j}
+    def obj_of(out):
+        return Image.open(os.path.join(FINAL, os.path.basename(by_out[out]["file"]))).convert("RGBA")
+    reds, greens = obj_of(RED), obj_of(GREEN)
+    two = {RED: (reds, TASSEL_TOP.get(RED) or tassel_top(reds)), GREEN: (greens, TASSEL_TOP.get(GREEN) or tassel_top(greens))}
     for j in jobs:
         if not j.get("mount"):
             continue
@@ -181,10 +193,11 @@ def main():
         if gone:
             obj.save(f)
         top = None if j["out"] in NO_TASSEL else TASSEL_TOP.get(j["out"]) or tassel_top(obj)
-        tops[j["out"]] = top
+        src = GREEN if j["out"] in GREENS else RED
+        tops[j["out"]] = top and {"top": top, "from": os.path.basename(by_out[src]["file"]), "fromTop": two[src][1]}
         out = hang(obj, Image.open(os.path.join(MASTERS, m["file"])).convert("RGBA"), m["tie"],
                    cord=own.get("cord", st.get("cord", CORD)) + round(m.get("drop", 0) * MOUNT), size=own.get("size", st.get("size", 1.0)), band=m.get("band", 0),
-                   tassel=top, tassel_h=TASSEL_H * st.get("tassel", 1.0))
+                   tassel=top, tassel_h=TASSEL_H * st.get("tassel", 1.0), tassel_from=two[src])
         out.save(os.path.join(FINAL, j["out"] + ".png"))
         out.transpose(Image.FLIP_LEFT_RIGHT).save(os.path.join(FINAL, j["out"] + "-right.png"))
         n += 1
