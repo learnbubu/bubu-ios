@@ -139,8 +139,8 @@ def hang(obj, master, tie, cord=CORD, size=1.0, band=0, tassel=None, tassel_h=TA
     t = None
     if tassel:
         src, stop = tassel_from or (obj, tassel)                            # the tassel drawn: its own, or one of the two
-        xs = np.nonzero(np.asarray(obj)[tassel, :, 3] > 100)[0]
-        tx_obj = float(xs.mean()) if len(xs) else cx                        # where it hangs: the middle of its own top
+        tx_obj = cx                                                         # where it hangs: under the cord (the koi's fin
+                                                                            # reaches its tassel's top, so not that row's middle)
         sx = np.nonzero(np.asarray(src)[stop, :, 3] > 100)[0]
         t = src.crop((0, stop, src.width, src.height))
         x0 = t.getbbox()[0]
