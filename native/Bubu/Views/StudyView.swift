@@ -703,8 +703,8 @@ struct MascotPrompt<Content: View>: View {
     var long = false         // a long sentence: a smaller Bùbù, so the bubble gets the width
     /// answered: Bùbù and the bubble shrink, so the answers and the feedback fit without scrolling
     var compact = false
-    /// the bubble as wide as its words, beside Bùbù, not out to the screen's edge
-    var hug = false
+    /// the words at the bubble's left, not centred (it still fills the width: the owner, 2 Nov 2026)
+    var leading = false
     @ViewBuilder var content: Content
     @State private var pop = false
 
@@ -718,7 +718,7 @@ struct MascotPrompt<Content: View>: View {
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)
             // (to the screen's edge, a word's as a sentence's: the owner, 25 Oct 2026; it stopped at 200 pt)
-            SpeechBubbleBox(sentence: sentence, hug: hug) { content }
+            SpeechBubbleBox(sentence: sentence, leading: leading) { content }
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(minHeight: compact ? 78 : 150)
@@ -740,12 +740,12 @@ struct MascotPrompt<Content: View>: View {
 /// The white bubble with a tail on its left, pointing at Bùbù.
 struct SpeechBubbleBox<Content: View>: View {
     var sentence = false
-    var hug = false
+    var leading = false
     @ViewBuilder var content: Content
     var body: some View {
-        VStack(alignment: hug ? .leading : .center, spacing: 6) { content }
+        VStack(alignment: leading ? .leading : .center, spacing: 6) { content }
             .padding(.leading, sentence ? 10 : 13).padding(.trailing, sentence ? 14 : 13).padding(.vertical, 12)
-            .frame(maxWidth: hug ? nil : .infinity)
+            .frame(maxWidth: .infinity, alignment: leading ? .leading : .center)
             // the outline and tail behind the words, so a word's hint bubble is drawn over them
             // (the outline ran through the hint: the Mac's check of 0.1.30)
             // (one shape: the tail and the box were drawn apart and looked disconnected)
@@ -1764,7 +1764,7 @@ struct SentenceView: View {
         VStack(spacing: 0) {
             VStack(spacing: 16) {
             MascotPrompt(mood: result, sentence: !ex.toChinese,
-                         long: ex.hearOnly ? false : ex.toChinese ? sent.en.count > 60 : sent.words.map(\.hanzi).joined().count > 14, hug: !ex.hearOnly) {
+                         long: ex.hearOnly ? false : ex.toChinese ? sent.en.count > 60 : sent.words.map(\.hanzi).joined().count > 14, leading: !ex.hearOnly) {
                 if ex.hearOnly {
                     // tap what you hear: only the sound, again at a tap, and slowly
                     ListenButtons(text: sent.hanzi)
