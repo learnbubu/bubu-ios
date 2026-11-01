@@ -52,8 +52,15 @@ def main():
     px = int(row.mean())
     d = DISC_SIZE
     disc_pic = disc_pic.resize((d, round(disc_pic.height * d / disc_pic.width)), Image.LANCZOS)
+    # its edge a clean circle, a touch inside the drawn one, and clear of the picture's top (the Mac, 0.2.67: flat where
+    # it met the edge). The drawn disc is as tall as it's wide, its foot hidden by the paw it was drawn on.
+    da = np.asarray(disc_pic).copy()
+    yy, xx = np.ogrid[:da.shape[0], :da.shape[1]]
+    rad, cy = d / 2 - 1, d / 2 - 2
+    da[..., 3] = (da[..., 3] * np.clip(rad - np.hypot(xx - (d - 1) / 2, yy - cy) + 0.5, 0, 1)).astype("uint8")
+    disc_pic = Image.fromarray(da)
     dx, dy = px - d // 2 + 10, py + 560 - HIM - round(disc_pic.height * TUCK)
-    dy = max(0, dy)
+    dy = max(3, dy)
     # the canvas, his belly in the middle, so he stands on the coin's centre
     belly = int(np.nonzero((m[..., 3] > 128)[HIM * 11 // 14])[0].mean())
     half_w = max(belly, him.width - belly, dx + d - belly) + 2
