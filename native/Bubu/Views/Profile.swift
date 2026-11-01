@@ -31,12 +31,6 @@ struct ProfileView: View {
                 you(lv)
                 invite(lv)
                 overview(out: out)
-                if out != nil {
-                    Button(progress.embers < 1 ? "No spare lanterns left" : "Use a spare lantern") {
-                        if let o = out { Moments.shared.show(.askRelight(lost: o.lost, embers: progress.embers)) }
-                    }
-                    .buttonStyle(WideButton()).disabled(progress.embers < 1)
-                }
                 achievements
                 activityRow
                 Color.clear.frame(height: 90)
@@ -126,11 +120,11 @@ struct ProfileView: View {
     private func overview(out: (date: String, lost: Int)?) -> some View {
         let learned = course.cards.filter { (progress.srs[$0.id]?.reps ?? 0) >= 1 }.count
         let lit = out == nil && progress.streak > 0
-        let days = out?.lost ?? progress.streak
+        let days = progress.streak
         return VStack(alignment: .leading, spacing: 12) {
             heading("Overview")
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10, alignment: .leading), GridItem(.flexible(), alignment: .leading)], alignment: .leading, spacing: 14) {
-                stat("\(days) day\(days == 1 ? "" : "s")\(out != nil ? " (out)" : "")", icon: lit ? "chip-lantern-lit" : "chip-lantern-unlit")
+                stat(out != nil ? "Lantern out" : "\(days) day\(days == 1 ? "" : "s")", icon: lit ? "chip-lantern-lit" : "chip-lantern-unlit")
                 stat("\(progress.xpTotal.formatted()) XP", icon: "stat-xp")
                 Button { router.push(.chars) } label: { stat("\(progress.charsKnown) characters", icon: "stat-chars") }.buttonStyle(CardPress())
                 stat("\(learned) words", icon: "stat-words")
