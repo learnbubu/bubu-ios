@@ -31,12 +31,17 @@ struct LipButton: ButtonStyle {
     var lip: Color
     var radius: CGFloat = 16
     var depth: CGFloat = 4
+    /// the shine now and then, as the raised buttons (off unless asked for): its colour, and how late it comes
+    var sweep = false
+    var sweepTint: Color = .white
+    var sweepDelay: Double = 0
     func makeBody(configuration: Configuration) -> some View {
         let down = configuration.isPressed
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         return configuration.label
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(face, in: shape)
+            .modifier(IdleSweep(on: sweep, radius: radius, delay: sweepDelay, tint: sweepTint))
             .offset(y: down ? depth : 0)
             .padding(.bottom, depth)
             .background(shape.fill(lip).padding(.top, depth))

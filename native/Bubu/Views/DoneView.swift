@@ -358,14 +358,18 @@ struct RaisedButton: ButtonStyle {
 struct IdleSweep: ViewModifier {
     var on = true
     var radius: CGFloat = 16
+    /// how much later than the others its first sweep comes, so buttons on one screen take turns
+    var delay: Double = 0
+    /// the light's colour (white shows nothing on a cream button)
+    var tint: Color = .white
     @State private var sweep: CGFloat = -1
     @State private var shining = false
     @State private var twinkle = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var streak: some View {
-        LinearGradient(stops: [.init(color: .white.opacity(0), location: 0), .init(color: .white, location: 0.35),
-                               .init(color: .white, location: 0.65), .init(color: .white.opacity(0), location: 1)],
+        LinearGradient(stops: [.init(color: tint.opacity(0), location: 0), .init(color: tint, location: 0.35),
+                               .init(color: tint, location: 0.65), .init(color: tint.opacity(0), location: 1)],
                        startPoint: .leading, endPoint: .trailing)
     }
 
@@ -392,9 +396,10 @@ struct IdleSweep: ViewModifier {
                     .allowsHitTesting(false)
                 }
             }
-            .overlay { if on { CornerSparkles(on: twinkle) } }
+            .overlay { if on { CornerSparkles(on: twinkle, tint: tint) } }
             .task(id: on) {
                 guard on, !reduceMotion else { return }
+                try? await Task.sleep(for: .seconds(delay))
                 while !Task.isCancelled {
                     try? await Task.sleep(for: .seconds(3.6))
                     if Task.isCancelled { break }
