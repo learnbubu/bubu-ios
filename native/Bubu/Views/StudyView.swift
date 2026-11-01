@@ -50,6 +50,9 @@ struct StudyView: View {
     @State private var lift: CGFloat = 0
     /// the exercise's visible height, so the answers sit low in the card
     @State private var scrollHeight: CGFloat = 0
+    /// how much the keyboard covers above the home bar: the last one seen (remembered between lessons), so a typing
+    /// page is the right height before its keyboard has come up
+    @AppStorage("keyboardRoom") private var keyboardRoom: Double = 300
     /// the combo burst on screen (its count), and the cheer between parts of a lesson
     @State private var burst: Int?
     /// the progress bar's place on screen: the burst's firecrackers come out from behind it
@@ -112,15 +115,11 @@ struct StudyView: View {
                     VStack(spacing: 0) {
                         if let c = chatStep {
                             chatView(c.0, c.1)
-                        } else if typingFits {
-                            // typing: not in the scroll view, so with the keyboard up the page stays put and the box
-                            // gives up the room (the page scrolled instead, the title off the top and the box's foot cut:
-                            // the owner's phone, 0.2.43)
-                            content.padding(.horizontal, 12).padding(.top, 15).padding(.bottom, 12)
-                                .frame(maxHeight: .infinity, alignment: .top)
                         } else {
                         ScrollViewReader { reader in
-                            ScrollView(fixed ? [] : .vertical) {
+                            // (typing doesn't scroll: the title went off the top and the box's foot was cut, the owner's
+                            // phone, 0.2.43. The same stack as every other exercise, or the title's rebuilt as it arrives)
+                            ScrollView(fixed || typingFits ? [] : .vertical) {
                                 // spacing 0: the default stack gap (8 pt) between the exercise and the
                                 // end marker made every exercise 8 pt taller than the card, so it
                                 // scrolled (the Mac's measure of 0.1.49)
@@ -140,7 +139,7 @@ struct StudyView: View {
                             // the feedback takes room from the exercise: keep the answers in view
                             .onChange(of: feedback != nil) { _, shown in
                                 if !shown { lift = 0 }
-                                guard shown, !fixed else { return }
+                                guard shown, !fixed, !typingFits else { return }
                                 // once the feedback has taken its room (it springs in), not before:
                                 // until then there's nothing to scroll
                                 for delay in [0.35, 0.7] {
@@ -158,6 +157,11 @@ struct StudyView: View {
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { cardHeight = $0 }
                     .padding(.horizontal, 6)
                 }
+                // typing: laid out above the keyboard's room from the moment it arrives, so the keyboard rises into the
+                // space and nothing moves (the page came in full height and was squeezed as it rose: the owner, 0.2.67,
+                // "feels buggy when loads in"). Answered, the keyboard goes and the page has its height back.
+                .padding(.bottom, typingFits && feedback == nil ? keyboardRoom : 0)
+                .ignoresSafeArea(typingFits ? SafeAreaRegions.keyboard : [], edges: .bottom)
             }
             if let m = munch {
                 GeometryReader { g in
@@ -420,6 +424,13 @@ struct StudyView: View {
         }
         .frame(maxHeight: .infinity, alignment: .top)
         .animation(.spring(response: 0.35, dampingFraction: 0.9), value: exerciseKey)
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { n in
+            guard let end = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+                  let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+            let room = scene.screen.bounds.height - end.minY - (scene.windows.first?.safeAreaInsets.bottom ?? 0)
+            // (going down reads as nothing; a different keyboard's height is taken in step with it)
+            if room > 0, abs(room - keyboardRoom) > 0.5 { withAnimation(.easeOut(duration: 0.25)) { keyboardRoom = room } }
+        }
     }
 
     /// Lift the exercise clear of the feedback sheet only when the sheet would hide most of the answer you picked
@@ -430,7 +441,7 @@ struct StudyView: View {
         guard feedback != nil, pickedBottom > 0, sheetTop.isFinite else { if feedback == nil, lift != 0 { lift = 0 }; return }
         // a multiple-choice screen that doesn't scroll never moves: its options are fitted above the sheet's room from
         // the start (it still slid on a right answer and a look-alike: the Mac's check of b474e5b)
-        guard !fixed else { return }
+        guard !fixed, !typingFits else { return }
         let bottom = pickedBottom + lift, top = (pickedTop > 0 ? pickedTop : pickedBottom) + lift
         let hidden = bottom - sheetTop, tall = max(1, bottom - top)
         guard hidden > tall * 0.5 else { return }
@@ -2145,7 +2156,8 @@ struct TypeView: View {
                 }
             }
         }
-        .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { focused = true } }
+        // (at once, not after the slide: the keyboard rises with the page coming in)
+        .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { focused = true } }
         .onChange(of: result) { _, r in if r != nil { focused = false } }
     }
 
