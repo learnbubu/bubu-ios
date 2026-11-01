@@ -703,7 +703,7 @@ struct MascotPrompt<Content: View>: View {
     var long = false         // a long sentence: a smaller Bùbù, so the bubble gets the width
     /// answered: Bùbù and the bubble shrink, so the answers and the feedback fit without scrolling
     var compact = false
-    /// the words at the bubble's left, not centred (it still fills the width: the owner, 2 Nov 2026)
+    /// the lines lined up on their left, the block of them centred in the bubble, which fills the width (the owner, 2 Nov 2026)
     var leading = false
     @ViewBuilder var content: Content
     @State private var pop = false
@@ -745,7 +745,7 @@ struct SpeechBubbleBox<Content: View>: View {
     var body: some View {
         VStack(alignment: leading ? .leading : .center, spacing: 6) { content }
             .padding(.leading, sentence ? 10 : 13).padding(.trailing, sentence ? 14 : 13).padding(.vertical, 12)
-            .frame(maxWidth: .infinity, alignment: leading ? .leading : .center)
+            .frame(maxWidth: .infinity)
             // the outline and tail behind the words, so a word's hint bubble is drawn over them
             // (the outline ran through the hint: the Mac's check of 0.1.30)
             // (one shape: the tail and the box were drawn apart and looked disconnected)
