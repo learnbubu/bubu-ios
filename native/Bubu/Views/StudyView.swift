@@ -130,6 +130,7 @@ struct StudyView: View {
                                         .frame(minHeight: scrollHeight, alignment: .top)
                                     Color.clear.frame(height: 1).id("exercise-end")
                                 }
+                                .coordinateSpace(.named("page"))
                             }
                             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { scrollHeight = max(0, $0 - 1) }
                             .onPreferenceChange(PickedBottomKey.self) { pickedBottom = $0; relift() }
@@ -396,7 +397,7 @@ struct StudyView: View {
                 case .card:
                     if let ex = session.exercise {
                         if ex.kind == .sentence {
-                            SentenceView(ex: ex, placed: $placed, result: feedback?.correct, wheels: wheels,
+                            SentenceView(ex: ex, placed: $placed, result: feedback?.correct, page: scrollHeight, wheels: wheels,
                                          skipped: skipped, skip: { cantListen() })
                         } else if ex.kind == .build {
                             BuildView(ex: ex, picked: $built, result: feedback?.correct)
@@ -702,6 +703,8 @@ struct MascotPrompt<Content: View>: View {
     var long = false         // a long sentence: a smaller Bùbù, so the bubble gets the width
     /// answered: Bùbù and the bubble shrink, so the answers and the feedback fit without scrolling
     var compact = false
+    /// the bubble as wide as its words, beside Bùbù, not out to the screen's edge
+    var hug = false
     @ViewBuilder var content: Content
     @State private var pop = false
 
@@ -715,8 +718,8 @@ struct MascotPrompt<Content: View>: View {
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)
             // (to the screen's edge, a word's as a sentence's: the owner, 25 Oct 2026; it stopped at 200 pt)
-            SpeechBubbleBox(sentence: sentence) { content }
-                .frame(maxWidth: .infinity)
+            SpeechBubbleBox(sentence: sentence, hug: hug) { content }
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(minHeight: compact ? 78 : 150)
         // never squeezed shorter than what it holds: on a full screen the bubble was cut off under the
@@ -737,11 +740,12 @@ struct MascotPrompt<Content: View>: View {
 /// The white bubble with a tail on its left, pointing at Bùbù.
 struct SpeechBubbleBox<Content: View>: View {
     var sentence = false
+    var hug = false
     @ViewBuilder var content: Content
     var body: some View {
-        VStack(spacing: 6) { content }
+        VStack(alignment: hug ? .leading : .center, spacing: 6) { content }
             .padding(.leading, sentence ? 10 : 13).padding(.trailing, sentence ? 14 : 13).padding(.vertical, 12)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: hug ? nil : .infinity)
             // the outline and tail behind the words, so a word's hint bubble is drawn over them
             // (the outline ran through the hint: the Mac's check of 0.1.30)
             // (one shape: the tail and the box were drawn apart and looked disconnected)
@@ -1708,6 +1712,8 @@ struct SentenceView: View {
     let ex: Exercise
     @Binding var placed: [Exercise.Tile]
     let result: Bool?
+    /// the height of the page the exercise is on: what's spare goes between the answer and the tiles
+    var page: CGFloat = 0
     /// pinyin training wheels: over each word while it's new, a tap away once it's strong
     var wheels = Wheels()
     /// "Can't listen now" was tapped (tap what you hear): the exercise is over, nothing shown
@@ -1725,6 +1731,9 @@ struct SentenceView: View {
     @State private var answerFrame: CGRect = .zero
     @State private var justDragged = false
     @State private var moves = 0
+    @State private var topHeight: CGFloat = 0
+    @State private var tilesHeight: CGFloat = 0
+    @State private var top: CGFloat = 0
     fileprivate static let bankKey = 100_000
     private let course = Course.shared
 
@@ -1742,18 +1751,26 @@ struct SentenceView: View {
         return StudySession.isNewCard(progress.srs[c.id]) || (c.id == ex.card.id && ex.isNew)
     }
 
+    /// As Duolingo's: the tiles low, a little above Check, the spare room between them and the answer's lines (the
+    /// owner, 2 Nov 2026). Worked out from parts that don't depend on it, so the layout can't loop.
+    private var tilesGap: CGFloat {
+        guard page > 0, topHeight > 0, tilesHeight > 0 else { return 16 }
+        return max(16, page - top - 12 - topHeight - tilesHeight - 30)
+    }
+
     var body: some View {
         let sent = ex.sentence!
         let anyNew = sent.words.contains { isNew($0.hanzi) }
-        VStack(spacing: 16) {
+        VStack(spacing: 0) {
+            VStack(spacing: 16) {
             MascotPrompt(mood: result, sentence: !ex.toChinese,
-                         long: ex.hearOnly ? false : ex.toChinese ? sent.en.count > 60 : sent.words.map(\.hanzi).joined().count > 14) {
+                         long: ex.hearOnly ? false : ex.toChinese ? sent.en.count > 60 : sent.words.map(\.hanzi).joined().count > 14, hug: !ex.hearOnly) {
                 if ex.hearOnly {
                     // tap what you hear: only the sound, again at a tap, and slowly
                     ListenButtons(text: sent.hanzi)
                 } else if ex.toChinese {
                     if anyNew { NewBadge() }
-                    FlowLayout(spacing: 4, lineSpacing: 4, center: true) {
+                    FlowLayout(spacing: 4, lineSpacing: 4, hug: true) {
                         let tokens = Hints.english(sent.en, sent.words)
                         ForEach(Array(tokens.enumerated()), id: \.offset) { i, t in
                             if t.word == nil {
@@ -1776,8 +1793,8 @@ struct SentenceView: View {
                     // each word with its tone-coloured pinyin over it
                     if anyNew { NewBadge() }
                     // the words with the bubble's whole width, the sound under them side by side
-                    VStack(alignment: .trailing, spacing: 2) {
-                    FlowLayout(spacing: 2, lineSpacing: 4, center: true) {
+                    VStack(alignment: .leading, spacing: 2) {
+                    FlowLayout(spacing: 2, lineSpacing: 4, hug: true) {
                             ForEach(Array(sent.words.enumerated()), id: \.offset) { i, w in
                                 let new = isNew(w.hanzi)
                                 HintChip(hanzi: w.hanzi, pinyin: w.pinyin, phrase: Hints.phrase(sent.en, sent.words),
@@ -1795,7 +1812,6 @@ struct SentenceView: View {
                                 .padding(.horizontal, 3)
                             }
                     }
-                    .frame(maxWidth: .infinity)
                     .contentShape(Rectangle())
                     .onTapGesture { withAnimation { pinyinOpen.toggle() } }
                     BubbleSound(text: sent.hanzi, row: true)
@@ -1804,6 +1820,10 @@ struct SentenceView: View {
             }
             if !HintTip.used && !ex.hearOnly { Text("Tap a word for its meaning, or hold a tile").font(.nunito(12.5)).foregroundStyle(Color.muted) }
             answerArea.allowsHitTesting(!skipped)
+            }
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { topHeight = $0 }
+            Color.clear.frame(height: tilesGap)
+            VStack(spacing: 16) {
             bank.allowsHitTesting(!skipped)
             if ex.hearOnly, let skip {
                 // its place is kept once the exercise is answered, so nothing moves
@@ -1822,7 +1842,10 @@ struct SentenceView: View {
                 }
                 .frame(maxWidth: .infinity, minHeight: 20)
             }
+            }
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { tilesHeight = $0 }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("page")).minY } action: { top = $0 }
         .coordinateSpace(.named("sentence"))
         .onPreferenceChange(TileFrames.self) { frames = $0 }
         .overlay(alignment: .topLeading) {
@@ -2020,12 +2043,14 @@ struct FlowLayout: Layout {
     var lineSpacing: CGFloat = 8
     var rowHeight: CGFloat? = nil     // fixed rows, children sitting on the bottom of each
     var center = false
+    /// as wide as its widest row, not all the width it's offered
+    var hug = false
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let rows = arrange(width: proposal.width ?? .infinity, subviews)
         let h = rows.reduce(0) { $0 + $1.height } + CGFloat(max(0, rows.count - 1)) * lineSpacing
         let w = rows.map(\.width).max() ?? 0
-        return CGSize(width: proposal.width ?? w, height: h)
+        return CGSize(width: hug ? w : proposal.width ?? w, height: h)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
