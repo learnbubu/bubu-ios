@@ -190,6 +190,8 @@ struct DoneView: View {
                     .frame(minHeight: 120, maxHeight: 360)
                     .frame(maxWidth: .infinity)
                     .background(GeometryReader { g in Color.clear.preference(key: MomentStickerBox.self, value: g.frame(in: .global)) })
+                    // (Brain gains' books stand up out of the box: room for them under the Dynamic Island, the owner, 0.2.67)
+                    .padding(.top, m.key == "brain" ? 26 : 0)
                     .layoutPriority(-1)
                 Text(m.title).font(.nunito(28, .black)).tracking(-0.4).foregroundStyle(Color(UIColor(hex: m.color)))
                     .multilineTextAlignment(.center).padding(.top, 2)
