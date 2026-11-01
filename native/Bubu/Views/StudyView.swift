@@ -52,7 +52,7 @@ struct StudyView: View {
     @State private var scrollHeight: CGFloat = 0
     /// how much the keyboard covers above the home bar: the last one seen (remembered between lessons), so a typing
     /// page is the right height before its keyboard has come up
-    @AppStorage("keyboardRoom") private var keyboardRoom: Double = 300
+    @AppStorage("keyboardRoom") private var keyboardRoom: Double = BuildView.tallScreen ? 318 : 260
     /// the combo burst on screen (its count), and the cheer between parts of a lesson
     @State private var burst: Int?
     /// the progress bar's place on screen: the burst's firecrackers come out from behind it
@@ -428,8 +428,9 @@ struct StudyView: View {
             guard let end = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
                   let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
             let room = scene.screen.bounds.height - end.minY - (scene.windows.first?.safeAreaInsets.bottom ?? 0)
-            // (going down reads as nothing; a different keyboard's height is taken in step with it)
-            if room > 0, abs(room - keyboardRoom) > 0.5 { withAnimation(.easeOut(duration: 0.25)) { keyboardRoom = room } }
+            // (only ever the tallest seen: 中文's has a bar of candidates English's hasn't, and the switch mustn't move
+            // the page, the Mac's check of 0.2.68. A bar over a hardware keyboard, going down: nothing to take)
+            if room > keyboardRoom + 0.5 { withAnimation(.easeOut(duration: 0.25)) { keyboardRoom = room } }
         }
     }
 
@@ -2103,7 +2104,10 @@ struct TypeView: View {
     // that"): no Bùbù and bubble, the word big with its sound beside it, a tall box to type in, the tip under it.
     var body: some View {
         let w = ex.card.word
-        VStack(spacing: 14) {
+        // what the room above the keyboard has to give: the page doesn't scroll, so nothing may run off its foot (the
+        // Mac's check of 0.2.68: on the SE the switch was cut in half; on a 16 the tip, with the New badge above)
+        let tall = BuildView.tallScreen
+        VStack(spacing: tall ? 14 : 8) {
             if ex.isNew { NewBadge().frame(maxWidth: .infinity, alignment: .leading) }
             HStack(alignment: .center, spacing: 14) {
                 Button { Speech.shared.speak(w.hanzi) } label: {
@@ -2121,7 +2125,7 @@ struct TypeView: View {
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(w.hanzi).font(.hanzi(w.hanzi.count > 3 ? 44 : 60, .bold)).foregroundStyle(Color.ink)
+                        Text(w.hanzi).font(.hanzi(!tall ? 38 : w.hanzi.count > 3 ? 44 : 60, .bold)).foregroundStyle(Color.ink)
                             .lineLimit(1).minimumScaleFactor(0.6)
                         Text(w.gloss).font(.nunito(16, .semibold)).foregroundStyle(Color.muted).lineLimit(2)
                     }
@@ -2137,8 +2141,8 @@ struct TypeView: View {
                             .allowsHitTesting(false)
                     }
                 }
-                .padding(.vertical, 16).padding(.horizontal, 16)
-                .frame(maxWidth: .infinity, minHeight: 72, maxHeight: 150, alignment: .topLeading)
+                .padding(.vertical, tall ? 16 : 10).padding(.horizontal, 16)
+                .frame(maxWidth: .infinity, minHeight: tall ? 72 : 48, maxHeight: 150, alignment: .topLeading)
                 .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.panel))
                 .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
@@ -2149,9 +2153,12 @@ struct TypeView: View {
             if result == nil {
                 VStack(spacing: 8) {
                     keyboardSwitch
+                    // (the tip gives way first, where there's no room for it; how to add the keyboard never does)
                     Group {
                         if chinese && !KeyboardField.hasChinese {
                             Text("Add the Chinese (Pinyin) keyboard in iPhone Settings → General → Keyboard → Keyboards.")
+                        } else if !tall || ex.isNew {
+                            EmptyView()
                         } else if ex.typeHanzi {
                             Text("Type the characters, or their pinyin.")
                         } else {
