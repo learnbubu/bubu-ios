@@ -1277,6 +1277,14 @@ struct ChoiceView: View {
                                     .lineLimit(1).minimumScaleFactor(0.5)
                                     .overlay(alignment: .bottom) { Line().stroke(Color.newInk, style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2) }
                             }
+                        } else if answered {
+                            // answered, its meaning a tap away, as a new word's (the owner, 0.2.67: "can't click on pao bu
+                            // to see English"); not before, or it would give the answer
+                            HintChip(hanzi: w.hanzi, pinyin: w.pinyin, tapped: { reveal() }) {
+                                ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: big, weight: .medium)
+                                    .lineLimit(1).minimumScaleFactor(0.5)
+                                    .overlay(alignment: .bottom) { Line().stroke(Color.muted.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [2, 3])).frame(height: 2) }
+                            }
                         } else {
                             Button { reveal() } label: {
                                 ToneText(hanzi: w.hanzi, pinyin: w.pinyin, size: big, weight: .medium)
