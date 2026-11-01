@@ -52,7 +52,7 @@ struct StudyView: View {
     @State private var scrollHeight: CGFloat = 0
     /// how much the keyboard covers above the home bar: the last one seen (remembered between lessons), so a typing
     /// page is the right height before its keyboard has come up
-    @AppStorage("keyboardRoom") private var keyboardRoom: Double = BuildView.tallScreen ? 318 : 260
+    @AppStorage("keyboardRoom") private var keyboardRoom: Double = BuildView.tallScreen ? 296 : 260
     /// the combo burst on screen (its count), and the cheer between parts of a lesson
     @State private var burst: Int?
     /// the progress bar's place on screen: the burst's firecrackers come out from behind it
