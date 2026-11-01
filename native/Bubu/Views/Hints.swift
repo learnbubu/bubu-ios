@@ -19,9 +19,10 @@ extension Course {
 }
 
 enum Hints {
-    /// What a word means: its own card, a compound built from its parts, else its characters (web: wordMeaning).
+    /// What a word means: its own card, its English if it's a name, a compound built from its parts, else its characters (web: wordMeaning).
     static func meaning(_ h: String) -> String {
         if let e = Course.wordEn[h] { return e }
+        if let e = nameEn[h.filter(Course.isHan)] { return e }
         let han = h.filter(Course.isHan).map(String.init)
         let charEn = { (c: String) in Course.wordEn[c] ?? CharData.shared.meaning(c) }
         if han.count > 1 {
