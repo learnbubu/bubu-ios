@@ -3401,25 +3401,23 @@
  },
  {
   "file": "out/raw/achv4-flawless.png",
-  "group": "achievements4",
+  "group": "profileart",
   "size": "1024x1024",
   "refs": [
-   "out/raw/achv3-lantern-keeper.png",
-   "out/raw/achv3-step-by-step.png",
+   "out/raw/_superseded/achv4-flawless-2.png",
    "refs/panda-celebrate.png"
   ],
-  "prompt": "Bùbù for an ACHIEVEMENT BADGE in the app, shown small (80 to 100 pixels), so it must read at a glance: Bùbù holding a round pale-green jade disc with a hole in the middle up above his head, eyes shut with pride.\n\nONLY Bùbù and his one prop, NOTHING behind him: no badge shape, no circle, no ground, no scenery (the app puts him on the badge). Draw him BIG: he fills about 85% of the canvas height, centred, his head in the upper part. The app stands him inside a badge shape that hides the lower part of his legs, so keep the action - his face, his paws and his prop - in the top 60% of the canvas, and make it lively: a clear pose and a strong, happy expression. His prop may reach out towards the edges.\n\nSTICKER SIMPLE, EXACTLY like Bùbù in the first two attached images (ignore the shape behind him there): big bold flat shapes, very few details, one or two flat tones a colour, no texture, no grain, no fine lines, no small patterns, no outlines, no glossy highlights.\n\nBùbù, clearly him (the third attached image): a chubby baby panda, a big round cream-white head about as wide as his body, charcoal round ears, charcoal eye patches with happy arched eyes, a small black nose, rosy blush cheeks, a little white tuft of fur on top, charcoal arms and stubby legs, a cream belly, and his small coral-red backpack.\n\nPalette: muted and warm, as the app: jade and teal greens, warm cream, terracotta red, soft orange, soft gold, warm greys, charcoal for the darkest. Nothing in the family's badge colour (pale jade) is needed: the badge behind him will be that colour, so keep his prop a different colour from it where you can.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+  "prompt": "The FIRST attached image is Bùbù from an achievement badge in this app. EDIT it and change only what is said here; keep his face, body, legs, backpack, jade disc and flat sticker style exactly as they are, and keep him the same size on the canvas.\n\nHis arms look odd: they are too long and thin, like long curved noodles, and they don't start from his shoulders. REDRAW both arms short, chubby and stubby like a baby panda's, as in the second attached image: each one starts at his shoulder just below his cheek, about as long as his head is tall and thick all the way along, ending in a plain round charcoal paw with NO paw pads or toes. His right-of-picture arm holds the jade disc up above his head, the disc moved closer to his head so the short arm reaches it. His left-of-picture arm is raised in a small happy wave beside his head.\n\nNOTHING behind him: no badge shape, circle, ground or scenery.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
   "file": "out/raw/achv4-night-owl.png",
-  "group": "achievements4",
+  "group": "profileart",
   "size": "1024x1024",
   "refs": [
-   "out/raw/achv3-lantern-keeper.png",
-   "out/raw/achv3-step-by-step.png",
+   "out/raw/_superseded/achv4-night-owl-2.png",
    "refs/panda-celebrate.png"
   ],
-  "prompt": "Bùbù for an ACHIEVEMENT BADGE in the app, shown small (80 to 100 pixels), so it must read at a glance: Bùbù in a floppy teal nightcap, holding a small book open in one paw and a little glowing hand lantern held UP beside his head in the other, a pale crescent moon by his ear. Everything he holds is up level with his head, near the middle: nothing hangs down at his sides.\n\nONLY Bùbù and his one prop, NOTHING behind him: no badge shape, no circle, no ground, no scenery (the app puts him on the badge). Draw him BIG: he fills about 85% of the canvas height, centred, his head in the upper part. The app stands him inside a badge shape that hides the lower part of his legs, so keep the action - his face, his paws and his prop - in the top 60% of the canvas, and make it lively: a clear pose and a strong, happy expression. His prop may reach out towards the edges.\n\nSTICKER SIMPLE, EXACTLY like Bùbù in the first two attached images (ignore the shape behind him there): big bold flat shapes, very few details, one or two flat tones a colour, no texture, no grain, no fine lines, no small patterns, no outlines, no glossy highlights.\n\nBùbù, clearly him (the third attached image): a chubby baby panda, a big round cream-white head about as wide as his body, charcoal round ears, charcoal eye patches with happy arched eyes, a small black nose, rosy blush cheeks, a little white tuft of fur on top, charcoal arms and stubby legs, a cream belly, and his small coral-red backpack.\n\nPalette: muted and warm, as the app: jade and teal greens, warm cream, terracotta red, soft orange, soft gold, warm greys, charcoal for the darkest. Nothing in the family's badge colour (deep muted blue) is needed: the badge behind him will be that colour, so keep his prop a different colour from it where you can.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+  "prompt": "The FIRST attached image is Bùbù from an achievement badge in this app. EDIT it and change only what is said here; keep his pose, face, proportions, colours, prop and flat sticker style exactly as they are, and keep him the same size on the canvas.\n\nHis nightcap looks wrong: it sits behind his head and ear, a moon is stuck on it, and it doesn't look like something he is wearing. REDRAW only the cap: a floppy teal nightcap pulled on TOP of his head, in front of the top of his head with a neat paler band across his forehead, his two ears poking out on either side of it in front of the cap, the tip flopping over to the right of the picture and ending in a round pale pompom just above the book. NO moon anywhere, on the cap or beside it.\n\nNOTHING behind him: no badge shape, circle, ground or scenery.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
   "file": "out/raw/achv4-early-bird.png",
@@ -4789,5 +4787,86 @@
    "out/raw/hang-hanging-plum-branch.png"
   ],
   "prompt": "The FIRST attached image is a mount the app hangs decorations from. EDIT it to clean up how it is painted, and change nothing else: keep it EXACTLY where it is on the canvas, the same size, the same outline, the same parts (the brass ring too) and the same colours. Every area of colour must be ONE perfectly flat, solid fill: remove all the faint stripes, streaks, banding, grain, mottling, speckles and soft gradients inside the shapes. Where it is shaded, use a separate flat shape of a darker tone with a sharp edge, like the other attached images (the flowering branches). All edges razor-sharp, nothing blurred or soft. Nothing hangs from it.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/stat-xp-bolt.png",
+  "group": "profileart",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/hud-flat-coin.png",
+   "out/raw/hud-flat-lantern-lit.png"
+  ],
+  "prompt": "Attached: icons from this app's top bar. Draw a new icon from the SAME SET: the same flat look, the same chunky proportions, the same palette.\n\nStyle: a crisp FLAT 2D vector icon, like the icons in Duolingo's top bar: solid flat colour fills with NO gradients, NO texture, NO paper grain and NO soft airbrushing; shading only as one or two hard-edged shapes in a slightly darker tone of the same colour (a crescent along the bottom or right side); one clean light highlight shape (a short rounded stroke or pill) near the top left; edges perfectly clean and smooth; no outlines. Warm, friendly palette matching the app: coral red (#E8553E) with deeper red (#C43E2D), gold (#F6C33B) with deeper gold (#D9961C), warm cream (#FBEACF) with tan (#E5C291).\n\nCreate an icon: A fat, chunky gold lightning bolt with rounded corners: flat gold, one hard-edged deeper gold shape down its right side, one short light highlight.\n\nIt is shown very small (about 22 points, beside a number), so one bold, compact, chunky silhouette filling about 80% of the canvas, centred, front-on and upright; no thin lines, no small parts, nothing sticking out, nothing hanging below it, no cast shadow, no sparkles. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/stat-xp-ingot.png",
+  "group": "profileart",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/hud-flat-coin.png",
+   "out/raw/hud-flat-lantern-lit.png"
+  ],
+  "prompt": "Attached: icons from this app's top bar. Draw a new icon from the SAME SET: the same flat look, the same chunky proportions, the same palette.\n\nStyle: a crisp FLAT 2D vector icon, like the icons in Duolingo's top bar: solid flat colour fills with NO gradients, NO texture, NO paper grain and NO soft airbrushing; shading only as one or two hard-edged shapes in a slightly darker tone of the same colour (a crescent along the bottom or right side); one clean light highlight shape (a short rounded stroke or pill) near the top left; edges perfectly clean and smooth; no outlines. Warm, friendly palette matching the app: coral red (#E8553E) with deeper red (#C43E2D), gold (#F6C33B) with deeper gold (#D9961C), warm cream (#FBEACF) with tan (#E5C291).\n\nCreate an icon: A traditional Chinese gold ingot (yuanbao): a boat shape with raised rounded ends and a dome in the middle, flat gold with a hard-edged deeper gold shape along the bottom, one short light highlight.\n\nIt is shown very small (about 22 points, beside a number), so one bold, compact, chunky silhouette filling about 80% of the canvas, centred, front-on and upright; no thin lines, no small parts, nothing sticking out, nothing hanging below it, no cast shadow, no sparkles. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/stat-chars-grid.png",
+  "group": "profileart",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/hud-flat-coin.png",
+   "out/raw/hud-flat-lantern-lit.png"
+  ],
+  "prompt": "Attached: icons from this app's top bar. Draw a new icon from the SAME SET: the same flat look, the same chunky proportions, the same palette.\n\nStyle: a crisp FLAT 2D vector icon, like the icons in Duolingo's top bar: solid flat colour fills with NO gradients, NO texture, NO paper grain and NO soft airbrushing; shading only as one or two hard-edged shapes in a slightly darker tone of the same colour (a crescent along the bottom or right side); one clean light highlight shape (a short rounded stroke or pill) near the top left; edges perfectly clean and smooth; no outlines. Warm, friendly palette matching the app: coral red (#E8553E) with deeper red (#C43E2D), gold (#F6C33B) with deeper gold (#D9961C), warm cream (#FBEACF) with tan (#E5C291).\n\nCreate an icon: A square sheet of cream practice paper, slightly rounded corners, of the kind Chinese children learn to write on (a tianzige): a bold red square border and a faint red cross dividing it into four quarters, with a flat tan shape along the bottom edge for thickness. The middle is EMPTY: nothing is written on it (the app writes the character on top).\n\nIt is shown very small (about 22 points, beside a number), so one bold, compact, chunky silhouette filling about 80% of the canvas, centred, front-on and upright; no thin lines, no small parts, nothing sticking out, nothing hanging below it, no cast shadow, no sparkles. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/stat-chars-brush.png",
+  "group": "profileart",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/hud-flat-coin.png",
+   "out/raw/hud-flat-lantern-lit.png"
+  ],
+  "prompt": "Attached: icons from this app's top bar. Draw a new icon from the SAME SET: the same flat look, the same chunky proportions, the same palette.\n\nStyle: a crisp FLAT 2D vector icon, like the icons in Duolingo's top bar: solid flat colour fills with NO gradients, NO texture, NO paper grain and NO soft airbrushing; shading only as one or two hard-edged shapes in a slightly darker tone of the same colour (a crescent along the bottom or right side); one clean light highlight shape (a short rounded stroke or pill) near the top left; edges perfectly clean and smooth; no outlines. Warm, friendly palette matching the app: coral red (#E8553E) with deeper red (#C43E2D), gold (#F6C33B) with deeper gold (#D9961C), warm cream (#FBEACF) with tan (#E5C291).\n\nCreate an icon: A Chinese writing brush held at a diagonal, tip down: a chunky bamboo-coloured handle and a plump charcoal bristle tip, finishing a single short bold black ink stroke beneath it. Thick shapes only.\n\nIt is shown very small (about 22 points, beside a number), so one bold, compact, chunky silhouette filling about 80% of the canvas, centred, front-on and upright; no thin lines, no small parts, nothing sticking out, nothing hanging below it, no cast shadow, no sparkles. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/stat-words-slips.png",
+  "group": "profileart",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/hud-flat-coin.png",
+   "out/raw/hud-flat-lantern-lit.png"
+  ],
+  "prompt": "Attached: icons from this app's top bar. Draw a new icon from the SAME SET: the same flat look, the same chunky proportions, the same palette.\n\nStyle: a crisp FLAT 2D vector icon, like the icons in Duolingo's top bar: solid flat colour fills with NO gradients, NO texture, NO paper grain and NO soft airbrushing; shading only as one or two hard-edged shapes in a slightly darker tone of the same colour (a crescent along the bottom or right side); one clean light highlight shape (a short rounded stroke or pill) near the top left; edges perfectly clean and smooth; no outlines. Warm, friendly palette matching the app: coral red (#E8553E) with deeper red (#C43E2D), gold (#F6C33B) with deeper gold (#D9961C), warm cream (#FBEACF) with tan (#E5C291).\n\nCreate an icon: A small rolled-open bundle of ancient Chinese bamboo writing slips (zhujian): four or five thick upright bamboo-coloured slats side by side, bound by two bold red cords across them. Nothing written on it.\n\nIt is shown very small (about 22 points, beside a number), so one bold, compact, chunky silhouette filling about 80% of the canvas, centred, front-on and upright; no thin lines, no small parts, nothing sticking out, nothing hanging below it, no cast shadow, no sparkles. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/stat-words-book.png",
+  "group": "profileart",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/hud-flat-coin.png",
+   "out/raw/hud-flat-lantern-lit.png"
+  ],
+  "prompt": "Attached: icons from this app's top bar. Draw a new icon from the SAME SET: the same flat look, the same chunky proportions, the same palette.\n\nStyle: a crisp FLAT 2D vector icon, like the icons in Duolingo's top bar: solid flat colour fills with NO gradients, NO texture, NO paper grain and NO soft airbrushing; shading only as one or two hard-edged shapes in a slightly darker tone of the same colour (a crescent along the bottom or right side); one clean light highlight shape (a short rounded stroke or pill) near the top left; edges perfectly clean and smooth; no outlines. Warm, friendly palette matching the app: coral red (#E8553E) with deeper red (#C43E2D), gold (#F6C33B) with deeper gold (#D9961C), warm cream (#FBEACF) with tan (#E5C291).\n\nCreate an icon: A small open book seen from the front, chunky and simple, with a teal-green cover showing around cream pages and a deeper shape down the fold. Nothing written on the pages.\n\nIt is shown very small (about 22 points, beside a number), so one bold, compact, chunky silhouette filling about 80% of the canvas, centred, front-on and upright; no thin lines, no small parts, nothing sticking out, nothing hanging below it, no cast shadow, no sparkles. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/stat-chars-paper.png",
+  "group": "profileart",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/hud-flat-coin.png",
+   "out/raw/hud-flat-lantern-lit.png",
+   "out/raw/stat-chars-grid.png"
+  ],
+  "prompt": "Attached: icons from this app's top bar. Draw a new icon from the SAME SET: the same flat look, the same chunky proportions, the same palette.\n\nStyle: a crisp FLAT 2D vector icon, like the icons in Duolingo's top bar: solid flat colour fills with NO gradients, NO texture, NO paper grain and NO soft airbrushing; shading only as one or two hard-edged shapes in a slightly darker tone of the same colour (a crescent along the bottom or right side); one clean light highlight shape (a short rounded stroke or pill) near the top left; edges perfectly clean and smooth; no outlines. Warm, friendly palette matching the app: coral red (#E8553E) with deeper red (#C43E2D), gold (#F6C33B) with deeper gold (#D9961C), warm cream (#FBEACF) with tan (#E5C291).\n\nCreate an icon: A square sheet of cream practice paper with slightly rounded corners, as in the LAST attached image, the same shape: a bold red square border, a flat tan shape along the bottom edge for thickness, one short light highlight at the top left. Inside the border it is PLAIN flat cream: remove the red cross completely, with only four tiny pale red ticks where the cross's lines would meet the border. The middle is EMPTY: nothing is written on it (the app writes a big dark character on top).\n\nIt is shown very small (about 22 points, beside a number), so one bold, compact, chunky silhouette filling about 80% of the canvas, centred, front-on and upright; no thin lines, no small parts, nothing sticking out, nothing hanging below it, no cast shadow, no sparkles. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/stat-words-bubble.png",
+  "group": "profileart",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/hud-flat-coin.png",
+   "out/raw/hud-flat-lantern-lit.png"
+  ],
+  "prompt": "Attached: icons from this app's top bar. Draw a new icon from the SAME SET: the same flat look, the same chunky proportions, the same palette.\n\nStyle: a crisp FLAT 2D vector icon, like the icons in Duolingo's top bar: solid flat colour fills with NO gradients, NO texture, NO paper grain and NO soft airbrushing; shading only as one or two hard-edged shapes in a slightly darker tone of the same colour (a crescent along the bottom or right side); one clean light highlight shape (a short rounded stroke or pill) near the top left; edges perfectly clean and smooth; no outlines. Warm, friendly palette matching the app: coral red (#E8553E) with deeper red (#C43E2D), gold (#F6C33B) with deeper gold (#D9961C), warm cream (#FBEACF) with tan (#E5C291).\n\nCreate an icon: A chunky rounded speech bubble, a little wider than tall, with a short stubby tail at its bottom left: flat jade green (#2E9A84), a hard-edged deeper green (#17786A) shape along the bottom for thickness, one short light highlight at the top left. The middle is a large EMPTY area of plain flat green: nothing is written on it (the app writes a big cream character on top).\n\nIt is shown very small (about 22 points, beside a number), so one bold, compact, chunky silhouette filling about 80% of the canvas, centred, front-on and upright; no thin lines, no small parts, nothing sticking out, nothing hanging below it, no cast shadow, no sparkles. Square canvas.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]

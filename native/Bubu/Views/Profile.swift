@@ -131,9 +131,9 @@ struct ProfileView: View {
             heading("Overview")
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10, alignment: .leading), GridItem(.flexible(), alignment: .leading)], alignment: .leading, spacing: 14) {
                 stat("\(days) day\(days == 1 ? "" : "s")\(out != nil ? " (out)" : "")", icon: lit ? "chip-lantern-lit" : "chip-lantern-unlit")
-                stat("\(progress.xpTotal.formatted()) XP", symbol: "bolt.fill", tint: 0xF2B33D)
-                Button { router.push(.chars) } label: { stat("\(progress.charsKnown) characters", han: true) }.buttonStyle(CardPress())
-                stat("\(learned) words", symbol: "leaf.fill", tint: 0x1F8A6D)
+                stat("\(progress.xpTotal.formatted()) XP", icon: "stat-xp")
+                Button { router.push(.chars) } label: { stat("\(progress.charsKnown) characters", icon: "stat-chars") }.buttonStyle(CardPress())
+                stat("\(learned) words", icon: "stat-words")
             }
         }
         .padding(.top, 4)
