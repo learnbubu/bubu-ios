@@ -339,6 +339,9 @@ struct ChatPage: View {
     private func startAudio(mic: Bool) {
         let r = run
         Task { @MainActor in
+            // (the last answer's chime first: coming straight from Continue, the switch cut it off, the owner's phone, 2 Nov 2026)
+            let chime = Sounds.shared.timeLeft()
+            if chime > 0 { try? await Task.sleep(for: .seconds(chime)) }
             if mic, await Recognizer.authorize(), run == r { Sounds.shared.holdForRecording(true); heldAudio = true }
             try? await Task.sleep(for: .milliseconds(450))
             if run == r { step() }

@@ -255,6 +255,11 @@ final class Sounds {
         active = !on
     }
 
+    /// How long the effect now playing has left (a chat waits for it: switching the audio to the microphone cut it off).
+    func timeLeft() -> TimeInterval {
+        queue.sync { players.values.filter(.isPlaying).map { $0.duration - $0.currentTime }.max() ?? 0 }
+    }
+
     func play(_ name: String) {
         if Launch.silent { return }
         guard enabled else { return }
