@@ -19,10 +19,20 @@ extension Course {
 }
 
 enum Hints {
+    /// What each word with no card means, written out once (tools/word-meanings.js): joining its characters' first
+    /// meanings said 一天 was "as soon as + day" (the owner, 2 Nov 2026).
+    static let builtEn: [String: String] = {
+        guard let url = Bundle.main.url(forResource: "word-meanings", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let d = try? JSONDecoder().decode([String: String].self, from: data) else { return [:] }
+        return d
+    }()
+
     /// What a word means: its own card, its English if it's a name, a compound built from its parts, else its characters (web: wordMeaning).
     static func meaning(_ h: String) -> String {
         if let e = Course.wordEn[h] { return e }
         if let e = nameEn[h.filter(Course.isHan)] { return e }
+        if let e = builtEn[h.filter(Course.isHan)] { return e }
         let han = h.filter(Course.isHan).map(String.init)
         let charEn = { (c: String) in Course.wordEn[c] ?? CharData.shared.meaning(c) }
         if han.count > 1 {

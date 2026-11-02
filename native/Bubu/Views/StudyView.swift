@@ -1814,6 +1814,8 @@ struct SentenceView: View {
                     }
                     .contentShape(Rectangle())
                     .onTapGesture { withAnimation { pinyinOpen.toggle() } }
+                    // (over the speaker row, so a word's hint hanging down covers it: the Mac's check of 0.2.70)
+                    .zIndex(1)
                     BubbleSound(text: sent.hanzi, row: true)
                     }
                 }
