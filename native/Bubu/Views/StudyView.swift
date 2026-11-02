@@ -52,6 +52,9 @@ struct StudyView: View {
     @State private var scrollHeight: CGFloat = 0
     /// how much the keyboard covers above the home bar: the last one seen (remembered between lessons), so a typing
     /// page is the right height before its keyboard has come up
+    @State private var keyboardUp = false
+    /// a typed answer checked: the keyboard's on its way down, the sheet to follow
+    @State private var keyboardLeaving = false
     @AppStorage("keyboardRoom") private var keyboardRoom: Double = BuildView.tallScreen ? 296 : 260
     /// the combo burst on screen (its count), and the cheer between parts of a lesson
     @State private var burst: Int?
@@ -152,7 +155,9 @@ struct StudyView: View {
                             }
                         }
                         }
-                        if !preStart, case .card = session.current { bottomSlot }
+                        if !preStart, case .card = session.current {
+                            bottomSlot.opacity(keyboardLeaving ? 0 : 1).allowsHitTesting(!keyboardLeaving)
+                        }
                     }
                     .frame(maxHeight: .infinity)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { cardHeight = $0 }
@@ -162,8 +167,7 @@ struct StudyView: View {
                 // space and nothing moves (the page came in full height and was squeezed as it rose: the owner, 0.2.67,
                 // "feels buggy when loads in"). Answered, the keyboard goes and the page has its height back.
                 .padding(.bottom, typingFits && feedback == nil ? keyboardRoom : 0)
-                // (answered: all in place at once, behind the keyboard, which goes down off it; Check fell and the sheet
-                // rose through it, each in its own time: the owner, 2 Nov 2026, "the bottom pop up is odd")
+                // (the page's foot goes down at once once the keyboard's gone; only the sheet slides)
                 .transaction(value: feedback != nil) { if typingFits { $0.animation = nil } }
                 .ignoresSafeArea(typingFits ? SafeAreaRegions.keyboard : [], edges: .bottom)
             }
@@ -307,7 +311,7 @@ struct StudyView: View {
     }
 
     private func resetExercise() {
-        pick = ChoicePick(); skipped = false; placed = []; typed = ""; built = []; feedback = nil; exerciseKey = UUID()
+        pick = ChoicePick(); skipped = false; placed = []; typed = ""; built = []; feedback = nil; keyboardLeaving = false; exerciseKey = UUID()
         srsAtStart = progress.srs
         if session.exercise != nil {
             let key = exerciseKey
@@ -406,6 +410,7 @@ struct StudyView: View {
                             BuildView(ex: ex, picked: $built, result: feedback?.correct)
                         } else if ex.kind == .type {
                             TypeView(ex: ex, typed: $typed, result: feedback?.correct) { if !session.answered { checkType() } }
+                                .allowsHitTesting(!keyboardLeaving)
                         } else if ex.kind == .write {
                             WriteView(ex: ex, answered: session.answered) { settle(true) }
                         } else if ex.kind == .speak {
@@ -431,6 +436,7 @@ struct StudyView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { n in
             guard let end = n.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
                   let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+            keyboardUp = end.minY < scene.screen.bounds.height - 1
             let room = scene.screen.bounds.height - end.minY - (scene.windows.first?.safeAreaInsets.bottom ?? 0)
             // (only ever the tallest seen: 中文's has a bar of candidates English's hasn't, and the switch mustn't move
             // the page, the Mac's check of 0.2.68. A bar over a hardware keyboard, going down: nothing to take)
@@ -519,7 +525,7 @@ struct StudyView: View {
             .padding(.bottom, 14)
         }
         .padding(.horizontal, 12)
-        .animation(typingFits ? nil : .spring(response: 0.3, dampingFraction: 0.85), value: feedback != nil)
+        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: feedback != nil)
     }
 
     // MARK: answering
@@ -566,8 +572,19 @@ struct StudyView: View {
         let correct = ex.typedRight(typed)
         session.answer(correct)
         Sounds.shared.play(correct ? "correct" : "wrong")
-        withAnimation { feedback = Feedback(correct: correct, chosen: typed) }
         playAnswer(ex)
+        let verdict = Feedback(correct: correct, chosen: typed)
+        guard keyboardUp else { withAnimation { feedback = verdict }; return }
+        // the keyboard down first, the button out of the way, then the sheet up as on any other question: together,
+        // the button fell with the keyboard and the sheet rose through it (the owner, 2 Nov 2026, "the bottom pop up is odd")
+        keyboardLeaving = true
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        let key = exerciseKey
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+            guard key == exerciseKey else { return }
+            keyboardLeaving = false
+            withAnimation { feedback = verdict }
+        }
     }
 
     private func checkSentence() {
