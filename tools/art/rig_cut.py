@@ -13,6 +13,7 @@ OUT = "out/rig"
 SIZE = 1024
 PLAIN = ("torso pack tail head ear-l ear-r brows patches nose cheeks eyes-open eyes-happy eyes-shut eyes-wow "
          "eyes-squint mouth-smile mouth-open mouth-o mouth-frown").split()
+FUR = np.array([52.0, 56, 57])
 # how far along each limb its joints are
 ARM = {"top": 0.10, "mid": 0.52, "end": 0.80}
 STRAP_TOP, STRAP_SEEDS = 430, [(327, 555), (686, 555)]
@@ -21,11 +22,13 @@ LEG = {"top": 0.12, "mid": 0.50, "end": 0.84}
 
 def load(name):
     """RGBA floats, with the magenta taken off: its share of each edge pixel becomes transparency."""
-    rgb = np.asarray(Image.open(f"out/raw/rm-{name}.png").convert("RGB").resize((SIZE, SIZE), Image.LANCZOS), float)
+    # a small median takes out Codex's mottling and keeps the shapes
+    rgb = np.asarray(Image.open(f"out/raw/rm-{name}.png").convert("RGB").resize((SIZE, SIZE), Image.LANCZOS).filter(ImageFilter.MedianFilter(5)), float)
     alpha = 1 - np.clip((np.minimum(rgb[..., 0], rgb[..., 2]) - rgb[..., 1]) / 200, 0, 1)
     alpha[alpha < 0.04] = 0
     safe = np.maximum(alpha, 0.04)[..., None]
     colour = np.clip((rgb - (1 - safe) * np.array([255.0, 0, 255])) / safe, 0, 255)
+    colour[np.abs(colour - FUR).max(-1) < 30] = FUR  # one black
     # one piece only: stray specks go
     return np.dstack([colour, alpha * 255])
 

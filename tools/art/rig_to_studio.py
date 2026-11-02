@@ -46,7 +46,6 @@ def keys(*pairs):
 
 # a wave: the arm up, the forearm swinging, his head and body going with it
 WAVE = {
-    "head": {"rotation": keys((0, 0), (400, 5), (2000, 5), (2400, 0))},
 }
 
 os.makedirs(ART, exist_ok=True)
@@ -65,8 +64,6 @@ for name, parent, pivot, shown in STACK:
         "pivot": {"x": joint[0] + dx, "y": joint[1] + dy} if name not in SHIFT else {"x": JOINTS["paw-r"][0], "y": JOINTS["paw-r"][1]},
         "keys": WAVE.get(name, {}), "loop": 0, "blink": 0,
     }
-    if parent:
-        layer["parent"] = ids[parent]
     layers.append(layer)
 layers.reverse()  # top first
 
