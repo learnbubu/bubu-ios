@@ -48,7 +48,7 @@ for i, (name, start, end, h0, h1) in enumerate(TIMES):
     opacity = ([] if start == 0 else [{"t": 0, "v": 0, "ease": HOLD}]) + [{"t": start, "v": 1, "ease": HOLD}, {"t": end, "v": 0, "ease": HOLD}]
     layers.append({
         "id": f"L{i + 1}", "name": f"{i + 1} {name}", "art": f"{name}.png", "w": w, "h": h, "x": x, "y": y + h0, "scale": SCALE,
-        "rotation": 0, "flipX": False, "opacity": 1, "visible": True, "locked": False, "pivot": {"x": x, "y": foot},
+        "rotation": 0, "flipX": False, "opacity": 1, "visible": True, "locked": False, "pivot": {"x": x, "y": y},
         "keys": {"opacity": opacity, "y": [{"t": start, "v": y + h0, "ease": SOFT if name == "apex" else LINE}, {"t": end, "v": y + h1, "ease": LINE}]},
         "loop": 0, "blink": 0,
     })
