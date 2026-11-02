@@ -49,22 +49,14 @@ PARTS = {
     "mouth-open": "ONLY a big open happy mouth with a little tongue.",
     "mouth-o": "ONLY a small round surprised O mouth.",
     "mouth-frown": "ONLY a small sad mouth, curving down.",
-    # arms: upper, lower, paws in every shape a move needs
-    "arm-l": "only the top half of his left arm (viewer's left), from the shoulder down to the elbow, which is halfway down the arm: black fur only, with NO forearm, NO paw, NO strap and NO backpack." + JOINT,
-    "forearm-l": "only the lower half of his left arm (viewer's left), from the elbow, which is halfway down the arm, to the wrist: black fur only, with NO upper arm, NO paw and NO strap." + JOINT,
-    "arm-r": "only the top half of his right arm (viewer's right), from the shoulder down to the elbow, which is halfway down the arm: black fur only, with NO forearm, NO paw, NO strap and NO backpack." + JOINT,
-    "forearm-r": "only the lower half of his right arm (viewer's right), from the elbow, which is halfway down the arm, to the wrist: black fur only, with NO upper arm, NO paw and NO strap." + JOINT,
-    "paw-open": "ONLY his right paw (viewer's right), the rounded end of the arm with its two grey toe lines, as on the sheet." + JOINT,
+    # whole limbs, split at their joints in code (the model won't stop at an elbow), and the paws a split can't give
     "paw-fist": "ONLY his right paw closed in a round fist, at the same place and size." + JOINT,
     "paw-point": "ONLY his right paw pointing with one rounded finger, at the same place and size." + JOINT,
     "paw-thumb": "ONLY his right paw giving a thumbs up, at the same place and size." + JOINT,
-    # legs
-    "leg-l": "his left thigh alone (viewer's left), hip to knee." + JOINT,
-    "shin-l": "his left lower leg alone, knee to ankle, with NO foot." + JOINT,
-    "foot-l": "his left foot alone." + JOINT,
-    "leg-r": "his right thigh alone (viewer's right), hip to knee." + JOINT,
-    "shin-r": "his right lower leg alone, knee to ankle, with NO foot." + JOINT,
-    "foot-r": "his right foot alone." + JOINT,
+    "limb-arm-l": "his whole left arm alone (viewer's left), shoulder to paw with its toe lines, and none of his body. Its top ends in a soft rounded shoulder where it meets his body.",
+    "limb-arm-r": "his whole right arm alone (viewer's right), shoulder to paw with its toe lines, and none of his body. Its top ends in a soft rounded shoulder where it meets his body.",
+    "limb-leg-l": "his whole left leg alone (viewer's left), hip to foot with its toe lines, and none of his belly. Where the belly covered it, complete the black leg up to a soft rounded hip.",
+    "limb-leg-r": "his whole right leg alone (viewer's right), hip to foot with its toe lines, and none of his belly. Where the belly covered it, complete the black leg up to a soft rounded hip.",
 }
 BACKDROP = "\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text."
 
