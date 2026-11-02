@@ -59,3 +59,12 @@ v = a[..., :3].max(-1)
 shade = v / max(float(np.percentile(v[a[..., 3] > 0.5], 95)), 1e-3)
 rgb = LIGHT[None, None] * np.clip(0.9 + 0.1 * shade, 0, 1.1)[..., None]
 Image.fromarray((np.clip(np.dstack([rgb, a[..., 3]]), 0, 1) * 255 + 0.5).astype(np.uint8), "RGBA").save(p)
+
+# the hongbao's lucky clouds (祥云) in pale green, for the lucky pocket's ground: their shading kept, the gold gone
+PALE = np.array([214, 244, 216], np.float32) / 255
+for src, name in [("pk3-cloud-puff", "jade-cloud"), ("pk3-cloud-puff-2", "jade-cloud-2"), ("pk3-cloud-wisp", "jade-cloud-wisp")]:
+    a = np.asarray(Image.open("out/final/" + src + ".png").convert("RGBA")).astype(np.float32) / 255
+    shade = a[..., :3].mean(-1)
+    shade = shade / max(float(np.percentile(shade[a[..., 3] > 0.5], 90)), 1e-3)
+    rgb = PALE[None, None] * np.clip(shade, 0.6, 1)[..., None]
+    Image.fromarray((np.clip(np.dstack([rgb, a[..., 3]]), 0, 1) * 255 + 0.5).astype(np.uint8), "RGBA").save(os.path.join(ART, "jade-bg", name + ".png"))
