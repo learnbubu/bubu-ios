@@ -38,16 +38,17 @@ PARTS = {
     "patches": "ONLY his two black eye patches, with no eyes in them.",
     "nose": "ONLY his nose.",
     "cheeks": "ONLY his two pink cheeks.",
+    "brows": "ONLY his two small dark eyebrows.",
     # eyes, on the patches
-    "eyes-open": "ONLY his two open eyes with their glints, as on the sheet, without the patches.",
+    "eyes-open": "ONLY his two open eyes, at the size and place of the white arcs on the first image, in the style of the eyes in the second image: each a round cream-white eye with a dark pupil and a small glint. NO black patch around them.",
     "eyes-happy": "ONLY his two eyes as happy upward curves, closed in a smile, without the patches.",
-    "eyes-shut": "ONLY his two eyes gently closed in a level line (a blink), without the patches.",
+    "eyes-shut": "ONLY his two eyes gently closed, as two short level straight cream-white dashes (a blink), at the place of the white arcs on the sheet, without the patches.",
     "eyes-wow": "ONLY his two eyes very wide with big glints, amazed, without the patches.",
-    "eyes-squint": "ONLY his two eyes screwed shut as tight arcs like > <, without the patches.",
+    "eyes-squint": "ONLY his two eyes screwed shut, drawn in cream-white as tight arcs like > <, at the place of the white arcs on the sheet, without the patches.",
     # mouths
     "mouth-smile": "ONLY his closed smile.",
     "mouth-open": "ONLY a big open happy mouth with a little tongue.",
-    "mouth-o": "ONLY a small round surprised O mouth.",
+    "mouth-o": "ONLY a small round surprised O mouth, at the place of his smile on the sheet and about as wide as his nose: a dark ring with a dark inside, in the dark colour of his smile.",
     "mouth-frown": "ONLY a small sad mouth, curving down.",
     # whole limbs, split at their joints in code (the model won't stop at an elbow), and the paws a split can't give
     "paw-fist": "ONLY his right paw closed in a round fist, at the same place and size." + JOINT,
@@ -56,7 +57,7 @@ PARTS = {
     "limb-arm-l": "his whole left arm alone (viewer's left), shoulder to paw with its toe lines, and none of his body. Its top ends in a soft rounded shoulder where it meets his body.",
     "limb-arm-r": "his whole right arm alone (viewer's right), shoulder to paw with its toe lines, and none of his body. Its top ends in a soft rounded shoulder where it meets his body.",
     "limb-leg-l": "his whole left leg alone (viewer's left), hip to foot with its toe lines, and none of his belly. Where the belly covered it, complete the black leg up to a soft rounded hip.",
-    "limb-leg-r": "his whole right leg alone (viewer's right), hip to foot with its toe lines, and none of his belly. Where the belly covered it, complete the black leg up to a soft rounded hip.",
+    "limb-leg-r": "his whole right leg alone (viewer's right), hip to foot with its toe lines, and none of his belly. Where the belly covered it, complete the black leg upward as a full thick leg, as tall as a mirror image of his left leg, up to a soft rounded hip at the middle of his belly's height.",
 }
 BACKDROP = "\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text."
 
@@ -69,6 +70,6 @@ jobs.append({"file": "out/raw/rm-bare.png", "group": "rigm", "size": "1024x1024"
 for k, text in PARTS.items():
     sheet = "master" if k in ("pack", "straps") else "bare"
     jobs.append({"file": f"out/raw/rm-{k}.png", "group": "rigm", "size": "1024x1024",
-                 "refs": [f"out/raw/rm-{sheet}.png"], "prompt": PIECE + text + BACKDROP + STYLE})
+                 "refs": [f"out/raw/rm-{sheet}.png"] + (["out/raw/rm-master-1.png"] if k == "eyes-open" else []), "prompt": PIECE + text + BACKDROP + STYLE})
 json.dump(jobs, open("jobs.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print(len(PARTS) + 1, "jobs in rigm")
