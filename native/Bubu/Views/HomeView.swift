@@ -258,8 +258,8 @@ struct ClassroomBoard: View {
                     .lineLimit(1).minimumScaleFactor(0.6)
             }
             .buttonStyle(LipButton(face: Color(UIColor(hex: 0xFFF7E6)), lip: Color(UIColor(hex: 0xE2D3B4)), radius: h * 22 / 83, depth: h * 9 / 83,
-                                       // the shine in gold (white would not show on cream), half a second after Start lesson's (the owner, 2 Nov 2026)
-                                       sweep: true, sweepTint: Color(UIColor(hex: 0xF2C14E)), sweepDelay: 0.5))
+                                       // the shine, half a second after Start lesson's (the owner, 2 Nov 2026)
+                                       sweep: true, sweepDelay: 0.5))
                 .frame(width: b.width * k, height: b.height * k)
                 .offset(x: b.minX * k, y: b.minY * k)
         }
