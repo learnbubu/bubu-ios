@@ -162,6 +162,9 @@ struct StudyView: View {
                 // space and nothing moves (the page came in full height and was squeezed as it rose: the owner, 0.2.67,
                 // "feels buggy when loads in"). Answered, the keyboard goes and the page has its height back.
                 .padding(.bottom, typingFits && feedback == nil ? keyboardRoom : 0)
+                // (answered: all in place at once, behind the keyboard, which goes down off it; Check fell and the sheet
+                // rose through it, each in its own time: the owner, 2 Nov 2026, "the bottom pop up is odd")
+                .transaction(value: feedback != nil) { if typingFits { $0.animation = nil } }
                 .ignoresSafeArea(typingFits ? SafeAreaRegions.keyboard : [], edges: .bottom)
             }
             if let m = munch {
@@ -380,7 +383,7 @@ struct StudyView: View {
             Text(promptLabel).font(.nunito(25, .black)).tracking(-0.4).foregroundStyle(Color.ink)
                 .lineLimit(1).minimumScaleFactor(0.75)
                 // (typing: less room above it, the keyboard takes so much; the owner, 0.2.43, "a lot of empty space")
-                .padding(.top, typingFits ? 0 : 14).padding(.bottom, typingFits ? 12 : 18)
+                .padding(.top, typingFits ? 0 : BuildView.tallScreen ? 14 : 2).padding(.bottom, typingFits ? 12 : BuildView.tallScreen ? 18 : 8)
             Group {
                 if tonesIntro {
                     TonesIntroCard { dismissTonesIntro() }
@@ -516,7 +519,7 @@ struct StudyView: View {
             .padding(.bottom, 14)
         }
         .padding(.horizontal, 12)
-        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: feedback != nil)
+        .animation(typingFits ? nil : .spring(response: 0.3, dampingFraction: 0.85), value: feedback != nil)
     }
 
     // MARK: answering
@@ -709,21 +712,23 @@ struct MascotPrompt<Content: View>: View {
     var leading = false
     @ViewBuilder var content: Content
     @State private var pop = false
+    private var small: Bool { compact || !BuildView.tallScreen }
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             // Bùbù in parts, reacting to the answer (the owner, 7 Oct 2026)
             // (one size whatever the answer or the sentence's length: the owner, 13 Oct 2026)
             // (as big as Duolingo's characters beside the bubble, about 150 pt: the owner, 13 Oct 2026)
-            BubuMascot(mood: mood, height: compact ? 78 : 150)
-                .frame(width: compact ? 64 : 112, height: compact ? 78 : 150, alignment: .bottom)
+            // (small on a short screen too: at full size the answers ran under Check on the SE, the Mac's check of 0.2.71)
+            BubuMascot(mood: mood, height: small ? 78 : 150)
+                .frame(width: small ? 64 : 112, height: small ? 78 : 150, alignment: .bottom)
                 .shadow(color: .black.opacity(0.15), radius: 4, y: 3)
                 .scaleEffect(pop ? 1.14 : 1)
             // (to the screen's edge, a word's as a sentence's: the owner, 25 Oct 2026; it stopped at 200 pt)
             SpeechBubbleBox(sentence: sentence, leading: leading) { content }
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(minHeight: compact ? 78 : 150)
+        .frame(minHeight: small ? 78 : 150)
         // never squeezed shorter than what it holds: on a full screen the bubble was cut off under the
         // first answer (a two-line gap sentence, the owner's phone, 12 Oct 2026)
         .fixedSize(horizontal: false, vertical: true)
@@ -1761,15 +1766,16 @@ struct SentenceView: View {
     /// As Duolingo's: the tiles low, a little above Check, the spare room between them and the answer's lines (the
     /// owner, 2 Nov 2026). Worked out from parts that don't depend on it, so the layout can't loop.
     private var tilesGap: CGFloat {
-        guard page > 0, topHeight > 0, tilesHeight > 0 else { return 16 }
-        return max(16, page - top - 12 - topHeight - tilesHeight - 30)
+        let tall = BuildView.tallScreen
+        guard page > 0, topHeight > 0, tilesHeight > 0 else { return tall ? 16 : 10 }
+        return max(tall ? 16 : 10, page - top - 12 - topHeight - tilesHeight - (tall ? 30 : 8))
     }
 
     var body: some View {
         let sent = ex.sentence!
         let anyNew = sent.words.contains { isNew($0.hanzi) }
         VStack(spacing: 0) {
-            VStack(spacing: 16) {
+            VStack(spacing: BuildView.tallScreen ? 16 : 10) {
             MascotPrompt(mood: result, sentence: !ex.toChinese,
                          long: ex.hearOnly ? false : ex.toChinese ? sent.en.count > 60 : sent.words.map(\.hanzi).joined().count > 14, leading: !ex.hearOnly) {
                 if ex.hearOnly {
@@ -1827,12 +1833,12 @@ struct SentenceView: View {
                     }
                 }
             }
-            if !HintTip.used && !ex.hearOnly { Text("Tap a word for its meaning, or hold a tile").font(.nunito(12.5)).foregroundStyle(Color.muted) }
+            if !HintTip.used && !ex.hearOnly && BuildView.tallScreen { Text("Tap a word for its meaning, or hold a tile").font(.nunito(12.5)).foregroundStyle(Color.muted) }
             answerArea.allowsHitTesting(!skipped)
             }
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { topHeight = $0 }
             Color.clear.frame(height: tilesGap)
-            VStack(spacing: 16) {
+            VStack(spacing: BuildView.tallScreen ? 16 : 8) {
             bank.allowsHitTesting(!skipped)
             if ex.hearOnly, let skip {
                 // its place is kept once the exercise is answered, so nothing moves
@@ -1886,10 +1892,10 @@ struct SentenceView: View {
         }
     }
 
-    private var rowHeight: CGFloat { ex.toChinese ? 78 : 64 }
+    private var rowHeight: CGFloat { BuildView.tallScreen ? (ex.toChinese ? 78 : 64) : (ex.toChinese ? 66 : 50) }
     private var rows: Int {
         let n = ex.toChinese ? (ex.sentence?.words.count ?? 0) : Sentence.enWords(ex.sentence?.en ?? "").count
-        return max(2, Int(ceil(Double(n) / Double(ex.toChinese ? 6 : 5))))
+        return max(BuildView.tallScreen ? 2 : 1, Int(ceil(Double(n) / Double(ex.toChinese ? 6 : 5))))
     }
 
     private var answerArea: some View {
@@ -1952,7 +1958,7 @@ struct SentenceView: View {
             Text(t.text).font(ex.toChinese ? .hanzi(22, .medium) : .nunito(18.4, .semibold))
         }
         .foregroundStyle(tint ?? Color.ink)
-        .padding(.horizontal, 14).padding(.vertical, 10)
+        .padding(.horizontal, 14).padding(.vertical, BuildView.tallScreen ? 10 : 6)
         // (as Duolingo's word tiles: rounder, with a deeper lip)
         .background {
             ZStack {
