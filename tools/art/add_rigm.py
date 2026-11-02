@@ -17,6 +17,9 @@ MASTER = ("The attached images show Bùbù the panda. Draw him as an animator's 
           "front, feet apart under his hips, arms hanging a little away from his sides so no part overlaps another, paws "
           "open, a calm closed-mouth smile with eyes open. Keep his exact proportions, face, colours and red backpack straps. "
           "He fills most of the square canvas, centred, with his whole body in frame and room around him.")
+BARE = ("Edit the attached image: take off his backpack and its two red straps completely, and nothing else. Where the straps "
+        "crossed his chest and shoulders, there's plain black fur and his cream belly's edge, and no red or orange is left "
+        "anywhere. Keep everything else exactly as it is: the same pose, size, position, proportions, face and colours.")
 PIECE = ("The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece "
          "stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it "
          "leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same "
@@ -24,7 +27,8 @@ PIECE = ("The attached image is Bùbù's model sheet. Edit it by erasing everyth
 JOINT = " Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap."
 PARTS = {
     # the body
-    "torso": "his torso alone, staying where it is on the sheet: the black chest, the cream belly and the two red straps, with NO head, arms, legs or backpack. Where the head covered his chest, complete the black chest and the straps up to a rounded neck." + JOINT,
+    "torso": "his torso alone, staying where it is on the sheet: the black chest and the cream belly, with NO head, arms or legs. Where the head covered his chest, complete the black chest up to a rounded neck." + JOINT,
+    "straps": "ONLY his two red backpack straps, with no body. Where the head covered them, complete them up to where they'd go over his shoulders.",
     "pack": "his red backpack alone, as much of it as would sit behind his back, drawn whole.",
     "tail": "his small round tail alone.",
     # the head, built up
@@ -67,8 +71,12 @@ BACKDROP = "\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing el
 jobs = [j for j in jobs if j["group"] != "rigm"]
 jobs.append({"file": "out/raw/rm-master.png", "group": "rigm", "size": "1024x1024",
              "refs": ["refs/ref-rig-idle.png", "refs/ref-rig5-head.png"], "prompt": MASTER + BACKDROP + STYLE})
+# the panda with nothing on, so no body part carries a strap or a bit of backpack; only those two are drawn from the master
+jobs.append({"file": "out/raw/rm-bare.png", "group": "rigm", "size": "1024x1024", "refs": ["out/raw/rm-master.png"],
+             "prompt": BARE + BACKDROP + STYLE})
 for k, text in PARTS.items():
+    sheet = "master" if k in ("pack", "straps") else "bare"
     jobs.append({"file": f"out/raw/rm-{k}.png", "group": "rigm", "size": "1024x1024",
-                 "refs": ["out/raw/rm-master.png"], "prompt": PIECE + text + BACKDROP + STYLE})
+                 "refs": [f"out/raw/rm-{sheet}.png"], "prompt": PIECE + text + BACKDROP + STYLE})
 json.dump(jobs, open("jobs.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print(len(PARTS) + 1, "jobs in rigm")

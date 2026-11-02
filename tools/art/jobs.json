@@ -4880,13 +4880,31 @@
   "prompt": "The attached images show Bùbù the panda. Draw him as an animator's model sheet pose: standing straight, facing front, feet apart under his hips, arms hanging a little away from his sides so no part overlaps another, paws open, a calm closed-mouth smile with eyes open. Keep his exact proportions, face, colours and red backpack straps. He fills most of the square canvas, centred, with his whole body in frame and room around him.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
-  "file": "out/raw/rm-torso.png",
+  "file": "out/raw/rm-bare.png",
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
    "out/raw/rm-master.png"
   ],
-  "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his torso alone, staying where it is on the sheet: the black chest, the cream belly and the two red straps, with NO head, arms, legs or backpack. Where the head covered his chest, complete the black chest and the straps up to a rounded neck. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+  "prompt": "Edit the attached image: take off his backpack and its two red straps completely, and nothing else. Where the straps crossed his chest and shoulders, there's plain black fur and his cream belly's edge, and no red or orange is left anywhere. Keep everything else exactly as it is: the same pose, size, position, proportions, face and colours.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-torso.png",
+  "group": "rigm",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-bare.png"
+  ],
+  "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his torso alone, staying where it is on the sheet: the black chest and the cream belly, with NO head, arms or legs. Where the head covered his chest, complete the black chest up to a rounded neck. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-straps.png",
+  "group": "rigm",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-master.png"
+  ],
+  "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his two red backpack straps, with no body. Where the head covered them, complete them up to where they'd go over his shoulders.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
   "file": "out/raw/rm-pack.png",
@@ -4902,7 +4920,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his small round tail alone.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -4911,7 +4929,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his head alone: the cream shape with its soft hair tuft, with NO ears, NO eye patches, NO eyes, NO nose, NO mouth and NO cheeks. A blank face.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -4920,7 +4938,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his left ear alone (on the viewer's left), whole, including the part that would be hidden behind his head.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -4929,7 +4947,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his right ear alone (on the viewer's right), whole, including the part that would be hidden behind his head.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -4938,7 +4956,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his two black eye patches, with no eyes in them.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -4947,7 +4965,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his nose.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -4956,7 +4974,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his two pink cheeks.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -4965,7 +4983,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his two open eyes with their glints, as on the sheet, without the patches.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -4974,7 +4992,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his two eyes as happy upward curves, closed in a smile, without the patches.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -4983,7 +5001,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his two eyes gently closed in a level line (a blink), without the patches.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -4992,7 +5010,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his two eyes very wide with big glints, amazed, without the patches.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5001,7 +5019,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his two eyes screwed shut as tight arcs like > <, without the patches.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5010,7 +5028,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his closed smile.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5019,7 +5037,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY a big open happy mouth with a little tongue.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5028,7 +5046,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY a small round surprised O mouth.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5037,7 +5055,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY a small sad mouth, curving down.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5046,7 +5064,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: only the top half of his left arm (viewer's left), from the shoulder down to the elbow, which is halfway down the arm: black fur only, with NO forearm, NO paw, NO strap and NO backpack. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5055,7 +5073,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: only the lower half of his left arm (viewer's left), from the elbow, which is halfway down the arm, to the wrist: black fur only, with NO upper arm, NO paw and NO strap. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5064,7 +5082,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: only the top half of his right arm (viewer's right), from the shoulder down to the elbow, which is halfway down the arm: black fur only, with NO forearm, NO paw, NO strap and NO backpack. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5073,7 +5091,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: only the lower half of his right arm (viewer's right), from the elbow, which is halfway down the arm, to the wrist: black fur only, with NO upper arm, NO paw and NO strap. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5082,7 +5100,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his right paw (viewer's right), the rounded end of the arm with its two grey toe lines, as on the sheet. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5091,7 +5109,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his right paw closed in a round fist, at the same place and size. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5100,7 +5118,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his right paw pointing with one rounded finger, at the same place and size. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5109,7 +5127,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: ONLY his right paw giving a thumbs up, at the same place and size. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5118,7 +5136,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his left thigh alone (viewer's left), hip to knee. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5127,7 +5145,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his left lower leg alone, knee to ankle, with NO foot. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5136,7 +5154,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his left foot alone. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5145,7 +5163,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his right thigh alone (viewer's right), hip to knee. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5154,7 +5172,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his right lower leg alone, knee to ankle, with NO foot. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
@@ -5163,7 +5181,7 @@
   "group": "rigm",
   "size": "1024x1024",
   "refs": [
-   "out/raw/rm-master.png"
+   "out/raw/rm-bare.png"
   ],
   "prompt": "The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same framing.\n\nThe piece: his right foot alone. Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
