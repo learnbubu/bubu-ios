@@ -1,4 +1,4 @@
-"""Bùbù's master rig into Studio: out/rig/*.png trimmed into the project's art, and a document "rig" with every part jointed
+"""Bùbù's master rig into Studio: out/rigm/*.png trimmed into the project's art, and a document "rig" with every part jointed
 to its parent, the spare faces and paws hidden, and a test wave. Replaces only that document and its art. Run with Studio
 saved, then reload it.
 
@@ -10,7 +10,7 @@ from PIL import Image
 
 ROOT = "C:/Users/domch/Documents/Projects/bubu-studio/projects/bubu"
 ART = f"{ROOT}/art/rig"
-JOINTS = json.load(open("out/rig/rig.json"))
+JOINTS = json.load(open("out/rigm/rig.json"))
 SMOOTH = [0.42, 0, 0.58, 1]
 NECK, WAIST = [505, 470], [505, 640]
 
@@ -52,7 +52,7 @@ os.makedirs(ART, exist_ok=True)
 layers = []
 ids = {name: f"L{i + 1}" for i, (name, *_) in enumerate(STACK)}
 for name, parent, pivot, shown in STACK:
-    im = Image.open(f"out/rig/{name}.png")
+    im = Image.open(f"out/rigm/{name}.png")
     box = im.getchannel("A").getbbox()
     im.crop(box).save(f"{ART}/{name}.png")
     dx, dy = SHIFT.get(name, (0, 0))

@@ -1,6 +1,6 @@
 """Bùbù's master rig: takes the Codex parts in out/raw/rm-*.png off their magenta, splits the whole limbs at their joints
-with a round overlap, trims the pose paws down to the hand, and writes out/rig/<part>.png (full 1024 canvas, so they stack
-as they are) and out/rig/rig.json (where each joint is). Then draws a few test poses to out/rig/pose-test.png.
+with a round overlap, trims the pose paws down to the hand, and writes out/rigm/<part>.png (full 1024 canvas, so they stack
+as they are) and out/rigm/rig.json (where each joint is). Then draws a few test poses to out/rigm/pose-test.png.
 
 From tools/art: ../sfx/.venv/Scripts/python -I rig_cut.py
 """
@@ -9,11 +9,12 @@ import os
 import numpy as np
 from PIL import Image, ImageFilter
 
-OUT = "out/rig"
+OUT = "out/rigm"
 SIZE = 1024
 PLAIN = ("torso pack tail head ear-l ear-r brows patches nose cheeks eyes-open eyes-happy eyes-shut eyes-wow "
          "eyes-squint mouth-smile mouth-open mouth-o mouth-frown").split()
 FUR = np.array([52.0, 56, 57])
+LEG_OUT = 730  # how far down his side a leg first shows
 # how far along each limb its joints are
 ARM = {"top": 0.10, "mid": 0.52, "end": 0.80}
 STRAP_TOP, STRAP_SEEDS = 430, [(327, 555), (686, 555)]
@@ -80,6 +81,17 @@ def piece(a, along, lo, hi, joints):
 
 def split(name, side, stops, parts):
     a = load(name)
+    if "leg" in name:
+        # a leg only shows where it shows standing: Codex carried the hip out past the belly's edge
+        bare = load("bare")[..., 3] / 255
+        a[..., 3] *= np.asarray(Image.fromarray((bare * 255).astype("uint8")).filter(ImageFilter.MaxFilter(3)), float) / 255
+        # that outline includes his arms, so above where a leg comes out it has to stay behind the belly
+        # and it leaves the belly's edge at a slant, with no step where it starts
+        for row in range(SIZE):
+            inside = np.nonzero(share[row] > 0.5)[0]
+            # above the belly's widest line its own edge; below, that widest width, opening out on the slant
+            width = half if row >= waist else ((inside.max() - inside.min()) / 2 if len(inside) > 8 else 0)
+            a[row, :, 3] *= np.abs(np.arange(SIZE) - cx) <= width + max(0, row - LEG_OUT) * 0.6
     save(name, a)  # whole, for Studio's bones: rigid pieces lump at their joints (owner, 2 Nov 2026)
     along, at = axis(a)
     top, _ = at(stops["top"])
@@ -125,11 +137,19 @@ ys, xs = np.mgrid[0:SIZE, 0:SIZE]
 ax = np.nonzero(load("limb-arm-l")[..., 3].sum(0))[0]
 belly = (torso[..., :3].min(-1) > 200) & (torso[..., 3] > 128)
 by, bx = np.nonzero(belly)
-cx, half = (bx.min() + bx.max()) / 2, (bx.max() - bx.min()) / 2
+# (by percentile: Codex left a stray speck or two beside it)
+left, right = np.percentile(bx, 0.3), np.percentile(bx, 99.7)
+cx, half = (left + right) / 2, (right - left) / 2
+share = share * (np.abs(xs - cx) <= half + 2)
+belly_part[..., 3] *= np.abs(xs - cx) <= half + 2
+save("belly", belly_part)
 top = np.nonzero(torso[..., 3].sum(1))[0][0]
 cy, tall = (top + by.max()) / 2, (by.max() - top) / 2
-egg = ((xs - cx) / (half + 4)) ** 2 + ((ys - cy) / (tall + 4)) ** 2
-torso[..., 3] *= np.clip((1 - egg) * half / 2 + 0.5, 0, 1)
+# Standing, no black shows beside his belly (owner, 2 Nov 2026): the chest tapers from the neck into the belly's widest
+# line, and below that line there's only belly.
+waist = by.mean()
+reach = 150 + (half - 10 - 150) * np.clip((ys - top) / (waist - top), 0, 1)
+torso[..., 3] *= np.clip(reach - np.abs(xs - cx) + 0.5, 0, 1) * (ys < waist) + (share > 0.5) * (ys >= waist)
 save("torso", torso)
 
 # Codex's straps came out padded and bulky, so they're lifted straight from the approved master.
