@@ -77,6 +77,7 @@ def piece(a, along, lo, hi, joints):
 
 def split(name, side, stops, parts):
     a = load(name)
+    save(name, a)  # whole, for Studio's bones: rigid pieces lump at their joints (owner, 2 Nov 2026)
     along, at = axis(a)
     top, _ = at(stops["top"])
     mid, mr = at(stops["mid"])
@@ -112,7 +113,7 @@ for n in PLAIN:
 torso = load("torso")
 # the belly on its own, so the straps can run under it as they do on the sheet
 fur_tone = np.median(torso[(torso[..., 3] > 200) & (torso[..., 0] < 100)][:, :3], axis=0)
-share = np.clip((torso[..., :3].min(-1) - fur_tone.min()) / 150, 0, 1)
+share = np.clip((torso[..., :3].min(-1) - 130) / 70, 0, 1)  # above the fur's mottling and any grey toe lines
 belly_part = torso.copy()
 belly_part[..., 3] = torso[..., 3] * share
 belly_part[..., :3] = np.clip((torso[..., :3] - (1 - share[..., None]) * fur_tone) / np.maximum(share[..., None], 0.05), 0, 255)
@@ -140,7 +141,9 @@ for seed in STRAP_SEEDS:
             seen[y, x] = True
             todo += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
 soft = np.asarray(Image.fromarray((seen * 255).astype("uint8")).filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.7)), float)
-save("straps", np.dstack([sheet, soft]))
+strap_colour = sheet.copy()
+strap_colour[~seen] = np.median(sheet[seen], axis=0)  # so the soft edge doesn't carry the backdrop's or the head's colour
+save("straps", np.dstack([strap_colour, soft]))
 
 # Codex's open mouth is far bigger than his smile and runs into his nose: brought down to a little wider than the smile.
 smile, wide = Image.open(f"{OUT}/mouth-smile.png"), Image.open(f"{OUT}/mouth-open.png")
@@ -151,6 +154,15 @@ small = small.resize((w, round(small.height * w / small.width)), Image.LANCZOS)
 fixed = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 fixed.paste(small, (round((sb[0] + sb[2] - w) / 2), sb[1]))
 fixed.save(f"{OUT}/mouth-open.png")
+
+# the backpack came out a big slab showing down both sides: only a low rounded bag, from his shoulders to his chest
+bag = Image.open(f"{OUT}/pack.png")
+bb = bag.getchannel("A").getbbox()
+small = bag.crop(bb)
+small = small.resize((round(small.width * 0.9), round(small.height * 0.56)), Image.LANCZOS)
+out = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+out.paste(small, (round((bb[0] + bb[2] - small.width) / 2), bb[1]))
+out.save(f"{OUT}/pack.png")
 
 joints = {}
 joints.update(split("limb-arm-l", "l", ARM, ("arm", "forearm", "paw")))
