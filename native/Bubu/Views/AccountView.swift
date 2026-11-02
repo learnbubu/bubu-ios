@@ -48,7 +48,8 @@ struct AccountSection: View {
                 .font(.nunito(13)).foregroundStyle(Color.muted).fixedSize(horizontal: false, vertical: true)
             field { TextField("Email", text: $email, prompt: Text(verbatim: "you@example.com").foregroundStyle(Color.muted)).keyboardType(.emailAddress).textContentType(.username) }
             field { SecureField("Password", text: $password).textContentType(.password) }
-            HStack(spacing: 8) {
+            // (one above the other: side by side, "Create account" was cut off)
+            VStack(spacing: 8) {
                 Button(busy ? "Signing in…" : "Sign in") { Task { await go(signUp: false) } }.buttonStyle(WideButton())
                 Button("Create account") { Task { await go(signUp: true) } }.buttonStyle(WideButton(ghost: true))
             }

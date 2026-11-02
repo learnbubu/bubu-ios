@@ -120,7 +120,7 @@ struct CharactersPage: View {
                             .overlay(RoundedRectangle(cornerRadius: 11, style: .continuous).strokeBorder(Color.gold.opacity(0.45), lineWidth: 1.5))
                     }
                     if due.count > 5 {
-                        Text("+\(due.count - 5)").font(.nunito(14, .black)).foregroundStyle(Color.muted)
+                        Text("+\(due.count - 5)").font(.nunito(14, .black)).foregroundStyle(Color.muted).lineLimit(1).fixedSize()
                             .padding(.leading, 4)
                     }
                     Spacer(minLength: 0)

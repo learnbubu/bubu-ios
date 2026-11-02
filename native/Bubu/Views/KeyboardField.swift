@@ -27,6 +27,8 @@ struct KeyboardField: UIViewRepresentable {
         v.tintColor = UIColor(Color.accent)
         v.backgroundColor = .clear
         v.textContainerInset = .zero
+        // (the typed text dropped out of the box and slid back as the keyboard went: the Mac's frames of 861cdb4)
+        v.contentInsetAdjustmentBehavior = .never
         v.textContainer.lineFragmentPadding = 0
         v.autocapitalizationType = .none
         v.autocorrectionType = .no

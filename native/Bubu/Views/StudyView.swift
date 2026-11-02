@@ -166,8 +166,8 @@ struct StudyView: View {
                 // typing: laid out above the keyboard's room from the moment it arrives, so the keyboard rises into the
                 // space and nothing moves (the page came in full height and was squeezed as it rose: the owner, 0.2.67,
                 // "feels buggy when loads in"). Answered, the keyboard goes and the page has its height back.
-                .padding(.bottom, typingFits && feedback == nil ? keyboardRoom : 0)
-                // (the page's foot goes down at once once the keyboard's gone; only the sheet slides)
+                .padding(.bottom, typingFits && feedback == nil && !keyboardLeaving ? keyboardRoom : 0)
+                // (the foot goes down at Check, hidden, so Continue is already in its place when it shows; only the sheet slides)
                 .transaction(value: feedback != nil) { if typingFits { $0.animation = nil } }
                 .ignoresSafeArea(typingFits ? SafeAreaRegions.keyboard : [], edges: .bottom)
             }
@@ -409,7 +409,7 @@ struct StudyView: View {
                         } else if ex.kind == .build {
                             BuildView(ex: ex, picked: $built, result: feedback?.correct)
                         } else if ex.kind == .type {
-                            TypeView(ex: ex, typed: $typed, result: feedback?.correct) { if !session.answered { checkType() } }
+                            TypeView(ex: ex, typed: $typed, result: feedback?.correct, leaving: keyboardLeaving) { if !session.answered { checkType() } }
                                 .allowsHitTesting(!keyboardLeaving)
                         } else if ex.kind == .write {
                             WriteView(ex: ex, answered: session.answered) { settle(true) }
@@ -2152,7 +2152,10 @@ struct TypeView: View {
     let ex: Exercise
     @Binding var typed: String
     let result: Bool?
+    /// checked, the keyboard going down, the verdict still to come: nothing here changes meanwhile
+    var leaving = false
     var submit: () -> Void
+    private var settled: Bool { result != nil || leaving }
     @State private var focused = false
     /// the keyboard asked for: Chinese to start, every time
     @State private var chinese = true
@@ -2202,16 +2205,16 @@ struct TypeView: View {
                 }
                 .padding(.vertical, tall ? 16 : 10).padding(.horizontal, 16)
                 // (answered, it keeps the height it had: it grew as the keyboard went)
-                .frame(maxWidth: .infinity, minHeight: result != nil && boxHeight > 0 ? boxHeight : tall ? 72 : 48, maxHeight: result != nil && boxHeight > 0 ? boxHeight : 150, alignment: .topLeading)
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { if result == nil { boxHeight = $0 } }
+                .frame(maxWidth: .infinity, minHeight: settled && boxHeight > 0 ? boxHeight : tall ? 72 : 48, maxHeight: settled && boxHeight > 0 ? boxHeight : 150, alignment: .topLeading)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { if !settled { boxHeight = $0 } }
                 .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.panel))
                 .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))
+                    .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused || leaving ? Color.accent : Color.line, lineWidth: 2))
                 .contentShape(Rectangle())
                 .onTapGesture { if result == nil { focused = true } }
             // the keyboard: Chinese to start, English a tap away (the owner, 26 Oct 2026, "a button to switch to
             // english/chinese? and always start in chinese"); the tip under it
-            if result == nil {
+            if !settled {
                 VStack(spacing: 8) {
                     keyboardSwitch
                     // (the tip gives way first, where there's no room for it; how to add the keyboard never does)
