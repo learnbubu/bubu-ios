@@ -7,14 +7,15 @@ From tools/art: ../sfx/.venv/Scripts/python -I rig_cut.py
 import json
 import os
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 OUT = "out/rig"
 SIZE = 1024
-PLAIN = ("torso straps pack tail head ear-l ear-r brows patches nose cheeks eyes-open eyes-happy eyes-shut eyes-wow "
+PLAIN = ("torso pack tail head ear-l ear-r brows patches nose cheeks eyes-open eyes-happy eyes-shut eyes-wow "
          "eyes-squint mouth-smile mouth-open mouth-o mouth-frown").split()
 # how far along each limb its joints are
 ARM = {"top": 0.10, "mid": 0.52, "end": 0.80}
+STRAP_TOP, STRAP_SEEDS = 430, [(327, 555), (686, 555)]
 LEG = {"top": 0.12, "mid": 0.50, "end": 0.84}
 
 
@@ -109,6 +110,13 @@ for n in PLAIN:
 # Codex's torso keeps stumps of arm down each side, which stay behind when an arm lifts. Only the egg of his body stays;
 # the arms' own shoulders fill the rest. (The belly's edge is inside it.)
 torso = load("torso")
+# the belly on its own, so the straps can run under it as they do on the sheet
+fur_tone = np.median(torso[(torso[..., 3] > 200) & (torso[..., 0] < 100)][:, :3], axis=0)
+share = np.clip((torso[..., :3].min(-1) - fur_tone.min()) / 150, 0, 1)
+belly_part = torso.copy()
+belly_part[..., 3] = torso[..., 3] * share
+belly_part[..., :3] = np.clip((torso[..., :3] - (1 - share[..., None]) * fur_tone) / np.maximum(share[..., None], 0.05), 0, 255)
+save("belly", belly_part)
 ys, xs = np.mgrid[0:SIZE, 0:SIZE]
 ax = np.nonzero(load("limb-arm-l")[..., 3].sum(0))[0]
 belly = (torso[..., :3].min(-1) > 200) & (torso[..., 3] > 128)
@@ -119,6 +127,20 @@ cy, tall = (top + by.max()) / 2, (by.max() - top) / 2
 egg = ((xs - cx) / (half + 4)) ** 2 + ((ys - cy) / (tall + 4)) ** 2
 torso[..., 3] *= np.clip((1 - egg) * half / 2 + 0.5, 0, 1)
 save("torso", torso)
+
+# Codex's straps came out padded and bulky, so they're lifted straight from the approved master.
+sheet = np.asarray(Image.open("out/raw/rm-master.png").convert("RGB"), float)
+red = (sheet[..., 0] > 150) & (sheet[..., 1] < 150) & (sheet[..., 2] < 125) & (np.arange(SIZE)[:, None] >= STRAP_TOP)
+seen = np.zeros_like(red)
+for seed in STRAP_SEEDS:
+    todo = [seed]
+    while todo:
+        x, y = todo.pop()
+        if 0 <= x < SIZE and 0 <= y < SIZE and red[y, x] and not seen[y, x]:
+            seen[y, x] = True
+            todo += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+soft = np.asarray(Image.fromarray((seen * 255).astype("uint8")).filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.GaussianBlur(0.7)), float)
+save("straps", np.dstack([sheet, soft]))
 
 # Codex's open mouth is far bigger than his smile and runs into his nose: brought down to a little wider than the smile.
 smile, wide = Image.open(f"{OUT}/mouth-smile.png"), Image.open(f"{OUT}/mouth-open.png")
@@ -174,7 +196,7 @@ def pose(left, right, legl, legr, face, down=0):
         put(im)
     for im in chain(canvas, ["arm-l", "forearm-l", "paw-l"], left, (0, down)) + chain(canvas, ["arm-r", "forearm-r", "paw-r"], right, (0, down)):
         put(im)
-    for n in ["torso", "straps", "ear-l", "ear-r", "head", "brows", "patches"] + face + ["nose", "cheeks"]:
+    for n in ["torso", "straps", "belly", "ear-l", "ear-r", "head", "brows", "patches"] + face + ["nose", "cheeks"]:
         plain(n, down)
     return canvas.resize((400, 400), Image.LANCZOS)
 

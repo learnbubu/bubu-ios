@@ -29,7 +29,7 @@ PARTS = {
     # the body
     "torso": "his torso alone, staying where it is on the sheet: the black chest and the cream belly, with NO head, arms or legs. Where the head covered his chest, complete the black chest up to a rounded neck." + JOINT,
     "straps": "ONLY his two red backpack straps, with no body. Where the head covered them, complete them up to where they'd go over his shoulders.",
-    "pack": "his red backpack alone, as much of it as would sit behind his back, drawn whole.",
+    "pack": "ONLY his red backpack, seen from the side that rests against his back, because it is behind him and we look past him at it: a plain padded inner back panel in the same red, with soft rounded corners. NO pocket, NO button, NO buckle and NO handle on it. It is centred behind his body, at the height of his shoulders down to his waist, and just wide enough that its rounded top corners peek out behind his shoulders exactly where they do on the sheet.",
     "tail": "his small round tail alone.",
     # the head, built up
     "head": "his head alone: the cream shape with its soft hair tuft, with NO ears, NO eye patches, NO eyes, NO nose, NO mouth and NO cheeks. A blank face.",
