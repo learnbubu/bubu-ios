@@ -267,7 +267,6 @@ struct PlusCard: View {
                 perk("Unlimited buns: mistakes never stop a lesson") {
                     Text("∞").font(.nunito(20, .black)).foregroundStyle(Color.accent)
                 }
-                perk("A red pocket for every lesson, not just the first each day") { CoinIcon(size: 20) }
                 perk("Hold up to 3 spare lanterns, and buy more in the shop") {
                     LanternMark(size: 22)
                 }
@@ -337,7 +336,7 @@ struct ShopCard: View {
                         Image(systemName: "person.fill").font(.system(size: 21))
                     }
                     if progress.offersPlus {
-                        ShopRow("Bùbù Plus", sub: "Unlimited buns, more pockets, spare lanterns", plus: true,
+                        ShopRow("Bùbù Plus", sub: "Unlimited buns, spare lanterns", plus: true,
                                 action: { Moments.shared.replace(with: .plus) }) {
                             Text("∞")
                         }
