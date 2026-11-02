@@ -50,3 +50,12 @@ for src, to in DOCS.items():
     # the XP bolt, the icon the app already uses, for the prize and the falling ones
     shutil.copy(BOLT, os.path.join(out, "jade-bolt.png"))
     print(to, sorted(os.listdir(out)))
+
+# the prize's ground: a lighter green, not the red's dark one (the owner, 2 Nov 2026). Its shading kept, in that colour.
+LIGHT = np.array([62, 168, 100], np.float32) / 255
+p = os.path.join(ART, "jade-bg-dark", "jade-dark-sweep.png")
+a = np.asarray(Image.open(p).convert("RGBA")).astype(np.float32) / 255
+v = a[..., :3].max(-1)
+shade = v / max(float(np.percentile(v[a[..., 3] > 0.5], 95)), 1e-3)
+rgb = LIGHT[None, None] * np.clip(0.9 + 0.1 * shade, 0, 1.1)[..., None]
+Image.fromarray((np.clip(np.dstack([rgb, a[..., 3]]), 0, 1) * 255 + 0.5).astype(np.uint8), "RGBA").save(p)
