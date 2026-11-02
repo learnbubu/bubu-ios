@@ -17,13 +17,14 @@ MASTER = ("The attached images show Bùbù the panda. Draw him as an animator's 
           "front, feet apart under his hips, arms hanging a little away from his sides so no part overlaps another, paws "
           "open, a calm closed-mouth smile with eyes open. Keep his exact proportions, face, colours and red backpack straps. "
           "He fills most of the square canvas, centred, with his whole body in frame and room around him.")
-PIECE = ("The first attached image is Bùbù's model sheet. Draw ONLY the piece described below, nothing else on the canvas, at "
-         "EXACTLY the size, position and angle it has on the sheet, so it stacks back onto the other pieces. Square canvas, "
-         "the same framing.\n\nThe piece: ")
+PIECE = ("The attached image is Bùbù's model sheet. Edit it by erasing everything except the piece described below. The piece "
+         "stays at EXACTLY the size, position and angle it has on the sheet: never move, re-centre or enlarge it, even though it "
+         "leaves it off-centre with a lot of empty canvas. It has to stack back onto the other pieces. Square canvas, the same "
+         "framing.\n\nThe piece: ")
 JOINT = " Where it joins the next part it ends in a soft rounded end, extended a little past the joint, so it can turn there with no gap."
 PARTS = {
     # the body
-    "torso": "his torso alone with its cream belly and the red straps across the chest, with NO head, arms, legs or backpack." + JOINT,
+    "torso": "his torso alone, staying where it is on the sheet: the black chest, the cream belly and the two red straps, with NO head, arms, legs or backpack. Where the head covered his chest, complete the black chest and the straps up to a rounded neck." + JOINT,
     "pack": "his red backpack alone, as much of it as would sit behind his back, drawn whole.",
     "tail": "his small round tail alone.",
     # the head, built up
@@ -45,11 +46,11 @@ PARTS = {
     "mouth-o": "ONLY a small round surprised O mouth.",
     "mouth-frown": "ONLY a small sad mouth, curving down.",
     # arms: upper, lower, paws in every shape a move needs
-    "arm-l": "the upper half of his left arm alone (viewer's left), shoulder to elbow." + JOINT,
-    "forearm-l": "the lower half of his left arm alone, elbow to wrist, with NO paw." + JOINT,
-    "arm-r": "the upper half of his right arm alone (viewer's right), shoulder to elbow." + JOINT,
-    "forearm-r": "the lower half of his right arm alone, elbow to wrist, with NO paw." + JOINT,
-    "paw-open": "ONLY his right paw, open with its pads, as on the sheet." + JOINT,
+    "arm-l": "only the top half of his left arm (viewer's left), from the shoulder down to the elbow, which is halfway down the arm: black fur only, with NO forearm, NO paw, NO strap and NO backpack." + JOINT,
+    "forearm-l": "only the lower half of his left arm (viewer's left), from the elbow, which is halfway down the arm, to the wrist: black fur only, with NO upper arm, NO paw and NO strap." + JOINT,
+    "arm-r": "only the top half of his right arm (viewer's right), from the shoulder down to the elbow, which is halfway down the arm: black fur only, with NO forearm, NO paw, NO strap and NO backpack." + JOINT,
+    "forearm-r": "only the lower half of his right arm (viewer's right), from the elbow, which is halfway down the arm, to the wrist: black fur only, with NO upper arm, NO paw and NO strap." + JOINT,
+    "paw-open": "ONLY his right paw (viewer's right), the rounded end of the arm with its two grey toe lines, as on the sheet." + JOINT,
     "paw-fist": "ONLY his right paw closed in a round fist, at the same place and size." + JOINT,
     "paw-point": "ONLY his right paw pointing with one rounded finger, at the same place and size." + JOINT,
     "paw-thumb": "ONLY his right paw giving a thumbs up, at the same place and size." + JOINT,
@@ -68,6 +69,6 @@ jobs.append({"file": "out/raw/rm-master.png", "group": "rigm", "size": "1024x102
              "refs": ["refs/ref-rig-idle.png", "refs/ref-rig5-head.png"], "prompt": MASTER + BACKDROP + STYLE})
 for k, text in PARTS.items():
     jobs.append({"file": f"out/raw/rm-{k}.png", "group": "rigm", "size": "1024x1024",
-                 "refs": ["out/raw/rm-master.png", "refs/ref-rig-idle.png"], "prompt": PIECE + text + BACKDROP + STYLE})
+                 "refs": ["out/raw/rm-master.png"], "prompt": PIECE + text + BACKDROP + STYLE})
 json.dump(jobs, open("jobs.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print(len(PARTS) + 1, "jobs in rigm")
