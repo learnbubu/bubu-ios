@@ -582,8 +582,9 @@ struct StudyView: View {
         let key = exerciseKey
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
             guard key == exerciseKey else { return }
-            keyboardLeaving = false
-            withAnimation { feedback = verdict }
+            // (one change, not two: on its own, keyboardLeaving false put the page back above the keyboard's room for a frame,
+            // so Continue showed under the box and fell, and the box's height lock let go: the Mac's log of b902dc0)
+            withAnimation { keyboardLeaving = false; feedback = verdict }
         }
     }
 
@@ -2197,8 +2198,11 @@ struct TypeView: View {
             // the box: tall, the text from its top left, as Duolingo's; as tall as the room above the keyboard allows
             // (StudyView lays typing out to fit, not scrolled: the owner's phone, 0.2.43)
             KeyboardField(text: $typed, chinese: chinese, focused: $focused, enabled: result == nil, submit: submit)
+                .opacity(settled ? 0 : 1)
                 .overlay(alignment: .topLeading) {
-                    if typed.isEmpty {
+                    // (checked, the words as a plain Text: the text view's slid out of the box and back as the keyboard went)
+                    if settled { Text(typed).font(.nunito(22, .bold)).foregroundStyle(Color.ink).allowsHitTesting(false) }
+                    else if typed.isEmpty {
                         Text(ex.typeHanzi ? "Type it in Chinese" : "Type here").font(.nunito(22, .bold)).foregroundStyle(Color.muted.opacity(0.55))
                             .allowsHitTesting(false)
                     }
