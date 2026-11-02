@@ -8,6 +8,9 @@ import AVFoundation
 /// The pictures are three videos from Studio, played one after another: the waiting loop, the opening (once), and
 /// the prize's hold loop, whose first frame is the opening's last. A little money (a lesson, a chapter) lands as a
 /// small stack; a milestone's lands as the big heap.
+///
+/// The daily quests' lucky pocket is the same screen in green, for XP (the owner, 2 Nov 2026: no more pop-ups). Its
+/// videos are a stand-in, the red ones recoloured with ffmpeg's colorchannelmixer, until Studio makes its own.
 struct HongbaoScreen: View {
     let pocket: Moments.Pocket
     /// the coins come out (once, as it opens)
@@ -22,6 +25,8 @@ struct HongbaoScreen: View {
     enum Phase { case waiting, opening, prize }
 
     private var big: Bool { pocket.milestone }
+    private var jade: Bool { pocket.kind == .jade }
+    private var ground: Color { Color(UIColor(hex: jade ? 0x287429 : 0xC02C22)) }
     /// from the tap to the prize landing (the opening's own timing: Studio's Prize starts 2.75 s into Hongbao, 1 s
     /// of it the wait; the small stack lands 380 ms in, the big heap 320)
     private var landsAt: Double { big ? 2.07 : 2.13 }
@@ -30,15 +35,15 @@ struct HongbaoScreen: View {
         GeometryReader { g in
             let h = g.size.height
             ZStack {
-                Color(UIColor(hex: 0xC02C22))
-                HongbaoVideo(players: players).allowsHitTesting(false)
+                ground
+                HongbaoVideo(players: players, ground: jade ? 0x287429 : 0xC02C22).allowsHitTesting(false)
 
                 // waiting: 红包 over it, "Tap to open!" under
                 // (spaced as the mock-up has it, measured against the Hanzi's height: the gap between 红 and 包 about
                 // 29% of it, Red envelope 17% under it; on the phone they were 40% and 8%, the owner, 21 Oct 2026)
                 VStack(spacing: -7) {
-                    Text("红包").font(.hanzi(64, .heavy)).tracking(8).padding(.leading, 8)
-                    Text("Red envelope").font(.nunito(16, .heavy)).opacity(0.85)
+                    Text(jade ? "福袋" : "红包").font(.hanzi(64, .heavy)).tracking(8).padding(.leading, 8)
+                    Text(jade ? "Lucky pocket" : "Red envelope").font(.nunito(16, .heavy)).opacity(0.85)
                 }
                 .foregroundStyle(Color(UIColor(hex: 0xFFD98A)))
                 .modifier(LetterSheen(on: phase == .waiting))
@@ -52,23 +57,23 @@ struct HongbaoScreen: View {
                 // the prize: the greeting at the top, what you got and why under the pile
                 Group {
                     VStack(spacing: 6) {
-                        Text("恭喜发财").font(.hanzi(46, .heavy)).tracking(9).padding(.leading, 9)
+                        Text(jade ? "恭喜恭喜" : "恭喜发财").font(.hanzi(46, .heavy)).tracking(9).padding(.leading, 9)
                             .foregroundStyle(Color(UIColor(hex: 0xFFD98A)))
-                        Text("Wishing you good fortune!").font(.nunito(17, .heavy)).foregroundStyle(Color(UIColor(hex: 0xF2D1A8)))
+                        Text(jade ? "Congratulations!" : "Wishing you good fortune!").font(.nunito(17, .heavy)).foregroundStyle(Color(UIColor(hex: jade ? 0xCFE8C4 : 0xF2D1A8)))
                     }
                     .position(x: g.size.width / 2, y: h * (0.192 + 29.0 / 780) + 38)
                     .modifier(WordIn(on: words >= 1))
-                    Text("You got \(pocket.reward) coins!").font(.nunito(24, .black)).foregroundStyle(.white)
+                    Text("You got \(pocket.reward) \(jade ? "XP" : "coins")!").font(.nunito(24, .black)).foregroundStyle(.white)
                         .position(x: g.size.width / 2, y: h * ((big ? 0.599 : 0.579) + 48.0 / 780) + 14)
                         .modifier(WordIn(on: words >= 2, pop: true))
-                    Text(pocket.sub).font(.nunito(15.5, .bold)).foregroundStyle(Color(UIColor(hex: 0xE9C9AE)))
+                    Text(pocket.sub).font(.nunito(15.5, .bold)).foregroundStyle(Color(UIColor(hex: jade ? 0xC4DFBB : 0xE9C9AE)))
                         .multilineTextAlignment(.center).padding(.horizontal, 30)
                         .position(x: g.size.width / 2, y: h * ((big ? 0.642 : 0.623) + 48.0 / 780) + 12)
                         .modifier(WordIn(on: words >= 3))
                 }
                 VStack {
                     Spacer()
-                    Button("Continue", action: close).buttonStyle(RaisedButton(fill: .white, ink: Color(UIColor(hex: 0xC0392B)), edge: nil))
+                    Button("Continue", action: close).buttonStyle(RaisedButton(fill: .white, ink: Color(UIColor(hex: jade ? 0x1F7A3A : 0xC0392B)), edge: nil))
                         .padding(.horizontal, 18).padding(.bottom, 30)
                         .opacity(words >= 4 ? 1 : 0).offset(y: words >= 4 ? 0 : 30)
                         .animation(.spring(response: 0.45, dampingFraction: 0.85), value: words)
@@ -80,10 +85,10 @@ struct HongbaoScreen: View {
         }
         .ignoresSafeArea()
         .onAppear {
-            players.start(big: big)
+            players.start(big: big, jade: jade)
             #if DEBUG
             // the screenshots open it by themselves
-            if ["pocket", "hongbaobig"].contains(Launch.screen ?? "") { DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { if phase == .waiting { open() } } }
+            if ["pocket", "hongbaobig", "jadepocket"].contains(Launch.screen ?? "") { DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { if phase == .waiting { open() } } }
             #endif
         }
         .onDisappear { players.stop() }
@@ -177,11 +182,11 @@ final class HongbaoPlayers {
         Bundle.main.url(forResource: name, withExtension: "mp4").map { AVPlayerItem(url: $0) }
     }
 
-    func start(big: Bool) {
+    func start(big: Bool, jade: Bool = false) {
         for p in [wait, opening, hold] as [AVPlayer] { p.isMuted = true; p.preventsDisplaySleepDuringVideoPlayback = false }
-        if let w = Self.item("hongbao-wait") { waitLoop = AVPlayerLooper(player: wait, templateItem: w) }
-        if let o = Self.item(big ? "hongbao-open-big" : "hongbao-open") { opening.replaceCurrentItem(with: o) }
-        if let h = Self.item(big ? "hongbao-hold-big" : "hongbao-hold") { holdLoop = AVPlayerLooper(player: hold, templateItem: h) }
+        if let w = Self.item(jade ? "hongbao-jade-wait" : "hongbao-wait") { waitLoop = AVPlayerLooper(player: wait, templateItem: w) }
+        if let o = Self.item(jade ? "hongbao-jade-open" : big ? "hongbao-open-big" : "hongbao-open") { opening.replaceCurrentItem(with: o) }
+        if let h = Self.item(jade ? "hongbao-jade-hold" : big ? "hongbao-hold-big" : "hongbao-hold") { holdLoop = AVPlayerLooper(player: hold, templateItem: h) }
         hold.pause()
         opening.pause()
         wait.play()
@@ -223,13 +228,14 @@ final class HongbaoPlayers {
 /// The players' layers, filling the screen (the videos are made the phone's shape).
 private struct HongbaoVideo: UIViewRepresentable {
     let players: HongbaoPlayers
+    var ground: UInt32 = 0xC02C22
 
     final class Stack: UIView {
         let layers: [AVPlayerLayer]
-        init(_ p: HongbaoPlayers) {
+        init(_ p: HongbaoPlayers, ground: UInt32) {
             layers = [p.wait, p.opening, p.hold].map { AVPlayerLayer(player: $0) }
             super.init(frame: .zero)
-            backgroundColor = UIColor(hex: 0xC02C22)
+            backgroundColor = UIColor(hex: ground)
             for l in layers { l.videoGravity = .resizeAspectFill; l.isHidden = true; layer.addSublayer(l) }
             layers[0].isHidden = false
         }
@@ -256,7 +262,7 @@ private struct HongbaoVideo: UIViewRepresentable {
     }
 
     func makeUIView(context: Context) -> Stack {
-        let v = Stack(players)
+        let v = Stack(players, ground: ground)
         players.show = { [weak v] i in v?.show(i) }
         return v
     }

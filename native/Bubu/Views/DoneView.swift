@@ -21,7 +21,6 @@ struct DoneView: View {
     private func steps(_ r: StudySession.Result) -> [Step] {
         guard r.simple.isEmpty else { return [.result] }
         var out: [Step] = [.result]
-        if !(r.learned.isEmpty ? r.practised : r.learned).isEmpty { out.append(.learned) }
         if r.fireJustLit { out.append(.streak) }
         if r.milestonePocket != nil { out.append(.milestone) }
         if r.pocket != nil { out.append(.pocket) }
@@ -210,7 +209,7 @@ struct DoneView: View {
                 Text(r.steps - r.step == 1 ? "One more step finishes the lesson" : "\(r.steps - r.step) more steps finish the lesson")
                     .font(.nunito(14, .semibold)).foregroundStyle(Color.muted).padding(.top, 6)
             } else if r.lessonFinished, let l = course.lessonById[session.lessonId] {
-                Text(l.name).font(.nunito(14.5, .semibold))
+                Text(l.name.withoutStep).font(.nunito(14.5, .semibold))
                     .foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.8).padding(.top, 4)
             }
             // Duolingo's result tiles: a coloured band with the label, the number on white under it
@@ -625,6 +624,11 @@ struct SplashMoment: View {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.6).delay(0.3)) { words = true }
         }
     }
+}
+
+extension String {
+    /// A lesson's name without its stone's number ("Let's go at the weekend! · 1"), which means nothing to a learner.
+    var withoutStep: String { replacingOccurrences(of: " · [0-9]+$", with: "", options: .regularExpression) }
 }
 
 /// The done screen's recap of a stone's new words ("You learned") or a practice stone's

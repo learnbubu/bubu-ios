@@ -93,7 +93,7 @@ struct StudyView: View {
         }
         .padding(.horizontal, 12).padding(.top, 15)
         .id(exerciseKey)
-        .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
+        .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity.animation(.easeOut(duration: 0.06))))
     }
 
     private var fixed: Bool {
@@ -389,7 +389,7 @@ struct StudyView: View {
                 } else {
                 switch session.current {
                 case .meet(let cards, _, _):
-                    MeetView(cards: cards) { advance() }
+                    MeetView(cards: cards, page: scrollHeight) { advance() }
                 case .match(let cards, _):
                     MatchView(session: session, cards: cards, audio: session.matchAudio) { advance() }
                 case .chat:
@@ -420,7 +420,7 @@ struct StudyView: View {
                 }
             }
             .id(exerciseKey)
-            .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
+            .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity.animation(.easeOut(duration: 0.06))))
             .frame(maxHeight: .infinity, alignment: .top)
         }
         .frame(maxHeight: .infinity, alignment: .top)
@@ -602,6 +602,8 @@ struct StudyView: View {
     }
 
     private func moveOn() {
+        // (the seal stays on the question just answered, not over the next: the owner's video, 2 Nov 2026)
+        burst = nil
         // "Can't listen now" before anything was answered, in a session of only listening:
         // there's nothing to show for it, so it just closes
         if session.answered && !session.hasMore && session.nothingAnswered {
@@ -1003,7 +1005,11 @@ extension Color {
 /// characters are built is a tap away, not on the card.
 struct MeetView: View {
     let cards: [Card]
+    /// the page's height: Continue sits at its foot, where Check is on the questions
+    var page: CGFloat = 0
     var done: () -> Void
+    @State private var cardHeight: CGFloat = 0
+    @State private var top: CGFloat = 0
     @State private var built = false
     @State private var played = false
 
@@ -1053,11 +1059,13 @@ struct MeetView: View {
             .frame(maxWidth: 440)
             .background(Color.panel, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { cardHeight = $0 }
             Button(action: done) { Text("Continue") }
             .buttonStyle(RaisedButton(fill: Color.accent, ink: Color.onAccent))
-            .padding(.top, 18)
+            .padding(.top, cardHeight > 0 && page > 0 ? max(18, page - top - 12 - cardHeight - 66) : 18)
         }
         .frame(maxWidth: .infinity)
+        .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("page")).minY } action: { top = $0 }
         .onAppear {
             guard !played else { return }
             played = true
@@ -1251,7 +1259,6 @@ struct ChoiceView: View {
                                     .frame(height: 2).offset(y: 3)
                             }
                     }
-                    SpeakerButton(text: w.hanzi, size: 15, withSlow: true)
                 case "pinyin":
                     Text(w.hanzi).font(.hanzi(big, .medium)).foregroundStyle(isNew ? Color.newInk : Color.ink)
                         .lineLimit(1).minimumScaleFactor(0.5)
@@ -2126,6 +2133,7 @@ struct TypeView: View {
     @State private var focused = false
     /// the keyboard asked for: Chinese to start, every time
     @State private var chinese = true
+    @State private var boxHeight: CGFloat = 0
 
     // Duolingo's typing (the owner, 25 Oct 2026, "remember we were struggling to get something nice for typing? … use
     // that"): no Bùbù and bubble, the word big with its sound beside it, a tall box to type in, the tip under it.
@@ -2152,7 +2160,8 @@ struct TypeView: View {
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(w.hanzi).font(.hanzi(!tall ? 38 : w.hanzi.count > 3 ? 44 : 60, .bold)).foregroundStyle(Color.ink)
+                        // (one size that fits over the keyboard: squeezed there, it grew when the keyboard went: the owner's video, 2 Nov 2026)
+                        Text(w.hanzi).font(.hanzi(!tall ? 30 : w.hanzi.count > 3 ? 32 : 38, .bold)).foregroundStyle(Color.ink)
                             .lineLimit(1).minimumScaleFactor(0.6)
                         Text(w.gloss).font(.nunito(16, .semibold)).foregroundStyle(Color.muted).lineLimit(2)
                     }
@@ -2169,7 +2178,9 @@ struct TypeView: View {
                     }
                 }
                 .padding(.vertical, tall ? 16 : 10).padding(.horizontal, 16)
-                .frame(maxWidth: .infinity, minHeight: tall ? 72 : 48, maxHeight: 150, alignment: .topLeading)
+                // (answered, it keeps the height it had: it grew as the keyboard went)
+                .frame(maxWidth: .infinity, minHeight: result != nil && boxHeight > 0 ? boxHeight : tall ? 72 : 48, maxHeight: result != nil && boxHeight > 0 ? boxHeight : 150, alignment: .topLeading)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { if result == nil { boxHeight = $0 } }
                 .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.panel))
                 .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .strokeBorder(result == true ? Color.good : result == false ? Color.again : focused ? Color.accent : Color.line, lineWidth: 2))

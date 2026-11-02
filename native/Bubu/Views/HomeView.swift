@@ -89,7 +89,7 @@ struct HomeView: View {
                 Text(kicker)
                     .font(.nunito(12, .black)).tracking(1.4).textCase(.uppercase).foregroundStyle(Home.teal)
                 Text(lesson?.nameParts.hanzi ?? "复习").font(.hanzi(27, .black)).foregroundStyle(Home.ink).padding(.top, 4)
-                Text(lesson.map { $0.nameParts.en } ?? "Keep your words sharp with a review").font(.nunito(15.5, .bold)).foregroundStyle(Home.muted)
+                Text(lesson.map { $0.nameParts.en.withoutStep } ?? "Keep your words sharp with a review").font(.nunito(15.5, .bold)).foregroundStyle(Home.muted)
                 GeometryReader { g in
                     ZStack(alignment: .leading) {
                         Capsule().fill(Color(UIColor(hex: 0xD3DED8)))

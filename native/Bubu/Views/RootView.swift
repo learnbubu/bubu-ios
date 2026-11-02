@@ -125,6 +125,12 @@ struct RootView: View {
             }
             return
         }
+        if Launch.screen == "jadepocket" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                Moments.shared.show(.pocket(.init(kind: .jade, reward: ProgressStore.chestXP, title: "All 3 daily quests done!", sub: "A lucky pocket, full of XP")))
+            }
+            return
+        }
         if Launch.screen == "pocket" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 Moments.shared.show(.pocket(.init(kind: .red, reward: 15, title: "Lesson complete!", sub: "For finishing today's lesson.")))

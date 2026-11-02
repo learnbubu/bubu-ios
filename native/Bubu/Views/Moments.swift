@@ -180,8 +180,8 @@ struct MomentCard: View {
     }
 
     var body: some View {
-        // a red pocket: the hongbao, a screen of its own (the owner, 21 Oct 2026)
-        if case .pocket(let p) = moment, p.kind == .red {
+        // a pocket: the hongbao, a screen of its own (red: the owner, 21 Oct 2026; the green lucky one too, 2 Nov 2026)
+        if case .pocket(let p) = moment {
             HongbaoScreen(pocket: p, close: close).transition(.opacity)
         // Streak saved: a screen of its own, not a card (the owner, 20 Oct 2026)
         } else if case .relit(let streak, let left) = moment {
