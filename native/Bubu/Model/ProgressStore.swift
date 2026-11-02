@@ -540,12 +540,12 @@ final class ProgressStore {
         return true
     }
 
-    /// A red pocket for a finished lesson: the first each day (every one with Plus),
+    /// A red pocket for a finished lesson: the first each day, for everyone (the owner, 2 Nov 2026; Plus had one every lesson),
     /// and a fuller one when it finishes a chapter. The coins in it, 0 for none.
     func lessonPocket(chapterEnd: Bool) -> Int {
         if chapterEnd { return Self.pocketChapter }
         let t = today
-        if !isPlus && activity.pocketDay == t { return 0 }
+        if activity.pocketDay == t { return 0 }
         activity.pocketDay = t
         save()
         let (lo, hi) = Self.pocketLesson

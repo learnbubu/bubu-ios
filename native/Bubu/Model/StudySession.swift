@@ -633,6 +633,8 @@ final class StudySession: Identifiable {
     /// about `stoneLen`: 3 around three new words, 7 around two.
     static func reviewsWanted(new n: Int) -> Int {
         guard n > 0 else { return 0 }
+        // (four new words filled all twelve, so nothing earlier came back: fifteen for those, the owner, 2 Nov 2026)
+        if n == 4 { return 3 }
         return max(0, stoneLen - n * baseReps(new: n))
     }
 

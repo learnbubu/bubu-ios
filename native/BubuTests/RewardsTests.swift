@@ -215,10 +215,7 @@ final class RewardsTests: XCTestCase {
         XCTAssertGreaterThan(p.lessonPocket(chapterEnd: false), 0) // a new day
         XCTAssertEqual(p.lessonPocket(chapterEnd: false), 0)
         p.setPlus(true)
-        for _ in 0..<40 {                                          // every lesson with Plus
-            let n = p.lessonPocket(chapterEnd: false)
-            XCTAssertTrue((5...30).contains(n) && n % 5 == 0)
-        }
+        XCTAssertEqual(p.lessonPocket(chapterEnd: false), 0)       // once a day with Plus too
     }
 
     /// A session of new words is played on buns: a mistake eats one, except on a
