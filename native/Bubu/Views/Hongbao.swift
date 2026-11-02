@@ -9,8 +9,8 @@ import AVFoundation
 /// the prize's hold loop, whose first frame is the opening's last. A little money (a lesson, a chapter) lands as a
 /// small stack; a milestone's lands as the big heap.
 ///
-/// The daily quests' lucky pocket is the same screen in green, for XP (the owner, 2 Nov 2026: no more pop-ups). Its
-/// videos are a stand-in, the red ones recoloured with ffmpeg's colorchannelmixer, until Studio makes its own.
+/// The daily quests' lucky pocket is the same screen in green, for XP, its prize the XP bolt (the owner, 2 Nov 2026: no
+/// more pop-ups). Studio's Jade Hongbao, Jade Wait and Jade Hold.
 struct HongbaoScreen: View {
     let pocket: Moments.Pocket
     /// the coins come out (once, as it opens)
@@ -57,16 +57,17 @@ struct HongbaoScreen: View {
                 // the prize: the greeting at the top, what you got and why under the pile
                 Group {
                     VStack(spacing: 6) {
-                        Text(jade ? "恭喜恭喜" : "恭喜发财").font(.hanzi(46, .heavy)).tracking(9).padding(.leading, 9)
+                        Text(jade ? "任务完成" : "恭喜发财").font(.hanzi(46, .heavy)).tracking(9).padding(.leading, 9)
                             .foregroundStyle(Color(UIColor(hex: 0xFFD98A)))
-                        Text(jade ? "Congratulations!" : "Wishing you good fortune!").font(.nunito(17, .heavy)).foregroundStyle(Color(UIColor(hex: jade ? 0xCFE8C4 : 0xF2D1A8)))
+                        Text(jade ? "Daily quests complete!" : "Wishing you good fortune!").font(.nunito(17, .heavy)).foregroundStyle(Color(UIColor(hex: jade ? 0xE6F6DF : 0xFFE9D6)))
                     }
                     .position(x: g.size.width / 2, y: h * (0.192 + 29.0 / 780) + 38)
                     .modifier(WordIn(on: words >= 1))
-                    Text("You got \(pocket.reward) \(jade ? "XP" : "coins")!").font(.nunito(24, .black)).foregroundStyle(.white)
+                    Text("+\(pocket.reward) \(jade ? "XP" : "coins")").font(.nunito(34, .black)).foregroundStyle(.white)
                         .position(x: g.size.width / 2, y: h * ((big ? 0.599 : 0.579) + 48.0 / 780) + 14)
                         .modifier(WordIn(on: words >= 2, pop: true))
-                    Text(pocket.sub).font(.nunito(15.5, .bold)).foregroundStyle(Color(UIColor(hex: jade ? 0xC4DFBB : 0xE9C9AE)))
+                    // (the lucky pocket's heading already says why)
+                    Text(jade ? "" : pocket.sub).font(.nunito(15.5, .bold)).foregroundStyle(Color(UIColor(hex: 0xFFE9D6)))
                         .multilineTextAlignment(.center).padding(.horizontal, 30)
                         .position(x: g.size.width / 2, y: h * ((big ? 0.642 : 0.623) + 48.0 / 780) + 12)
                         .modifier(WordIn(on: words >= 3))
