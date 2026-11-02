@@ -213,10 +213,17 @@ struct DoneView: View {
                     .foregroundStyle(Color.muted).lineLimit(1).minimumScaleFactor(0.8).padding(.top, 4)
             }
             // Duolingo's result tiles: a coloured band with the label, the number on white under it
+            // one after another, each popping out of its own burst, then the first settles as the total (Duolingo's; the
+            // owner, 2 Nov 2026)
+            let xp = Self.xpSteps(r), next = 0.45 + Double(xp.count - 1) * 0.88
             HStack(spacing: 10) {
-                XPTile(steps: Self.xpSteps(r), delay: 0.2)
-                DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: Self.timeLabel(r), icon: "clock.fill", tint: .accent, delay: 0.42)
-                DoneTile(value: r.accuracy, format: { "\($0)%" }, label: Self.accuracyLabel(r.accuracy), icon: "scope", tint: .good, delay: 0.64)
+                XPTile(steps: xp, delay: 0.45, beforeTotal: 1.1)
+                    .modifier(TileArrival(delay: 0.45, tint: Color(UIColor(hex: 0xFFC72C)), bolts: true))
+                    .zIndex(1)
+                DoneTile(value: r.seconds, format: { String(format: "%d:%02d", $0 / 60, $0 % 60) }, label: Self.timeLabel(r), icon: "clock.fill", tint: .accent, delay: next)
+                    .modifier(TileArrival(delay: next, tint: Color(UIColor(hex: 0x7CC4B3))))
+                DoneTile(value: r.accuracy, format: { "\($0)%" }, label: Self.accuracyLabel(r.accuracy), icon: "scope", tint: .good, delay: next + 0.5)
+                    .modifier(TileArrival(delay: next + 0.5, tint: Color(UIColor(hex: 0x8FE3A8))))
             }
             .padding(.top, 22).padding(.bottom, 4)
             // what this earned, as quiet rows rather than shouting pills
@@ -236,6 +243,7 @@ struct DoneView: View {
                 .padding(.horizontal, 14).padding(.vertical, 11)
                 .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.line, lineWidth: 1.5))
                 .padding(.top, 12)
+                .modifier(TileArrival(delay: next + 1.5, tint: .clear, plain: true))
             }
             if moment == nil { Spacer(minLength: 0) }
         }
@@ -248,8 +256,8 @@ struct DoneView: View {
         var out = [XPTile.Step(label: "Lesson XP", value: base, tint: Color(light: 0xF0A92E, dark: 0xF5B03D))]
         if r.xpCombo > 0 { out.append(.init(label: "Combo", value: base + r.xpCombo, tint: Color(light: 0xE8743B, dark: 0xF08A5A))) }
         if r.xpDouble > 0 { out.append(.init(label: "2× XP", value: r.xp, tint: Color(light: 0x8B5CF6, dark: 0xA78BFA))) }
-        // each part keeps its own label; the total comes last, in the gold of the plain tile
-        if out.count > 1 { out.append(.init(label: "Total XP", value: r.xp, tint: Color(light: 0xF0A92E, dark: 0xF5B03D))) }
+        // each part keeps its own label; the total comes last, once the other tiles are in, in its own purple
+        out.append(.init(label: "Total XP", value: r.xp, tint: Color(light: 0x7C5CD6, dark: 0xA78BFA)))
         return out
     }
     static func accuracyLabel(_ a: Int) -> String { a >= 100 ? "Perfect" : a >= 90 ? "Amazing" : a >= 75 ? "Great" : "Accuracy" }
@@ -295,11 +303,11 @@ struct DoneView: View {
             if !r.simple.isEmpty {
                 Button("← Back to path") { close() }.buttonStyle(WideButton())
             } else if !isLast(r) {
-                Button(step(r) == .streak ? "Keep it up" : "Continue") { advance(r) }
+                Button(step(r) == .result ? "Claim XP" : step(r) == .streak ? "Keep it up" : "Continue") { advance(r) }
                     .buttonStyle(WideButton())
             } else {
                 // one button, as Duolingo's: back to the path (or home), where the next stone waits
-                Button("Continue") { close() }
+                Button(step(r) == .result ? "Claim XP" : "Continue") { close() }
                     .buttonStyle(WideButton())
             }
         }
@@ -430,6 +438,54 @@ struct LanternMark: View {
     }
 }
 
+/// A result tile arriving: it pops up with a spring out of a burst, and a soft pop (`plain`: only fades in).
+struct TileArrival: ViewModifier {
+    let delay: Double
+    let tint: Color
+    var bolts = false
+    var plain = false
+    @State private var shown = false
+    @State private var flying = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(shown || plain || reduceMotion ? 1 : 0.01)
+            .opacity(shown || reduceMotion ? 1 : 0)
+            .overlay { if !plain && !reduceMotion { burst } }
+            .task {
+                guard !reduceMotion else { return }
+                try? await Task.sleep(for: .seconds(delay))
+                if plain { withAnimation(.easeOut(duration: 0.3)) { shown = true }; return }
+                withAnimation(.spring(response: 0.38, dampingFraction: 0.55)) { shown = true }
+                Sounds.shared.play("burst-pop2")
+                withAnimation(.easeOut(duration: 0.62)) { flying = true }
+            }
+    }
+
+    /// Nine bits flying out and fading: sparkles, with bolts among them on the XP tile.
+    private var burst: some View {
+        ZStack {
+            ForEach(0..<9, id: \.self) { i in
+                let a = Double(i) / 9 * 2 * .pi + 0.3, d: CGFloat = 46 + CGFloat(i % 3) * 11
+                Group {
+                    if bolts && i % 3 == 0 { Image("stat-xp").resizable().scaledToFit().frame(width: 15, height: 18) }
+                    else { SparkleShape().fill(tint).frame(width: 10, height: 10) }
+                }
+                .scaleEffect(flying ? 1 : 0.3)
+                .offset(x: flying ? cos(a) * d : 0, y: flying ? sin(a) * d : 0)
+                .opacity(flying ? fade : 0)
+            }
+        }
+        .allowsHitTesting(false)
+        .onChange(of: flying) { _, now in
+            guard now else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.34) { withAnimation(.easeIn(duration: 0.28)) { fade = 0 } }
+        }
+    }
+    @State private var fade: Double = 1
+}
+
 /// A result tile that counts up from zero: its label on top, the number below.
 struct DoneTile: View {
     let value: Int
@@ -547,6 +603,8 @@ struct XPTile: View {
     struct Step { let label: String; let value: Int; let tint: Color }
     let steps: [Step]
     let delay: Double
+    /// how long the last step (the total) waits, for the other tiles to come in
+    var beforeTotal: Double = 0
     @State private var shown = 0
     @State private var at = 0
     @State private var pop = false
@@ -580,6 +638,7 @@ struct XPTile: View {
             try? await Task.sleep(for: .seconds(delay))
             var from = 0
             for (k, step) in steps.enumerated() {
+                if k == steps.count - 1, beforeTotal > 0 { try? await Task.sleep(for: .seconds(beforeTotal)) }
                 at = k
                 let n = 16
                 for i in 1...n {
