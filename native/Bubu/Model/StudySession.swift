@@ -1772,6 +1772,9 @@ struct Exercise {
         guard let sent = sentence else { return false }
         let texts = placed.map(\.text)
         if toChinese { return sent.acceptedOrders.contains(texts) }
-        return texts.map { $0.lowercased() } == Sentence.enWords(sent.en).map { $0.lowercased() }
+        let said = texts.map { $0.lowercased() }, want = Sentence.enWords(sent.en).map { $0.lowercased() }
+        if said == want { return true }
+        // an "and" only the English needs isn't wrong to leave out: 她在画画，我在玩游戏 has none (the owner, 2 Nov 2026)
+        return !sent.hanzi.contains(where: { "和跟与及并而且还也又".contains($0) }) && said == want.filter { $0 != "and" }
     }
 }
