@@ -201,7 +201,7 @@ final class StudySession: Identifiable {
         self.title = title
         // (a stone's own lesson, as the path opens it: set. Anything given its cards, or of another kind, at chance)
         Dice.begin(mode == .lesson && cards == nil && !lessonId.isEmpty ? SeededRNG(lessonId) : nil)
-        // a mixed session uses the skills switched on in Settings → Lesson exercises
+        // a mixed session uses every skill
         self.focuses = focuses ?? (mode == .mistakes ? Set(Self.allDirs) : progress.selectedFocuses)
         self.start = progress.now()
         let practice = mode == .lesson && Course.shared.lessonById[lessonId]?.isPractice == true

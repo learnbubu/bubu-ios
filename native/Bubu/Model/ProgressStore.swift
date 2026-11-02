@@ -210,11 +210,9 @@ final class ProgressStore {
 
     // MARK: what to practise
 
-    /// The skills switched on (Settings → Lesson exercises); all seven unless some were switched off.
-    var selectedFocuses: Set<String> {
-        if let f = prefs.focuses, !f.isEmpty { return Set(f) }
-        return Set(StudySession.allDirs)
-    }
+    /// The skills a lesson asks: all of them, for everyone (Settings' switches are gone, and any set before are ignored:
+    /// the owner, 2 Nov 2026, "should just always be the same").
+    var selectedFocuses: Set<String> { Set(StudySession.allDirs) }
     /// The words you've learned, weakest first: what the Classroom's Listening, Writing and Quiz draw on. (It was the
     /// lessons picked in "What to study", gone: the owner, 25 Oct 2026.) None learned yet: the first chapter's.
     var learnedCards: [Card] {
