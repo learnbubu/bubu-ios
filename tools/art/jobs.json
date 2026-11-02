@@ -5167,7 +5167,7 @@
    "out/raw/rm-master.png",
    "out/raw/rm-pose-crouch.png"
   ],
-  "prompt": "The attached image is Bùbù's model sheet. Redraw this same panda in the key pose below, as a professional character animator would draw it: a strong, clear, appealing silhouette with a real line of action, the pose pushed further than feels natural, and squash and stretch in his whole body. Keep his design: the same face, colours, red backpack straps, two toe lines on each paw and foot, and flat clean shapes. His volume stays about the same however he's squashed or stretched. He stays facing us, and his whole body is in frame with room around him.\n\nThe pose: Standing happily and relaxed, feet at the bottom of the frame, arms loose at his sides, a warm closed-mouth smile with happy closed eyes. He has exactly one mouth. Draw him in the same way as the second attached image.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+  "prompt": "The attached image is Bùbù's model sheet. Redraw this same panda in the key pose below, as a professional character animator would draw it: a strong, clear, appealing silhouette with a real line of action, the pose pushed further than feels natural, and squash and stretch in his whole body. Keep his design: the same face, colours, red backpack straps, two toe lines on each paw and foot, and flat clean shapes. His volume stays about the same however he's squashed or stretched. He stays facing us, and his whole body is in frame with room around him.\n\nThe pose: Standing straight on, perfectly symmetrical: his body upright with no lean or twist, feet apart at the bottom of the frame, arms hanging loosely at his sides, a warm closed-mouth smile with happy closed eyes. His head is the same size as in the second attached image. He has exactly one mouth. Draw him in the same way as the second attached image.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  },
  {
   "file": "out/raw/rm-pose-dip.png",
@@ -5207,5 +5207,65 @@
    "out/raw/rm-pose-launch-2.png"
   ],
   "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is, the same pose, size, position, colours and flat magenta backdrop, except this. He has two mouths: a small smile under his nose and a big open mouth below it. Remove the small smile, so that one big open happy mouth starts right under his nose, joined to it by the short line."
+ },
+ {
+  "file": "out/raw/rm-pose-push.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-pose-crouch.png",
+   "out/raw/rm-pose-launch.png"
+  ],
+  "prompt": "The two attached images are consecutive key poses of one animation of this panda. Draw the in-between frame, exactly halfway between them, as an animator would: every part (body height and width, arms, legs, feet, head tilt, ears) is halfway from its place in the first image to its place in the second. The same character, facing us, his head the same size as in the first image, one mouth only, two toe lines on each paw and foot, flat clean shapes.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-rise.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-pose-launch.png",
+   "out/raw/rm-pose-apex.png"
+  ],
+  "prompt": "The two attached images are consecutive key poses of one animation of this panda. Draw the in-between frame, exactly halfway between them, as an animator would: every part (body height and width, arms, legs, feet, head tilt, ears) is halfway from its place in the first image to its place in the second. The same character, facing us, his head the same size as in the first image, one mouth only, two toe lines on each paw and foot, flat clean shapes.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-drop.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-pose-apex.png",
+   "out/raw/rm-pose-fall.png"
+  ],
+  "prompt": "The two attached images are consecutive key poses of one animation of this panda. Draw the in-between frame, exactly halfway between them, as an animator would: every part (body height and width, arms, legs, feet, head tilt, ears) is halfway from its place in the first image to its place in the second. The same character, facing us, his head the same size as in the first image, one mouth only, two toe lines on each paw and foot, flat clean shapes.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-preland.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-pose-fall.png",
+   "out/raw/rm-pose-land.png"
+  ],
+  "prompt": "The two attached images are consecutive key poses of one animation of this panda. Draw the in-between frame, exactly halfway between them, as an animator would: every part (body height and width, arms, legs, feet, head tilt, ears) is halfway from its place in the first image to its place in the second. The same character, facing us, his head the same size as in the first image, one mouth only, two toe lines on each paw and foot, flat clean shapes.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-rebound.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-pose-land.png",
+   "out/raw/rm-pose-settle.png"
+  ],
+  "prompt": "The two attached images are consecutive key poses of one animation of this panda. Draw the in-between frame, exactly halfway between them, as an animator would: every part (body height and width, arms, legs, feet, head tilt, ears) is halfway from its place in the first image to its place in the second. The same character, facing us, his head the same size as in the first image, one mouth only, two toe lines on each paw and foot, flat clean shapes.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-ease.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-pose-settle.png",
+   "out/raw/rm-pose-stand.png"
+  ],
+  "prompt": "The two attached images are consecutive key poses of one animation of this panda. Draw the in-between frame, exactly halfway between them, as an animator would: every part (body height and width, arms, legs, feet, head tilt, ears) is halfway from its place in the first image to its place in the second. The same character, facing us, his head the same size as in the first image, one mouth only, two toe lines on each paw and foot, flat clean shapes.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]

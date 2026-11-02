@@ -38,6 +38,19 @@ jobs.append({"file": "out/raw/rm-pose-launch.png", "group": "rigp", "size": "102
                        "flat magenta backdrop, except this. He has two mouths: a small smile under his nose and a big open mouth below it. "
                        "Remove the small smile, so that one big open happy mouth starts right under his nose, joined to it by the short line."})
 jobs = [j for i, j in enumerate(jobs) if not (j["file"] == "out/raw/rm-pose-launch.png" and "two mouths" not in j["prompt"])]
+# Hard cuts between eight poses read as a glitch (owner, 2 Nov 2026): a drawing halfway across each big change
+for name, a, b in (("push", "crouch", "launch"), ("rise", "launch", "apex"), ("drop", "apex", "fall"), ("preland", "fall", "land"),
+                   ("rebound", "land", "settle"), ("ease", "settle", "stand")):
+    jobs.append({"file": f"out/raw/rm-pose-{name}.png", "group": "rigp", "size": "1024x1024",
+                 "refs": [f"out/raw/rm-pose-{a}.png", f"out/raw/rm-pose-{b}.png"],
+                 "prompt": "The two attached images are consecutive key poses of one animation of this panda. Draw the in-between frame, exactly "
+                           "halfway between them, as an animator would: every part (body height and width, arms, legs, feet, head tilt, ears) is "
+                           "halfway from its place in the first image to its place in the second. The same character, facing us, his head the same "
+                           "size as in the first image, one mouth only, two toe lines on each paw and foot, flat clean shapes." + BACKDROP + "\n\nStyle:" + style})
+next(j for j in jobs if j["file"] == "out/raw/rm-pose-stand.png")["prompt"] = (
+    BASE + "Standing straight on, perfectly symmetrical: his body upright with no lean or twist, feet apart at the bottom of the frame, arms "
+    "hanging loosely at his sides, a warm closed-mouth smile with happy closed eyes. His head is the same size as in the second attached "
+    "image. He has exactly one mouth. Draw him in the same way as the second attached image." + BACKDROP + "\n\nStyle:" + style)
 # the first apex was the one to keep, but with two mouths and paw pads: fixed by editing it, not redrawing
 next(j for j in jobs if j["file"] == "out/raw/rm-pose-apex.png").update({
     "refs": ["out/raw/rm-pose-apex-1.png"],
