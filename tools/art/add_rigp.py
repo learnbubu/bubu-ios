@@ -58,6 +58,17 @@ next(j for j in jobs if j["file"] == "out/raw/rm-pose-settle.png").update({
               "with the red straps showing above a wide round belly, the same short thick legs and feet, the same size and place in the frame. "
               "The only changes: he is bouncing up just after a landing, so he is very slightly taller, no more than one tenth, his arms are "
               "lifted a little out from his sides, and he has one big open happy mouth." + BACKDROP + "\n\nStyle:" + style})
+# launch, fall and rebound lost his proportions the same way: two tries each from the master, for the owner to pick from
+KEEP = ("The attached image is Bùbù's model sheet. Redraw him with the same big head at the same size, the same black chest with the red straps "
+        "showing above a wide round belly, the same thick arms and legs, and one mouth only. He stays chunky and clearly the same character. ")
+for name, text in {
+    "launch": "He is taking off in a jump: stretched upward no more than one fifth taller than on the sheet, his belly a little longer but still wide and round, both thick legs straight with his feet just leaving the ground at the bottom of the frame, arms flung up above his head, chin lifted, a big open happy mouth.",
+    "fall": "He is falling back down from a jump: stretched no more than one fifth taller than on the sheet, his belly a little longer but still wide and round, both thick legs reaching straight down with the toes pointing to the ground, arms high above and trailing up, excited eyes, a big open happy mouth.",
+    "rebound": "He is rising just after a squashed landing: about the same height as on the sheet, knees still slightly bent and apart, feet on the ground at the bottom of the frame, arms held out and up at shoulder height, happy closed eyes, a big open happy mouth.",
+}.items():
+    for take in "ab":
+        jobs.append({"file": f"out/raw/rm-pose-{name}-{take}.png", "group": "rigp", "size": "1024x1024", "refs": ["out/raw/rm-master.png"],
+                     "prompt": KEEP + text + BACKDROP + "\n\nStyle:" + style})
 # the first apex was the one to keep, but with two mouths and paw pads: fixed by editing it, not redrawing
 next(j for j in jobs if j["file"] == "out/raw/rm-pose-apex.png").update({
     "refs": ["out/raw/rm-pose-apex-1.png"],

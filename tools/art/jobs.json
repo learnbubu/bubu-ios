@@ -5266,5 +5266,59 @@
    "out/raw/rm-pose-stand.png"
   ],
   "prompt": "The two attached images are consecutive key poses of one animation of this panda. Draw the in-between frame, exactly halfway between them, as an animator would: every part (body height and width, arms, legs, feet, head tilt, ears) is halfway from its place in the first image to its place in the second. The same character, facing us, his head the same size as in the first image, one mouth only, two toe lines on each paw and foot, flat clean shapes.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-launch-a.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-master.png"
+  ],
+  "prompt": "The attached image is Bùbù's model sheet. Redraw him with the same big head at the same size, the same black chest with the red straps showing above a wide round belly, the same thick arms and legs, and one mouth only. He stays chunky and clearly the same character. He is taking off in a jump: stretched upward no more than one fifth taller than on the sheet, his belly a little longer but still wide and round, both thick legs straight with his feet just leaving the ground at the bottom of the frame, arms flung up above his head, chin lifted, a big open happy mouth.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-launch-b.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-master.png"
+  ],
+  "prompt": "The attached image is Bùbù's model sheet. Redraw him with the same big head at the same size, the same black chest with the red straps showing above a wide round belly, the same thick arms and legs, and one mouth only. He stays chunky and clearly the same character. He is taking off in a jump: stretched upward no more than one fifth taller than on the sheet, his belly a little longer but still wide and round, both thick legs straight with his feet just leaving the ground at the bottom of the frame, arms flung up above his head, chin lifted, a big open happy mouth.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-fall-a.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-master.png"
+  ],
+  "prompt": "The attached image is Bùbù's model sheet. Redraw him with the same big head at the same size, the same black chest with the red straps showing above a wide round belly, the same thick arms and legs, and one mouth only. He stays chunky and clearly the same character. He is falling back down from a jump: stretched no more than one fifth taller than on the sheet, his belly a little longer but still wide and round, both thick legs reaching straight down with the toes pointing to the ground, arms high above and trailing up, excited eyes, a big open happy mouth.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-fall-b.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-master.png"
+  ],
+  "prompt": "The attached image is Bùbù's model sheet. Redraw him with the same big head at the same size, the same black chest with the red straps showing above a wide round belly, the same thick arms and legs, and one mouth only. He stays chunky and clearly the same character. He is falling back down from a jump: stretched no more than one fifth taller than on the sheet, his belly a little longer but still wide and round, both thick legs reaching straight down with the toes pointing to the ground, arms high above and trailing up, excited eyes, a big open happy mouth.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-rebound-a.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-master.png"
+  ],
+  "prompt": "The attached image is Bùbù's model sheet. Redraw him with the same big head at the same size, the same black chest with the red straps showing above a wide round belly, the same thick arms and legs, and one mouth only. He stays chunky and clearly the same character. He is rising just after a squashed landing: about the same height as on the sheet, knees still slightly bent and apart, feet on the ground at the bottom of the frame, arms held out and up at shoulder height, happy closed eyes, a big open happy mouth.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
+ },
+ {
+  "file": "out/raw/rm-pose-rebound-b.png",
+  "group": "rigp",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-master.png"
+  ],
+  "prompt": "The attached image is Bùbù's model sheet. Redraw him with the same big head at the same size, the same black chest with the red straps showing above a wide round belly, the same thick arms and legs, and one mouth only. He stays chunky and clearly the same character. He is rising just after a squashed landing: about the same height as on the sheet, knees still slightly bent and apart, feet on the ground at the bottom of the frame, arms held out and up at shoulder height, happy closed eyes, a big open happy mouth.\n\nThe backdrop is one flat solid magenta (#FF00FF) with nothing else on it: no shadow, no ground, no text, no motion lines.\n\nStyle: Bùbù house style. Flat, soft storybook vector illustration with gentle rounded shapes and a faint paper-grain texture. No outlines; shapes are defined by colour with 2–3 tones of soft shading. Muted, warm palette: jade and teal greens (#2E7A6B, #3E9A82, sage #8DB596), warm cream (#F6F1E4), terracotta/coral red (#D9654B), soft orange (#E8955A), warm greys for stone (#A9A9A2), charcoal (#2B3036) for the darkest tones, pale blush cheeks. Calm, friendly and slightly whimsical, like a picture book set in a Chinese garden.\n\nBackground: one flat, solid pure magenta (#FF00FF) filling the whole canvas, with no gradient, vignette, texture, glow or shadow on it, so it can be cut out cleanly. Do not use any magenta or hot pink inside the artwork itself. Crisp clean edges against the magenta, no soft halo. No text, no letters, no numbers, no watermark, no border, no frame."
  }
 ]
