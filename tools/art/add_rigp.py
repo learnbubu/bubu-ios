@@ -51,6 +51,13 @@ next(j for j in jobs if j["file"] == "out/raw/rm-pose-stand.png")["prompt"] = (
     BASE + "Standing straight on, perfectly symmetrical: his body upright with no lean or twist, feet apart at the bottom of the frame, arms "
     "hanging loosely at his sides, a warm closed-mouth smile with happy closed eyes. His head is the same size as in the second attached "
     "image. He has exactly one mouth. Draw him in the same way as the second attached image." + BACKDROP + "\n\nStyle:" + style)
+# the bounce back up lost his body: a thin column with no black chest (owner, 2 Nov 2026). Drawn from the master instead
+next(j for j in jobs if j["file"] == "out/raw/rm-pose-settle.png").update({
+    "refs": ["out/raw/rm-master.png"],
+    "prompt": "The attached image is Bùbù's model sheet. Redraw him almost exactly as he is on it, with the same big head, the same black chest "
+              "with the red straps showing above a wide round belly, the same short thick legs and feet, the same size and place in the frame. "
+              "The only changes: he is bouncing up just after a landing, so he is very slightly taller, no more than one tenth, his arms are "
+              "lifted a little out from his sides, and he has one big open happy mouth." + BACKDROP + "\n\nStyle:" + style})
 # the first apex was the one to keep, but with two mouths and paw pads: fixed by editing it, not redrawing
 next(j for j in jobs if j["file"] == "out/raw/rm-pose-apex.png").update({
     "refs": ["out/raw/rm-pose-apex-1.png"],
