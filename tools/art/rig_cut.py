@@ -137,12 +137,16 @@ ys, xs = np.mgrid[0:SIZE, 0:SIZE]
 ax = np.nonzero(load("limb-arm-l")[..., 3].sum(0))[0]
 belly = (torso[..., :3].min(-1) > 200) & (torso[..., 3] > 128)
 by, bx = np.nonzero(belly)
-# (by percentile: Codex left a stray speck or two beside it)
-left, right = np.percentile(bx, 0.3), np.percentile(bx, 99.7)
-cx, half = (left + right) / 2, (right - left) / 2
-share = share * (np.abs(xs - cx) <= half + 2)
-belly_part[..., 3] *= np.abs(xs - cx) <= half + 2
+# (Codex left thin specks beside it: shrinking the shape and growing it back removes them and keeps its real edge)
+solid = Image.fromarray(((share > 0.3) * 255).astype("uint8")).filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5))
+solid = solid.filter(ImageFilter.MinFilter(7)).filter(ImageFilter.MaxFilter(9))
+solid = np.asarray(solid) > 128
+share = share * solid
+belly_part[..., 3] *= solid
 save("belly", belly_part)
+sy, sx = np.nonzero(solid)
+cx, half = (sx.min() + sx.max()) / 2, (sx.max() - sx.min()) / 2
+by = sy
 top = np.nonzero(torso[..., 3].sum(1))[0][0]
 cy, tall = (top + by.max()) / 2, (by.max() - top) / 2
 # Standing, no black shows beside his belly (owner, 2 Nov 2026): the chest tapers from the neck into the belly's widest
