@@ -50,9 +50,11 @@ for name, turn, extra in (("quarter", "three-quarters to our right (his left sid
                            "We see his face from three-quarters: the near eye patch and cheek larger, the far ones narrower and partly round the curve of his head, "
                            "his nose and mouth moved toward the far side. Both ears show. The far arm and leg are partly behind his body but still show."),
                           ("side", "fully side on, facing to our right, a true profile",
-                           "We see one eye patch, one cheek, his nose at the front edge of his face and the smile in profile; one ear in front and the far ear just "
-                           "behind it. His near arm hangs a little in front of his body, his far arm hidden; his near leg in front of the far one, both feet "
-                           "pointing right. The backpack shows on his back.")):
+                           "We see one eye patch, one cheek, his nose at the front edge of his face and the smile in profile. One round ear on top of his head, "
+                           "just behind the middle, with the far ear barely peeking out behind it. His near arm starts at his shoulder, right under his head, "
+                           "and hangs straight down along his side, clearly in front of everything, its paw by his hip; his far arm is hidden. A small backpack "
+                           "sits flat on his back, behind the arm and the strap, never in front of the arm. His near leg is in front of the far one, both "
+                           "feet pointing right, his round belly toward the right.")):
     jobs.append({"file": f"out/raw/rm-rest-{name}.png", "group": "puppet", "size": "1024x1024",
                  "refs": ["out/raw/rm-rest-a-happy.png", "out/raw/rm-hero-5.png", "out/raw/rm-master.png"], "prompt": TURN.format(turn, extra)})
 # the front face set: edits of rm-rest-a-happy with only the face changed, the expressions he uses in the hero board plus the two a lesson needs
@@ -60,13 +62,15 @@ FACE = ("Edit the attached drawing of a panda and keep everything exactly as it 
         "nose, body, straps, paws and flat magenta backdrop. Keep both big black eye patches the same size, shape and place. Change only his eyes and "
         "mouth: {} Draw them in the same flat style as the second attached image. Change nothing else.")
 for name, ref, face in (
+        # the owner isn't keen on this big open grin but it'll do for now (3 Nov 2026); the teacher's small open smile is the replacement
         ("grin", "rm-hero-4", "the same happy closed arc eyes, and a big open happy grin with a pink tongue, as in the second image."),
         ("wink", "rm-hero-5", "his left eye a happy closed arc, his right eye a tight wink, and a big open happy grin, as in the second image."),
         ("strain", "rm-hero-2", "both eyes screwed tightly shut as sideways chevrons, and a small tight determined mouth, as in the second image."),
         ("cross", "rm-hero-3", "fierce determined eyes, the white eyes narrowed and slanted inside the patches, and a small set frown, as in the second image."),
         ("oh", "ref-teacher-eyes", "open eyes as in the second image (the black patch with a big white crescent highlight; no glasses), and a small round "
                                    "surprised 'oh' mouth."),
-        ("oops", "ref-teacher-eyes", "open eyes as in the second image (the black patch with a big white crescent highlight; no glasses), the patches' top "
+        ("oops", "ref-teacher-eyes", "open eyes as in the second image: no pupil or eyeball, the black patch itself is the eye, with one big white crescent "
+                                     "highlight curving round inside it (no glasses). The patches' top "
                                      "edges tipped down at the outside a little so he looks sorry, and a small wobbly unsure mouth. Gentle, never sad or "
                                      "upset.")):
     jobs.append({"file": f"out/raw/rm-face-{name}.png", "group": "puppet", "size": "1024x1024", "refs": ["out/raw/rm-rest-a-happy.png", f"out/raw/{ref}.png"],
