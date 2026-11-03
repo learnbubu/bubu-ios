@@ -5605,6 +5605,15 @@
   "prompt": "The first attached image is a storyboard of Bùbù the panda. Draw only the pose of its panel 5, alone and large, as a clean final drawing for animation, in the same flat style. Keep its pose and expression, but check his design against the second attached image: the same round eye patches, the tuft of hair on top of his head, one mouth, two single muted red straps that never cross, two grey toe lines on each paw and foot, and no black outline. The seal is the same small grey stone seal with a guardian lion on top and a flat, matte vermilion base, with no drips. His whole body is in frame with room round him. No action lines, sparkles, print, shadow or ground. The backdrop is one flat solid magenta (#FF00FF) with nothing else on it."
  },
  {
+  "file": "out/raw/rm-hero-5-blink.png",
+  "group": "board",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-hero-5.png"
+  ],
+  "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is, the same pose, size, position, colours, seal and flat magenta backdrop, except his eyes: his left eye is winking, drawn as a closed line. Make his other eye closed too, drawn as a happy upward arc in the same black, so both eyes are happily closed. Change nothing else."
+ },
+ {
   "file": "out/raw/rm-board-seal-1-2.png",
   "group": "board",
   "size": "1536x1024",

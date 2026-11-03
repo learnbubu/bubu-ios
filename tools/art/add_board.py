@@ -106,6 +106,12 @@ HERO = ("The first attached image is a storyboard of Bùbù the panda. Draw only
 for n, extra in ((1, ""), (2, " Make the wind up a clear coil: his whole body tilted back, knees pulled tight to his chest, the seal drawn back over his shoulder, his face turned toward us with screwed-shut eyes and a determined mouth."),
                  (3, " His legs are hidden behind the seal and his body: we only see the seal thrust at us, big at the front, his paws gripping its sides, and his cross face just behind it."), (4, ""), (5, "")):
     jobs.append({"file": f"out/raw/rm-hero-{n}.png", "group": "board", "size": "1024x1024", "refs": ["out/raw/rm-board-hero-legs.png", "out/raw/rm-master.png"], "prompt": HERO.format(n, extra)})
+# five separate drawings swapped hands and shapes from pose to pose (owner, 3 Nov 2026): one drawing moved whole, like Duolingo's bird, plus
+# an edit of that same drawing for a blink, which keeps everything else identical
+jobs.append({"file": "out/raw/rm-hero-5-blink.png", "group": "board", "size": "1024x1024", "refs": ["out/raw/rm-hero-5.png"],
+             "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is, the same pose, size, position, colours, seal and flat magenta backdrop, "
+                       "except his eyes: his left eye is winking, drawn as a closed line. Make his other eye closed too, drawn as a happy upward arc in the same black, "
+                       "so both eyes are happily closed. Change nothing else."})
 # more like an animatic (owner, 3 Nov 2026): the in-betweens across panels 1 to 2 and 2 to 3 of the board, saved as out/raw/rm-board-seal-<name>.png
 BETWEEN = ("The attached image is a storyboard, and Bùbù the panda and his seal are drawn exactly as in it. Draw a new sheet of six numbered tall phone-shaped panels, in two rows of "
            "three, showing six evenly spaced animation frames {}, as a professional animator would break down the action with weight, anticipation and follow through. Each panel "
