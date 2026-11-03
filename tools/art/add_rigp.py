@@ -69,6 +69,39 @@ for name, text in {
     for take in "ab":
         jobs.append({"file": f"out/raw/rm-pose-{name}-{take}.png", "group": "rigp", "size": "1024x1024", "refs": ["out/raw/rm-master.png"],
                      "prompt": KEEP + text + BACKDROP + "\n\nStyle:" + style})
+# dip and crouch were the odd ones (owner, 3 Nov 2026): flat crab shapes with no chest or legs, and dip was nearly a full crouch
+for name, text in {
+    "dip": "He is just starting to sink before a jump: no more than one tenth shorter than on the sheet, knees only just bending, arms a little out from his sides, feet on the ground at the bottom of the frame, eyes closing, one closed smile.",
+    "crouch": "He is crouched ready to jump: about one quarter shorter than on the sheet and a little wider, his two thick legs clearly visible with the knees bent and apart, feet flat on the ground at the bottom of the frame, arms down and held back beside his hips, head lowered a little, eyes shut tight, one closed smile.",
+}.items():
+    for take in "ab":
+        jobs.append({"file": f"out/raw/rm-pose-{name}-{take}.png", "group": "rigp", "size": "1024x1024", "refs": ["out/raw/rm-master.png"],
+                     "prompt": KEEP + text + BACKDROP + "\n\nStyle:" + style})
+# the in-air in-betweens came from the old thin poses, so his head and body shrink for those frames (owner, 3 Nov 2026)
+for name, text in {
+    "rise": "He is in mid-air rising in a jump: about the same height as on the sheet, knees starting to lift and bend, feet off the ground and just below his belly, arms up and out in a wide V above his shoulders, chin a little lifted, happy closed eyes, a big open happy mouth.",
+    "drop": "He is in mid-air just starting to fall from the top of a jump: about the same height as on the sheet, knees still a little bent and starting to straighten, feet coming down below his belly, arms high and out in a wide V, excited eyes, a big open happy mouth.",
+    "preland": "He is in mid-air just about to land: about the same height as on the sheet, both thick legs reaching down and slightly apart, feet flat and ready to touch the ground at the bottom of the frame, arms up and out above his shoulders, eyes starting to close, a big open happy mouth.",
+}.items():
+    for take in "ab":
+        jobs.append({"file": f"out/raw/rm-pose-{name}-{take}.png", "group": "rigp", "size": "1024x1024", "refs": ["out/raw/rm-master.png"],
+                     "prompt": KEEP + text + BACKDROP + "\n\nStyle:" + style})
+# the straps wander from pose to pose: the pack grows into bright blobs at his waist and the straps cross or double (owner, 3 Nov 2026)
+STRAPS = (" The straps and pack stay exactly as on the sheet: two single plain straps in the sheet's muted red, the same width, each running from under his "
+          "chin down over the black chest to the side of his belly, never crossing or doubled. The pack shows only as a small sliver above each shoulder, "
+          "nothing beside his waist or belly.")
+for take in "ab":
+    jobs.append({"file": f"out/raw/rm-pose-apex-{take}.png", "group": "rigp", "size": "1024x1024", "refs": ["out/raw/rm-master.png"],
+                 "prompt": KEEP + "He is at the top of a jump, floating and joyful: his body and head upright and facing us, arms thrown up and out in a wide V, "
+                           "both thick legs bent with the knees apart and the feet tucked up below his belly, each foot still clearly the sheet's foot, happy "
+                           "closed eyes, a big open happy mouth." + STRAPS + BACKDROP + "\n\nStyle:" + style})
+# five strong poses instead of a flipbook: the stretch and the landing with the strap rule
+for name, text in {
+    "stretch": "He is taking off in a jump, stretched upward no more than one fifth taller than on the sheet: his belly a little longer but still wide and round, both thick legs straight and reaching down with his feet pointing to the ground, arms straight up above his head, happy closed eyes, a big open happy mouth.",
+    "squash": "He is landing, squashed about one quarter shorter than on the sheet and a little wider: his two thick legs clearly visible with the knees bent and apart, feet flat on the ground at the bottom of the frame, arms held out and up at shoulder height, eyes shut tight, a big open happy mouth.",
+}.items():
+    jobs.append({"file": f"out/raw/rm-pose-{name}.png", "group": "rigp", "size": "1024x1024", "refs": ["out/raw/rm-master.png"],
+                 "prompt": KEEP + text + STRAPS + BACKDROP + "\n\nStyle:" + style})
 # the first apex was the one to keep, but with two mouths and paw pads: fixed by editing it, not redrawing
 next(j for j in jobs if j["file"] == "out/raw/rm-pose-apex.png").update({
     "refs": ["out/raw/rm-pose-apex-1.png"],
