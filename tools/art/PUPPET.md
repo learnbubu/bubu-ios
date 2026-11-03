@@ -84,3 +84,22 @@ The face sets Codex draws as whole faces (`rm-face-*.png`) are the source: each 
 1. The reassembled puppet at rest matches `rm-rest-a-happy.png` when laid over it.
 2. Each joint turned 45° both ways shows no gap or seam.
 3. A test pose (arms up, one knee up, head tilted) is shown to the owner as a still before any motion is made.
+
+## Where it stands (3 Nov 2026, paused by the owner)
+
+- **Done:**
+  - Front rest pose, the three-quarter view and the redrawn side view (`rm-rest-side.png`).
+  - Six faces (`rm-face-*.png`). The grin is accepted for now; the oops face came back neutral, not sorry.
+- **puppet_trace.py:** the front traced into 25 vector parts, written to the Studio document `bubu-puppet`, with checks in
+  `out/puppet/` (rebuilt.png, joints.png, parts.png).
+  - The rebuilt puppet matches the drawing to within 0.5% of pixels, and parenting works in Studio.
+  - Studio only carries a child with its parent when the move is keyed. Changing a part's resting value moves it alone.
+- **Not clean yet (owner: "make sure the arms and legs take into consideration what's underneath"):** parts.png shows ragged limb
+  pieces: a spike on top of each leg, a clipped blob at each shoulder, notches on the paws and feet, crescent ears and a spiked strap
+  top. They come from bolting hidden areas on by mask arithmetic.
+- **Next:**
+  - Rebuild the arms and legs as swept shapes: circles along the limb's axis, sized to the drawing's width at each point, with
+    round ends. Paws and feet become one smooth blob each (the convex hull of the drawn part plus the wrist or ankle circle).
+  - Ears become whole fitted circles.
+  - The torso becomes one smooth convex body that covers everything under the arms and legs.
+  - Check every part alone (parts.png) and zoom on each joint at ±45° before moving on.

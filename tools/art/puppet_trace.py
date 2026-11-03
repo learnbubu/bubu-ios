@@ -244,3 +244,24 @@ for k, t in enumerate(tests):
     sheet.paste(pose(t).resize((420, 420)), (k * 420, 0))
 sheet.save(f"{OUT}/joints.png")
 print(len(ORDER), "parts written to", ART)
+
+# every part alone, outlined, to see each one is a whole, clean shape
+names = ["torso", "armL", "pawL", "legL", "footL", "head", "earL", "belly", "strapL"]
+tiles = []
+for name in names:
+    a = drawn[name]
+    ys, xs = np.nonzero(a[..., 3])
+    crop = Image.fromarray(a[ys.min() - 20:ys.max() + 20, xs.min() - 20:xs.max() + 20])
+    bg = Image.new("RGBA", crop.size, (190, 200, 215, 255))
+    bg.alpha_composite(crop)
+    m = (np.asarray(crop)[..., 3] > 0).astype(np.uint8)
+    edge = cv2.dilate(m, K3) - m
+    arr = np.asarray(bg).copy()
+    arr[edge > 0] = (255, 0, 120, 255)
+    t = Image.fromarray(arr).convert("RGB")
+    t.thumbnail((300, 300))
+    tiles.append(t)
+sheet = Image.new("RGB", (300 * len(tiles), 300), "white")
+for k, t in enumerate(tiles):
+    sheet.paste(t, (k * 300, 0))
+sheet.save(f"{OUT}/parts.png")
