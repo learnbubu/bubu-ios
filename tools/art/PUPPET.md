@@ -85,6 +85,39 @@ The face sets Codex draws as whole faces (`rm-face-*.png`) are the source: each 
 2. Each joint turned 45° both ways shows no gap or seam.
 3. A test pose (arms up, one knee up, head tilted) is shown to the owner as a still before any motion is made.
 
+## The owner's method, from recordings (Studio's Record button, `projects/bubu/recordings/`)
+
+**Head** (`2026-11-03-23-27-18.jsonl`, overlay in `out/puppet/lesson-head.png`):
+- **One pen shape for the head and its tuft.** The tuft is part of the head's outline, not a separate piece.
+- **Four points for the whole round head:** left, bottom and right, each at the outline's extreme, plus where the tuft starts. Each point has
+  long curve handles that run along the edge: level at the bottom, upright at the sides. The detail goes where the shape has corners: 7
+  points for the tuft's three spikes.
+- **Rough first, then refined:** the shape was placed in about 30 s. About 4 minutes then went on dragging points and handles until the
+  edge sat exactly on the drawing's edge. One point was added and taken back again, so he kept to as few points as possible.
+- The model layer was made a guide, so it can't be picked while drawing. The colour was set last (cream `#FEF8E8`).
+- The bottom of the head follows the visible edge. The head sits on top of the body, so nothing is hidden under it. The ears are not in
+  the head shape: they go behind it.
+
+**Arm** (`2026-11-03-23-37-39.jsonl`, overlay in `out/puppet/lesson-arm.png`):
+- **The arm and paw are one shape, 8 points.** The paw isn't a separate piece, which goes against the Toon Boom rule in section 2. His
+  choice for this design is that the paw is the arm's rounded end.
+- **The hidden end is a round cap about the arm's width.** It goes past the visible shoulder, up under the strap and the bottom of the
+  head, so the arm can swing without a gap.
+- **Each toe line is its own small rounded shape (6 points) in the same layer.** It is drawn on top of the arm, in the grey picked from
+  the drawing.
+- The colours are picked from the drawing (`#393a36` dark, `#959491` grey).
+- The workflow was the same as the head: placed in about 30 s, refined for about 3 minutes, with one point added.
+
+**Claude's leg, by the same rules** (`lesson_fit.py`, layer "Leg_R (Claude)" in cut-lesson, check `out/puppet/lesson-leg.png`):
+- The leg and foot are one shape with 9 points: a round cap under the belly, then outer edge, foot top, toe, sole and heel, inner edge.
+- The toe lines are 6-point rounded shapes.
+- The points are placed by hand, then nudged by least-squares onto the drawing's edge. The fit only counts edges against the backdrop:
+  where the leg meets the belly is an overlap, not its outline. The points are bounded, which stops loops. The result sits 0.7 px off
+  the drawing's edge on average.
+
+What it changes for puppet_trace.py: hand-placed points at the extremes with tangent handles, not a dense traced contour smoothed
+afterwards.
+
 ## Where it stands (3 Nov 2026, paused by the owner)
 
 - **Done:**
