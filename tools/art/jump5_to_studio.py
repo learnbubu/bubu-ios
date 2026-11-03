@@ -15,6 +15,7 @@ SIZE = 1024
 FUR = np.array([52.0, 56, 57])
 HOLD, OUT, IN, SOFT = [1, 0, 1, 0], [0.16, 1, 0.3, 1], [0.7, 0, 0.84, 0], [0.42, 0, 0.58, 1]
 SCALE, GROUND, MID = 0.72, 950, 512
+LINE, FADE = [0, 0, 1, 1], 40  # each pose melts into the next over a couple of frames, so the swaps stop reading as stop motion
 # each drawing's head width in its own pixels, so he stays one size from pose to pose
 POSES = {"stand": ("rm-master", 512), "crouch": ("rm-pose-crouch-a", 697), "stretch": ("rm-pose-stretch", 585),
          "apex": ("rm-pose-apex-a", 627), "squash": ("rm-pose-squash", 688)}
@@ -26,8 +27,10 @@ TIMES = [
     ("apex", 530, 830, [(530, -180, SOFT), (680, -225, SOFT), (830, -180, HOLD)], None),
     ("stretch", 830, 930, [(830, -170, IN), (930, 0, HOLD)], None),
     ("squash", 930, 1100, [(930, 0, HOLD)], [(930, 1.06, SOFT), (1020, 0.99, SOFT), (1100, 1, HOLD)]),
-    ("stand", 1100, 2000, [(1100, 0, HOLD)], [(1100, 0.96, SOFT), (1200, 1.02, SOFT), (1300, 1, HOLD)]),
+    ("stand", 1100, 2000, [(1100, 0, HOLD)], [(1100, 0.96, SOFT), (1200, 1.02, SOFT), (1300, 1, SOFT), (1650, 1.012, SOFT), (2000, 1, HOLD)]),
 ]
+# a lean through the air, so he's never quite still: by the place in TIMES
+LEAN = {2: [(420, -2, LINE), (570, -6, HOLD)], 3: [(530, -6, SOFT), (870, 6, HOLD)], 4: [(830, 6, LINE), (970, 0, HOLD)]}
 
 
 def clean(name, raw):
@@ -52,12 +55,16 @@ for i, (name, start, end, heights, sizes) in enumerate(TIMES):
     s = SCALE * 512 / head
     x = MID + ((box[0] + box[2]) / 2 - width / 2) * s
     y = GROUND - h * s / 2
-    opacity = ([] if start == 0 else [{"t": 0, "v": 0, "ease": HOLD}]) + [{"t": start, "v": 1, "ease": HOLD}, {"t": end, "v": 0, "ease": HOLD}]
+    opacity = [{"t": 0, "v": 1, "ease": HOLD}] if start == 0 else [{"t": 0, "v": 0, "ease": HOLD}, {"t": start, "v": 0, "ease": LINE}, {"t": start + FADE, "v": 1, "ease": HOLD}]
+    if end < 2000:
+        opacity.append({"t": end + FADE, "v": 0, "ease": HOLD})
     keys = {"opacity": opacity, "y": [{"t": t, "v": y + v, "ease": e} for t, v, e in heights]}
     if sizes:
         keys["scale"] = [{"t": t, "v": s * v, "ease": e} for t, v, e in sizes]
         # it grows about its middle, so its middle moves to keep his feet on the ground
         keys["y"] = [{"t": t, "v": GROUND - h * s * v / 2, "ease": e} for t, v, e in sizes]
+    if i in LEAN:
+        keys["rotation"] = [{"t": t, "v": v, "ease": e} for t, v, e in LEAN[i]]
     layers.append({
         "id": f"L{i + 1}", "name": f"{i + 1} {name}", "art": f"{name}.png", "w": w, "h": h, "x": x, "y": y, "scale": s,
         "rotation": 0, "flipX": False, "opacity": 1, "visible": True, "locked": False, "pivot": {"x": x, "y": y},
