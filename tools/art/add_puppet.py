@@ -20,5 +20,15 @@ REST = ("The attached images are Bùbù the panda, drawn in a flat style with no
 for take in "ab":
     jobs.append({"file": f"out/raw/rm-rest-{take}.png", "group": "puppet", "size": "1024x1024",
                  "refs": ["out/raw/rm-hero-4.png", "out/raw/rm-hero-5.png", "out/raw/rm-hero-1.png", "out/raw/rm-master.png"], "prompt": REST})
+# take A's small staring eyes read as scary (owner, 3 Nov 2026): edits of take A with only the eyes changed. The blink edit of rm-hero-5
+# lost his eye patches, so the prompt holds them in place.
+EYES = ("Edit the attached drawing of a panda and keep everything exactly as it is: the same pose, size, position, colours, head, ears, tuft, "
+        "cheeks, nose, mouth, straps, paws and flat magenta backdrop. Keep both big black eye patches exactly as they are, the same size, shape "
+        "and place. Change only the eyes inside the patches: {} Change nothing else.")
+for name, eyes in (("happy", "draw each eye as a soft, happy closed upward arc in cream, like a smile, as in the second attached image."),
+                   ("soft", "make each eye a big, friendly, gently tall oval in very dark brown, filling about half of its patch, set a little low, with a "
+                            "large round white highlight at the top and a small one below it, so he looks warm, cute and gentle, never staring.")):
+    jobs.append({"file": f"out/raw/rm-rest-a-{name}.png", "group": "puppet", "size": "1024x1024", "refs": ["out/raw/rm-rest-a.png", "out/raw/rm-hero-4.png"],
+                 "prompt": EYES.format(eyes)})
 json.dump(jobs, open("jobs.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print("puppet jobs added")
