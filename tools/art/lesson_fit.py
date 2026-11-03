@@ -1,4 +1,4 @@
-"""A part cut the owner's way (PUPPET.md, "The owner's method"): a few hand-placed points on the outline's extremes with smooth
+"""Parts cut the owner's way (PUPPET.md, "The owner's method"): a few hand-placed points on the outline's extremes with smooth
 handles along the edge, the hidden end a round cap under what covers it, then the points nudged until the edge sits on the drawing.
 Toe lines are their own little rounded shapes in the same layer. First test: the right leg and foot (the owner did the head and an arm),
 written into the Studio document "cut-lesson" as the layer "Leg_R (Claude)".
@@ -53,13 +53,42 @@ def path_d(anchors):
     return f"M{f(s[0][0])} " + " ".join(f"C{f(a)} {f(b)} {f(c)}" for _, a, b, c in s) + " Z"
 
 
-def fit(init, free, target, care):
-    """nudge the free anchors until the outline lies on the target's edge wherever the edge can be seen (care)"""
-    # (the part's own edge is where it meets the backdrop; where it meets the belly is an overlap, not its outline)
-    edge = cv2.Canny(target * 255, 50, 150) & cv2.dilate(colour("magenta"), np.ones((5, 5), np.uint8)) * 255
+def misfit(target, care, behind):
+    """how far an outline sits from the drawing's edge, wherever that edge can be seen (care): a list of distances"""
+    # (the part's own edge is where it meets what's behind it, the backdrop and anything it sits in front of; where it meets the belly
+    # it is under, that's the belly's outline, not its own)
+    edge = cv2.Canny(target * 255, 50, 150) & cv2.dilate(behind, np.ones((5, 5), np.uint8)) * 255
     dist = cv2.distanceTransform((edge == 0).astype(np.uint8), cv2.DIST_L2, 5)
     eys, exs = np.nonzero(edge & (care * 255))
     epts = np.stack([exs, eys], 1).astype(float)
+
+    def of(anchors):
+        pts = sample(anchors)
+        xi, yi = np.clip(pts[:, 0].round().astype(int), 0, S - 1), np.clip(pts[:, 1].round().astype(int), 0, S - 1)
+        r1 = np.where(care[yi, xi] > 0, dist[yi, xi], 0)
+        # and every visible bit of the drawing's edge near the outline (so no part of it is skipped)
+        d2 = np.sqrt(((epts[:, None, :] - pts[None, ::3, :]) ** 2).sum(-1)).min(1)
+        return np.concatenate([r1, d2 * 0.5])
+    return of
+
+
+def place(init, target, care, behind):
+    """the whole shape moved, turned and sized onto the drawing first (a mirrored part starts where the other side's was)"""
+    of = misfit(target, care, behind)
+    c = np.mean([a[:2] for a in init], 0)
+
+    def moved(v):
+        dx, dy, th, k = v
+        co, si = math.cos(th), math.sin(th)
+        return [[c[0] + dx + k * (co * (a[0] - c[0]) - si * (a[1] - c[1])), c[1] + dy + k * (si * (a[0] - c[0]) + co * (a[1] - c[1])),
+                 a[2] + th, a[3] * k, a[4] * k] for a in init]
+    r = least_squares(lambda v: of(moved(v)), [0, 0, 0, 1], bounds=([-80, -80, -0.5, 0.8], [80, 80, 0.5, 1.25]), diff_step=1e-3)
+    return moved(r.x)
+
+
+def fit(init, free, target, care, behind):
+    """nudge the free anchors until the outline lies on the target's edge wherever the edge can be seen (care)"""
+    of = misfit(target, care, behind)
     base = [list(a) for a in init]
 
     def build(v):
@@ -69,13 +98,7 @@ def fit(init, free, target, care):
         return an
 
     def resid(v):
-        pts = sample(build(v))
-        xi, yi = np.clip(pts[:, 0].round().astype(int), 0, S - 1), np.clip(pts[:, 1].round().astype(int), 0, S - 1)
-        seen = care[yi, xi] > 0
-        r1 = np.where(seen, dist[yi, xi], 0)
-        # and every visible bit of the drawing's edge near the outline (so no part of it is skipped)
-        d2 = np.sqrt(((epts[:, None, :] - pts[None, ::3, :]) ** 2).sum(-1)).min(1)
-        return np.concatenate([r1, d2 * 0.5])
+        return of(build(v))
 
     v0 = np.concatenate([base[i] for i in free])
     # (each point stays near where it was put, its handles turned no more than ~30 degrees and never flipped back on themselves)
@@ -125,55 +148,150 @@ def toe_lines(region):
     return shapes
 
 
-# --- the right leg and foot, one shape like the owner's arm and paw ---------------------------------------------------
-target = colour("dark", "grey")
+def anchors_of(svg_file, index=0):
+    """a drawn shape's points back as anchors (x, y, angle, in length, out length), from its SVG path"""
+    import re
+    d = re.findall(r' d="([^"]+)"', open(f"{ROOT}/art/{DOC}/{svg_file}").read())[index]
+    n = [float(x) for x in re.findall(r"-?[\d.]+", d)]
+    segs_ = [(n[i:i + 2], n[i + 2:i + 4], n[i + 4:i + 6]) for i in range(2, len(n) - 5, 6)]
+    pts = [n[0:2]] + [s[2] for s in segs_][:-1]
+    out = []
+    for k, p in enumerate(pts):
+        c_out, c_in = segs_[k][0], segs_[k - 1][1]
+        lo, li = math.dist(p, c_out), math.dist(p, c_in)
+        ang = math.atan2(c_out[1] - p[1], c_out[0] - p[0]) if lo > 0.5 else math.atan2(p[1] - c_in[1], p[0] - c_in[0])
+        out.append([p[0], p[1], ang, li, lo])
+    return out
+
+
+def mirror(anchors):
+    """the other side: the model is drawn symmetric about its middle"""
+    return [[S - a[0], a[1], math.pi - a[2], a[3], a[4]] for a in anchors]
+
+
+magenta = colour("magenta")
 cream = colour("cream")
 dark = colour("dark")
-care = np.zeros((S, S), np.uint8)
-care[900:, 640:] = 1                      # his right side, from the hip down: wherever the leg's outline shows
-care &= (cream == 0).astype(np.uint8)
+target = colour("dark", "grey")
+NEAR = cv2.dilate(magenta, np.ones((9, 9), np.uint8))
+
+
+def care_in(box, behind):
+    """where a part's own outline can be seen: next to what's behind it, inside its box (x0, y0, x1, y1)"""
+    c = np.zeros((S, S), np.uint8)
+    c[max(0, box[1]):box[3], max(0, box[0]):box[2]] = 1
+    return c & cv2.dilate(behind, np.ones((9, 9), np.uint8))
+
+
+def cut(name, init, box, toes=None, move=False, behind=None):
+    """fit a part: the points on the drawing's visible edge move, the hidden ones (under something) stay as placed"""
+    behind = magenta if behind is None else behind
+    care = care_in(box, behind)
+    init = place(init, target, care, behind) if move else init
+    # (a point counts as on the visible edge when the backdrop is within ~15 px of it; deeper ones are hidden and stay put)
+    seen = cv2.dilate(care, np.ones((23, 23), np.uint8))
+    free = [i for i, a in enumerate(init) if seen[min(S - 1, round(a[1])), min(S - 1, round(a[0]))]]
+    shape, err = fit(init, free, target, care, behind)
+    lines = toe_lines(toes) if toes is not None else []
+    print(f"{name}: {len(shape)} points ({len(free)} on the visible edge), off it by {err:.2f} px on average; {len(lines)} toe lines")
+    fills = [("#393a36", shape)] + [("#959491", t) for t in lines]
+    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{S}" height="{S}" viewBox="0 0 {S} {S}">\n' + "\n".join(
+        f'<path d="{path_d(a)}" fill="{f}"/>' for f, a in fills) + "</svg>"
+    open(f"{ROOT}/art/{DOC}/{name}-claude.svg", "w").write(svg)
+    return fills
+
+
+def region(x0, y0, x1, y1):
+    r = np.zeros((S, S), bool)
+    r[max(0, y0):y1, max(0, x0):x1] = True
+    return r
+
+
+parts = {}
+
+# --- the right leg and foot, one shape like the owner's arm and paw ---------------------------------------------------
 # The owner's fix: the leg owns its whole visible outline, right up to where it goes under the belly (the hip), and only then rounds
 # over in a cap that rises a little above that point and reaches a little past the inner edge, all hidden.
 hip_y = next(y for y in range(860, 1100) if dark[y, 830:880].any() and not cream[y, 830:880].all())
 hip_x = int(np.nonzero(dark[hip_y + 2, 830:880])[0].mean()) + 830
-gap_y = next(y for y in range(1000, 1150) if colour("magenta")[y, 640:700].any())
+gap_y = next(y for y in range(1000, 1150) if magenta[y, 640:700].any())
 inner_x = int(np.nonzero(dark[gap_y + 5, 640:760])[0].min()) + 640
 cap_x, cap_y = (inner_x - 8 + hip_x) / 2 - 10, hip_y - 35
 side = (inner_x - 8, (hip_y + gap_y) / 2)
-init = [(cap_x, cap_y, 0, 45, 45),                      # cap top (hidden)
-        (hip_x, hip_y - 8, 1.1, 30, 30),                # the hip: where the outer edge goes under the belly
-        (858, 1017, math.pi / 2, 50, 50),               # outer edge
-        (849, 1118, math.pi / 2, 30, 20),               # where the foot starts
-        (886, 1170, math.pi / 2, 25, 25),               # toe tip
-        (850, 1207, math.pi, 30, 50),                   # sole, front
-        (725, 1203, math.pi, 50, 25),                   # sole, back
-        (681, 1166, -math.pi / 2, 12, 10),              # heel
-        (683, 1145, -math.pi / 2, 8, 20),               # heel top: a little step where the leg meets the foot
-        (668, 1100, -math.pi / 2 - 0.25, 40, 50),       # inner edge
-        (side[0], side[1], -math.pi / 2, 50, 45)]       # cap side (hidden)
-leg, err = fit(init, [1, 2, 3, 4, 5, 6, 7, 8, 9], target, care)
-toes = toe_lines((np.arange(S)[None, :] > 640) & (np.arange(S)[:, None] > 1100))
-print("hip", hip_x, hip_y, "inner", inner_x, "at", gap_y, "| leg: 11 points, off the drawing's edge by", round(err, 2), "px on average;", len(toes), "toe lines")
+LEG_R = [(cap_x, cap_y, 0, 45, 45),                     # cap top (hidden)
+         (hip_x, hip_y - 8, 1.1, 30, 30),               # the hip: where the outer edge goes under the belly
+         (858, 1017, math.pi / 2, 50, 50),              # outer edge
+         (849, 1118, math.pi / 2, 30, 20),              # where the foot starts
+         (886, 1170, math.pi / 2, 25, 25),              # toe tip
+         (850, 1207, math.pi, 30, 50),                  # sole, front
+         (725, 1203, math.pi, 50, 25),                  # sole, back
+         (681, 1166, -math.pi / 2, 12, 10),             # heel
+         (683, 1145, -math.pi / 2, 8, 20),              # heel top: a little step where the leg meets the foot
+         (668, 1100, -math.pi / 2 - 0.25, 40, 50),      # inner edge
+         (side[0], side[1], -math.pi / 2, 50, 45)]      # cap side (hidden)
+# (the hip point sits just above where it goes under, so it counts as seen)
+parts["leg-r"] = cut("leg-r", LEG_R, (640, 900, S, S), region(640, 1100, S, S))
+# the other leg: the same points mirrored, then fitted to that side's own edge
+parts["leg-l"] = cut("leg-l", mirror(LEG_R), (0, 900, 615, S), region(0, 1100, 615, S), move=True)
+# the other arm: the owner's arm and paw (8 points) mirrored, then fitted to that side's own edge
+# the other arm: placed by hand at the same spots as the owner's (his arm mirrored doesn't land: this arm hangs at another angle). Its
+# strap runs over it down to the belly, so below the shoulder only the outer edge and the paw show; the rest is hidden.
 
-fills = [("#393a36", leg)] + [("#959491", t) for t in toes]
-svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{S}" height="{S}" viewBox="0 0 {S} {S}">\n' + "\n".join(
-    f'<path d="{path_d(a)}" fill="{f}"/>' for f, a in fills) + "</svg>"
-open(f"{ROOT}/art/{DOC}/leg-r-claude.svg", "w").write(svg)
 
-# checks: over the model with the points, and alone
+def handles(pts):
+    """points placed with their direction of travel: handles a third of the way to each neighbour, the owner's long smooth curves"""
+    out = []
+    for k, (x, y, ang) in enumerate(pts):
+        prev, nxt = pts[k - 1], pts[(k + 1) % len(pts)]
+        out.append((x, y, ang, math.dist((x, y), prev[:2]) / 3, math.dist((x, y), nxt[:2]) / 3))
+    return out
+
+
+ARM_R = handles([(920, 685, 0.70),     # outer edge
+                 (1020, 770, 1.1),     # outer edge, into the paw
+                 (1032, 815, 1.57),    # paw tip
+                 (975, 872, 3.25),     # paw bottom, its lowest point (heading left)
+                 (865, 785, -2.3),     # where it goes under the strap and belly
+                 (805, 690, -2.0),     # armpit (hidden)
+                 (717, 575, -1.0),     # shoulder cap (hidden, under the head)
+                 (826, 579, 0.6)])     # cap top, where the outer edge starts
+parts["arm-r"] = cut("arm-r", ARM_R, (640, 500, S, 950), region(640, 750, S, 950))
+
+
+# --- the ears: a round shape each, like the owner's head (points at the extremes, handles along the edge); the part under the head
+# drawn whole, so the ear can turn without a gap
+def ear(cx, cy):
+    ys, xs = np.nonzero(cv2.Canny(dark * 255, 50, 150) & (NEAR * 255) & (region(cx - 170, cy - 170, cx + 170, cy + 170) * 255).astype(np.uint8))
+    # the circle through the visible rim (least squares)
+    A_ = np.stack([xs, ys, np.ones_like(xs)], 1).astype(float)
+    sol = np.linalg.lstsq(A_, xs ** 2 + ys ** 2, rcond=None)[0]
+    ex, ey = sol[0] / 2, sol[1] / 2
+    r = math.sqrt(sol[2] + ex ** 2 + ey ** 2)
+    k = 0.552 * r
+    an = [(ex + r * math.cos(t), ey + r * math.sin(t), t + math.pi / 2, k, k) for t in (0, math.pi / 2, math.pi, 3 * math.pi / 2)]
+    print(f"  ear circle at ({ex:.0f}, {ey:.0f}), radius {r:.0f}")
+    return an, (int(ex - r - 30), int(ey - r - 30), int(ex + r + 30), int(ey + r + 30))
+
+
+for nm, (cx, cy) in (("ear-l", (400, 150)), ("ear-r", (850, 150))):
+    an, box = ear(cx, cy)
+    parts[nm] = cut(nm, an, box)
+
+# checks: over the model with the points, each part alone in a row
 m = Image.fromarray(im.astype(np.uint8)).convert("RGBA")
 ov = Image.new("RGBA", m.size)
 d = ImageDraw.Draw(ov)
-for f, a in fills:
-    p = [tuple(x) for x in sample(a)]
-    d.polygon(p, fill=(0, 160, 255, 90))
-    d.line(p + [p[0]], fill=(0, 90, 255, 255), width=2)
-    for x in a:
-        d.ellipse((x[0] - 5, x[1] - 5, x[0] + 5, x[1] + 5), fill=(255, 0, 0, 255))
-box = (600, 820, 940, 1240)
-Image.alpha_composite(m, ov).crop(box).resize((680, 840)).save("out/puppet/lesson-leg.png")
+for fills in parts.values():
+    for f, a in fills:
+        p = [tuple(x) for x in sample(a)]
+        d.polygon(p, fill=(0, 160, 255, 80))
+        d.line(p + [p[0]], fill=(0, 90, 255, 255), width=2)
+        for x in a:
+            d.ellipse((x[0] - 4, x[1] - 4, x[0] + 4, x[1] + 4), fill=(255, 0, 0, 255))
+Image.alpha_composite(m, ov).save("out/puppet/lesson-parts.png")
 al = Image.new("RGB", (S, S), (255, 255, 255))
 d = ImageDraw.Draw(al)
-for f, a in fills:
-    d.polygon([tuple(x) for x in sample(a)], fill=f)
-al.crop(box).resize((680, 840)).save("out/puppet/lesson-leg-alone.png")
+for fills in parts.values():
+    for f, a in fills:
+        d.polygon([tuple(x) for x in sample(a)], fill=f)
+al.save("out/puppet/lesson-parts-alone.png")
