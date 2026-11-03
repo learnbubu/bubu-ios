@@ -86,7 +86,8 @@ def fit(init, free, target, care):
 
 
 def toe_lines(region):
-    """each grey toe line as a 6-point rounded stroke, the way the owner drew them"""
+    """each grey toe line as an 8-point rounded stroke bent along the drawn line, the way the owner cleaned them up: a tip and two
+    shoulders at each end, and a point halfway down each side"""
     grey = colour("grey") & region
     shapes = []
     n, cc, stats, _ = cv2.connectedComponentsWithStats(grey)
@@ -95,47 +96,64 @@ def toe_lines(region):
             continue
         ys, xs = np.nonzero(cc == k)
         c = np.array([xs.mean(), ys.mean()])
-        w, v = np.linalg.eigh(np.cov(np.stack([xs, ys])))
+        _, v = np.linalg.eigh(np.cov(np.stack([xs, ys])))
         ax = v[:, 1]
-        along = (np.stack([xs, ys], 1) - c) @ ax
-        half_len = (along.max() - along.min()) / 2
-        r = max(2.5, (cc == k).sum() / (2 * half_len + 1e-6) / 2)
-        a = math.atan2(ax[1], ax[0])
-        e1, e2 = c + ax * (half_len - r), c - ax * (half_len - r)
         nrm = np.array([-ax[1], ax[0]])
-        q = 0.552 * r
-        # round end, side, round end, side: 6 points as the owner's (end tip, two shoulders each end)
-        an = [(*(e1 + nrm * r), a, q, q), (*(e1 + ax * r), a + math.pi / 2, q, q), (*(e1 - nrm * r), a + math.pi, q, q),
-              (*(e2 - nrm * r), a + math.pi, q, q), (*(e2 - ax * r), a + 3 * math.pi / 2, q, q), (*(e2 + nrm * r), a, q, q)]
-        # (the long sides' handles a third of the side)
-        side = np.linalg.norm(e1 - e2) / 3
-        an = [list(x) for x in an]
-        an[2][4] = an[3][3] = side
-        an[5][4] = an[0][3] = side
-        shapes.append(an)
+        rel = np.stack([xs, ys], 1) - c
+        s, o = rel @ ax, rel @ nrm
+        bend = np.polyfit(s, o, 2)                       # the line's centre, bent as drawn
+        bins = np.linspace(s.min(), s.max(), 8)
+        r = float(np.median([(o[(s >= p) & (s < q)].max() - o[(s >= p) & (s < q)].min()) / 2
+                             for p, q in zip(bins, bins[1:]) if ((s >= p) & (s < q)).sum() > 2]))
+        r = max(r, 2.5)
+        at = lambda t: c + ax * t + nrm * np.polyval(bend, t)
+
+        def tn(t):
+            d = ax + nrm * np.polyval(np.polyder(bend), t)
+            d = d / np.linalg.norm(d)
+            return d, np.array([-d[1], d[0]])
+        s1, s2, sm = s.min() + r, s.max() - r, (s.min() + s.max()) / 2
+        q, side = 0.552 * r, (s2 - s1) / 6
+        ang = lambda d: math.atan2(d[1], d[0])
+        (t1, n1), (t2, n2), (tm, nm) = tn(s1), tn(s2), tn(sm)
+        p1, p2, pm = at(s1), at(s2), at(sm)
+        an = [(*(p2 + n2 * r), ang(t2), side, q), (*(p2 + t2 * r), ang(-n2), q, q), (*(p2 - n2 * r), ang(-t2), q, side),
+              (*(pm - nm * r), ang(-tm), side, side),
+              (*(p1 - n1 * r), ang(-t1), side, q), (*(p1 - t1 * r), ang(n1), q, q), (*(p1 + n1 * r), ang(t1), q, side),
+              (*(pm + nm * r), ang(tm), side, side)]
+        shapes.append([list(x) for x in an])
     return shapes
 
 
 # --- the right leg and foot, one shape like the owner's arm and paw ---------------------------------------------------
 target = colour("dark", "grey")
 cream = colour("cream")
+dark = colour("dark")
 care = np.zeros((S, S), np.uint8)
-care[1000:, 640:] = 1                     # below the belly, his right side: where the leg's edge shows
+care[900:, 640:] = 1                      # his right side, from the hip down: wherever the leg's outline shows
 care &= (cream == 0).astype(np.uint8)
-CX, R = 756, 99                           # the hidden top: a round cap the leg's width, up under the belly
-H = 0.552 * R
-init = [(CX, 1000 - R * 1.1, 0, H, H),                 # cap top (hidden)
-        (855, 1010, math.pi / 2, 50, 50),               # outer edge
+# The owner's fix: the leg owns its whole visible outline, right up to where it goes under the belly (the hip), and only then rounds
+# over in a cap that rises a little above that point and reaches a little past the inner edge, all hidden.
+hip_y = next(y for y in range(860, 1100) if dark[y, 830:880].any() and not cream[y, 830:880].all())
+hip_x = int(np.nonzero(dark[hip_y + 2, 830:880])[0].mean()) + 830
+gap_y = next(y for y in range(1000, 1150) if colour("magenta")[y, 640:700].any())
+inner_x = int(np.nonzero(dark[gap_y + 5, 640:760])[0].min()) + 640
+cap_x, cap_y = (inner_x - 8 + hip_x) / 2 - 10, hip_y - 35
+side = (inner_x - 8, (hip_y + gap_y) / 2)
+init = [(cap_x, cap_y, 0, 45, 45),                      # cap top (hidden)
+        (hip_x, hip_y - 8, 1.1, 30, 30),                # the hip: where the outer edge goes under the belly
+        (858, 1017, math.pi / 2, 50, 50),               # outer edge
         (849, 1118, math.pi / 2, 30, 20),               # where the foot starts
         (886, 1170, math.pi / 2, 25, 25),               # toe tip
         (850, 1207, math.pi, 30, 50),                   # sole, front
-        (722, 1203, math.pi, 50, 25),                   # sole, back
-        (681, 1160, -math.pi / 2, 20, 20),              # heel
-        (668, 1100, -math.pi / 2 - 0.25, 40, 40),       # inner edge
-        (CX - R, 990, -math.pi / 2, H, H)]              # cap side (hidden)
-leg, err = fit(init, [1, 2, 3, 4, 5, 6, 7], target, care)
+        (725, 1203, math.pi, 50, 25),                   # sole, back
+        (681, 1166, -math.pi / 2, 12, 10),              # heel
+        (683, 1145, -math.pi / 2, 8, 20),               # heel top: a little step where the leg meets the foot
+        (668, 1100, -math.pi / 2 - 0.25, 40, 50),       # inner edge
+        (side[0], side[1], -math.pi / 2, 50, 45)]       # cap side (hidden)
+leg, err = fit(init, [1, 2, 3, 4, 5, 6, 7, 8, 9], target, care)
 toes = toe_lines((np.arange(S)[None, :] > 640) & (np.arange(S)[:, None] > 1100))
-print("leg: 9 points, off the drawing's edge by", round(err, 2), "px on average;", len(toes), "toe lines")
+print("hip", hip_x, hip_y, "inner", inner_x, "at", gap_y, "| leg: 11 points, off the drawing's edge by", round(err, 2), "px on average;", len(toes), "toe lines")
 
 fills = [("#393a36", leg)] + [("#959491", t) for t in toes]
 svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{S}" height="{S}" viewBox="0 0 {S} {S}">\n' + "\n".join(

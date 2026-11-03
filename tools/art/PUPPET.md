@@ -115,6 +115,20 @@ The face sets Codex draws as whole faces (`rm-face-*.png`) are the source: each 
   where the leg meets the belly is an overlap, not its outline. The points are bounded, which stops loops. The result sits 0.7 px off
   the drawing's edge on average.
 
+**The owner's clean-up of that leg** (`2026-11-03-23-45-50.jsonl`, final `Leg_R-Claude--edit-60.svg`, check `out/puppet/lesson-leg-fix.png`):
+- **The limb owns its whole visible outline, right up to where it goes under the covering part.** My cap started curving in at y≈1000.
+  That left the strip of black between the belly and the outer edge (y 925–1000) uncovered. His outer edge follows the silhouette up
+  to the hip, where it meets the belly at (850, 928). Only then does it round over, with an extra point there.
+- **The cap is bigger and fully hidden.** It rises about 35 px above the hip and reaches about 8 px past the visible inner edge, so a
+  turn never shows its edge.
+- **The heel has a small step.** An extra point where the inner leg meets the foot makes a slight corner, not one smooth curve.
+- **The toe lines have 8 points and bend with the drawn line.** Each end has a tip and two shoulders, and each side has a point
+  halfway along. My 6-point straight capsules were too stiff.
+- The result: 11 points on the leg (mine had 9).
+
+After the fixes went into lesson_fit.py, the new leg matches his to within 5% of its area. Most of the gap is in the hidden cap; only
+828 px differ where the leg can be seen.
+
 What it changes for puppet_trace.py: hand-placed points at the extremes with tangent handles, not a dense traced contour smoothed
 afterwards.
 
