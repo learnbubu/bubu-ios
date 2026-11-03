@@ -5674,5 +5674,97 @@
    "out/raw/rm-hero-4.png"
   ],
   "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is: the same pose, size, position, colours, head, ears, tuft, cheeks, nose, mouth, straps, paws and flat magenta backdrop. Keep both big black eye patches exactly as they are, the same size, shape and place. Change only the eyes inside the patches: make each eye a big, friendly, gently tall oval in very dark brown, filling about half of its patch, set a little low, with a large round white highlight at the top and a small one below it, so he looks warm, cute and gentle, never staring. Change nothing else."
+ },
+ {
+  "file": "out/raw/rm-rest-a-open.png",
+  "group": "puppet",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-rest-a.png",
+   "out/raw/ref-teacher-eyes.png"
+  ],
+  "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is: the same pose, size, position, colours, head, ears, tuft, cheeks, nose, mouth, straps, paws and flat magenta backdrop. Keep both big black eye patches exactly as they are, the same size, shape and place. Change only the eyes inside the patches: draw his eyes the way the panda's are in the second attached image: no separate eyeball, the black patch itself is the eye, with one big white crescent highlight curving round inside each patch, both crescents on the same side so he looks gently ahead and a little up, friendly and bright. Copy only the eyes from the second image: no glasses, nothing else from it. Change nothing else."
+ },
+ {
+  "file": "out/raw/rm-rest-quarter.png",
+  "group": "puppet",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-rest-a-happy.png",
+   "out/raw/rm-hero-5.png",
+   "out/raw/rm-master.png"
+  ],
+  "prompt": "The first attached image is Bùbù the panda's front rest pose for a character rig. Draw the same character, in exactly the same flat style, colours, proportions and size, turned three-quarters to our right (his left side toward us, turned about 45 degrees), as the next view of a professional character turnaround sheet. Same height on the canvas, the soles of his feet on the same line, his body centred in the same place. The same neutral stance: standing straight, weight even, arms held a little away from his body and angled down, paws open and relaxed. We see his face from three-quarters: the near eye patch and cheek larger, the far ones narrower and partly round the curve of his head, his nose and mouth moved toward the far side. Both ears show. The far arm and leg are partly behind his body but still show. The same happy face: closed eyes drawn as soft cream upward arcs inside the black eye patches, and a small closed smile. Keep his design: the round black ears, the tuft of hair, the pink cheek, his black chest and limbs, the cream belly, two single muted red backpack straps that never cross, and two grey toe lines on each paw and foot. He holds nothing. No outline, shadow, ground, lines or text. The backdrop is one flat solid magenta (#FF00FF) with nothing else on it."
+ },
+ {
+  "file": "out/raw/rm-rest-side.png",
+  "group": "puppet",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-rest-a-happy.png",
+   "out/raw/rm-hero-5.png",
+   "out/raw/rm-master.png"
+  ],
+  "prompt": "The first attached image is Bùbù the panda's front rest pose for a character rig. Draw the same character, in exactly the same flat style, colours, proportions and size, turned fully side on, facing to our right, a true profile, as the next view of a professional character turnaround sheet. Same height on the canvas, the soles of his feet on the same line, his body centred in the same place. The same neutral stance: standing straight, weight even, arms held a little away from his body and angled down, paws open and relaxed. We see one eye patch, one cheek, his nose at the front edge of his face and the smile in profile; one ear in front and the far ear just behind it. His near arm hangs a little in front of his body, his far arm hidden; his near leg in front of the far one, both feet pointing right. The backpack shows on his back. The same happy face: closed eyes drawn as soft cream upward arcs inside the black eye patches, and a small closed smile. Keep his design: the round black ears, the tuft of hair, the pink cheek, his black chest and limbs, the cream belly, two single muted red backpack straps that never cross, and two grey toe lines on each paw and foot. He holds nothing. No outline, shadow, ground, lines or text. The backdrop is one flat solid magenta (#FF00FF) with nothing else on it."
+ },
+ {
+  "file": "out/raw/rm-face-grin.png",
+  "group": "puppet",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-rest-a-happy.png",
+   "out/raw/rm-hero-4.png"
+  ],
+  "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is: the same pose, size, position, colours, head, ears, tuft, cheeks, nose, body, straps, paws and flat magenta backdrop. Keep both big black eye patches the same size, shape and place. Change only his eyes and mouth: the same happy closed arc eyes, and a big open happy grin with a pink tongue, as in the second image. Draw them in the same flat style as the second attached image. Change nothing else."
+ },
+ {
+  "file": "out/raw/rm-face-wink.png",
+  "group": "puppet",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-rest-a-happy.png",
+   "out/raw/rm-hero-5.png"
+  ],
+  "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is: the same pose, size, position, colours, head, ears, tuft, cheeks, nose, body, straps, paws and flat magenta backdrop. Keep both big black eye patches the same size, shape and place. Change only his eyes and mouth: his left eye a happy closed arc, his right eye a tight wink, and a big open happy grin, as in the second image. Draw them in the same flat style as the second attached image. Change nothing else."
+ },
+ {
+  "file": "out/raw/rm-face-strain.png",
+  "group": "puppet",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-rest-a-happy.png",
+   "out/raw/rm-hero-2.png"
+  ],
+  "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is: the same pose, size, position, colours, head, ears, tuft, cheeks, nose, body, straps, paws and flat magenta backdrop. Keep both big black eye patches the same size, shape and place. Change only his eyes and mouth: both eyes screwed tightly shut as sideways chevrons, and a small tight determined mouth, as in the second image. Draw them in the same flat style as the second attached image. Change nothing else."
+ },
+ {
+  "file": "out/raw/rm-face-cross.png",
+  "group": "puppet",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-rest-a-happy.png",
+   "out/raw/rm-hero-3.png"
+  ],
+  "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is: the same pose, size, position, colours, head, ears, tuft, cheeks, nose, body, straps, paws and flat magenta backdrop. Keep both big black eye patches the same size, shape and place. Change only his eyes and mouth: fierce determined eyes, the white eyes narrowed and slanted inside the patches, and a small set frown, as in the second image. Draw them in the same flat style as the second attached image. Change nothing else."
+ },
+ {
+  "file": "out/raw/rm-face-oh.png",
+  "group": "puppet",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-rest-a-happy.png",
+   "out/raw/ref-teacher-eyes.png"
+  ],
+  "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is: the same pose, size, position, colours, head, ears, tuft, cheeks, nose, body, straps, paws and flat magenta backdrop. Keep both big black eye patches the same size, shape and place. Change only his eyes and mouth: open eyes as in the second image (the black patch with a big white crescent highlight; no glasses), and a small round surprised 'oh' mouth. Draw them in the same flat style as the second attached image. Change nothing else."
+ },
+ {
+  "file": "out/raw/rm-face-oops.png",
+  "group": "puppet",
+  "size": "1024x1024",
+  "refs": [
+   "out/raw/rm-rest-a-happy.png",
+   "out/raw/ref-teacher-eyes.png"
+  ],
+  "prompt": "Edit the attached drawing of a panda and keep everything exactly as it is: the same pose, size, position, colours, head, ears, tuft, cheeks, nose, body, straps, paws and flat magenta backdrop. Keep both big black eye patches the same size, shape and place. Change only his eyes and mouth: open eyes as in the second image (the black patch with a big white crescent highlight; no glasses), the patches' top edges tipped down at the outside a little so he looks sorry, and a small wobbly unsure mouth. Gentle, never sad or upset. Draw them in the same flat style as the second attached image. Change nothing else."
  }
 ]
