@@ -183,7 +183,17 @@ P["qNose"] = {"shapes": [(DARK, fit_to(oval(nose), nose, cream, "qNose")[0])]}
 belly = comp_at(cream, 620, 830)
 P["qBelly"] = {"shapes": [(CREAM, fit_to(oval(belly), belly, (dark | red | magenta).astype(np.uint8), "qBelly")[0])]}
 pack = comp_at(red, 360, 620)
-P["qPack"] = {"shapes": [(RED, fit_to(oval(pack), pack, (magenta | dark).astype(np.uint8), "qPack")[0])]}
+# (the backpack carries on down behind the arm to its bottom, where the near strap meets it: lesson 12, "think where those lines may
+# lead". Its top and outer edge are fitted where they show; the rest is under the arm and the body at rest, there when he lifts his arm)
+def smooth_loop(pts, k=1 / 3):
+    out = []
+    for i, p in enumerate(pts):
+        a, b = np.array(pts[i - 1], float), np.array(pts[(i + 1) % len(pts)], float)
+        d = b - a
+        out.append([p[0], p[1], math.atan2(d[1], d[0]), math.dist(p, a) * k, math.dist(p, b) * k])
+    return out
+PACK = [(445, 518), (364, 564), (334, 660), (310, 750), (345, 808), (418, 778), (432, 690)]
+P["qPack"] = {"shapes": [(RED, fit_to(smooth_loop(PACK), pack, magenta, "qPack")[0])]}
 print("strokes:")
 for nm, (x, y), box_ in (("qEyeL", (640, 322), (580, 290, 700, 350)), ("qEyeR", (850, 338), (820, 315, 880, 360))):
     m = comp_at(cream & box(*box_), x, y)
@@ -356,6 +366,9 @@ for l in layers:
         l["control"] = CTL[l["id"]]
 # (the views' roots: at the foot line in the middle, where a mirrored view flips across)
 d["layers"] = layers[::-1] + [qhips] + d["layers"] + [null("view-quarter", 627, 1200), null("view-front", 627, 1200)]
+# (each view's layers in their own group in the Layers panel, folding under its name, so they're easy to find: the owner, 4 Nov 2026)
+for l in d["layers"]:
+    l["group"] = "Views" if l["id"] in ("view-quarter", "view-front") else "Three-quarter" if l["id"].startswith("q") or l["id"] == "refQuarter" else "Front"
 d["turn"] = {"views": [{"id": "quarter-l", "name": "three-quarter, left", "root": "view-quarter", "mirror": True},
                        {"id": "front", "name": "front", "root": "view-front"},
                        {"id": "quarter-r", "name": "three-quarter, right", "root": "view-quarter"}],
