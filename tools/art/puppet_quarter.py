@@ -183,17 +183,24 @@ P["qNose"] = {"shapes": [(DARK, fit_to(oval(nose), nose, cream, "qNose")[0])]}
 belly = comp_at(cream, 620, 830)
 P["qBelly"] = {"shapes": [(CREAM, fit_to(oval(belly), belly, (dark | red | magenta).astype(np.uint8), "qBelly")[0])]}
 pack = comp_at(red, 360, 620)
-# (the backpack carries on down behind the arm to its bottom, where the near strap meets it: lesson 12, "think where those lines may
-# lead". Its top and outer edge are fitted where they show; the rest is under the arm and the body at rest, there when he lifts his arm)
-def smooth_loop(pts, k=1 / 3):
-    out = []
-    for i, p in enumerate(pts):
-        a, b = np.array(pts[i - 1], float), np.array(pts[(i + 1) % len(pts)], float)
-        d = b - a
-        out.append([p[0], p[1], math.atan2(d[1], d[0]), math.dist(p, a) * k, math.dist(p, b) * k])
-    return out
-PACK = [(445, 518), (364, 564), (334, 660), (310, 750), (345, 808), (418, 778), (432, 690)]
-P["qPack"] = {"shapes": [(RED, fit_to(smooth_loop(PACK), pack, magenta, "qPack")[0])]}
+# (the backpack's whole shape, hidden parts included: lesson 12, "think where those lines may lead". What's under the near arm comes
+# from Codex's picture of this view with that arm taken away (out/codex/quarter-no-arm/no-arm.png, 4 Nov 2026): a tall bag down to his
+# waist, the near strap running straight down into its bottom. The bag there is the red left of where the strap is drawn.)
+NOARM = "out/codex/quarter-no-arm/no-arm.png"
+im2 = np.asarray(Image.open(NOARM).convert("RGB").resize((S, S))).astype(float)
+lab2 = np.argmin(((im2[:, :, None, :] - np.array(list(F.PALETTE.values()), float)[None, None]) ** 2).sum(-1), -1)
+red2 = (lab2 == F.NAMES.index("red")).astype(np.uint8)
+red2 = cv2.morphologyEx(cv2.morphologyEx(red2, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+strap_band = np.zeros((S, S), np.uint8)
+cv2.fillPoly(strap_band, [T.sample(T.shapes_of(DOC, "qStrapL")[0][1]).round().astype(np.int32)], 1)   # (his strap)
+bag = comp_at(red2 & (1 - cv2.dilate(strap_band, np.ones((25, 25), np.uint8))), 340, 650)
+# (its bottom reaching in under the strap's end, so the strap goes into the bag rather than stopping beside it)
+end = np.array(T.anchors(T.shapes_of(DOC, "qStrapL")[0][1])[[0, 1, 2]]).mean(0)
+cv2.circle(bag, (int(end[0]), int(end[1])), 26, 1, -1)
+bag = cv2.morphologyEx(bag, cv2.MORPH_CLOSE, np.ones((31, 31), np.uint8))
+bag = cv2.morphologyEx(bag, cv2.MORPH_OPEN, np.ones((9, 9), np.uint8))
+# (as few points as hold its shape, at its extremes, as his round parts; then onto the bag's whole edge)
+P["qPack"] = {"shapes": [(RED, fit_to(outline(bag, 6), bag, (1 - bag).astype(np.uint8), "qPack")[0])]}
 print("strokes:")
 for nm, (x, y), box_ in (("qEyeL", (640, 322), (580, 290, 700, 350)), ("qEyeR", (850, 338), (820, 315, 880, 360))):
     m = comp_at(cream & box(*box_), x, y)
