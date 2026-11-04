@@ -36,6 +36,9 @@ POSES = [{}, {"head": -15}, {"head": 15}, {"armL": (-60, -230)}, {"armL": (-150,
          {"armL": (-60, -230), "armR": (60, -230), "head": -12}, {"ears": -20}, {"ears": 20},
          {"face": (-30, 0)}, {"face": (25, -15)}, {"torso": -8}, {"torso": 8}, {"hips": (0, 30)}, {"legL": (40, -90)}, {"legR": (40, -90)},
          {"hips": (-25, 20), "torso": 6, "head": -8, "face": (20, 5), "armL": (-40, -120), "legR": (30, -60)}]
+# (from the side, raising an arm "up" in front means forward: the arms' and feet's moves go the way he faces)
+if VIEW == "s":
+    POSES = [{k: ((-v[0] + (60 if k.startswith("arm") else 0), v[1]) if k.startswith(("arm", "leg")) else v) for k, v in p.items()} for p in POSES]
 d["duration"] = len(POSES) * 1000
 d["work"] = [0, d["duration"]]
 for l in d["layers"]:

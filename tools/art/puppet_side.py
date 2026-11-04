@@ -1,18 +1,20 @@
-"""Bùbù's side view, from the model out/raw/rm-rest-side.png (drawn at the front's height and foot line, facing right), into the one
-rig with the front and the three-quarter (the owner, 4 Nov 2026: "yes start the side view"). Done the way the lessons say:
-- every part starts from the owner's own finished part, carried onto this drawing (owner_transfer.py): the three-quarter's near
-  side for the face (patch, eye, brow, cheek, nose), the head, belly, backpack, strap, arms and legs; his front ear for the near ear,
-  which in profile sits in front of the head and so must be whole
-- the profile's mouth is one curve, which none of his mouths is, so it starts as an 8-point stroke (lesson 3's toe-line rule)
-- the hidden parts come from Codex's pictures of this view with the near arm, the head, or the near leg taken away
-  (out/codex/side-*): the near strap is one loop, off the bag's top, over the shoulder, down his side and back into the bag's bottom;
-  the far leg stands right behind the near one; the far arm hangs behind the body
-- the far ear peeks over the back of the head
-The parts go under "view-side", in the Layers panel's "Side" group, with the same rig as the three-quarter, and the Turn control gets
+"""Bùbù's side view, from the model out/raw/rm-rest-side.png (drawn at the front's height and foot line, facing right), in the one
+rig with the front and the three-quarter. Second cut (the owner, 4 Nov 2026: "side is kinda bad... follow how we made things from the
+recording. Things will be different shapes etc but the same principles apply"): the first carried his three-quarter shapes over
+whole; now every part is cut by his principles (principle_cut.py) from its whole shape:
+- what the drawing shows, plus what Codex shows under the parts in front (out/codex/side2-*: no near arm, no head, neither)
+- points at the part's extremes in its own frame, corners kept, handles along the edge, then a point added only where the shape can't
+  be held without one; visible edges within 1.5 px of the drawing, hidden ones generous
+- strokes (eye, brow, toe lines) the 8-point rule; the mouth one outline, its stem up under the nose; the nose's bottom over it
+- the near strap one loop, off the bag's top, over the shoulder, down his front and back into the bag's bottom (Codex)
+- limbs with generous round hidden caps tucked under what covers them: the arm's under the strap's arch, the leg's high under the
+  belly; the paw a round end; the foot its own bump
+- in profile the near ear is in front of the head, and the belly over the leg's top
+The parts go under "view-side", in the Layers panel's "Side" group, with the same rig as the three-quarter, and the Turn control has
 the side each way (the left one mirrored).
 
 A part the owner has edited (its file no longer the plain s*.svg) or approved is kept as it is on a re-run. Afterwards run
-strap_over.py sStrapL sArmL and side_face.py.
+strap_over.py sStrapL sArmL 870 650 and side_face.py.
 From tools/art (Studio saved first, then reload without saving): ../sfx/.venv/Scripts/python -I puppet_side.py
 """
 import json
@@ -26,6 +28,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # (run with -I, which leaves this folder off the path)
 import lesson_fit as F  # noqa: E402
 import owner_transfer as T  # noqa: E402
+import principle_cut as PC  # noqa: E402
 
 S, ROOT = F.S, F.ROOT
 SRC = "out/raw/rm-rest-side.png"
@@ -81,10 +84,6 @@ def coded(pic):
     return {n: m(n) for n in ("dark", "red", "cream")}
 
 
-NOARM = coded("out/codex/side-no-arm/no-arm.png")
-NOHEAD = coded("out/codex/side-no-head/no-head.png")
-
-
 def stroke(mask, extend=(0, 0)):
     """a drawn line as an 8-point rounded stroke bent along it (the toe lines' rule, lesson 3)"""
     ys, xs = np.nonzero(mask)
@@ -116,80 +115,186 @@ def stroke(mask, extend=(0, 0)):
             [*(pm + nm * r), ang(tm), side, side]]
 
 
-his = lambda doc, lid, i=0: T.shapes_of(doc, lid)[i][1]
-Q = lambda lid: his(DOC, lid)                     # (his three-quarter parts)
+# --- the parts, each cut by his principles (principle_cut.py) from its whole shape: what the drawing shows, plus what Codex's
+# pictures show under the parts in front (out/codex/side2-*: no near arm, no head, neither), plus generous hidden ends -------------
+NA, NH, NB = (coded(f"out/codex/side2-{n}/out.png") for n in ("no-arm", "no-head", "no-both"))
 P = {}
+bg = cv2.dilate(magenta, np.ones((7, 7), np.uint8))
 
-print("his parts, carried onto the side:")
-# the head: his three-quarter head (14 points, the tuft his), onto the profile; the profile's snout is the nose's, not the head's
+
+def put(nm, col, mask, seen, tol=2.0, tol_hidden=8.0, extra=(), why="", most=20):
+    """`most`: no more points than his own part of the kind has (belly 9, backpack 7, strap 10, torso 8, arm 8, leg 12)"""
+    shape, n, w = PC.cut(mask.astype(np.uint8), seen, tol=tol, tol_hidden=tol_hidden, extra=extra, max_points=most)
+    P[nm] = {"shapes": [(col, shape)]}
+    print(f"  {nm}: {n} points{', still ' + format(w, '.1f') + 'x off somewhere' if w > 1 else ''}  {why}")
+
+
+def edge_of(*masks):
+    """where a part's own edge shows: next to these"""
+    m = np.zeros((S, S), np.uint8)
+    for x in masks:
+        m |= x.astype(np.uint8)
+    return cv2.dilate(m, np.ones((7, 7), np.uint8))
+
+
+xx, yy = np.arange(S)[None, :], np.arange(S)[:, None]
+print("head and ears:")
 head = comp_at(cream, 500, 350)
-head[590:] = 0
-P["sHead"] = {"shapes": [(CREAM, T.transfer(Q("qHead"), rough_of(head), head, F.care_in((330, 0, 960, 600), magenta | dark), (magenta | dark).astype(np.uint8),
-                                            reach=30, label="sHead (lessons 1, 14)"))]}
-# the face: the three-quarter's near side
-patch = comp_at(dark, 750, 330)
-P["sPatch"] = {"shapes": [(DARK, T.transfer(Q("qPatchL"), rough_of(patch, 12), patch, F.care_in((650, 240, 860, 440), cream), cream, reach=12, label="sPatch"))]}
-eye = comp_at(cream & box(720, 300, 830, 360), 775, 330)
-P["sEye"] = {"shapes": [(CREAM, T.transfer(Q("qEyeL"), stroke(eye), eye, F.care_in((710, 295, 840, 365), dark), dark, refit=False, similar=True, label="sEye (lessons 6, 17)"))]}
-brow = comp_at(dark & box(690, 190, 780, 245), 735, 215)
-P["sBrow"] = {"shapes": [(DARK, T.transfer(Q("qBrowL"), stroke(brow), brow, F.care_in((690, 190, 780, 245), cream), cream, refit=False, similar=True, label="sBrow (lessons 7, 17)"))]}
-cheek = comp_at(pink, 705, 453)
-P["sCheek"] = {"shapes": [(PINK, T.transfer(Q("qCheekL"), rough_of(cheek, 12), cheek, F.care_in((640, 400, 770, 500), cream), cream, reach=8, label="sCheek"))]}
-face = comp_at(dark, 870, 380)
-nose = face.copy()
-nose[402:] = 0
-P["sNose"] = {"shapes": [(DARK, T.transfer(Q("qNose"), rough_of(nose, 12), nose, F.care_in((820, 350, 930, 410), cream | magenta), (cream | magenta).astype(np.uint8), reach=10, label="sNose (lesson 18)"))]}
-mouth = face.copy()
-mouth[:398] = 0
-# (the stem's top runs up under the nose: lesson 18)
-P["sMouth"] = {"shapes": [(DARK, F.fit(stroke(mouth, (0, 8)), list(range(8)), mouth, F.care_in((820, 395, 920, 450), cream), cream)[0])]}
-print("  sMouth: an 8-point stroke (the profile's mouth is one curve; none of his is)")
-# the ears: the near one in front of the head in profile, so whole: his front ear; the far one peeks over the back of the head
+head[600:] = 0
 ear = comp_at(dark, 480, 150)
-earn = ear.copy()
-earn[:, 600:] = 0
-P["sEarL"] = {"shapes": [(DARK, T.transfer(his("puppet-ik", "earL"), rough_of(earn, 16), earn, F.care_in((360, 20, 620, 270), magenta | cream), (magenta | cream).astype(np.uint8), reach=12, label="sEarL (front's ear, lesson 7)"))]}
-earf = ear & box(560, 40, 640, 120)
-P["sEarR"] = {"shapes": [(DARK, T.transfer(Q("qEarR"), poly([(560, 60), (600, 55), (632, 80), (625, 125), (590, 140), (560, 120)]), earf, F.care_in((560, 40, 640, 110), magenta), magenta, reach=10, label="sEarR (peeking)"))]}
-# the belly
+face = comp_at(dark, 870, 380)
+# the near ear: in profile it's in front of the head, a round piece (lesson 1: points at its extremes); the far ear's bump is cut off
+# it by the near ear's own ellipse, fitted where the near ear's edge shows
+cs, _ = cv2.findContours(ear, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+ce = max(cs, key=len)[:, 0, :]
+el = cv2.fitEllipse(ce[~((ce[:, 0] > 560) & (ce[:, 1] < 115))].astype(np.float32))
+near_ear = np.zeros((S, S), np.uint8)
+cv2.ellipse(near_ear, el, 1, -1)
+near_ear &= cv2.dilate(ear, np.ones((5, 5), np.uint8))
+put("sEarL", DARK, near_ear, edge_of(magenta, cream), why="(round, in front of the head)")
+# the far ear: the bump that peeks over the back of the head, carried on as a round ear behind it (lesson 15)
+bump = ear & (1 - cv2.dilate(near_ear, np.ones((5, 5), np.uint8)))
+bump = comp_at(bump, 600, 80)
+ys, xs = np.nonzero(bump)
+far_ear = np.zeros((S, S), np.uint8)
+r = int(max(30, (xs.max() - xs.min()) * 0.6))
+cv2.circle(far_ear, (int(xs.mean()) + 5, int(ys.min()) + r - 2), r, 1, -1)   # (its top where the bump peeks, the rest behind)
+far_ear |= bump
+put("sEarR", DARK, far_ear, edge_of(magenta), why="(peeking; round behind the head)")
+# the head: the head's round carried on under the ear (a circle through its edge either side of the ear), and the snout on under
+# the nose and mouth, which sit on it (lesson 18)
+cs, _ = cv2.findContours(head, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+c = max(cs, key=len)[:, 0, :]
+earz = cv2.dilate(ear, np.ones((61, 61), np.uint8))
+near = c[(earz[c[:, 1], c[:, 0]] > 0) & (bg[c[:, 1], c[:, 0]] > 0) & (c[:, 0] < 640)]
+A = np.c_[near, np.ones(len(near))]
+sol = np.linalg.lstsq(A, (near ** 2).sum(1), rcond=None)[0]
+cx, cy = sol[0] / 2, sol[1] / 2
+circ = np.zeros((S, S), np.uint8)
+cv2.circle(circ, (int(cx), int(cy)), int(math.sqrt(sol[2] + cx * cx + cy * cy)), 1, -1)
+hullh = np.zeros((S, S), np.uint8)
+cv2.fillPoly(hullh, [cv2.convexHull(np.argwhere(head[150:] > 0)[:, ::-1].astype(np.int32) + [0, 150])], 1)
+whole_head = head | (circ & cv2.dilate(ear, np.ones((9, 9), np.uint8))) | (face & hullh)
+whole_head = cv2.morphologyEx(whole_head.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((7, 7), np.uint8))
+put("sHead", CREAM, whole_head, edge_of(magenta), tol=2.0, why="(one shape with the tuft, lesson 1)")
+print("face:")
+patch = comp_at(dark, 750, 330)
+put("sPatch", DARK, patch, edge_of(cream), why="(round)")
+cheek = comp_at(pink, 705, 453)
+put("sCheek", PINK, cheek, edge_of(cream), why="(round)")
+# the eye and brow: strokes, 8 points with full round ends (lessons 3, 6, 7, 17)
+eye = comp_at(cream & box(720, 300, 830, 360), 775, 330)
+P["sEye"] = {"shapes": [(CREAM, F.fit(stroke(eye), list(range(8)), eye, F.care_in((710, 295, 840, 365), dark), dark)[0])]}
+brow = comp_at(dark & box(690, 190, 780, 245), 735, 215)
+P["sBrow"] = {"shapes": [(DARK, F.fit(stroke(brow), list(range(8)), brow, F.care_in((690, 190, 780, 245), cream), cream)[0])]}
+print("  sEye, sBrow: 8-point strokes")
+# the nose and mouth: the nose's bottom comes down a little over the stem's join, and the stem's top runs up under the nose
+# (lesson 18); the mouth is one outline (lesson 5)
+split = 400
+nose = (face & (yy < split)).astype(np.uint8)
+nose = (nose | (cv2.dilate(nose, np.ones((9, 1), np.uint8)) & (yy < split + 4) & hullh)).astype(np.uint8)
+put("sNose", DARK, nose, edge_of(cream, magenta), why="(its bottom over the stem's top)")
+mouth = (face & (yy >= split - 2)).astype(np.uint8)
+ys, xs = np.nonzero(mouth & (yy < split + 10))
+stem_x = int(np.median(xs))
+mouth[split - 14:split, stem_x - 4:stem_x + 5] = 1                    # (the stem on up under the nose)
+put("sMouth", DARK, mouth, edge_of(cream), tol=1.5, why="(one outline, its top under the nose)")
+print("body:")
+# the belly: as drawn, and on under the arm where Codex shows it
 belly = comp_at(cream, 720, 830)
-P["sBelly"] = {"shapes": [(CREAM, T.transfer(Q("qBelly"), rough_of(belly, 24), belly, F.care_in((560, 630, 870, 1040), dark | magenta), (dark | magenta).astype(np.uint8), reach=15, label="sBelly (lesson 13)"))]}
-# the backpack: Codex's whole bag (the red left of the strap's loop)
-bag = comp_at(NOARM["red"] & box(330, 560, 470, 900), 380, 720)
-bag = cv2.morphologyEx(bag, cv2.MORPH_OPEN, np.ones((9, 9), np.uint8))
-P["sPack"] = {"shapes": [(RED, T.transfer(Q("qPack"), rough_of(bag, 24), bag, F.care_in((330, 560, 470, 900), magenta), magenta, reach=15, label="sPack (lessons 12, 13)"))]}
-# the near strap: what the drawing shows of it (the arch over the shoulder and the band down the front of the arm: the red that isn't
-# the bag), carrying on under the arm to the bag's bottom as Codex's loop does (lesson 12, "think where those lines may lead"); fitted
-# to the drawing where it shows. (Codex drew the loop a little off from the drawing, so it only says where the hidden part goes.)
-seen_strap = red & (1 - cv2.dilate(bag, np.ones((9, 9), np.uint8))) & box(400, 540, 700, 900)
-seen_strap = comp_at(seen_strap, 630, 720)
-loop = NOARM["red"] & (1 - cv2.dilate(bag, np.ones((7, 7), np.uint8))) & box(400, 540, 700, 900)
-under = cv2.dilate(F.target & box(420, 580, 625, 970), np.ones((3, 3), np.uint8))       # (the arm, where the loop is hidden)
-whole = (seen_strap | (loop & under)).astype(np.uint8)
-whole = cv2.morphologyEx(whole, cv2.MORPH_CLOSE, np.ones((15, 15), np.uint8))
-P["sStrapL"] = {"shapes": [(RED, T.transfer(Q("qStrapL"), rough_of(whole, 28), seen_strap, F.care_in((400, 540, 700, 900), cream | magenta | dark) & cv2.dilate(seen_strap, np.ones((9, 9), np.uint8)),
-                                            (cream | magenta | dark).astype(np.uint8), reach=20, hold_k=1.0, label="sStrapL (lessons 12, 13)"))]}
-# the arms: the near one hanging in front of the body, his three-quarter near arm; the far one hangs behind the body, the same
-# place a little back (hidden at rest)
-ARM = [(522, 585), (580, 600), (612, 660), (610, 760), (590, 880), (565, 950), (510, 962), (450, 935), (432, 860), (435, 740), (452, 640), (480, 598)]
-arm = F.target & box(420, 580, 625, 970)
-P["sArmL"] = {"shapes": [(DARK, T.transfer(Q("qArmL"), poly(ARM), arm, F.care_in((420, 600, 625, 970), red | cream | magenta), (red | cream | magenta).astype(np.uint8), reach=15, label="sArmL (lessons 2, 4, 11, 14)"))]}
-P["sArmR"] = {"shapes": [(DARK, T.transfer(Q("qArmR"), poly([(x + 45, y - 5) for x, y in ARM]), np.zeros((S, S), np.uint8), np.zeros((S, S), np.uint8), magenta, refit=False, label="sArmR (behind the body)"))]}
-# the legs: his three-quarter near leg (its tall hidden cap, lesson 16), and the far one right behind it
-LEG = [(560, 870), (640, 900), (690, 990), (688, 1100), (705, 1125), (722, 1165), (705, 1200), (600, 1202), (500, 1200), (486, 1170),
-       (487, 1120), (468, 1040), (462, 960), (490, 890)]
-leg = F.target & box(450, 960, 735, 1210)
-P["sLegL"] = {"shapes": [(DARK, T.transfer(Q("qLegL"), poly(LEG), leg, F.care_in((450, 990, 735, 1210), magenta | cream), (magenta | cream).astype(np.uint8), reach=20, label="sLegL (lessons 3, 10, 16)"))]}
-P["sLegR"] = {"shapes": [(DARK, T.transfer(Q("qLegR"), poly([(x - 18, y) for x, y in LEG]), np.zeros((S, S), np.uint8), np.zeros((S, S), np.uint8), magenta, refit=False, label="sLegR (right behind)"))]}
-# toe lines: the near paw's and foot's own, as the toe-line rule cuts them; the far ones hidden
+belly_na = comp_at(NA["cream"] & box(540, 600, 880, 1050), 720, 830)
+whole_belly = (belly | belly_na).astype(np.uint8)
+whole_belly = cv2.morphologyEx(whole_belly, cv2.MORPH_OPEN, np.ones((9, 9), np.uint8))
+put("sBelly", CREAM, whole_belly, edge_of(magenta), why="(not an oval, lesson 13)", most=9)
+# the backpack: its whole bag from Codex (the red that isn't the strap's loop), as drawn where it shows
+bag_seen = red & box(320, 560, 440, 900) & (xx < 445)
+bag = ((NB["red"] | NA["red"]) & box(320, 560, 465, 900)) | bag_seen
+hb = np.zeros((S, S), np.uint8)
+cv2.fillPoly(hb, [cv2.convexHull(np.argwhere(bag)[:, ::-1].astype(np.int32))], 1)
+bag = hb
+put("sPack", RED, bag, edge_of(magenta), why="(whole, lessons 12, 13)", most=7)
+# the near strap: one loop off the bag's top, over the shoulder, down his front and back into the bag's bottom (Codex, both
+# pictures); as drawn where it shows; its two ends run into the bag
+inside_bag = cv2.erode(bag, np.ones((21, 21), np.uint8))          # (its ends go 10 px into the bag)
+strap = ((NA["red"] | NB["red"] | red) & box(380, 520, 700, 920) & (1 - inside_bag)).astype(np.uint8)
+strap = cv2.morphologyEx(strap, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
+strap = comp_at(strap, 640, 720)
+# (the bag's own area isn't the strap's, but for the ends' 10 px into it)
+strap &= (1 - cv2.erode(bag, np.ones((21, 21), np.uint8)))
+put("sStrapL", RED, strap, edge_of(dark, cream, magenta), why="(a band off the bag's top and back into its bottom, lesson 12)", most=10)
+# the torso: the body as Codex shows it with the head and the near arm away, the drawn chest, down to under the belly and legs
+# (all of it: in Codex's picture the strap's loop cuts the body into pieces, and the body runs on under the strap and the belly. So the
+# trunk's dark, the strap's loop and the belly together, filled round as one body)
+trunk = ((NB["dark"] | NB["red"] | NA["red"] | (dark & box(600, 560, 800, 740))) & box(400, 520, 830, 1010) & (xx > 430)).astype(np.uint8)
+trunk |= whole_belly
+hull_b = np.zeros((S, S), np.uint8)
+cv2.fillPoly(hull_b, [cv2.convexHull(np.argwhere(trunk)[:, ::-1].astype(np.int32))], 1)
+body = hull_b
+put("sTorso", DARK, body, edge_of(magenta, cream), why="(the body from Codex, lesson 13)", most=8)
+print("limbs:")
+# the near arm: its edges as drawn (the bag's red behind it, the strap's red and the belly in front), its paw's round end (a shade
+# lighter than the leg), and a generous round cap tucked up under the strap's arch over the shoulder (lessons 4, 11, 14)
+lum = F.im.mean(2)
+lt = ((lum > 60.5) & (lum < 80)).astype(np.uint8)                        # (the paw's shade, a touch lighter than the leg)
+lt = cv2.morphologyEx(lt, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+rows = {}
+for y in range(600, 980):
+    run = np.nonzero(dark[y, 425:625])[0] + 425
+    if len(run) == 0:
+        continue
+    if y >= 890:
+        # (the paw: its row by its lighter shade, as far down as it goes)
+        pw = np.nonzero(lt[y, 425:625])[0] + 425
+        if len(pw) < 12:
+            if y > 930:
+                break
+            continue
+        rows[y] = (int(pw.min()), int(pw.max()))
+        continue
+    reds = np.nonzero(red[y, 400:700])[0] + 400
+    left = reds[reds < 520].max() + 1 if (reds < 520).any() else run.min()
+    if (reds > 540).any():
+        right = reds[reds > 540].min() - 1
+    elif cream[y, 540:700].any():
+        right = np.nonzero(cream[y, 540:700])[0].min() + 539
+    else:
+        right = run.max()
+    rows[y] = (int(left), int(right))
+paw = np.zeros((S, S), np.uint8)
+arm = np.zeros((S, S), np.uint8)
+for y, (a, b) in rows.items():
+    arm[y, a:b + 1] = 1
+arm |= paw
+cv2.ellipse(arm, (int((rows[620][0] + rows[620][1]) / 2), 620), (int((rows[620][1] - rows[620][0]) / 2), 45), 0, 180, 360, 1, -1)
+arm = cv2.morphologyEx(arm, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (31, 31)))   # (no notch where the paw starts)
+arm = cv2.morphologyEx(arm, cv2.MORPH_OPEN, np.ones((7, 7), np.uint8))
+put("sArmL", DARK, arm, edge_of(red, cream), why="(paw round, cap under the strap's arch)", most=8)
+# the far arm: hangs behind the body, the same arm a little back (hidden at rest; there when he swings it)
+put("sArmR", DARK, np.roll(np.roll(cv2.erode(arm, np.ones((9, 9), np.uint8)), 25, axis=1), -5, axis=0), np.zeros((S, S), np.uint8), tol_hidden=10, why="(behind the body)")
+# the near leg: as drawn below the belly and the paw, its foot's own bump at the top front (lesson 10), and a tall round cap well up
+# under the belly (lesson 16)
+leg = (dark & box(440, 940, 760, 1215) & (1 - cv2.dilate(paw, np.ones((5, 5), np.uint8)))).astype(np.uint8)
+leg = comp_at(leg, 580, 1100)
+ys, xs = np.nonzero(leg & (yy < 1010))
+lx0, lx1 = int(np.percentile(xs, 2)), int(np.percentile(xs, 98))
+cv2.ellipse(leg, ((lx0 + lx1) // 2, 960), ((lx1 - lx0) // 2, 85), 0, 180, 360, 1, -1)
+cv2.rectangle(leg, (lx0, 960), (lx1, 1010), 1, -1)
+leg = cv2.morphologyEx(leg, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
+foot_top = next((x, y) for y in range(1080, 1180) for x in range(760, 600, -1) if leg[y, x])
+put("sLegL", DARK, leg, edge_of(magenta, cream), extra=(foot_top,), why="(cap high under the belly; the foot's bump)", most=12)
+put("sLegR", DARK, cv2.erode(leg, np.ones((9, 9), np.uint8)), np.zeros((S, S), np.uint8), tol_hidden=10, why="(right behind the near one)")
+# toe lines: the drawn grey ones, as the toe-line rule cuts them
 P["sArmL"]["shapes"] += [(GREY, t) for t in F.toe_lines(box(440, 880, 600, 960).astype(bool))]
 P["sLegL"]["shapes"] += [(GREY, t) for t in F.toe_lines(box(620, 1120, 735, 1200).astype(bool))]
 
-# pivots: the shoulder, the hip, the neck, the ears' bases
-P["sArmL"]["pivot"], P["sArmR"]["pivot"] = (525, 640), (570, 635)
-P["sLegL"]["pivot"], P["sLegR"]["pivot"] = (575, 950), (557, 950)
+# pivots: the shoulder (the cap's middle), the hip, the neck, the ears' bases
+P["sArmL"]["pivot"], P["sArmR"]["pivot"] = ((rows[640][0] + rows[640][1]) / 2, 640), ((rows[640][0] + rows[640][1]) / 2 + 25, 635)
+P["sLegL"]["pivot"], P["sLegR"]["pivot"] = ((lx0 + lx1) / 2, 960), ((lx0 + lx1) / 2, 960)
+P["sTorso"]["pivot"] = (600, 960)
 P["sHead"]["pivot"] = (610, 575)
-P["sEarL"]["pivot"], P["sEarR"]["pivot"] = (540, 200), (590, 120)
+P["sEarL"]["pivot"], P["sEarR"]["pivot"] = (540, 200), (600, 125)
+WRIST = ((rows[870][0] + rows[870][1]) / 2, 875)
+ANKLE = ((lx0 + lx1) / 2 + 8, 1140)
 
 OLD = {l["id"]: l for l in json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))["layers"]}
 for nm in P:
@@ -198,35 +303,13 @@ for nm in P:
         P[nm]["his"] = OLD[nm]
         print(f"  {nm}: the owner's ({OLD[nm]['art']}), kept")
 
-print("torso:")
-# the body: the drawing's dark that's none of the other parts, round the shoulder and hip joints, and the body Codex shows where the
-# near arm and the head were (lesson 13)
-others = np.zeros((S, S), np.uint8)
-for nm in ("sArmL", "sLegL", "sEarL", "sEarR"):
-    cv2.fillPoly(others, [T.sample(P[nm]["shapes"][0][1]).round().astype(np.int32)], 1)
-need = (dark & (1 - cv2.dilate(others, np.ones((3, 3), np.uint8))) & box(380, 540, 820, 1000)).astype(np.uint8)
-need = cv2.morphologyEx(need, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
-for pic in (NOARM, NOHEAD):
-    need |= pic["dark"] & box(400, 520, 800, 960)
-cv2.circle(need, P["sArmL"]["pivot"], 50, 1, -1)
-cv2.circle(need, P["sLegL"]["pivot"], 60, 1, -1)
-hull = cv2.convexHull(np.argwhere(need)[:, ::-1].astype(np.int32))
-body = np.zeros((S, S), np.uint8)
-cv2.fillPoly(body, [hull], 1)
-body = cv2.morphologyEx(body, cv2.MORPH_OPEN, np.ones((9, 9), np.uint8))
-if "his" not in P.get("sTorso", {}):
-    P["sTorso"] = {"shapes": [(DARK, T.transfer(Q("qTorso"), rough_of(body, 24), body, np.ones((S, S), np.uint8), (1 - body).astype(np.uint8), reach=25, label="sTorso (lesson 13)"))]}
-P["sTorso"]["pivot"] = (590, 960)
-if "sTorso" in OLD and OLD["sTorso"].get("art") not in (None, "sTorso.svg"):
-    P["sTorso"]["shapes"], P["sTorso"]["his"] = T.shapes_of(DOC, "sTorso"), OLD["sTorso"]
-
 PARENT = {"sLegL": "sHips", "sLegR": "sHips", "sTorso": "sHips", "sArmL": "sTorso", "sArmR": "sTorso", "sStrapL": "sTorso",
           "sPack": "sTorso", "sBelly": "sTorso", "sHead": "sTorso", "sEarL": "sHead", "sEarR": "sHead", "sCheek": "sHead",
           "sPatch": "sHead", "sNose": "sHead", "sMouth": "sHead", "sBrow": "sHead", "sEye": "sPatch"}
-# back to front: the far arm and leg and ear behind everything, the bag behind the body, the near leg under the belly's bottom, the
-# strap, the near arm, the head, and the near ear in front of the head (in profile it covers the head's back)
-# (in profile the belly overlaps the leg's top, so the near leg goes under the belly, not over it as in the three-quarter)
-ORDER = ["sArmR", "sLegR", "sEarR", "sPack", "sTorso", "sLegL", "sBelly", "sStrapL", "sArmL", "sHead", "sEarL", "sCheek", "sPatch",
+# back to front: the far arm, leg and ear behind everything; the body; the bag on its back (over the body's back edge, as drawn);
+# the near leg under the belly (in profile the belly overlaps the leg's top); the strap; the near arm; the head; the near ear in front
+# of the head (in profile it covers the head's back); the face
+ORDER = ["sArmR", "sLegR", "sEarR", "sTorso", "sPack", "sLegL", "sBelly", "sStrapL", "sArmL", "sHead", "sEarL", "sCheek", "sPatch",
          "sEye", "sBrow", "sNose", "sMouth"]
 for nm, p in P.items():
     if "pivot" not in p:
@@ -319,8 +402,8 @@ def pins(layer, bs, top, end):
 
 
 # (an elbow bends back, a knee forward: facing right, an elbow's middle bulges left and a knee's right)
-for nm, prefix, follow, kind, end, bulge in (("sArmL", "s armL", "sTorso", "hand", (512, 880), -1), ("sArmR", "s armR", "sTorso", "hand", (557, 875), -1),
-                                             ("sLegL", "s legL", "sHips", "foot", (585, 1140), 1), ("sLegR", "s legR", "sHips", "foot", (567, 1140), 1)):
+for nm, prefix, follow, kind, end, bulge in (("sArmL", "s armL", "sTorso", "hand", WRIST, -1), ("sArmR", "s armR", "sTorso", "hand", (WRIST[0] + 25, WRIST[1] - 5), -1),
+                                             ("sLegL", "s legL", "sHips", "foot", ANKLE, 1), ("sLegR", "s legR", "sHips", "foot", ANKLE, 1)):
     top, end = np.array(P[nm]["pivot"], float), np.array(end, float)
     joint = (top + end) / 2
     bs = chain(prefix, top, joint, end, follow, kind, 0)

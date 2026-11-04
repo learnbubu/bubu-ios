@@ -237,6 +237,15 @@ what's hidden he followed Codex's shapes closely. So **hidden parts are drawn fr
   - 24 of 58 steps changed only handles, and 31 of 34 point moves ended on the drawn edge.
   - The nose took 19 s and the cheek 17 s.
 
+**Shapes don't carry between views; the principles do** (the owner on the side view, 4 Nov 2026: "side is kinda bad... follow how
+we made things from the recording. Things will be different shapes etc but the same principles apply"):
+- Carrying his three-quarter shapes onto the side gave the wrong shapes. Each part is now cut fresh by `principle_cut.py`:
+  - from its whole shape (the drawing, plus Codex's pictures of what's hidden)
+  - points at its extremes in its own frame, and its corners kept
+  - more points only where the shape needs them, up to his count for that kind of part
+  - visible edges within about 2 px, hidden ones generous
+- Carrying shapes over is still right between near-identical views: the three-quarter's near brow, approved as it was.
+
 **Approved as they are** (the owner looked and said they were good, unchanged):
 - the three-quarter's near brow, Claude's carry-over of his front brow (4 Nov 2026: "brows are good")
 - they're kept, and never re-cut (`APPROVED` in puppet_quarter.py)
