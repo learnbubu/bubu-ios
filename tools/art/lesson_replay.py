@@ -2,7 +2,7 @@
 of the shape growing over the model, step by step, with the time and what was done, and the notes. For when a cut gets stuck: watch
 how the owner did the nearest part before trying again.
 
-From tools/art: ../sfx/.venv/Scripts/python -I lesson_replay.py lessons/recordings/<name>.jsonl [frames]
+From tools/art: ../sfx/.venv/Scripts/python -I lesson_replay.py lessons/recordings/<name>.jsonl [frames] [--model <png>]
 Writes out/lessons/<name>.png (the sheet) and prints the steps.
 """
 import json
@@ -13,7 +13,9 @@ from PIL import Image, ImageDraw
 
 S = 1254
 src = sys.argv[1]
-want = int(sys.argv[2]) if len(sys.argv) > 2 else 16
+want = int(sys.argv[2]) if len(sys.argv) > 2 and sys.argv[2].isdigit() else 16
+# (a lesson on another view is drawn over that view's model: --model out/raw/rm-rest-quarter.png)
+MODEL = sys.argv[sys.argv.index("--model") + 1] if "--model" in sys.argv else "out/raw/rm-rest-a-happy.png"
 name = os.path.splitext(os.path.basename(src))[0]
 lines = [json.loads(l) for l in open(src, encoding="utf-8")]
 
@@ -71,7 +73,7 @@ pick = sorted({round(i * (len(frames) - 1) / max(1, want - 1)) for i in range(wa
 allp = [p for f in frames for ly, ds in f[3].items() for d in ds if d for p in outline(d, *f[4][ly])[0]]
 x0, y0 = max(0, min(p[0] for p in allp) - 40), max(0, min(p[1] for p in allp) - 40)
 x1, y1 = min(S, max(p[0] for p in allp) + 40), min(S, max(p[1] for p in allp) + 40)
-model = Image.open("out/raw/rm-rest-a-happy.png").convert("RGBA").resize((S, S))
+model = Image.open(MODEL).convert("RGBA").resize((S, S))
 tw = 320
 th = round(tw * (y1 - y0) / (x1 - x0))
 cols = 4

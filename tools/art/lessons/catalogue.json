@@ -237,5 +237,35 @@
    "the inner edge by the strap brought onto the drawing's edge where it shows, then running on smoothly under the strap"
   ],
   "applied": "armR = his arm mirrored with a 0.5 degree turn about the shoulder and a (-3.5, 0.5) nudge: overlap 0.991 where it shows (his 0.988)"
+ },
+ {
+  "id": "q-straps-fix",
+  "date": "2026-11-04",
+  "recording": "2026-11-04-09-20-27.jsonl",
+  "by": "owner fixing Claude",
+  "part": "both straps of the three-quarter view, in puppet-views",
+  "owner": "q-strap-l-fix.svg",
+  "claude": null,
+  "before": "q-strap-l-claude-before.svg",
+  "also": {
+   "owner": "q-strap-r-fix.svg",
+   "before": "q-strap-r-claude-before.svg"
+  },
+  "box": [
+   330,
+   480,
+   900,
+   900
+  ],
+  "model": "out/raw/rm-rest-quarter.png",
+  "learnt": [
+   "8 points each, 3 round each end and 1 down each side, as before",
+   "the strap is the full drawn band, on both drawn edges",
+   "both ends go under what covers them: the top up under the head, the near bottom under the arm, the far bottom narrow behind its arm",
+   "the near strap bottom squared off with two corners under the arm",
+   "his note: think where lines lead - the near strap goes on to the backpack under the arm, so it must make sense when he lifts his arm",
+   "his note: extend enough that it stays covered when things move - the strap's top may need more under the head, which tilts"
+  ],
+  "applied": "kept as his in puppet-views; puppet_quarter.py now keeps any three-quarter part he has edited"
  }
 ]

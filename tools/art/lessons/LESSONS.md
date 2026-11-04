@@ -115,6 +115,23 @@ lesson improves on the last and none is ever lost.
 
 Most of what's left is in the hidden caps, which nobody sees at rest.
 
+### 12. Three-quarter straps (owner fixing Claude's, in puppet-views) - `2026-11-04-09-20-27.jsonl`, `owner/q-strap-l-fix.svg`, `owner/q-strap-r-fix.svg`
+- **Still 8 points each, laid out as before:** 3 round each end and 1 down each side. The fix was in where they sit, about 3.5 minutes
+  of moving points, the near strap first.
+- **The strap is the full drawn band.** Claude's near strap was narrower than the drawn red on its arm side; his sits on both drawn edges.
+- **Both ends go under what covers them:**
+  - the top in a round cap well up under the head
+  - the near strap's bottom down under the arm
+  - the far strap's bottom to a narrow end behind its arm
+- **The near strap's bottom end is squared off,** with two corners where it goes under the arm. `part_kinks.py` flags both.
+- **His notes on it:**
+  - **Think where a line leads.** The near strap goes on to the backpack under the arm, so it has to make sense when he lifts his arm.
+    Hidden ends aren't just tucked away: they carry on the way the real thing would.
+  - **Reach far enough to stay covered when things move.** The strap's top may need more under the head, because the head tilts.
+- **So for any part that goes under another:** picture the cover moved (the arm raised, the head tilted) and draw what would then show,
+  carrying on where the thing really goes.
+- Replayed over the three-quarter model with `lesson_replay.py <file> 16 --model out/raw/rm-rest-quarter.png`.
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut
@@ -131,4 +148,4 @@ point count, handles, stroke ends and hidden caps:
 - the arms (lessons 2, 4 and 11)
 - the legs, both from his right leg (lessons 3 and 10)
 
-The straps didn't carry over: the near one runs on into the backpack's bottom as one red shape. The owner is showing how those are cut.
+The straps didn't carry over well from the front. The owner fixed the three-quarter's himself (lesson 12), and his are kept.

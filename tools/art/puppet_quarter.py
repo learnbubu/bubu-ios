@@ -266,6 +266,15 @@ for nm, lid, bx in (("qArmL", "armL", (270, 600, 470, 880)), ("qArmR", "armR", (
                     ("qLegL", "legR", (370, 860, 620, 1210)), ("qLegR", "legR", (625, 900, 870, 1210))):
     P[nm]["shapes"] = [(DARK, T.transfer(his(lid), rough(nm), F.target, F.care_in(bx, magenta), magenta, reach=20, label=f"{nm} ({lid}, lessons 2-4, 10-11)"))] + P[nm]["shapes"][1:]
 
+# (a part the owner has edited in Studio is his: kept as he left it, never rebuilt. Studio names an edited part's file after the edit,
+# so any three-quarter layer whose art isn't the plain q*.svg written here is his; lesson 12's straps were the first)
+OLD = {l["id"]: l for l in json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))["layers"]} if os.path.exists(f"{ROOT}/docs/{DOC}.json") else {}
+for nm in P:
+    if nm in OLD and OLD[nm].get("art") not in (None, f"{nm}.svg"):
+        P[nm]["shapes"] = T.shapes_of(DOC, nm)
+        P[nm]["his"] = OLD[nm]
+        print(f"  {nm}: the owner's ({OLD[nm]['art']}), kept")
+
 print("torso:")
 others = np.zeros((S, S), np.uint8)
 for nm in ("qArmL", "qArmR", "qLegL", "qLegR", "qEarL", "qEarR"):
@@ -324,6 +333,9 @@ for l in d["layers"]:
         l["parent"] = "view-front"
 layers = []
 for nm in ORDER:
+    if "his" in P[nm]:
+        layers.append(dict(P[nm]["his"]))
+        continue
     pts = np.concatenate([T.sample(a) for _, a in P[nm]["shapes"]])
     x0, y0 = np.floor(pts.min(0)) - 2
     x1, y1 = np.ceil(pts.max(0)) + 2
