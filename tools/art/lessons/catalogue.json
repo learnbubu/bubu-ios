@@ -357,5 +357,32 @@
    "asked: does the cut-off bottom of the near ear show when it turns? (cover_check.py turns the ears 20 degrees each way)"
   ],
   "applied": "kept as his"
+ },
+ {
+  "id": "q-legs-fix",
+  "date": "2026-11-04",
+  "recording": [
+   "2026-11-04-10-53-16.jsonl"
+  ],
+  "by": "owner fixing Claude",
+  "part": "three-quarter legs, in puppet-views",
+  "model": "out/raw/rm-rest-quarter.png",
+  "owner": {
+   "leg-l": "q-leg-l-fix.svg",
+   "leg-r": "q-leg-r-fix.svg"
+  },
+  "before": {
+   "leg-l": "q-leg-l-claude-before.svg",
+   "leg-r": "q-leg-r-claude-before.svg"
+  },
+  "process": "out/lessons/2026-11-04-10-53-16-process.json",
+  "learnt": [
+   "both hidden caps raised much higher, a round dome well up under the belly",
+   "near leg 12 points; far leg 11 (heel point taken out)",
+   "near leg: hidden cap points first with big moves (56-68 px), then round the foot in order with 1-3 px moves, heel point nudged off and back on until it looked right",
+   "far leg: worked backwards round the outline; 8 of 21 steps handles only; ended on the hidden cap with big handle pulls",
+   "his method generally: biggest error first; then round the outline in order; overshoot and correct by eye; handles for curves; as few points as hold the shape; hidden parts generous"
+  ],
+  "applied": "kept as his"
  }
 ]

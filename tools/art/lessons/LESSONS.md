@@ -17,9 +17,11 @@ lesson improves on the last and none is ever lost.
    - put the rule into `lesson_fit.py`, with a comment naming the lesson
    - run `lesson_check.py`. It re-cuts every part and scores each against the owner's. A rule that makes an older lesson worse is
      flagged, and gets fixed rather than accepted. `--save` keeps the new best scores in `scores.json`.
-4. **Check every part for spikes, hidden ones too:** run `part_kinks.py [doc]`. A sharp turn that isn't meant, like the tuft's, gets
+4. **For every recording, also run `lesson_process.py <rec> [--model <png>]`.** It shows how he worked: the order he visited the
+   points, how big the moves were, and which ended on the drawn edge. The lessons keep his method as well as his shapes.
+5. **Check every part for spikes, hidden ones too:** run `part_kinks.py [doc]`. A sharp turn that isn't meant, like the tuft's, gets
    fixed before the owner sees the part (lesson 8).
-5. **Never edit the owner's layers.** Claude's attempts go in as new layers named "(Claude)".
+6. **Never edit the owner's layers.** Claude's attempts go in as new layers named "(Claude)".
 
 ## The lessons
 
@@ -179,6 +181,31 @@ what's hidden he followed Codex's shapes closely. So **hidden parts are drawn fr
     turns is asked about, not assumed; `cover_check.py` now turns the ears 20 degrees each way to see.
 - **The far ear kept 4 points,** made a bit smaller and moved down and right onto the drawn ear; its bottom stays hidden behind the head.
 - Both ears' pivots stayed where they were.
+
+### 16. Three-quarter legs (owner fixing Claude's, in puppet-views) - `2026-11-04-10-53-16.jsonl` (the one before it is a start that stopped at once), `owner/q-leg-l-fix.svg`, `owner/q-leg-r-fix.svg`; how he worked: `out/lessons/2026-11-04-10-53-16-process.json`
+- **The shapes:**
+  - Both hidden caps were raised much higher, in a round dome well up under the belly. Claude's were low and flat. It's lesson 3's
+    "the hidden cap is bigger" again, which Claude's carried-over legs still didn't do enough.
+  - The near leg keeps 12 points. The far leg went to 11: he took out a point at the heel, where its heel is simpler.
+  - The feet only moved a pixel or two.
+- **How he worked it out**, from `lesson_process.py`, about 50 s a leg:
+  - **Near leg.** The big hidden ones first: the cap's top and side, moved 56 to 68 px in one go each. Then he walked round the foot
+    in order (toe, sole, heel: points 4, 3, 5, 6, 7, 8, 9), each move 1 to 3 px. He went back and forth on the heel point, off the line
+    and back on, until it looked right. Moves shrank from about 25 px to 2 px; 16 of 22 ended on a drawn edge.
+  - **Far leg.** He started at the hidden inner top, then went backwards round the outline. He used the handles far more: 8 of 21
+    steps changed only handles, to bend a curve rather than move a point. He took out the heel point once it wasn't needed. He ended
+    on the hidden cap with big handle pulls (24 to 26 px).
+- **Points he left off the drawn edge** were all hidden: the caps and the top of the inside edge.
+
+**How he works by eye** (from all the recordings so far; `lesson_process.py` reads any recording this way):
+1. **Biggest error first, roughly:** whole points moved tens of pixels at once, often the hidden parts (lessons 4 and 16).
+2. **Then round the outline in order, point by point,** each move a pixel or a few. Every visible point lands on the drawn edge.
+3. **Overshoot and correct:** a point moved off and back on until it looks right. He judges by eye, not by measuring.
+4. **Handles for curves, points for corners.** Where a curve is wrong but its ends are right, he bends the handles.
+5. **As few points as hold the shape:** he adds one where a turn needs it (the head's far side, the foot's bump) and takes one out
+   where it isn't needed (the far heel). He has also tried one and taken it out again (lessons 1 and 11).
+6. **Hidden parts are generous:** caps high and round, ends tucked well under, shaped from a picture of what's really there
+   (lesson 13).
 
 ## Other views (the three-quarter, 4 Nov 2026)
 
