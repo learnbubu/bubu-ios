@@ -305,6 +305,14 @@ for j in ("qArmL", "qArmR"):
     cv2.circle(need, tuple(int(v) for v in P[j]["pivot"]), 50, 1, -1)
 for j in ("qLegL", "qLegR"):
     cv2.circle(need, tuple(int(v) for v in P[j]["pivot"]), 65, 1, -1)
+# (and the body Codex shows where the near arm and the head were: its dark side between the backpack and the strap, there when he lifts
+# his arm, and the tops of his shoulders under the head; lesson 12)
+for pic in ("out/codex/quarter-no-arm/no-arm.png", "out/codex/quarter-no-head/no-head.png"):
+    imc = np.asarray(Image.open(pic).convert("RGB").resize((S, S))).astype(float)
+    labc = np.argmin(((imc[:, :, None, :] - np.array(list(F.PALETTE.values()), float)[None, None]) ** 2).sum(-1), -1)
+    darkc = cv2.morphologyEx((labc == F.NAMES.index("dark")).astype(np.uint8), cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
+    zone = box(360, 520, 760, 880)                 # (the trunk: not the legs, the far arm or the ears)
+    need |= darkc & zone                         # (all of it: the strap cuts the side between it and the bag off from the rest)
 hull = cv2.convexHull(np.argwhere(need)[:, ::-1].astype(np.int32))
 body = np.zeros((S, S), np.uint8)
 cv2.fillPoly(body, [hull], 1)
@@ -376,10 +384,14 @@ d["layers"] = layers[::-1] + [qhips] + d["layers"] + [null("view-quarter", 627, 
 # (each view's layers in their own group in the Layers panel, folding under its name, so they're easy to find: the owner, 4 Nov 2026)
 for l in d["layers"]:
     l["group"] = "Views" if l["id"] in ("view-quarter", "view-front") else "Three-quarter" if l["id"].startswith("q") or l["id"] == "refQuarter" else "Front"
+old_turn = d.get("turn") or {}
 d["turn"] = {"views": [{"id": "quarter-l", "name": "three-quarter, left", "root": "view-quarter", "mirror": True},
                        {"id": "front", "name": "front", "root": "view-front"},
                        {"id": "quarter-r", "name": "three-quarter, right", "root": "view-quarter"}],
              "at": 1, "x": 1090, "y": 60, "w": 220}
+# (the owner's own Turn keys kept: which view he's on is his)
+if old_turn.get("keys"):
+    d["turn"]["keys"] = old_turn["keys"]
 # --- the limbs rigged as the front's (4 Nov 2026): four bones each (the upper and lower halves cut in two), a pin on each bone's
 # middle and at the shoulder or hip and the wrist or ankle (none on a joint), IK from the hand or foot with its control, the arms
 # moving with the chest and the legs with the hips; the feet planted on the view (so a mirrored view's are mirrored too)
