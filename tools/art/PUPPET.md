@@ -177,6 +177,17 @@ afterwards.
   - A small notch on the outer edge at the wrist is the drawing: the paw is wider than the forearm on that side.
   - **Not yet:** the app's native avatar export (`appExport.ts`) only takes bone-bound parts. Video and moments exports draw
     puppets.
+- **FK rig on the puppet (4 Nov, the owner's idea: "a blend of these pins and then an FK rig"):** a pin can follow a bone (Properties →
+  Puppet → *Pins follow bones*: each pin takes its nearest bone). The bones are turned shoulder, elbow, wrist with ordinary eased keys,
+  and the puppet bends the part smoothly between the pins. The part isn't bound to the bones. A drag on a pin that follows a bone
+  is a nudge on top. Demo: Studio document `puppet-fk` (`puppet_test_fk.py`), clip `puppet-fk.mp4`. The upper arm turns -55
+  (level), the forearm -72 more (upright), and the forearm runs a beat behind (overlap).
+- **Easier, no accidents (owner: "you can add pins and move stuff by accident"):** the Puppet tool has Move and Add modes in its
+  bar. Move is the default: clicks off a pin put nothing in, and a pin moves only once dragged 4 px, so a click just picks it. Add
+  mode, or Shift+click, puts a pin in without bending anything. The pin under the pointer grows and rings.
+- **Fixed:** a render's first frame could show a puppet unbent, because its mesh wasn't made yet. Renders now wait for it.
+- **`puppet-test` is the owner's playground:** he added pins 4 and 5 and slid the others. At 1.9 s a thin spike hangs under that
+  arm; it's unexplained, so ask what he did before calling it a bug.
 - **Was next (done above): a Puppet tool in Studio,** like After Effects' and Photoshop's (owner, 4 Nov):
   - a triangle mesh fitted inside the part's outline
   - pins placed and keyed
