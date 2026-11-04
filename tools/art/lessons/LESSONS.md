@@ -114,3 +114,21 @@ lesson improves on the last and none is ever lost.
 | arm-r-fix | 8.6% | 415 px |
 
 Most of what's left is in the hidden caps, which nobody sees at rest.
+
+## Other views (the three-quarter, 4 Nov 2026)
+
+The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut
+afresh by rule. Each starts from his finished front part, carried onto that view's drawing by `owner_transfer.py`, so it keeps his
+point count, handles, stroke ends and hidden caps:
+- moved, turned, sized and slanted whole, never sheared
+- then only his points on the seen edge are nudged onto the drawing
+- eyes and brows keep his proportions and aren't refitted (lesson 6)
+
+`puppet_quarter.py` uses it for these parts, all checked with `part_kinks.py`, which finds only his tuft corners and his foot step:
+- the head (lesson 1)
+- the mouth, as one outline (lesson 5)
+- the eyes and brows (lessons 6 and 7)
+- the arms (lessons 2, 4 and 11)
+- the legs, both from his right leg (lessons 3 and 10)
+
+The straps didn't carry over: the near one runs on into the backpack's bottom as one red shape. The owner is showing how those are cut.

@@ -24,6 +24,7 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # (run with -I, which leaves this folder off the path)
 import lesson_fit as F  # noqa: E402
+import owner_transfer as T  # noqa: E402
 
 S, ROOT = F.S, F.ROOT
 SRC = "out/raw/rm-rest-quarter.png"
@@ -174,7 +175,7 @@ for nm, (x, y), col, behind in (("qPatchL", (615, 330), DARK, cream), ("qPatchR"
     P[nm] = {"shapes": [(col, fit_to(oval(m), m, behind, nm)[0])]}
 # (the far cheek runs off the head's edge: as much of it as shows, its edge the head's, not a whole oval sticking out past)
 m = comp_at(pink, 882, 440)
-P["qCheekR"] = {"shapes": [(PINK, fit_to(outline(m, 6), m, cream, "qCheekR")[0])]}
+P["qCheekR"] = {"shapes": [(PINK, fit_to(outline(m, 4), m, cream, "qCheekR")[0])]}
 face = comp_at(dark, 790, 372)
 nose = face.copy()
 nose[390:] = 0
@@ -238,11 +239,38 @@ for nm in ("qEarL", "qEarR"):
     d = (np.array(HEAD_C) - ec) / np.linalg.norm(np.array(HEAD_C) - ec)
     P[nm]["pivot"] = tuple(ec + d * r * 0.6)
 
+# --- the owner's own parts carried over (4 Nov 2026: "make sure we're following what we learnt from those recordings and apply it
+# to these turns"). The cuts above are only rough placings; each part he drew or fixed is his own shape moved onto the three-quarter
+# drawing (owner_transfer.py), keeping his points, handles, round caps and stroke ends. Pivots were taken from the rough cuts above.
+print("his parts, carried onto the three-quarter:")
+MINE = "puppet-ik"
+his = lambda lid, i=0: T.shapes_of(MINE, lid)[i][1]
+rough = lambda nm: P[nm]["shapes"][0][1]
+# lesson 1: the head and tuft as one shape, his 11 points
+P["qHead"]["shapes"] = [(CREAM, T.transfer(his("head"), rough("qHead"), head, F.care_in((300, 0, 960, 600), magenta), magenta, reach=25, label="qHead (lesson 1)"))]
+# lesson 5: the mouth one outline, his 18 points, not three strokes laid over each other
+mouth_all = (face * (yy >= 380)).astype(np.uint8)
+union = np.concatenate([F.sample(a) for _, a in P["qMouth"]["shapes"]])
+P["qMouth"]["shapes"] = [(DARK, T.transfer(his("mouth"), [[x, y, 0, 0, 0] for x, y in union[::6]], mouth_all, F.care_in((740, 380, 860, 450), cream), cream, reach=8, label="qMouth (lesson 5)"))]
+# lessons 6 and 7: his eyes and brows, fuller ends, carried whole and not refitted
+for nm, lid, tgt, bh in (("qEyeL", "eyeL", cream, dark), ("qEyeR", "eyeR", cream, dark), ("qBrowL", "browL", dark, cream), ("qBrowR", "browR", dark, cream)):
+    an = rough(nm)
+    xs, ys = [a[0] for a in an], [a[1] for a in an]
+    bx = (int(min(xs)) - 15, int(min(ys)) - 15, int(max(xs)) + 15, int(max(ys)) + 15)
+    P[nm]["shapes"] = [(P[nm]["shapes"][0][0], T.transfer(his(lid), an, tgt & box(*bx), F.care_in(bx, bh), bh, refit=False, similar=True, label=f"{nm} (lessons 6-7)"))]
+# (the straps: the owner is showing how the three-quarter's are cut, 4 Nov 2026; until then they stay the rough 8-point strokes above.
+# His front strap carried over didn't fit: the near one here runs on into the backpack's bottom as one red shape)
+# lessons 2, 4, 11: his arms, 8 points, the fuller cap under the head; lessons 3, 10: his leg, 12 points with the foot's own bump
+# (both legs from his right leg: in this view both feet point the same way)
+for nm, lid, bx in (("qArmL", "armL", (270, 600, 470, 880)), ("qArmR", "armR", (800, 600, 960, 880)),
+                    ("qLegL", "legR", (370, 860, 620, 1210)), ("qLegR", "legR", (625, 900, 870, 1210))):
+    P[nm]["shapes"] = [(DARK, T.transfer(his(lid), rough(nm), F.target, F.care_in(bx, magenta), magenta, reach=20, label=f"{nm} ({lid}, lessons 2-4, 10-11)"))] + P[nm]["shapes"][1:]
+
 print("torso:")
 others = np.zeros((S, S), np.uint8)
 for nm in ("qArmL", "qArmR", "qLegL", "qLegR", "qEarL", "qEarR"):
     for _, an in P[nm]["shapes"]:
-        cv2.fillPoly(others, [F.sample(an).round().astype(np.int32)], 1)
+        cv2.fillPoly(others, [T.sample(an).round().astype(np.int32)], 1)
 own = dark & (1 - cv2.dilate(others, np.ones((3, 3), np.uint8)))
 own[:560] = 0
 own = cv2.morphologyEx(own, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
@@ -257,7 +285,7 @@ cv2.fillPoly(body, [hull], 1)
 # (none of it below the belly but under the legs: it showed in the gap between them)
 cover = np.zeros((S, S), np.uint8)
 for nm in ("qBelly", "qLegL", "qLegR"):
-    cv2.fillPoly(cover, [F.sample(P[nm]["shapes"][0][1]).round().astype(np.int32)], 1)
+    cv2.fillPoly(cover, [T.sample(P[nm]["shapes"][0][1]).round().astype(np.int32)], 1)
 low = np.zeros((S, S), np.uint8)
 low[1000:] = 1
 body &= (1 - (low & (1 - cover))).astype(np.uint8)
@@ -277,7 +305,7 @@ ORDER = ["qEarR", "qEarL", "qArmR", "qLegR", "qPack", "qTorso", "qStrapR", "qLeg
          "qCheekL", "qCheekR", "qPatchL", "qPatchR", "qEyeL", "qEyeR", "qBrowL", "qBrowR", "qNose", "qMouth"]
 for nm, p in P.items():
     if "pivot" not in p:
-        p["pivot"] = tuple(np.mean([a[:2] for _, an in p["shapes"] for a in an], 0))
+        p["pivot"] = tuple(np.concatenate([T.anchors(an) for _, an in p["shapes"]]).mean(0))
 
 # --- the document: a copy of puppet-ik, the front under its own root, the three-quarter beside it -------------------------------
 src = json.load(open(f"{ROOT}/docs/{FROM}.json", encoding="utf-8"))
@@ -296,12 +324,11 @@ for l in d["layers"]:
         l["parent"] = "view-front"
 layers = []
 for nm in ORDER:
-    pts = np.concatenate([F.sample(a) for _, a in P[nm]["shapes"]])
+    pts = np.concatenate([T.sample(a) for _, a in P[nm]["shapes"]])
     x0, y0 = np.floor(pts.min(0)) - 2
     x1, y1 = np.ceil(pts.max(0)) + 2
     w, h = x1 - x0, y1 - y0
-    moved = lambda an: [[a[0] - x0, a[1] - y0, a[2], a[3], a[4]] for a in an]
-    paths = "\n".join(f'<path d="{F.path_d(moved(a))}" fill="{f}"/>' for f, a in P[nm]["shapes"])
+    paths = "\n".join(f'<path d="{T.path_d(T.shifted(a, x0, y0))}" fill="{f}"/>' for f, a in P[nm]["shapes"])
     open(f"{ART}/{nm}.svg", "w").write(f'<svg xmlns="http://www.w3.org/2000/svg" width="{w:.0f}" height="{h:.0f}" viewBox="0 0 {w:.0f} {h:.0f}">\n{paths}</svg>')
     pv = P[nm]["pivot"]
     layers.append({"id": nm, "name": nm[1:] + " (3/4)", "art": f"{nm}.svg", "w": float(w), "h": float(h), "x": float((x0 + x1) / 2),
@@ -359,10 +386,10 @@ def pins(layer, bs, top, end):
 
 for nm, prefix, follow, kind in (("qArmL", "q armL", "qTorso", "hand"), ("qArmR", "q armR", "qTorso", "hand"),
                                  ("qLegL", "q legL", "qHips", "foot"), ("qLegR", "q legR", "qHips", "foot")):
-    an = P[nm]["shapes"][0][1]
+    an = T.anchors(P[nm]["shapes"][0][1])
     top = np.array(P[nm]["pivot"])
     if kind == "hand":
-        tip = np.array(an[3][:2])                          # (the paw's end, along the arm)
+        tip = an[np.argmax(np.linalg.norm(an - top, axis=1))]   # (the paw's end, along the arm: his point furthest from the shoulder)
         end = top + (tip - top) * 0.8                      # the wrist: where the paw starts
     else:
         # the ankle: the middle of the leg where the foot starts, straight down from the hip
@@ -400,7 +427,7 @@ al = Image.new("RGB", (S, S), (255, 0, 255))
 dr = ImageDraw.Draw(al)
 for nm in ORDER:
     for f, a in P[nm]["shapes"]:
-        dr.polygon([tuple(x) for x in F.sample(a)], fill=f)
+        dr.polygon([tuple(x) for x in T.sample(a)], fill=f)
 model = Image.open(SRC).convert("RGB").resize((S, S))
 both = Image.new("RGB", (S * 2, S))
 both.paste(model, (0, 0))
