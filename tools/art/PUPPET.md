@@ -230,3 +230,22 @@ afterwards.
   - Elbows and knees: limbs are one piece each, so they bend only at the shoulder and hip for now.
   - The face swaps (open eyes and the mouths from `rm-face-*.png`), cut by the same rules.
   - The three-quarter and side views, each as its own chain.
+
+## Views in one rig (4 Nov 2026)
+
+The owner: "think we need the other angles now... we want it all in one rig". Toon Boom's way: one character, several chains.
+- **Studio:** a document's `turn` lists its views, each a root (an empty layer) with that view's whole chain of layers, bones and
+  controls on it. One view shows at a time, keyed in steps by the **Turn** slider (top right). A mirrored view is its root flipped
+  across, so the three-quarter drawn facing right gives the left too.
+- **`puppet-views`:** a copy of `puppet-ik` (his playground stays his). The front sits under `view-front`. The three-quarter
+  (`puppet_quarter.py`, from `rm-rest-quarter.png`) sits under `view-quarter`, its parts cut by the lesson rules (1.89% of pixels
+  off the model). It has the same rig: four bones a limb, pins mid-bone, IK with mitten and paw-print controls, elbow and knee
+  diamonds, the hip line, and chest, head and ear arcs.
+  - Its arms move with its chest; its feet stay planted on the view root, so they mirror with it.
+- **Not yet:**
+  - the side view (`rm-rest-side.png`)
+  - the face look on the three-quarter
+  - poses don't carry between views (each view is keyed on its own, as in Toon Boom)
+  - the owner hasn't reviewed the three-quarter cut
+- **Re-running `puppet_quarter.py`** rebuilds every `q*` layer and bone in `puppet-views`, so the owner's changes to them would
+  go. Don't re-run it once he has edited them.
