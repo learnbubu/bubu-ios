@@ -332,5 +332,30 @@
    "head outline tightened onto the drawing top left by the ear and at the bottom; colour picked from the drawing (#fdf6e0)"
   ],
   "applied": "kept as his; strap_over.py re-run for his arm"
+ },
+ {
+  "id": "q-ears-fix",
+  "date": "2026-11-04",
+  "recording": [
+   "2026-11-04-10-51-17.jsonl"
+  ],
+  "by": "owner fixing Claude",
+  "part": "three-quarter ears, in puppet-views",
+  "model": "out/raw/rm-rest-quarter.png",
+  "owner": {
+   "ear-l": "q-ear-l-fix.svg",
+   "ear-r": "q-ear-r-fix.svg"
+  },
+  "before": {
+   "ear-l": "q-ear-l-claude-before.svg",
+   "ear-r": "q-ear-r-claude-before.svg"
+  },
+  "learnt": [
+   "near ear 4 -> 5 points: its top the drawn round ear, its bottom running just inside the head's edge along it (no longer a whole circle behind the head)",
+   "far ear kept 4 points, smaller and moved onto the drawn ear, its bottom hidden behind the head",
+   "pivots unchanged",
+   "asked: does the cut-off bottom of the near ear show when it turns? (cover_check.py turns the ears 20 degrees each way)"
+  ],
+  "applied": "kept as his"
  }
 ]

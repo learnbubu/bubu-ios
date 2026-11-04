@@ -25,15 +25,20 @@ L = {l["id"]: l for l in d["layers"]}
 B = {b["id"]: b for b in d.get("bones", [])}
 head, arm_l, arm_r = ("qHead", "qarmL4", "qarmR4") if q else ("head", "armL4", "armR4")
 key = lambda v, t: {"t": t, "v": v, "ease": [0, 0, 1, 1]}
-# poses, a second each: rest; head tilted back; head tilted forward; near arm up; near arm out; far arm up; both up, head tilted
+# poses, a second each: rest; head tilted back; head tilted forward; near arm up; near arm out; far arm up; both up, head tilted;
+# the ears turned back; the ears turned forward
 POSES = [{}, {"head": -15}, {"head": 15}, {"armL": (-60, -230)}, {"armL": (-150, -60)}, {"armR": (60, -230)},
-         {"armL": (-60, -230), "armR": (60, -230), "head": -12}]
+         {"armL": (-60, -230), "armR": (60, -230), "head": -12}, {"ears": -20}, {"ears": 20}]
 d["duration"] = len(POSES) * 1000
 d["work"] = [0, d["duration"]]
 for l in d["layers"]:
     l["keys"] = {}
 hl = L[head]
 hl["keys"]["rotation"] = [key(p.get("head", 0), i * 1000) for i, p in enumerate(POSES)]
+# (the ears turned each way about their bases, as the ear arcs turn them)
+for e in (("qEarL", "qEarR") if q else ("earL", "earR")):
+    if e in L:
+        L[e]["keys"]["rotation"] = [key(p.get("ears", 0), i * 1000) for i, p in enumerate(POSES)]
 for side, bid in (("armL", arm_l), ("armR", arm_r)):
     ik = B[bid]["ik"]
     ik["keys"] = {"tx": [key(ik["tx"] + p.get(side, (0, 0))[0], i * 1000) for i, p in enumerate(POSES)],

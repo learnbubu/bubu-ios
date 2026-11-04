@@ -170,6 +170,16 @@ what's hidden he followed Codex's shapes closely. So **hidden parts are drawn fr
   - `part_kinks.py` finds only his tuft's corners.
 - After the arm changed, `strap_over.py` was re-run, so the strap copy's paw cutout follows his arm.
 
+### 15. Three-quarter ears (owner fixing Claude's, in puppet-views) - `2026-11-04-10-51-17.jsonl`, `owner/q-ear-l-fix.svg`, `owner/q-ear-r-fix.svg`
+- **The near ear went from 4 points to 5, and isn't a whole circle any more.**
+  - Its top is still the drawn round ear.
+  - Its bottom now runs just inside the head's edge, in a curve along it, with a point added there. That goes with his head fix
+    (lesson 14), which showed the dark band of ear along the head's top left as drawn.
+  - Lesson 7 had the ears drawn whole behind the head so they can turn without a gap. Whether the cut-off bottom shows when the ear
+    turns is asked about, not assumed; `cover_check.py` now turns the ears 20 degrees each way to see.
+- **The far ear kept 4 points,** made a bit smaller and moved down and right onto the drawn ear; its bottom stays hidden behind the head.
+- Both ears' pivots stayed where they were.
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut
