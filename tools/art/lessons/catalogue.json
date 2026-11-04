@@ -1,0 +1,15 @@
+[
+ {"id": "head", "date": "2026-11-03", "recording": "2026-11-03-23-27-18.jsonl", "by": "owner", "part": "head and tuft, drawn from scratch",
+  "owner": "head.svg", "claude": null, "box": [250, 0, 1000, 680],
+  "learnt": ["one shape for head and tuft", "4 points round the head at its extremes, handles along the edge", "detail only where there are corners (7 points in the tuft)", "rough in 30 s, then minutes refining", "as few points as possible"]},
+ {"id": "arm-l", "date": "2026-11-03", "recording": "2026-11-03-23-37-39.jsonl", "by": "owner", "part": "left arm and paw, drawn from scratch",
+  "owner": "arm-l.svg", "claude": "arm-l-check-claude.svg", "box": [174, 520, 614, 920],
+  "learnt": ["arm and paw one shape, 8 points", "hidden end a round cap past the visible shoulder, under strap and head", "toe lines their own small rounded shapes in the same layer", "colours picked from the drawing"]},
+ {"id": "leg-r-fix", "date": "2026-11-03", "recording": "2026-11-03-23-45-50.jsonl", "by": "owner fixing Claude", "part": "right leg and foot",
+  "owner": "leg-r-fix.svg", "claude": "leg-r-claude.svg", "before": "leg-r-claude-before.svg", "box": [600, 820, 940, 1240],
+  "learnt": ["the limb owns its whole visible outline up to where it goes under the covering part", "the hidden cap is bigger: higher than that point and past the inner edge", "a small step at the heel", "toe lines 8 points, bent with the drawn line"]},
+ {"id": "arm-r-fix", "date": "2026-11-04", "recording": "2026-11-03-23-58-58.jsonl", "by": "owner fixing Claude", "part": "right arm and paw",
+  "owner": "arm-r-fix.svg", "claude": "arm-r-claude.svg", "before": "arm-r-claude-before.svg", "box": [640, 520, 1080, 920],
+  "learnt": ["a slanted limb's points go in its own frame (along and across the arm), not at the screen's lowest or rightmost", "the paw end is one point at the end along the arm, not a tip and a bottom", "the hidden inner edge runs on parallel to the seen one; it doesn't follow the strap or belly covering it", "the cap reaches a whole width back, a bulb under the head", "his order: the biggest seen error first (the paw), then the hidden edge, then the cap, toe lines last"],
+  "claude_bugs": ["the fit was pulled by other parts' edges in its box (the hip under the paw): only edges near the placed outline count now", "the limb's line taken from the whole picture was skewed by the paw: it's the outer edge's line now"]}
+]

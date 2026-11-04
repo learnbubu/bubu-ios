@@ -87,6 +87,10 @@ The face sets Codex draws as whole faces (`rm-face-*.png`) are the source: each 
 
 ## The owner's method, from recordings (Studio's Record button, `projects/bubu/recordings/`)
 
+The full catalogue, kept up to date, is **`lessons/LESSONS.md`**. It holds every recording, the owner's shapes, the rule each one
+taught, and how to rewatch and re-score them. Read it before cutting anything. The notes below are the first three lessons as they
+were written at the time.
+
 **Head** (`2026-11-03-23-27-18.jsonl`, overlay in `out/puppet/lesson-head.png`):
 - **One pen shape for the head and its tuft.** The tuft is part of the head's outline, not a separate piece.
 - **Four points for the whole round head:** left, bottom and right, each at the outline's extreme, plus where the tuft starts. Each point has

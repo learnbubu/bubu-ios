@@ -1,0 +1,14 @@
+{
+ "arm-l": {
+  "shape %": 10.0,
+  "seen px": 347
+ },
+ "leg-r-fix": {
+  "shape %": 6.2,
+  "seen px": 284
+ },
+ "arm-r-fix": {
+  "shape %": 8.6,
+  "seen px": 415
+ }
+}

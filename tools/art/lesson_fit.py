@@ -187,6 +187,11 @@ def cut(name, init, box, toes=None, move=False, behind=None):
     """fit a part: the points on the drawing's visible edge move, the hidden ones (under something) stay as placed"""
     behind = magenta if behind is None else behind
     care = care_in(box, behind)
+    # only edges near where the part was placed are its own (the arm fix, 4 Nov 2026: the hip's edge under the paw pulled the paw's
+    # outline into a loop, every try)
+    zone = np.zeros((S, S), np.uint8)
+    cv2.polylines(zone, [sample(init).round().astype(np.int32)], True, 1, 50)
+    care &= zone
     init = place(init, target, care, behind) if move else init
     # (a point counts as on the visible edge when the backdrop is within ~15 px of it; deeper ones are hidden and stay put)
     seen = cv2.dilate(care, np.ones((23, 23), np.uint8))
@@ -233,29 +238,64 @@ LEG_R = [(cap_x, cap_y, 0, 45, 45),                     # cap top (hidden)
 parts["leg-r"] = cut("leg-r", LEG_R, (640, 900, S, S), region(640, 1100, S, S))
 # the other leg: the same points mirrored, then fitted to that side's own edge
 parts["leg-l"] = cut("leg-l", mirror(LEG_R), (0, 900, 615, S), region(0, 1100, 615, S), move=True)
-# the other arm: the owner's arm and paw (8 points) mirrored, then fitted to that side's own edge
-# the other arm: placed by hand at the same spots as the owner's (his arm mirrored doesn't land: this arm hangs at another angle). Its
-# strap runs over it down to the belly, so below the shoulder only the outer edge and the paw show; the rest is hidden.
+# --- the arms, set out along the arm's own line (the owner's fix of Claude's right arm, 4 Nov 2026: points put at the extremes
+# of the screen (the paw's lowest and rightmost) don't suit a slanted limb; he put them in the arm's own frame: a point each side
+# partway down and near the paw, one at the paw's end along the arm, and the hidden edge running on parallel to the seen one, not
+# following the strap and belly that cover it)
 
 
-def handles(pts):
-    """points placed with their direction of travel: handles a third of the way to each neighbour, the owner's long smooth curves"""
+def limb(box, outward):
+    """8 points for a hanging limb, from the drawing: its line (the seen part's main axis), its width and its end. `outward` is +1
+    when the limb's outer side is to the right of its line going down it, -1 to the left."""
+    x0, y0, x1, y1 = box
+    ys, xs = np.nonzero(dark[y0:y1, x0:x1] | colour("grey")[y0:y1, x0:x1])
+    P = np.stack([xs + x0, ys + y0], 1).astype(float)
+    c = P.mean(0)
+    _, v = np.linalg.eigh(np.cov(P.T))
+    u = v[:, 1] * (1 if v[1, 1] > 0 else -1)            # down the limb
+    n = np.array([-u[1], u[0]]) * outward                # to its outer side
+    t, o = (P - c) @ u, (P - c) @ n
+    # (the paw skews the picture's axis: the limb's line is its outer edge's line, the long straight edge against the backdrop)
+    E = np.stack(np.nonzero(cv2.Canny(dark * 255, 50, 150)[y0:y1, x0:x1] & NEAR[y0:y1, x0:x1] * 255)[::-1], 1) + [x0, y0]
+    te, oe = (E - c) @ u, (E - c) @ n
+    rim = E[(oe > 0) & (te < t.max() - 70)]
+    _, v = np.linalg.eigh(np.cov(rim.T.astype(float)))
+    u = v[:, 1] * (1 if v[1, 1] > 0 else -1)
+    n = np.array([-u[1], u[0]]) * outward
+    t, o = (P - c) @ u, (P - c) @ n
+    end = t.max()
+    near = (t > end - 90) & (t < end - 40)
+    w = (o[near].max() - o[near].min()) / 2
+    mid = (o[near].max() + o[near].min()) / 2
+    # (his cap reaches a whole width back past where the outer edge goes under, a bulb under the head)
+    # where it starts: up its outer edge, past the box, to where that edge goes under the head; the round cap goes on beyond
+    top = t.min()
+    while top > -600:
+        q = at_ = c + u * (top - 4) + n * (mid + w * 0.8)
+        if cream[int(q[1]), int(q[0])] or not (dark[int(q[1]), int(q[0])] or colour("red")[int(q[1]), int(q[0])]):
+            break
+        top -= 4
+    L = end - top
+    at = lambda tt, ss: c + u * tt + n * (mid + ss)
+    ang = lambda d: math.atan2(d[1], d[0])
+    pts = [(at(top + 0.05 * L, w), ang(u)), (at(top + 0.45 * L, w), ang(u)), (at(top + 0.85 * L, w * 0.97), ang(u)),
+           (at(end, 0), ang(-n)), (at(top + 0.85 * L, -w), ang(-u)), (at(top + 0.45 * L, -w), ang(-u)),
+           (at(top + 0.1 * L, -w), ang(-u)), (at(top - w, -0.25 * w), ang(n))]
     out = []
-    for k, (x, y, ang) in enumerate(pts):
-        prev, nxt = pts[k - 1], pts[(k + 1) % len(pts)]
-        out.append((x, y, ang, math.dist((x, y), prev[:2]) / 3, math.dist((x, y), nxt[:2]) / 3))
+    for k, (p, a_) in enumerate(pts):
+        prev, nxt = pts[k - 1][0], pts[(k + 1) % len(pts)][0]
+        round_end = k in (3, 7)
+        li = 0.552 * w if round_end or k in (4, 0) else math.dist(p, prev) / 3
+        lo = 0.552 * w if round_end or k in (2, 6) else math.dist(p, nxt) / 3
+        out.append((p[0], p[1], a_, li, lo))
     return out
 
 
-ARM_R = handles([(920, 685, 0.70),     # outer edge
-                 (1020, 770, 1.1),     # outer edge, into the paw
-                 (1032, 815, 1.57),    # paw tip
-                 (975, 872, 3.25),     # paw bottom, its lowest point (heading left)
-                 (865, 785, -2.3),     # where it goes under the strap and belly
-                 (805, 690, -2.0),     # armpit (hidden)
-                 (717, 575, -1.0),     # shoulder cap (hidden, under the head)
-                 (826, 579, 0.6)])     # cap top, where the outer edge starts
-parts["arm-r"] = cut("arm-r", ARM_R, (640, 500, S, 950), region(640, 750, S, 950))
+ARM_BOX_R = (870, 560, 1060, 900)
+ARM_BOX_L = (S - ARM_BOX_R[2], 560, S - ARM_BOX_R[0], 900)
+parts["arm-r"] = cut("arm-r", limb(ARM_BOX_R, -1), (640, 500, S, 950), region(640, 750, S, 950))
+# (the owner's own arm is the check: the same rules on his side, measured against what he drew)
+parts["arm-l-check"] = cut("arm-l-check", limb(ARM_BOX_L, 1), (0, 500, 615, 950), region(0, 750, 615, 950))
 
 
 # --- the ears: a round shape each, like the owner's head (points at the extremes, handles along the edge); the part under the head
