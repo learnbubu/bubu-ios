@@ -111,5 +111,27 @@
    "the nose was only moved to sit right, its 4 points kept",
    "Studio clipped an edit that went past the SVG's box (the nose's bottom): Studio now grows the box on every kept edit"
   ]
+ },
+ {
+  "id": "eye-l-fix",
+  "date": "2026-11-04",
+  "recording": "2026-11-04-01-59-59.jsonl",
+  "by": "owner fixing Claude",
+  "part": "left eye arc in bubu-puppet-front",
+  "owner": "eye-l-fix.svg",
+  "claude": null,
+  "before": "eye-l-claude-before.svg",
+  "box": [
+   430,
+   310,
+   560,
+   390
+  ],
+  "learnt": [
+   "same 8 points, reshaped: fuller round ends that dip a little lower, smoother handles on the inner curve, a more even top arc",
+   "he shapes it to look right, not to trace the drawing exactly (it sits on the drawn eye about as closely as before)",
+   "a pair the owner fixes one of: mirror his fix about the face's middle (x 626.5) and nudge it onto the other side's drawing; don't refit it"
+  ],
+  "applied": "eyeR = his eye mirrored, shifted 0.5 px: overlap with the drawn right eye 0.836 (his on the left: 0.825)"
  }
 ]

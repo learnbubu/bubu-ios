@@ -61,6 +61,15 @@ lesson improves on the last and none is ever lost.
   `src/renderer/src/shapes.ts`, `growToFit`. The layer's size and position move with it, so nothing shifts on screen.
 - **His mouth is `#3a2a22`,** the pen's default brown, not the `#393a36` dark of the other parts. Ask before treating that as a choice.
 
+### 6. Left eye (owner fixing Claude's, in the puppet) - `2026-11-04-01-59-59.jsonl`, `owner/eye-l-fix.svg`
+- **Same 8 points, reshaped:** fuller, rounder ends that dip a little lower, smoother handles along the inner curve, and a more even
+  top arc.
+- **He shapes it to look right, not to trace the drawing exactly.** His eye overlaps the drawn eye about as much as Claude's did
+  (overlap 0.825), so a refit to the drawing would undo his work.
+- **Pairs:** when he fixes one side, mirror his fix about the face's middle (x 626.5), nudge it onto the other side's drawing, and
+  don't refit it. Done for eyeR: his eye mirrored, shifted 0.5 px, overlap 0.836 with the drawn right eye.
+- He made the mouth the same dark (`#393a36`) as the rest himself, so lesson 5's brown was not a choice.
+
 ## Scores (lesson_check.py, 4 Nov 2026)
 
 | lesson | differs from the owner's | seen against the backdrop |
