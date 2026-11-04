@@ -252,8 +252,20 @@ The owner: "think we need the other angles now... we want it all in one rig". To
 - **The face look on the three-quarter:** `quarter_face.py` adds a `qFace` null with the nose-shaped control, the features
   linked with the front's parallax. Sideways, the far side follows less, because it goes round the head's edge; the far cheek doesn't
   follow sideways at all.
+- **The side view** (`puppet_side.py`, started 4 Nov 2026) sits under `view-side`, in the Layers panel's "Side" group. The Turn
+  control now runs side, three-quarter, front, three-quarter, side; the left ones are mirrored.
+  - Every part starts from his approved three-quarter part, carried onto `rm-rest-side.png`. The near ear comes from his front
+    ear: in profile it's in front of the head, so it's whole.
+  - The profile's mouth is an 8-point stroke: none of his mouths is one curve.
+  - Hidden parts come from Codex's three pictures in `out/codex/side-*`: no near arm, no head, no near leg. The near strap is one
+    loop, from the bag's top over the shoulder, down his side and back into the bag's bottom. The far leg stands right behind the
+    near one, and the far arm hangs behind the body.
+  - In profile the belly overlaps the leg's top, unlike the three-quarter.
+  - The strap copy covers only the shoulder: `strap_over.py sStrapL sArmL 870 650`.
+  - The face look control: `side_face.py`.
+  - Checked with `cover_check.py puppet-views s` (`puppet-views-cover-side`).
+  - **The owner hasn't reviewed it yet.** After his fixes, re-run the two tools above.
 - **Not yet:**
-  - the side view (`rm-rest-side.png`)
   - poses don't carry between views (each view is keyed on its own, as in Toon Boom)
 - **Re-running `puppet_quarter.py`** keeps every part the owner has edited or approved. It still rebuilds the q-bones and pins, and
   it drops the strap copy and the face control: re-run `strap_over.py` and `quarter_face.py` after it.

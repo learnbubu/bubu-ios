@@ -352,7 +352,7 @@ if not os.path.exists(f"{ROOT}/docs/{DOC}.json"):
 else:
     d = json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))
 os.makedirs(ART, exist_ok=True)
-d["layers"] = [l for l in d["layers"] if not l["id"].startswith("q") and l["id"] not in ("view-front", "view-quarter")]
+d["layers"] = [l for l in d["layers"] if not l["id"].startswith("q") and l["id"] not in ("view-front", "view-quarter")]   # (the side's s* layers and view-side stay)
 null = lambda id_, x, y, parent=None: {"id": id_, "name": id_, "art": "", "w": 60, "h": 60, "x": x, "y": y, "scale": 1, "rotation": 0,
                                         "flipX": False, "opacity": 1, "visible": True, "locked": False, "pivot": {"x": x, "y": y}, "keys": {},
                                         "loop": 0, "blink": 0, "nullObj": True, **({"parent": parent} if parent else {})}
@@ -392,7 +392,12 @@ d["turn"] = {"views": [{"id": "quarter-l", "name": "three-quarter, left", "root"
                        {"id": "front", "name": "front", "root": "view-front"},
                        {"id": "quarter-r", "name": "three-quarter, right", "root": "view-quarter"}],
              "at": 1, "x": 1090, "y": 60, "w": 220}
-# (the owner's own Turn keys kept: which view he's on is his)
+# (other views the document has, the side's, kept round these, and the owner's own Turn keys kept: which view he's on is his)
+if old_turn.get("views"):
+    mine = {v["id"]: v for v in d["turn"]["views"]}
+    d["turn"]["views"] = [mine.get(v["id"], v) for v in old_turn["views"]]
+    for k in ("x", "y", "w"):
+        d["turn"][k] = old_turn.get(k, d["turn"][k])
 if old_turn.get("keys"):
     d["turn"]["keys"] = old_turn["keys"]
 # --- the limbs rigged as the front's (4 Nov 2026): four bones each (the upper and lower halves cut in two), a pin on each bone's

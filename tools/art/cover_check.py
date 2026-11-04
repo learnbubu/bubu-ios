@@ -6,7 +6,7 @@ hidden end that shows, or a part that stops where it should carry on.
 Save Studio first. This writes docs/<doc>-cover.json (and copies its art), adds it to project.json, then reload Studio without saving
 and render each second with render_frame (t = 0, 1000, 2000...).
 
-From tools/art: ../sfx/.venv/Scripts/python -I cover_check.py [doc] [view: q for the three-quarter, f for the front]
+From tools/art: ../sfx/.venv/Scripts/python -I cover_check.py [doc] [view: q for the three-quarter, s for the side, f for the front]
 """
 import json
 import shutil
@@ -15,17 +15,19 @@ import sys
 ROOT = "C:/Users/domch/Documents/Projects/bubu-studio/projects/bubu"
 DOC = sys.argv[1] if len(sys.argv) > 1 else "puppet-views"
 VIEW = sys.argv[2] if len(sys.argv) > 2 else "q"
-OUT = f"{DOC}-cover"
+OUT = f"{DOC}-cover" + ("-side" if VIEW == "s" else "")
 d = json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))
 d["id"], d["name"] = OUT, d["name"] + " (cover check)"
-q = VIEW == "q"
+q = VIEW in ("q", "s")
+pre = VIEW if q else ""
 if d.get("turn"):
-    d["turn"]["at"], d["turn"]["keys"] = (2 if q else 1), []
+    ids = [v["id"] for v in d["turn"]["views"]]
+    d["turn"]["at"], d["turn"]["keys"] = ids.index({"q": "quarter-r", "s": "side-r"}.get(VIEW, "front")), []
 L = {l["id"]: l for l in d["layers"]}
 B = {b["id"]: b for b in d.get("bones", [])}
-head, arm_l, arm_r = ("qHead", "qarmL4", "qarmR4") if q else ("head", "armL4", "armR4")
-face, torso, hips = ("qFace", "qTorso", "qHips") if q else ("face", "torso", "hips")
-leg_l, leg_r = ("qlegL4", "qlegR4") if q else ("legL4", "legR4")
+head, arm_l, arm_r = (f"{pre}Head", f"{pre}armL4", f"{pre}armR4") if q else ("head", "armL4", "armR4")
+face, torso, hips = (f"{pre}Face", f"{pre}Torso", f"{pre}Hips") if q else ("face", "torso", "hips")
+leg_l, leg_r = (f"{pre}legL4", f"{pre}legR4") if q else ("legL4", "legR4")
 key = lambda v, t: {"t": t, "v": v, "ease": [0, 0, 1, 1]}
 # poses, a second each: rest; head tilted back; head tilted forward; near arm up; near arm out; far arm up; both up, head tilted;
 # the ears turned back; the ears turned forward; then the rest of the rig, a control at a time: the face looking back, then forward
@@ -41,7 +43,7 @@ for l in d["layers"]:
 hl = L[head]
 hl["keys"]["rotation"] = [key(p.get("head", 0), i * 1000) for i, p in enumerate(POSES)]
 # (the ears turned each way about their bases, as the ear arcs turn them)
-for e in (("qEarL", "qEarR") if q else ("earL", "earR")):
+for e in ((f"{pre}EarL", f"{pre}EarR") if q else ("earL", "earR")):
     if e in L:
         L[e]["keys"]["rotation"] = [key(p.get("ears", 0), i * 1000) for i, p in enumerate(POSES)]
 # (the face look, the chest's turn and the hips' move: keyed on the controls' layers, as dragging the controls keys them)
