@@ -307,5 +307,30 @@
    "order: near strap, backpack, far strap, belly; torso in its own recording; near strap touch-ups last"
   ],
   "applied": "kept as his in puppet-views; puppet_quarter.py keeps any part he has edited"
+ },
+ {
+  "id": "q-shoulder-head-fix",
+  "date": "2026-11-04",
+  "recording": [
+   "2026-11-04-10-48-31.jsonl"
+  ],
+  "by": "owner fixing Claude",
+  "part": "three-quarter near arm (shoulder, unrecorded) and head, in puppet-views",
+  "model": "out/raw/rm-rest-quarter.png",
+  "owner": {
+   "arm-l": "q-arm-l-fix.svg",
+   "head": "q-head-fix.svg"
+  },
+  "before": {
+   "arm-l": "q-arm-l-claude-before.svg",
+   "head": "q-head-claude-before.svg"
+  },
+  "learnt": [
+   "arm still 8 points; outer edge follows the drawn arm all the way up; the top a round end tucked under the strap, not bulging out over the backpack",
+   "a hidden cap goes under what really covers it in that view (here the strap), not a whole width back regardless",
+   "head 11 -> 14 points: two on the far side where forehead turns into cheek (about (802,171) and (874,298)) and one by the tuft; the three-quarter head's far side isn't an oval's quarter",
+   "head outline tightened onto the drawing top left by the ear and at the bottom; colour picked from the drawing (#fdf6e0)"
+  ],
+  "applied": "kept as his; strap_over.py re-run for his arm"
  }
 ]

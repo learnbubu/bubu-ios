@@ -154,6 +154,22 @@ what's hidden he followed Codex's shapes closely. So **hidden parts are drawn fr
   - It has no box corners: Claude's was a convex hull, square on top and straight down the sides.
 - **Order of work:** near strap, backpack, far strap, belly, then the torso in its own recording, then touch-ups to the near strap.
 
+### 14. Three-quarter shoulder and head (owner, in puppet-views) - the near arm fixed without a recording (`owner/q-arm-l-fix.svg`); the head recorded, `2026-11-04-10-48-31.jsonl` (`owner/q-head-fix.svg`)
+- **The near arm's shoulder** (his words: "the shoulder shape needs fixing"). Still 8 points.
+  - Claude's cap reached a whole width back and out (lesson 4's rule from the front). In this view that pushed the shoulder out over
+    the backpack.
+  - His outer edge follows the drawn arm all the way up, and the top is a neat round end tucked under the strap at the shoulder.
+  - **A hidden cap goes under what really covers it in that view:** here the strap, now over the upper arm. It doesn't bulge out
+    where the backpack shows.
+  - His pins all stayed where they were.
+- **The head went from 11 points to 14.** He added two on the far side, at about (802, 171) and (874, 298), where the head turns from
+  the forehead into the cheek, plus one by the tuft.
+  - In the three-quarter view the far side of the head isn't an oval's quarter: it has its own shape.
+  - He also tightened the outline onto the drawing at the top left, by the ear, and at the bottom.
+  - He picked the colour from the drawing (`#fdf6e0`).
+  - `part_kinks.py` finds only his tuft's corners.
+- After the arm changed, `strap_over.py` was re-run, so the strap copy's paw cutout follows his arm.
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut
