@@ -176,3 +176,11 @@ The straps didn't carry over well from the front. The owner fixed the three-quar
 `quarter-no-head` are the first. Show them to him as reference layers, switched off. Lesson 13 was drawn over them.
 
 A part he has edited is never rebuilt.
+
+**Over and under at once** (the owner's question after lesson 13: "the top of the arm should be under the strap, but the bottom should
+be over"):
+- One layer can't be both, so `strap_over.py` adds a copy of his strap just above the arm, masked to the part over the shoulder.
+- The copy shows only where nothing changes at rest: under the head, or where the strap already shows beside the arm. It changed 0
+  pixels at rest.
+- The copy uses his strap's file. If he edits the strap again, re-run it.
+
