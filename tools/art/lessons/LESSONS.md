@@ -221,6 +221,22 @@ what's hidden he followed Codex's shapes closely. So **hidden parts are drawn fr
   - The brow took 30 s, the same way.
   - For small strokes he works mostly with the handles.
 
+### 18. Three-quarter mouth, nose and far cheek (owner fixing Claude's, in puppet-views) - `2026-11-04-11-03-40.jsonl`, `owner/q-mouth-fix.svg`, `owner/q-nose-fix.svg`, `owner/q-cheek-r-fix.svg`; how he worked: `out/lessons/2026-11-04-11-03-40-process.json`
+- **The mouth kept his 18 points** (lesson 5's one outline).
+  - The stem's top now runs up under the nose. Claude's stopped just below the nose in a little round end of its own, which showed.
+  - The two points at the stem's top were left off the drawn edge on purpose: under the nose, hidden.
+  - **Where one part meets another, the end tucks under it** (the nose here), as the limbs go under the body.
+- **The nose kept 4 points.** Its bottom point came down about 4 px, over the stem's join, so the two meet with no seam.
+- **The far cheek went from 4 points to 5.** The added point lets its outer side follow the head's edge, where the cheek runs off the
+  head in this view.
+- **How he worked:**
+  - The mouth took 2 minutes. He started at the near curve's end and went round (4, 5, 3, 6, 8, 7...) to the far curve.
+  - He spent the longest on the far curve's end (points 11, 12 and 13, revisited six times), moving them under 1 px a time. The far
+    end is where the turned mouth reads most.
+  - The stem came last, with bigger moves (5 to 9 px).
+  - 24 of 58 steps changed only handles, and 31 of 34 point moves ended on the drawn edge.
+  - The nose took 19 s and the cheek 17 s.
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut

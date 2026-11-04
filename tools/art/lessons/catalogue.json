@@ -410,5 +410,34 @@
    "small strokes: mostly handles (17 of 37 steps on the eye), point moves 2-3 px all onto the drawn edge; round the points in order, then back to the ones still off"
   ],
   "applied": "kept as his; owner_transfer to keep stroke thickness for far-side features"
+ },
+ {
+  "id": "q-mouth-nose-cheek-fix",
+  "date": "2026-11-04",
+  "recording": [
+   "2026-11-04-11-03-40.jsonl"
+  ],
+  "by": "owner fixing Claude",
+  "part": "three-quarter mouth, nose and far cheek, in puppet-views",
+  "model": "out/raw/rm-rest-quarter.png",
+  "owner": {
+   "mouth": "q-mouth-fix.svg",
+   "nose": "q-nose-fix.svg",
+   "cheek-r": "q-cheek-r-fix.svg"
+  },
+  "before": {
+   "mouth": "q-mouth-claude-before.svg",
+   "nose": "q-nose-claude-before.svg",
+   "cheek-r": "q-cheek-r-claude-before.svg"
+  },
+  "process": "out/lessons/2026-11-04-11-03-40-process.json",
+  "learnt": [
+   "mouth kept 18 points; the stem top runs up under the nose (Claude ended it below in its own little round end, which showed)",
+   "where one part meets another, the end tucks under it",
+   "nose kept 4 points; its bottom came down ~4 px over the stem join",
+   "far cheek 4 -> 5 points, its outer side following the head's edge where it runs off",
+   "mouth: near end first, round to the far curve; the far end revisited most (sub-pixel moves) as that is where the turn reads; stem last with bigger moves; 24 of 58 steps handles only"
+  ],
+  "applied": "kept as his"
  }
 ]
