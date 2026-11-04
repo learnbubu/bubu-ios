@@ -51,6 +51,16 @@ lesson improves on the last and none is ever lost.
   - The limb's line, taken from the whole picture, was skewed by the paw. It's now the outer edge's line.
 - **Checked on the owner's untouched left arm too:** the same rules land within 10% of his shape there.
 
+### 5. Nose and mouth (owner fixing Claude's, in the puppet) - `2026-11-04-01-22-18.jsonl`, `owner/mouth-fix.svg`, `owner/nose-fix.svg`
+- **The mouth is one continuous outline,** with 18 points for the stem and both curves. Claude had made it as three overlapping 8-point
+  strokes. He deleted those and redrew it as one shape, then refined it for about 10 minutes. A part made of joined lines is drawn as
+  a single outline round the whole thing, not as pieces laid over each other.
+- **The nose kept its 4 points.** He only moved it to sit right.
+- **Not his intent, Studio's fault:** the nose came out cut off at the bottom. An edit that went past the SVG's box was clipped,
+  because Claude had sized each part's box to the shape plus 2 px. Studio now grows the box on every kept edit, in
+  `src/renderer/src/shapes.ts`, `growToFit`. The layer's size and position move with it, so nothing shifts on screen.
+- **His mouth is `#3a2a22`,** the pen's default brown, not the `#393a36` dark of the other parts. Ask before treating that as a choice.
+
 ## Scores (lesson_check.py, 4 Nov 2026)
 
 | lesson | differs from the owner's | seen against the backdrop |

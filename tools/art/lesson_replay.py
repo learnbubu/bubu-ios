@@ -37,13 +37,15 @@ def outline(d, place, box):
 
 
 # the shapes on each layer, step by step
-state, frames = {}, []
+state, frames, places = {}, [], {}
 for l in lines:
     if l["kind"] == "note":
         print(f"  {l['t'] / 1000:6.1f}s  NOTE: {l['text']}")
     if l["kind"] != "shapes":
         continue
     shapes = state.setdefault(l["layer"], [])
+    # (each layer has its own place and box: a frame draws every layer at its own)
+    places[l["layer"]] = (l["place"], l["svgBox"])
     for a in l.get("added", []):
         shapes.insert(a["index"], a["d"])
     for c in l.get("changed", []):
@@ -52,21 +54,21 @@ for l in lines:
             shapes.append(None)
         if shapes[c["index"]] is None:
             shapes[c["index"]] = c["from"]["d"]
-            frames.append((l["t"], "as it was", l["layer"], {k: list(v) for k, v in state.items()}, l["place"], l["svgBox"]))
+            frames.append((l["t"], "as it was", l["layer"], {k: list(v) for k, v in state.items()}, dict(places)))
         shapes[c["index"]] = c["to"]["d"]
     if l.get("was") and len(shapes) < l["count"]:
         shapes.extend([None] * (l["count"] - len(shapes)))
     for r in l.get("removed", []):
         if r["d"] in shapes:
             shapes.remove(r["d"])
-    frames.append((l["t"], l["after"], l["layer"], {k: list(v) for k, v in state.items()}, l["place"], l["svgBox"]))
+    frames.append((l["t"], l["after"], l["layer"], {k: list(v) for k, v in state.items()}, dict(places)))
     print(f"  {l['t'] / 1000:6.1f}s  {l['after']:<18} {l['layer']}: {len(shapes)} shapes")
 
 if not frames:
     sys.exit("no shape steps in this recording")
 pick = sorted({round(i * (len(frames) - 1) / max(1, want - 1)) for i in range(want)})
 # the part's area: everything drawn, with a margin
-allp = [p for f in frames for ds in f[3].values() for d in ds if d for p in outline(d, f[4], f[5])[0]]
+allp = [p for f in frames for ly, ds in f[3].items() for d in ds if d for p in outline(d, *f[4][ly])[0]]
 x0, y0 = max(0, min(p[0] for p in allp) - 40), max(0, min(p[1] for p in allp) - 40)
 x1, y1 = min(S, max(p[0] for p in allp) + 40), min(S, max(p[1] for p in allp) + 40)
 model = Image.open("out/raw/rm-rest-a-happy.png").convert("RGBA").resize((S, S))
@@ -75,14 +77,14 @@ th = round(tw * (y1 - y0) / (x1 - x0))
 cols = 4
 sheet = Image.new("RGB", (cols * tw, ((len(pick) + cols - 1) // cols) * (th + 22)), (255, 255, 255))
 for k, i in enumerate(pick):
-    t, what, layer, st, place, box = frames[i]
+    t, what, layer, st, pl = frames[i]
     ov = Image.new("RGBA", (S, S))
     d = ImageDraw.Draw(ov)
-    for ds in st.values():
+    for ly, ds in st.items():
         for path in ds:
             if not path:
                 continue
-            pts, anc = outline(path, place, box)
+            pts, anc = outline(path, *pl[ly])
             d.polygon(pts, fill=(0, 160, 255, 80))
             d.line(pts + [pts[0]], fill=(0, 90, 255, 255), width=3)
             for a in anc:
