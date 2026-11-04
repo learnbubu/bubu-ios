@@ -88,6 +88,23 @@ lesson improves on the last and none is ever lost.
 - Mirrored to strapR with `mirror_fix.py`. It sits on the drawing as well as his does: 250 px of red off the drawing and 53 px
   missing, against his 235 and 140.
 
+### 9. Hair (owner, his own head) - `2026-11-04-02-13-19.jsonl`, `owner/head-fix.svg`
+- He moved one point of the tuft. The tuft is his own, from lesson 1.
+
+### 10. Screen-right leg (owner fixing Claude's, in the puppet) - `2026-11-04-02-14-18.jsonl`, `owner/leg-r-fix-2.svg`
+- **One point added at the top front of the foot,** making 12. The front of the foot rises from the leg in its own rounded bump,
+  not one long curve down to the toe.
+- The rest was small moves along the outer edge and the sole, about a minute's work.
+- Mirrored to legL with `mirror_fix.py legR legL --turn`. Overlap where it shows: 0.992, his 0.988.
+  - It's lined up using only what shows. Using the whole shape, the hidden cap pulled it 2 px off.
+  - The legs aren't exact mirrors in the drawing, so it also took a 1 degree turn about the hip.
+
+### 11. Screen-left arm (owner fixing Claude's, in the puppet) - `2026-11-04-02-16-13.jsonl`, `owner/arm-l-fix.svg`
+- **Still 8 points.** He tried a ninth and took it out.
+- **The hidden shoulder cap is rounder and fuller under the head.**
+- **The inner edge by the strap sits on the drawing's edge where it shows,** then runs on smoothly under the strap.
+- Mirrored to armR with `--turn`: 0.5 degrees about the shoulder. Overlap where it shows: 0.991, his 0.988.
+
 ## Scores (lesson_check.py, 4 Nov 2026)
 
 | lesson | differs from the owner's | seen against the backdrop |

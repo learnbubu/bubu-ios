@@ -2,7 +2,8 @@
 onto that side's drawing, never refitted (lesson 6: he shapes parts to look right, so a refit would undo him). It writes the other
 layer's new SVG and points that layer at it. Save Studio first, then reload it without saving afterwards.
 
-From tools/art: ../sfx/.venv/Scripts/python -I mirror_fix.py <fixed layer> <other layer> [doc]
+From tools/art: ../sfx/.venv/Scripts/python -I mirror_fix.py <fixed layer> <other layer> [doc] [--turn]
+(--turn for limbs: also tries a small turn about the other layer's pivot)
 """
 import json
 import os
@@ -15,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # (run with -I,
 import lesson_fit as F  # noqa: E402
 
 src, dst = sys.argv[1], sys.argv[2]
-DOC = sys.argv[3] if len(sys.argv) > 3 else "bubu-puppet-front"
+DOC = next((a for a in sys.argv[3:] if not a.startswith("--")), "bubu-puppet-front")
 MID = 626.5                      # the drawing's middle: the eyes, brows, cheeks and patches pair about it
 A = f"{F.ROOT}/art/{DOC}/"
 path = f"{F.ROOT}/docs/{DOC}.json"
@@ -69,15 +70,43 @@ def drawn_under(l):
     return (cc == labels[np.argmax(counts)]).astype(np.uint8)
 
 
-iou = lambda a, b: float((a & b).sum() / max(1, (a | b).sum()))
+# (judged only where the part can be seen: its own colour in the drawing, or the backdrop round it; under the belly or head its
+# hidden cap is free to differ (the leg fix, 4 Nov 2026: lined up on the whole shape, the hidden cap pulled the leg 2 px off))
+seen = None
+
+
+def iou(a, b):
+    a, b = a & seen, b & seen
+    return float((a & b).sum() / max(1, (a | b).sum()))
+
+
 fixed = shapes_in_doc(L[src])
 mirrored = [(f, np.c_[2 * MID - p[:, 0], p[:, 1]]) for f, p in fixed]
 target = drawn_under(L[dst])
-his = iou(raster(fixed), drawn_under(L[src]))
-best = max(((iou(raster([(f, p + [dx, dy]) for f, p in mirrored]), target), dx, dy)
-            for dx in np.arange(-6, 6.5, 0.5) for dy in np.arange(-6, 6.5, 0.5)))
-print(f"his {src} on its drawing: overlap {his:.3f}; mirrored onto {dst}: {best[0]:.3f} after a nudge of ({best[1]}, {best[2]})")
-moved = [(f, p + [best[1], best[2]]) for f, p in mirrored]
+seen = target | F.colour("magenta")
+his_target = drawn_under(L[src])
+saved, seen = seen, his_target | F.colour("magenta")
+his = iou(raster(fixed), his_target)
+seen = saved
+# a limb may also hang at a slightly different angle on the other side (lesson 4: the right arm does): a small turn about the
+# other layer's pivot (its shoulder or hip) is tried too, coarse then fine
+pv = np.array([L[dst]["pivot"]["x"], L[dst]["pivot"]["y"]])
+
+
+def placed(dx, dy, deg):
+    a = np.radians(deg)
+    R = np.array([[np.cos(a), -np.sin(a)], [np.sin(a), np.cos(a)]])
+    return [(f, (p - pv) @ R.T + pv + [dx, dy]) for f, p in mirrored]
+
+
+turns = np.arange(-6, 6.5, 1.0) if "--turn" in sys.argv else [0.0]
+coarse = max(((iou(raster(placed(dx, dy, a)), target), dx, dy, a) for a in turns
+              for dx in np.arange(-10, 11, 2.0) for dy in np.arange(-10, 11, 2.0)))
+best = max(((iou(raster(placed(coarse[1] + dx, coarse[2] + dy, coarse[3] + a)), target), coarse[1] + dx, coarse[2] + dy, coarse[3] + a)
+            for a in ((-0.5, 0, 0.5) if "--turn" in sys.argv else (0,)) for dx in np.arange(-1.5, 2, 0.5) for dy in np.arange(-1.5, 2, 0.5)))
+print(f"his {src} on its drawing: overlap {his:.3f}; mirrored onto {dst}: {best[0]:.3f} after a nudge of ({best[1]}, {best[2]})"
+      + (f" and a turn of {best[3]} degrees" if "--turn" in sys.argv else ""))
+moved = placed(best[1], best[2], best[3])
 allp = np.concatenate([p for _, p in moved])
 x0, y0 = np.floor(allp.min(0)) - 3
 x1, y1 = np.ceil(allp.max(0)) + 3

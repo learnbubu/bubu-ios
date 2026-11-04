@@ -176,5 +176,66 @@
    "hidden parts must be as clean as seen ones: part_kinks.py now lists every sharp turn in a document's parts (only the tuft's spikes, meant, are left)"
   ],
   "applied": "strapR = his strap mirrored (mirror_fix.py), nudged 2 px left: red off the drawing 250/53 px against his 235/140"
+ },
+ {
+  "id": "hair-fix",
+  "date": "2026-11-04",
+  "recording": "2026-11-04-02-13-19.jsonl",
+  "by": "owner, his own head",
+  "part": "tuft",
+  "owner": "head-fix.svg",
+  "claude": null,
+  "box": [
+   540,
+   40,
+   740,
+   130
+  ],
+  "learnt": [
+   "one point of the tuft moved: his own lesson-1 drawing, tidied"
+  ]
+ },
+ {
+  "id": "leg-r-fix-2",
+  "date": "2026-11-04",
+  "recording": "2026-11-04-02-14-18.jsonl",
+  "by": "owner fixing Claude",
+  "part": "screen-right leg in the puppet",
+  "owner": "leg-r-fix-2.svg",
+  "claude": null,
+  "before": "leg-r-claude-before-2.svg",
+  "box": [
+   620,
+   880,
+   920,
+   1230
+  ],
+  "learnt": [
+   "one point added at the top front of the foot: the foot's front rises in its own rounded bump from the leg, not one long curve down to the toe",
+   "the rest was small moves along the outer edge and sole, about a minute"
+  ],
+  "applied": "legL = his leg mirrored with a 1 degree turn about the hip and a (-3, -2) nudge: overlap 0.992 where it shows (his 0.988)"
+ },
+ {
+  "id": "arm-l-fix",
+  "date": "2026-11-04",
+  "recording": "2026-11-04-02-16-13.jsonl",
+  "by": "owner fixing Claude",
+  "part": "screen-left arm in the puppet",
+  "owner": "arm-l-fix.svg",
+  "claude": null,
+  "before": "arm-l-claude-before.svg",
+  "box": [
+   200,
+   540,
+   500,
+   900
+  ],
+  "learnt": [
+   "kept 8 points (tried a ninth and took it out)",
+   "the hidden shoulder cap made rounder and fuller under the head",
+   "the inner edge by the strap brought onto the drawing's edge where it shows, then running on smoothly under the strap"
+  ],
+  "applied": "armR = his arm mirrored with a 0.5 degree turn about the shoulder and a (-3.5, 0.5) nudge: overlap 0.991 where it shows (his 0.988)"
  }
 ]
