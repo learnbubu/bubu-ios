@@ -133,5 +133,26 @@
    "a pair the owner fixes one of: mirror his fix about the face's middle (x 626.5) and nudge it onto the other side's drawing; don't refit it"
   ],
   "applied": "eyeR = his eye mirrored, shifted 0.5 px: overlap with the drawn right eye 0.836 (his on the left: 0.825)"
+ },
+ {
+  "id": "brow-l-fix",
+  "date": "2026-11-04",
+  "recording": "2026-11-04-02-06-33.jsonl",
+  "by": "owner fixing Claude",
+  "part": "left brow in bubu-puppet-front",
+  "owner": "brow-l-fix.svg",
+  "claude": null,
+  "before": "brow-l-claude-before.svg",
+  "box": [
+   460,
+   205,
+   530,
+   255
+  ],
+  "learnt": [
+   "same 8 points; the end by the middle of the face reshaped into a rounder, fuller tip (as with the eye's ends)",
+   "about 80 s, points only moved"
+  ],
+  "applied": "browR = his brow mirrored (mirror_fix.py), nudged 0.5 px up: overlap 0.871 with the drawn right brow (his on the left: 0.879)"
  }
 ]

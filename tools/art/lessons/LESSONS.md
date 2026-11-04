@@ -70,6 +70,13 @@ lesson improves on the last and none is ever lost.
   don't refit it. Done for eyeR: his eye mirrored, shifted 0.5 px, overlap 0.836 with the drawn right eye.
 - He made the mouth the same dark (`#393a36`) as the rest himself, so lesson 5's brown was not a choice.
 
+### 7. Left brow (owner fixing Claude's, in the puppet) - `2026-11-04-02-06-33.jsonl`, `owner/brow-l-fix.svg`
+- **Same 8 points;** only the end nearest the middle of the face was reshaped, into a rounder, fuller tip. That makes two parts now
+  where his stroke ends are fuller than Claude's: the eye and the brow. Claude's stroke ends (lesson 3's toe-line rule) are too thin
+  and pinched.
+- He mirrored it to browR with `mirror_fix.py <fixed> <other>`. That's lesson 6's rule as a tool: save Studio, run it, reload without
+  saving. Overlap 0.871 with the drawn right brow; his on the left is 0.879.
+
 ## Scores (lesson_check.py, 4 Nov 2026)
 
 | lesson | differs from the owner's | seen against the backdrop |
