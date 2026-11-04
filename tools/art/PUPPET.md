@@ -157,7 +157,27 @@ afterwards.
   - **The owner: "super crunchy and unsmooth"** on the inside of the bend and the outside of the elbow. The cause is Studio's
     skinning: a square grid over a bitmap, blended linearly, so the squeezed inside folds. A finer grid helps the outside but
     can't fix the cause.
-- **Next: a Puppet tool in Studio,** like After Effects' and Photoshop's (owner, 4 Nov):
+- **Built (4 Nov): Studio's Puppet tool** (Shift+P, under Warp/Pin). Click a layer to stick a pin in, drag a pin to bend it,
+  Alt+click to take one out. Pins key like any value: a key at the playhead when animated or auto-key is on.
+  - Code: `src/shared/puppet.ts` (mesh and solver), `src/renderer/src/puppetMesh.ts`, `src/renderer/src/puppetTool.ts`, hooked into
+    `scene.ts`, `skeleton.ts` (warpedLocal), `model.ts` (Layer.puppet) and `CanvasPanel.tsx`.
+  - Tests: `tests/unit/puppet.test.ts` (no fold in a 90 degree bend; same frame every time) and `tests/e2e/puppet.cjs` (hidden).
+    All of Studio's tests pass. Left uncommitted for the owner.
+  - How it works:
+    - A triangle mesh fitted inside the SVG's outline, with a point under every pin.
+    - An as-rigid-as-possible solve: a rigid moving-least-squares first guess, then 120 local/global rounds.
+    - A banded Cholesky (points ordered along the part's long way): about 15 ms a solve.
+    - Pins hold firmly, not absolutely (`HOLD` 30), so the drawing round a pin doesn't pinch.
+  - Learnt on the arm:
+    - Keep pins few, and none at the elbow: a pin there made a corner.
+    - No pin on a toe line: the drawing under a pin pinches a little.
+    - Keep each section's length when placing raised pins: stretched, the paw broke its toe lines.
+  - The test wave is on 3 pins (shoulder, upper arm, wrist), via `puppet_test_pins.py`. Clip: `puppet-test-pins.mp4`. It covers 50%
+    of the sketch; the bones' version covered 68% only by sliding the arm 35 px out, which can be added.
+  - A small notch on the outer edge at the wrist is the drawing: the paw is wider than the forearm on that side.
+  - **Not yet:** the app's native avatar export (`appExport.ts`) only takes bone-bound parts. Video and moments exports draw
+    puppets.
+- **Was next (done above): a Puppet tool in Studio,** like After Effects' and Photoshop's (owner, 4 Nov):
   - a triangle mesh fitted inside the part's outline
   - pins placed and keyed
   - an as-rigid-as-possible solve each frame (Igarashi et al. 2005), so a bend squashes evenly instead of folding
