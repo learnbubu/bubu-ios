@@ -11,6 +11,8 @@ import copy
 import json
 import os
 import shutil
+import subprocess
+import sys
 
 ROOT = "C:/Users/domch/Documents/Projects/bubu-studio/projects/bubu"
 SRC, DOC = "bubu-puppet-front", "puppet-test"
@@ -28,6 +30,11 @@ for l in doc["layers"]:
     if l.get("art"):
         shutil.copy(f"{ROOT}/art/{SRC}/{l['art']}", f"{ROOT}/art/{DOC}/{l['art']}")
     layers.append(l)
+# the ears' hinges (puppet_elbow.py --ears) go on the copy before its keys; the limbs bend on bones, added in Studio after
+json.dump({"id": DOC, "name": "Puppet Test", "width": doc["width"], "height": doc["height"], "duration": END, "loop": True,
+           "layers": layers, "bones": [], "background": [247, 243, 236, 1]}, open(f"{ROOT}/docs/{DOC}.json", "w", encoding="utf-8"), ensure_ascii=False)
+subprocess.run([sys.executable, "-I", "puppet_elbow.py", DOC, "--ears"], check=True)
+layers = json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))["layers"]
 L = {l["id"]: l for l in layers}
 
 
@@ -48,13 +55,7 @@ key("earL", "rotation", [(0, 0, HOLD), (600, 0, OUT), (680, -14, SOFT), (800, 5,
                          (3250, 0, SOFT), (3650, 7, SOFT), (3850, -2, SOFT), (END, 0, HOLD)])
 key("earR", "rotation", [(0, 0, HOLD), (1550, 0, SOFT), (1950, -8, SOFT), (2150, 4, SOFT), (2350, 0, HOLD),
                          (3250, 0, SOFT), (3650, 8, SOFT), (3850, -2, SOFT), (END, 0, HOLD)])
-# the wave (his left arm, on our right: up is a negative turn)
-# (past about -100 the paw goes behind the head and is lost: the wave stays between -78 and -96)
-key("armR", "rotation", [(0, 0, HOLD), (1200, 0, SOFT), (1400, 6, OUT),           # a little dip first
-                         (1750, -92, SOFT),                                       # up
-                         (2000, -78, SOFT), (2250, -96, SOFT), (2500, -78, SOFT), (2750, -96, SOFT),
-                         (3000, -88, IN),                                         # and down, gathering speed
-                         (3350, 5, SOFT), (3550, -2, SOFT), (3750, 0, HOLD)])      # past rest, and settle
+# the wave is keyed on the arm's bones (Spine-style: the owner, 4 Nov 2026), in Studio
 key("head", "rotation", [(0, 0, HOLD), (1500, 0, SOFT), (1900, 5, SOFT), (3200, 5, SOFT), (3600, 0, HOLD)])
 key("torso", "rotation", [(0, 0, HOLD), (1500, 0, SOFT), (1900, -2, SOFT), (3200, -2, SOFT), (3600, 0, HOLD)])
 
