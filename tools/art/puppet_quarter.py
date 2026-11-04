@@ -287,8 +287,10 @@ for nm, lid, bx in (("qArmL", "armL", (270, 600, 470, 880)), ("qArmR", "armR", (
 # (a part the owner has edited in Studio is his: kept as he left it, never rebuilt. Studio names an edited part's file after the edit,
 # so any three-quarter layer whose art isn't the plain q*.svg written here is his; lesson 12's straps were the first)
 OLD = {l["id"]: l for l in json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))["layers"]} if os.path.exists(f"{ROOT}/docs/{DOC}.json") else {}
+# (and a part he has looked at and said is good, unchanged: kept as it is too, never re-cut. 4 Nov 2026: "brows are good")
+APPROVED = {"qBrowL"}
 for nm in P:
-    if nm in OLD and OLD[nm].get("art") not in (None, f"{nm}.svg"):
+    if nm in OLD and (OLD[nm].get("art") not in (None, f"{nm}.svg") or nm in APPROVED):
         P[nm]["shapes"] = T.shapes_of(DOC, nm)
         P[nm]["his"] = OLD[nm]
         print(f"  {nm}: the owner's ({OLD[nm]['art']}), kept")

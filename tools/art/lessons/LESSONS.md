@@ -237,6 +237,10 @@ what's hidden he followed Codex's shapes closely. So **hidden parts are drawn fr
   - 24 of 58 steps changed only handles, and 31 of 34 point moves ended on the drawn edge.
   - The nose took 19 s and the cheek 17 s.
 
+**Approved as they are** (the owner looked and said they were good, unchanged):
+- the three-quarter's near brow, Claude's carry-over of his front brow (4 Nov 2026: "brows are good")
+- they're kept, and never re-cut (`APPROVED` in puppet_quarter.py)
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut

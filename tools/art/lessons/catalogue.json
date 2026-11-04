@@ -439,5 +439,17 @@
    "mouth: near end first, round to the far curve; the far end revisited most (sub-pixel moves) as that is where the turn reads; stem last with bigger moves; 24 of 58 steps handles only"
   ],
   "applied": "kept as his"
+ },
+ {
+  "id": "q-brow-l-approved",
+  "date": "2026-11-04",
+  "by": "owner approving Claude",
+  "part": "three-quarter near brow (qBrowL), in puppet-views",
+  "owner": null,
+  "claude": "qBrowL.svg",
+  "learnt": [
+   "approved unchanged: his front brow carried over by owner_transfer (moved, turned, sized, his proportions kept, not refitted) was right for the near side"
+  ],
+  "applied": "kept; APPROVED in puppet_quarter.py"
  }
 ]
