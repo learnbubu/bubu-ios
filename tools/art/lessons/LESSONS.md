@@ -17,7 +17,9 @@ lesson improves on the last and none is ever lost.
    - put the rule into `lesson_fit.py`, with a comment naming the lesson
    - run `lesson_check.py`. It re-cuts every part and scores each against the owner's. A rule that makes an older lesson worse is
      flagged, and gets fixed rather than accepted. `--save` keeps the new best scores in `scores.json`.
-4. **Never edit the owner's layers.** Claude's attempts go in as new layers named "(Claude)".
+4. **Check every part for spikes, hidden ones too:** run `part_kinks.py [doc]`. A sharp turn that isn't meant, like the tuft's, gets
+   fixed before the owner sees the part (lesson 8).
+5. **Never edit the owner's layers.** Claude's attempts go in as new layers named "(Claude)".
 
 ## The lessons
 
@@ -76,6 +78,15 @@ lesson improves on the last and none is ever lost.
   and pinched.
 - He mirrored it to browR with `mirror_fix.py <fixed> <other>`. That's lesson 6's rule as a tool: save Studio, run it, reload without
   saving. Overlap 0.871 with the drawn right brow; his on the left is 0.879.
+
+### 8. Screen-left strap (owner fixing Claude's, in the puppet) - `2026-11-04-02-10-11.jsonl`, `owner/strap-l-fix.svg`
+- **Claude's strap had a spike on its hidden bottom end and a pointed flag on its hidden top end.** Both were covered at rest, so
+  nothing flagged them, but they'd show as soon as the strap moved. He rounded both into clean round caps in under 30 s, keeping the
+  same 8 points.
+- **Hidden parts must be as clean as the parts that show.** `part_kinks.py` now lists every sharp turn in a document's parts. It finds
+  both of the old strap's spikes, and on the puppet now it finds only the tuft's, which are meant.
+- Mirrored to strapR with `mirror_fix.py`. It sits on the drawing as well as his does: 250 px of red off the drawing and 53 px
+  missing, against his 235 and 140.
 
 ## Scores (lesson_check.py, 4 Nov 2026)
 

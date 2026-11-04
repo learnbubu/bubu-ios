@@ -154,5 +154,27 @@
    "about 80 s, points only moved"
   ],
   "applied": "browR = his brow mirrored (mirror_fix.py), nudged 0.5 px up: overlap 0.871 with the drawn right brow (his on the left: 0.879)"
+ },
+ {
+  "id": "strap-l-fix",
+  "date": "2026-11-04",
+  "recording": "2026-11-04-02-10-11.jsonl",
+  "by": "owner fixing Claude",
+  "part": "screen-left strap in bubu-puppet-front",
+  "owner": "strap-l-fix.svg",
+  "claude": null,
+  "before": "strap-l-claude-before.svg",
+  "box": [
+   370,
+   560,
+   540,
+   900
+  ],
+  "learnt": [
+   "Claude's strap had a spike on its hidden bottom end and a pointed flag on its hidden top end: hidden at rest, they'd show the moment it moves",
+   "he rounded both hidden ends into clean round caps, same 8 points, in under 30 s",
+   "hidden parts must be as clean as seen ones: part_kinks.py now lists every sharp turn in a document's parts (only the tuft's spikes, meant, are left)"
+  ],
+  "applied": "strapR = his strap mirrored (mirror_fix.py), nudged 2 px left: red off the drawing 250/53 px against his 235/140"
  }
 ]
