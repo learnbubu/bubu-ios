@@ -177,10 +177,13 @@ The straps didn't carry over well from the front. The owner fixed the three-quar
 
 A part he has edited is never rebuilt.
 
-**Over and under at once** (the owner's question after lesson 13: "the top of the arm should be under the strap, but the bottom should
-be over"):
-- One layer can't be both, so `strap_over.py` adds a copy of his strap just above the arm, masked to the part over the shoulder.
-- The copy shows only where nothing changes at rest: under the head, or where the strap already shows beside the arm. It changed 0
-  pixels at rest.
-- The copy uses his strap's file. If he edits the strap again, re-run it.
+**Over and under at once** (after lesson 13). The owner: "upper arm under strap, bottom part over", and "look at the ref":
+- In the drawing the strap lies over the whole upper arm, its own edge showing, and only the paw comes over it at the bottom.
+- `strap_over.py` adds a copy of his strap just above the arm, masked to leave out the paw: the arm below y 770. His strap stays under
+  the arm.
+- Claude first masked it to only the shoulder, so as to change nothing at rest. That was wrong: the drawing is the authority, and it
+  shows the strap over the arm.
+- **Studio's mask handles are positions in the layer, not offsets.** Zero handles pull every curve to the corner and the mask shows
+  nothing.
+- The copy uses his strap's file: if he edits the strap, re-run it.
 
