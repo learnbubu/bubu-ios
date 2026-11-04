@@ -207,6 +207,20 @@ what's hidden he followed Codex's shapes closely. So **hidden parts are drawn fr
 6. **Hidden parts are generous:** caps high and round, ends tucked well under, shaped from a picture of what's really there
    (lesson 13).
 
+### 17. Three-quarter far eye and brow (owner fixing Claude's, in puppet-views) - `2026-11-04-10-56-01.jsonl`, `owner/q-eye-r-fix.svg`, `owner/q-brow-r-fix.svg`; how he worked: `out/lessons/2026-11-04-10-56-01-process.json`
+- **Both kept 8 points.**
+- **The far eye's arc is fuller and more peaked,** like the drawn far eye, with round ends as thick as the near eye's. The **far brow is
+  thicker** too. He also picked the eye's colour from the drawing (`#fdf6e4`).
+- **Why Claude's were wrong:** they were his front eye and brow carried over, kept to his proportions and shrunk to the far side's size
+  (about half). That shrank their thickness too. **Turned away, a feature gets shorter, not thinner:** a line drawn with the same pen
+  keeps its width. Carry a far-side stroke over at the near side's thickness and shorten only its length.
+- **How he worked:**
+  - The eye took 70 s. Nearly half the steps (17 of 37) changed only handles. Every point move was 2 to 3 px and landed on the drawn
+    edge.
+  - He went round the points in order, then came back to the ones that still looked off (5, 6, 4 again at the end).
+  - The brow took 30 s, the same way.
+  - For small strokes he works mostly with the handles.
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut

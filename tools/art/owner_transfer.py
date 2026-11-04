@@ -9,6 +9,9 @@ leg), where his points sit, his handles, his fuller stroke ends, his round hidde
 - Then, only for parts the turn changes beyond a slant, each point he placed on the seen edge moves a little (with its handles, which
   keep his angles and lengths) to sit on the drawing; neighbours move together, so nothing goes lumpy. Hidden points stay where his
   shape puts them. Eyes and brows skip this step (lesson 6: he shapes them to look right, so a refit would undo him).
+- Lesson 17: a stroke on the far side, turned away, gets shorter, not thinner. `similar` sizing shrinks its thickness with its length
+  (the far eye and brow came out half as thick), so for a far-side stroke pass `keep_width` with the near one's thickness. Not done
+  yet: until then, expect the owner to thicken them.
 
 A shape here is {"raw": array of control points}: M p0, then C c1 c2 p for each segment, closing on p0.
 """

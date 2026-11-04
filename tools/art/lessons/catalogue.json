@@ -384,5 +384,31 @@
    "his method generally: biggest error first; then round the outline in order; overshoot and correct by eye; handles for curves; as few points as hold the shape; hidden parts generous"
   ],
   "applied": "kept as his"
+ },
+ {
+  "id": "q-far-eye-brow-fix",
+  "date": "2026-11-04",
+  "recording": [
+   "2026-11-04-10-56-01.jsonl"
+  ],
+  "by": "owner fixing Claude",
+  "part": "three-quarter far eye and brow, in puppet-views",
+  "model": "out/raw/rm-rest-quarter.png",
+  "owner": {
+   "eye-r": "q-eye-r-fix.svg",
+   "brow-r": "q-brow-r-fix.svg"
+  },
+  "before": {
+   "eye-r": "q-eye-r-claude-before.svg",
+   "brow-r": "q-brow-r-claude-before.svg"
+  },
+  "process": "out/lessons/2026-11-04-10-56-01-process.json",
+  "learnt": [
+   "8 points each",
+   "far eye fuller and more peaked like the drawing, round ends as thick as the near eye; far brow thicker; eye colour picked (#fdf6e4)",
+   "turned away, a feature gets shorter, not thinner: carry a far-side stroke over at the near side thickness, shortening only its length",
+   "small strokes: mostly handles (17 of 37 steps on the eye), point moves 2-3 px all onto the drawn edge; round the points in order, then back to the ones still off"
+  ],
+  "applied": "kept as his; owner_transfer to keep stroke thickness for far-side features"
  }
 ]
