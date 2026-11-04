@@ -132,6 +132,28 @@ Most of what's left is in the hidden caps, which nobody sees at rest.
   carrying on where the thing really goes.
 - Replayed over the three-quarter model with `lesson_replay.py <file> 16 --model out/raw/rm-rest-quarter.png`.
 
+### 13. Three-quarter straps, backpack, belly and torso (owner, in puppet-views, three recordings) - `2026-11-04-10-15-36.jsonl` (straps, backpack, belly, about 5 min), `2026-11-04-10-22-03.jsonl` (torso), `2026-11-04-10-23-42.jsonl` (near strap touch-ups); `owner/q-*-fix*.svg`
+He drew with the drawing and Codex's two pictures behind him (the view without the near arm, and without the head and near arm). For
+what's hidden he followed Codex's shapes closely. So **hidden parts are drawn from a picture of what's really underneath, not guessed.**
+- **Straps go up over the shoulders to the back.**
+  - The near strap went from 8 to 10 points: two new ones at the top carry it over the shoulder and down towards the backpack's top.
+    Its bottom end moved down into the bag's bottom.
+  - The far strap went from 8 to 9 points, also on over its shoulder towards the back.
+  - The far ends, hidden under the head, fold back in a narrow tip. `part_kinks.py` flags them (122 and 153 degrees). Asked about
+    rather than changed.
+- **The backpack** went from 6 to 7 points, traced round Codex's whole bag: its top under the near strap's top, its bottom under the
+  strap's end.
+- **The belly went from 4 points to 9,** onto the drawn belly exactly, with its colour picked from the drawing (`#fef9e3`, not
+  `#fef8e8`).
+  - Its left side runs up to a corner where it meets the near strap (73 degrees, drawn).
+  - Claude's 4-point oval was the round-pieces rule used on a shape that isn't an oval. **Points at the extremes only suits a part that
+    really is round:** the belly in this view isn't.
+- **The torso kept its 8 points, reshaped.**
+  - Its top follows the shoulders' rounded line, from Codex's no-head picture.
+  - Its left side goes out to the backpack.
+  - It has no box corners: Claude's was a convex hull, square on top and straight down the sides.
+- **Order of work:** near strap, backpack, far strap, belly, then the torso in its own recording, then touch-ups to the near strap.
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut
@@ -149,3 +171,8 @@ point count, handles, stroke ends and hidden caps:
 - the legs, both from his right leg (lessons 3 and 10)
 
 The straps didn't carry over well from the front. The owner fixed the three-quarter's himself (lesson 12), and his are kept.
+
+**To see what's hidden, ask Codex** for the view with the covering parts taken away. The owner's idea; `out/codex/quarter-no-arm` and
+`quarter-no-head` are the first. Show them to him as reference layers, switched off. Lesson 13 was drawn over them.
+
+A part he has edited is never rebuilt.

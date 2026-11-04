@@ -4,7 +4,8 @@ we want it all in one rig". So the parts go into one rig with the front: the Stu
 (the owner's playground stays his), each view under its own root, switched by the Turn control.
 - Ears: a round shape each, drawn whole behind the head (lesson 7). Head: one shape with its tuft (lesson 1), more points only at
   the tuft's corners.
-- Round pieces (patches, cheeks, nose, belly, backpack): 4 points at the extremes in their own frame, handles along the edge.
+- Round pieces (patches, cheeks, nose): 4 points at the extremes in their own frame, handles along the edge. Only for parts that
+  really are round (lesson 13: the belly in this view isn't; the owner gave it 9 points on its drawn outline).
 - Strokes (eyes, brows, mouth, straps): 8-point rounded strokes bent along the drawn line (lesson 3's toe lines).
 - Limbs: lesson_fit's limb (8 points in the limb's own frame, a round cap hidden past where it goes under), toe lines their own
   little shapes in the same layer.

@@ -267,5 +267,45 @@
    "his note: extend enough that it stays covered when things move - the strap's top may need more under the head, which tilts"
   ],
   "applied": "kept as his in puppet-views; puppet_quarter.py now keeps any three-quarter part he has edited"
+ },
+ {
+  "id": "q-back-fix",
+  "date": "2026-11-04",
+  "recording": [
+   "2026-11-04-10-15-36.jsonl",
+   "2026-11-04-10-22-03.jsonl",
+   "2026-11-04-10-23-42.jsonl"
+  ],
+  "by": "owner fixing Claude",
+  "part": "three-quarter straps, backpack, belly and torso, in puppet-views",
+  "model": "out/raw/rm-rest-quarter.png",
+  "refs": [
+   "out/codex/quarter-no-arm/no-arm.png",
+   "out/codex/quarter-no-head/no-head.png"
+  ],
+  "owner": {
+   "strap-l": "q-strap-l-fix-2.svg",
+   "strap-r": "q-strap-r-fix-2.svg",
+   "pack": "q-pack-fix.svg",
+   "belly": "q-belly-fix.svg",
+   "torso": "q-torso-fix.svg"
+  },
+  "before": {
+   "strap-l": "q-strap-l-fix.svg",
+   "strap-r": "q-strap-r-fix.svg",
+   "pack": "q-pack-claude-before.svg",
+   "belly": "q-belly-claude-before.svg",
+   "torso": "q-torso-claude-before.svg"
+  },
+  "learnt": [
+   "hidden parts drawn over a picture of what is really underneath (Codex with the covering parts taken away), followed closely",
+   "straps go up over the shoulders to the back: near 8 -> 10 points, far 8 -> 9; their far ends fold back in a narrow tip under the head (flagged by part_kinks, asked about)",
+   "the near strap's bottom end moved down into the bag's bottom",
+   "backpack 6 -> 7 points, round Codex's whole bag, top under the strap's top, bottom under its end",
+   "belly 4 -> 9 points onto the drawn belly, colour picked from the drawing (#fef9e3); the extremes-only rule is for parts that really are round",
+   "torso kept 8 points: top along the rounded shoulder line, left side out to the backpack, no box corners (Claude used a convex hull)",
+   "order: near strap, backpack, far strap, belly; torso in its own recording; near strap touch-ups last"
+  ],
+  "applied": "kept as his in puppet-views; puppet_quarter.py keeps any part he has edited"
  }
 ]
