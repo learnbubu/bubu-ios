@@ -185,6 +185,12 @@ afterwards.
 - **Easier, no accidents (owner: "you can add pins and move stuff by accident"):** the Puppet tool has Move and Add modes in its
   bar. Move is the default: clicks off a pin put nothing in, and a pin moves only once dragged 4 px, so a click just picks it. Add
   mode, or Shift+click, puts a pin in without bending anything. The pin under the pointer grows and rings.
+- **Bones tool fixed (owner: "feels buggy moving bones and can't change rotation"):**
+  - A bone's middle now turns it; before, it only picked it.
+  - A tip or joint aims the bone, and the chain stays joined. Before, a bone that changed length left the next one 6 px off.
+  - Alt+drag from a tip adds the next bone. Before, a plain drag on the picked bone's tip did, and Alt aimed.
+  - A new bone on empty canvas is chained only if it starts at the picked bone's tip.
+  - On a posed frame, the tool says so and changes nothing.
 - **Fixed:** a render's first frame could show a puppet unbent, because its mesh wasn't made yet. Renders now wait for it.
 - **`puppet-test` is the owner's playground:** he added pins 4 and 5 and slid the others. At 1.9 s a thin spike hangs under that
   arm; it's unexplained, so ask what he did before calling it a bug.
