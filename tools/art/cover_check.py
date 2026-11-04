@@ -24,11 +24,16 @@ if d.get("turn"):
 L = {l["id"]: l for l in d["layers"]}
 B = {b["id"]: b for b in d.get("bones", [])}
 head, arm_l, arm_r = ("qHead", "qarmL4", "qarmR4") if q else ("head", "armL4", "armR4")
+face, torso, hips = ("qFace", "qTorso", "qHips") if q else ("face", "torso", "hips")
+leg_l, leg_r = ("qlegL4", "qlegR4") if q else ("legL4", "legR4")
 key = lambda v, t: {"t": t, "v": v, "ease": [0, 0, 1, 1]}
 # poses, a second each: rest; head tilted back; head tilted forward; near arm up; near arm out; far arm up; both up, head tilted;
-# the ears turned back; the ears turned forward
+# the ears turned back; the ears turned forward; then the rest of the rig, a control at a time: the face looking back, then forward
+# and up; the chest turned each way; the hips down (feet planted); each foot lifted; and all together
 POSES = [{}, {"head": -15}, {"head": 15}, {"armL": (-60, -230)}, {"armL": (-150, -60)}, {"armR": (60, -230)},
-         {"armL": (-60, -230), "armR": (60, -230), "head": -12}, {"ears": -20}, {"ears": 20}]
+         {"armL": (-60, -230), "armR": (60, -230), "head": -12}, {"ears": -20}, {"ears": 20},
+         {"face": (-30, 0)}, {"face": (25, -15)}, {"torso": -8}, {"torso": 8}, {"hips": (0, 30)}, {"legL": (40, -90)}, {"legR": (40, -90)},
+         {"hips": (-25, 20), "torso": 6, "head": -8, "face": (20, 5), "armL": (-40, -120), "legR": (30, -60)}]
 d["duration"] = len(POSES) * 1000
 d["work"] = [0, d["duration"]]
 for l in d["layers"]:
@@ -39,7 +44,16 @@ hl["keys"]["rotation"] = [key(p.get("head", 0), i * 1000) for i, p in enumerate(
 for e in (("qEarL", "qEarR") if q else ("earL", "earR")):
     if e in L:
         L[e]["keys"]["rotation"] = [key(p.get("ears", 0), i * 1000) for i, p in enumerate(POSES)]
-for side, bid in (("armL", arm_l), ("armR", arm_r)):
+# (the face look, the chest's turn and the hips' move: keyed on the controls' layers, as dragging the controls keys them)
+for lid, prop, val in ((face, "x", lambda p: p.get("face", (0, 0))[0]), (face, "y", lambda p: p.get("face", (0, 0))[1]),
+                       (torso, "rotation", lambda p: p.get("torso", 0)), (hips, "x", lambda p: p.get("hips", (0, 0))[0]),
+                       (hips, "y", lambda p: p.get("hips", (0, 0))[1])):
+    if lid in L:
+        base = L[lid].get(prop, 0)
+        L[lid]["keys"][prop] = [key(base + val(p), i * 1000) for i, p in enumerate(POSES)]
+for side, bid in (("armL", arm_l), ("armR", arm_r), ("legL", leg_l), ("legR", leg_r)):
+    if bid not in B or not B[bid].get("ik"):
+        continue                 # (the front's IK bones go by other names: only the three-quarter's are known here)
     ik = B[bid]["ik"]
     ik["keys"] = {"tx": [key(ik["tx"] + p.get(side, (0, 0))[0], i * 1000) for i, p in enumerate(POSES)],
                   "ty": [key(ik["ty"] + p.get(side, (0, 0))[1], i * 1000) for i, p in enumerate(POSES)]}

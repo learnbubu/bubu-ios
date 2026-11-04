@@ -288,7 +288,7 @@ for nm, lid, bx in (("qArmL", "armL", (270, 600, 470, 880)), ("qArmR", "armR", (
 # so any three-quarter layer whose art isn't the plain q*.svg written here is his; lesson 12's straps were the first)
 OLD = {l["id"]: l for l in json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))["layers"]} if os.path.exists(f"{ROOT}/docs/{DOC}.json") else {}
 # (and a part he has looked at and said is good, unchanged: kept as it is too, never re-cut. 4 Nov 2026: "brows are good")
-APPROVED = {"qBrowL"}
+APPROVED = {"qBrowL"} | set(P)   # (and then the rest: "rest is good", 4 Nov 2026; every three-quarter part is his or approved)
 for nm in P:
     if nm in OLD and (OLD[nm].get("art") not in (None, f"{nm}.svg") or nm in APPROVED):
         P[nm]["shapes"] = T.shapes_of(DOC, nm)

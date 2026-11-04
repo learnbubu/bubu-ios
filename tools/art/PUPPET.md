@@ -242,10 +242,18 @@ The owner: "think we need the other angles now... we want it all in one rig". To
   off the model). It has the same rig: four bones a limb, pins mid-bone, IK with mitten and paw-print controls, elbow and knee
   diamonds, the hip line, and chest, head and ear arcs.
   - Its arms move with its chest; its feet stay planted on the view root, so they mirror with it.
+- **The three-quarter's parts are all the owner's now** (4 Nov 2026), drawn or fixed by him over lessons 12 to 18, or approved by him as
+  carried over ("rest is good"). Hidden parts were drawn over Codex's pictures of what's underneath (`out/codex/quarter-no-arm`,
+  `quarter-no-head`), which are kept in the document as locked guide layers.
+- **The rig, checked control by control** with `cover_check.py` (a posed copy, `puppet-views-cover`, one pose a second): head
+  tilts, each arm up and out, ear turns, face look, chest turns, hips down with the feet planted, each foot lifted, and all at once.
+- **The near strap is over the upper arm and under the paw,** as drawn. `strap_over.py` makes a masked copy of his strap above the
+  arm; re-run it if the strap or the arm changes.
+- **The face look on the three-quarter:** `quarter_face.py` adds a `qFace` null with the nose-shaped control, the features
+  linked with the front's parallax. Sideways, the far side follows less, because it goes round the head's edge; the far cheek doesn't
+  follow sideways at all.
 - **Not yet:**
   - the side view (`rm-rest-side.png`)
-  - the face look on the three-quarter
   - poses don't carry between views (each view is keyed on its own, as in Toon Boom)
-  - the owner hasn't reviewed the three-quarter cut
-- **Re-running `puppet_quarter.py`** rebuilds every `q*` layer and bone in `puppet-views`, so the owner's changes to them would
-  go. Don't re-run it once he has edited them.
+- **Re-running `puppet_quarter.py`** keeps every part the owner has edited or approved. It still rebuilds the q-bones and pins, and
+  it drops the strap copy and the face control: re-run `strap_over.py` and `quarter_face.py` after it.
