@@ -136,21 +136,29 @@ After the fixes went into lesson_fit.py, the new leg matches his to within 5% of
 What it changes for puppet_trace.py: hand-placed points at the extremes with tangent handles, not a dense traced contour smoothed
 afterwards.
 
-## Where it stands (3 Nov 2026, paused by the owner)
+## Where it stands (4 Nov 2026)
 
-- **Done:**
+- **Done before:**
   - Front rest pose, the three-quarter view and the redrawn side view (`rm-rest-side.png`).
   - Six faces (`rm-face-*.png`). The grin is accepted for now; the oops face came back neutral, not sorry.
-- **puppet_trace.py:** the front traced into 25 vector parts, written to the Studio document `bubu-puppet`, with checks in
-  `out/puppet/` (rebuilt.png, joints.png, parts.png).
-  - The rebuilt puppet matches the drawing to within 0.5% of pixels, and parenting works in Studio.
-  - Studio only carries a child with its parent when the move is keyed. Changing a part's resting value moves it alone.
-- **Not clean yet (owner: "make sure the arms and legs take into consideration what's underneath"):** parts.png shows ragged limb
-  pieces: a spike on top of each leg, a clipped blob at each shoulder, notches on the paws and feet, crescent ears and a spiked strap
-  top. They come from bolting hidden areas on by mask arithmetic.
+- **The front puppet, cut the owner's way: `puppet_build.py`.** It makes the Studio document `bubu-puppet-front`, with 21 parts and a
+  hips null. It replaces `puppet_trace.py` and the ragged `bubu-puppet` document.
+  - The limbs and ears come from `lesson_fit.py`, which holds the rules from the owner's recordings (`lessons/LESSONS.md`). The head
+    is the owner's own.
+  - Round pieces (belly, patches, cheeks, nose) have 4 points at their extremes in their own frame.
+  - Strokes (eye arcs, brows, mouth, straps) have 8 points bent along the line. The straps' hidden ends bend in under the belly,
+    because running straight on they showed past its side.
+  - The torso has no outline of its own from the front. It's one smooth body that fills the chest and reaches each shoulder and hip
+    joint.
+- **Checks** (in `out/puppet/`):
+  - `front-rebuilt.png` / `front-diff.png`: 0.63% of pixels differ from the drawing, almost all of it anti-aliasing on edges. What's
+    left is a sliver of 2-4 px along the arms' inner edges by the straps.
+  - `front-parts.png`: every part alone is a whole, clean shape.
+  - `front-joints.png`: arms out, up and in, legs out, head tilt and a wave, with no gaps at the joints. Arms raised straight up go
+    behind the head, which is the layer order working.
+  - `front-studio-wave.png`: the same wave keyed in Studio. Parenting carries the parts correctly there.
 - **Next:**
-  - Rebuild the arms and legs as swept shapes: circles along the limb's axis, sized to the drawing's width at each point, with
-    round ends. Paws and feet become one smooth blob each (the convex hull of the drawn part plus the wrist or ankle circle).
-  - Ears become whole fitted circles.
-  - The torso becomes one smooth convex body that covers everything under the arms and legs.
-  - Check every part alone (parts.png) and zoom on each joint at ±45° before moving on.
+  - The owner reviews the puppet.
+  - Elbows and knees: limbs are one piece each, so they bend only at the shoulder and hip for now.
+  - The face swaps (open eyes and the mouths from `rm-face-*.png`), cut by the same rules.
+  - The three-quarter and side views, each as its own chain.

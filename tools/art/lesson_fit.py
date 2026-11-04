@@ -212,38 +212,6 @@ def region(x0, y0, x1, y1):
     return r
 
 
-parts = {}
-
-# --- the right leg and foot, one shape like the owner's arm and paw ---------------------------------------------------
-# The owner's fix: the leg owns its whole visible outline, right up to where it goes under the belly (the hip), and only then rounds
-# over in a cap that rises a little above that point and reaches a little past the inner edge, all hidden.
-hip_y = next(y for y in range(860, 1100) if dark[y, 830:880].any() and not cream[y, 830:880].all())
-hip_x = int(np.nonzero(dark[hip_y + 2, 830:880])[0].mean()) + 830
-gap_y = next(y for y in range(1000, 1150) if magenta[y, 640:700].any())
-inner_x = int(np.nonzero(dark[gap_y + 5, 640:760])[0].min()) + 640
-cap_x, cap_y = (inner_x - 8 + hip_x) / 2 - 10, hip_y - 35
-side = (inner_x - 8, (hip_y + gap_y) / 2)
-LEG_R = [(cap_x, cap_y, 0, 45, 45),                     # cap top (hidden)
-         (hip_x, hip_y - 8, 1.1, 30, 30),               # the hip: where the outer edge goes under the belly
-         (858, 1017, math.pi / 2, 50, 50),              # outer edge
-         (849, 1118, math.pi / 2, 30, 20),              # where the foot starts
-         (886, 1170, math.pi / 2, 25, 25),              # toe tip
-         (850, 1207, math.pi, 30, 50),                  # sole, front
-         (725, 1203, math.pi, 50, 25),                  # sole, back
-         (681, 1166, -math.pi / 2, 12, 10),             # heel
-         (683, 1145, -math.pi / 2, 8, 20),              # heel top: a little step where the leg meets the foot
-         (668, 1100, -math.pi / 2 - 0.25, 40, 50),      # inner edge
-         (side[0], side[1], -math.pi / 2, 50, 45)]      # cap side (hidden)
-# (the hip point sits just above where it goes under, so it counts as seen)
-parts["leg-r"] = cut("leg-r", LEG_R, (640, 900, S, S), region(640, 1100, S, S))
-# the other leg: the same points mirrored, then fitted to that side's own edge
-parts["leg-l"] = cut("leg-l", mirror(LEG_R), (0, 900, 615, S), region(0, 1100, 615, S), move=True)
-# --- the arms, set out along the arm's own line (the owner's fix of Claude's right arm, 4 Nov 2026: points put at the extremes
-# of the screen (the paw's lowest and rightmost) don't suit a slanted limb; he put them in the arm's own frame: a point each side
-# partway down and near the paw, one at the paw's end along the arm, and the hidden edge running on parallel to the seen one, not
-# following the strap and belly that cover it)
-
-
 def limb(box, outward):
     """8 points for a hanging limb, from the drawing: its line (the seen part's main axis), its width and its end. `outward` is +1
     when the limb's outer side is to the right of its line going down it, -1 to the left."""
@@ -291,15 +259,6 @@ def limb(box, outward):
     return out
 
 
-ARM_BOX_R = (870, 560, 1060, 900)
-ARM_BOX_L = (S - ARM_BOX_R[2], 560, S - ARM_BOX_R[0], 900)
-parts["arm-r"] = cut("arm-r", limb(ARM_BOX_R, -1), (640, 500, S, 950), region(640, 750, S, 950))
-# (the owner's own arm is the check: the same rules on his side, measured against what he drew)
-parts["arm-l-check"] = cut("arm-l-check", limb(ARM_BOX_L, 1), (0, 500, 615, 950), region(0, 750, 615, 950))
-
-
-# --- the ears: a round shape each, like the owner's head (points at the extremes, handles along the edge); the part under the head
-# drawn whole, so the ear can turn without a gap
 def ear(cx, cy):
     ys, xs = np.nonzero(cv2.Canny(dark * 255, 50, 150) & (NEAR * 255) & (region(cx - 170, cy - 170, cx + 170, cy + 170) * 255).astype(np.uint8))
     # the circle through the visible rim (least squares)
@@ -313,25 +272,68 @@ def ear(cx, cy):
     return an, (int(ex - r - 30), int(ey - r - 30), int(ex + r + 30), int(ey + r + 30))
 
 
-for nm, (cx, cy) in (("ear-l", (400, 150)), ("ear-r", (850, 150))):
-    an, box = ear(cx, cy)
-    parts[nm] = cut(nm, an, box)
 
-# checks: over the model with the points, each part alone in a row
-m = Image.fromarray(im.astype(np.uint8)).convert("RGBA")
-ov = Image.new("RGBA", m.size)
-d = ImageDraw.Draw(ov)
-for fills in parts.values():
-    for f, a in fills:
-        p = [tuple(x) for x in sample(a)]
-        d.polygon(p, fill=(0, 160, 255, 80))
-        d.line(p + [p[0]], fill=(0, 90, 255, 255), width=2)
-        for x in a:
-            d.ellipse((x[0] - 4, x[1] - 4, x[0] + 4, x[1] + 4), fill=(255, 0, 0, 255))
-Image.alpha_composite(m, ov).save("out/puppet/lesson-parts.png")
-al = Image.new("RGB", (S, S), (255, 255, 255))
-d = ImageDraw.Draw(al)
-for fills in parts.values():
-    for f, a in fills:
-        d.polygon([tuple(x) for x in sample(a)], fill=f)
-al.save("out/puppet/lesson-parts-alone.png")
+if __name__ == "__main__":
+    parts = {}
+
+    # --- the right leg and foot, one shape like the owner's arm and paw ---------------------------------------------------
+    # The owner's fix: the leg owns its whole visible outline, right up to where it goes under the belly (the hip), and only then rounds
+    # over in a cap that rises a little above that point and reaches a little past the inner edge, all hidden.
+    hip_y = next(y for y in range(860, 1100) if dark[y, 830:880].any() and not cream[y, 830:880].all())
+    hip_x = int(np.nonzero(dark[hip_y + 2, 830:880])[0].mean()) + 830
+    gap_y = next(y for y in range(1000, 1150) if magenta[y, 640:700].any())
+    inner_x = int(np.nonzero(dark[gap_y + 5, 640:760])[0].min()) + 640
+    cap_x, cap_y = (inner_x - 8 + hip_x) / 2 - 10, hip_y - 35
+    side = (inner_x - 8, (hip_y + gap_y) / 2)
+    LEG_R = [(cap_x, cap_y, 0, 45, 45),                     # cap top (hidden)
+             (hip_x, hip_y - 8, 1.1, 30, 30),               # the hip: where the outer edge goes under the belly
+             (858, 1017, math.pi / 2, 50, 50),              # outer edge
+             (849, 1118, math.pi / 2, 30, 20),              # where the foot starts
+             (886, 1170, math.pi / 2, 25, 25),              # toe tip
+             (850, 1207, math.pi, 30, 50),                  # sole, front
+             (725, 1203, math.pi, 50, 25),                  # sole, back
+             (681, 1166, -math.pi / 2, 12, 10),             # heel
+             (683, 1145, -math.pi / 2, 8, 20),              # heel top: a little step where the leg meets the foot
+             (668, 1100, -math.pi / 2 - 0.25, 40, 50),      # inner edge
+             (side[0], side[1], -math.pi / 2, 50, 45)]      # cap side (hidden)
+    # (the hip point sits just above where it goes under, so it counts as seen)
+    parts["leg-r"] = cut("leg-r", LEG_R, (640, 900, S, S), region(640, 1100, S, S))
+    # the other leg: the same points mirrored, then fitted to that side's own edge
+    parts["leg-l"] = cut("leg-l", mirror(LEG_R), (0, 900, 615, S), region(0, 1100, 615, S), move=True)
+    # --- the arms, set out along the arm's own line (the owner's fix of Claude's right arm, 4 Nov 2026: points put at the extremes
+    # of the screen (the paw's lowest and rightmost) don't suit a slanted limb; he put them in the arm's own frame: a point each side
+    # partway down and near the paw, one at the paw's end along the arm, and the hidden edge running on parallel to the seen one, not
+    # following the strap and belly that cover it)
+
+
+    ARM_BOX_R = (870, 560, 1060, 900)
+    ARM_BOX_L = (S - ARM_BOX_R[2], 560, S - ARM_BOX_R[0], 900)
+    parts["arm-r"] = cut("arm-r", limb(ARM_BOX_R, -1), (640, 500, S, 950), region(640, 750, S, 950))
+    # (the owner's own arm is the check: the same rules on his side, measured against what he drew)
+    parts["arm-l-check"] = cut("arm-l-check", limb(ARM_BOX_L, 1), (0, 500, 615, 950), region(0, 750, 615, 950))
+
+
+    # --- the ears: a round shape each, like the owner's head (points at the extremes, handles along the edge); the part under the head
+    # drawn whole, so the ear can turn without a gap
+    for nm, (cx, cy) in (("ear-l", (400, 150)), ("ear-r", (850, 150))):
+        an, box = ear(cx, cy)
+        parts[nm] = cut(nm, an, box)
+
+    # checks: over the model with the points, each part alone in a row
+    m = Image.fromarray(im.astype(np.uint8)).convert("RGBA")
+    ov = Image.new("RGBA", m.size)
+    d = ImageDraw.Draw(ov)
+    for fills in parts.values():
+        for f, a in fills:
+            p = [tuple(x) for x in sample(a)]
+            d.polygon(p, fill=(0, 160, 255, 80))
+            d.line(p + [p[0]], fill=(0, 90, 255, 255), width=2)
+            for x in a:
+                d.ellipse((x[0] - 4, x[1] - 4, x[0] + 4, x[1] + 4), fill=(255, 0, 0, 255))
+    Image.alpha_composite(m, ov).save("out/puppet/lesson-parts.png")
+    al = Image.new("RGB", (S, S), (255, 255, 255))
+    d = ImageDraw.Draw(al)
+    for fills in parts.values():
+        for f, a in fills:
+            d.polygon([tuple(x) for x in sample(a)], fill=f)
+    al.save("out/puppet/lesson-parts-alone.png")
