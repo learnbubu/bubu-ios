@@ -30,6 +30,13 @@ DOC = "bubu-puppet-front"
 ART = f"{ROOT}/art/{DOC}"
 OUT = "out/puppet"
 os.makedirs(ART, exist_ok=True)
+# (the owner cleans parts up in Studio: once a part's art isn't the file this script wrote, the document is theirs, and rebuilding
+# would throw their work away; --force only when they ask for a fresh build)
+if os.path.exists(f"{ROOT}/docs/{DOC}.json") and "--force" not in sys.argv:
+    theirs = [l["id"] for l in json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))["layers"]
+              if l.get("art", "").endswith(".svg") and l["art"] != f"{l['id']}.svg"]
+    if theirs:
+        sys.exit(f"{DOC} has the owner's edits ({', '.join(theirs)}): not rebuilt. Learn from them instead (lessons/LESSONS.md); --force to rebuild.")
 subprocess.run([sys.executable, "-I", "lesson_fit.py"], check=True, stdout=subprocess.DEVNULL)
 
 label = F.label
