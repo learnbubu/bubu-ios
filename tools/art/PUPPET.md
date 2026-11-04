@@ -136,6 +136,37 @@ After the fixes went into lesson_fit.py, the new leg matches his to within 5% of
 What it changes for puppet_trace.py: hand-placed points at the extremes with tangent handles, not a dense traced contour smoothed
 afterwards.
 
+## Where it stands (4 Nov 2026, evening)
+
+- **The master front puppet, `bubu-puppet-front` in Studio, is the owner's.** He cleaned it up himself:
+  - nose, mouth, left eye, left brow, screen-left strap, hair, right leg and screen-left arm
+  - each other side mirrored with `mirror_fix.py`
+  - recorded as lessons 5-11 in `lessons/LESSONS.md`
+  - `puppet_build.py` won't rebuild over his edits.
+- **Motion test, `puppet-test`:** a copy of the master, made by `puppet_test.py` with `puppet_test_bones.py`, exports in
+  `out/puppet/`.
+  - **First clip, one-piece limbs** (`puppet-test.mp4`). The joints held. The owner's notes:
+    - the wave's elbow looks broken; it should come out to the side and curve up, as his sketch (`_sketch.json`)
+    - the face looks detached (open question: sliding, or flat when the head tilts?)
+    - the ear looks a bit detached
+  - **Ears:** now hinge on the head's edge (`puppet_elbow.py --ears`). The hinge was deep inside the head.
+  - **A two-piece hinged elbow was tried and dropped:** it reads as a corner.
+  - **Bones, Spine style:** each limb is one shape bound to bones. The waving arm is a 4-bone chain (armR1-4) bending 35 degrees
+    each, plus a slide out from under the head. Shaped to his sketch: 68% of the sketched arm covered (`sketch_match.py`).
+    Clips: `puppet-test-bend.mp4`, and `puppet-test-bend-fine.mp4` with a finer grid (cell 3, softness 5).
+  - **The owner: "super crunchy and unsmooth"** on the inside of the bend and the outside of the elbow. The cause is Studio's
+    skinning: a square grid over a bitmap, blended linearly, so the squeezed inside folds. A finer grid helps the outside but
+    can't fix the cause.
+- **Next: a Puppet tool in Studio,** like After Effects' and Photoshop's (owner, 4 Nov):
+  - a triangle mesh fitted inside the part's outline
+  - pins placed and keyed
+  - an as-rigid-as-possible solve each frame (Igarashi et al. 2005), so a bend squashes evenly instead of folding
+  - the vector outline bent itself, so edges stay crisp
+  - Then redo the wave with pins (shoulder, elbow, wrist, paw) against his sketch, and give all four limbs the same.
+- **Studio export with bones** takes about 2 minutes. The MCP tool times out first, but the file still lands; wait for it.
+- **Studio change left for the owner to commit:** `src/renderer/src/shapes.ts` `growToFit`. An edit past an SVG's box grows the
+  box instead of being clipped (the nose).
+
 ## Where it stands (4 Nov 2026)
 
 - **Done before:**
