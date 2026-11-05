@@ -31,34 +31,9 @@ REST = {"hips": (L0["hips"]["x"], L0["hips"]["y"]), "torso": L0["torso"]["rotati
 HAND0 = {k: (B0[b]["ik"]["tx"], B0[b]["ik"]["ty"]) for k, b in HANDS.items()}
 FOOT0 = {k: (B0[b]["ik"]["tx"], B0[b]["ik"]["ty"]) for k, b in FEET.items()}
 
-# (the paws over his face, for Wrong's "oops" after Pengu covering its eyes (the owner, 5 Nov 2026: "not sure our hands can go
-# over the eyes though since arm sit under"): the arms are drawn under the head and a layer's place in the stack can't be
-# keyed, in Studio or the app. So the round end of each arm, cut from its art by a circle (the arm's own drawing, untouched),
-# is its own layer at the top of the front, pinned to the hand's bone as the arm's own hand pins are, and hidden: Wrong shows
-# it while the hands are up over his eyes, the arms going on behind the head)
-PAWS = {"R": ("armR", 313, 280, 58), "L": ("armL", 52, 262, 58)}    # (the arm, and its paw's circle in the arm's drawing)
-
-
-def paw_svg(arm_svg, cx, cy, r):
-    head, body = arm_svg.split(">", 1)
-    body = body.rsplit("</svg>", 1)[0]
-    return (head + '><defs><clipPath id="paw"><circle cx="%s" cy="%s" r="%s"/></clipPath></defs><g clip-path="url(#paw)">' % (cx, cy, r)
-            + body + "</g></svg>")
-
-
-def add_paws(d):
-    L = {l["id"]: l for l in d["layers"]}
-    at_ = [l["id"] for l in d["layers"]].index("mouth")
-    for s_, (arm, cx, cy, r) in PAWS.items():
-        a = L[arm]
-        paw = {k: copy.deepcopy(v) for k, v in a.items() if k not in ("mask", "masks", "keys")}
-        hand = HANDS[s_]
-        paw.update(id="paw" + s_, name="paw" + s_ + " (oops)", art="paw" + s_ + ".svg", opacity=0, keys={})
-        paw["puppet"] = {"pins": [pin for pin in a["puppet"]["pins"] if pin["bone"] == hand]}
-        d["layers"].insert(at_, paw)
-
-
-add_paws(base)
+# (Wrong's "oops" brings his whole arms in front of his face, by Studio's draw-order keys (5 Nov 2026): the owner, of a first
+# try with only the paws cut out and shown over the face, "that works terribly", the arms gone behind the head; animators key
+# the draw order instead (Spine, Harmony), which Studio and the app's export now do)
 
 
 def pose(**k):
@@ -89,14 +64,13 @@ def sparse_keys(timeline):
     ch, rest = {}, {("hips", "x"): REST["hips"][0], ("hips", "y"): REST["hips"][1], ("torso", "rotation"): REST["torso"],
                     ("torso", "sx"): 1, ("torso", "sy"): 1, ("head", "y"): REST["head"][0], ("head", "rotation"): REST["head"][1],
                     ("head", "sx"): 1, ("head", "sy"): 1, ("earL", "rotation"): REST["earL"], ("earR", "rotation"): REST["earR"],
-                    ("face", "x"): REST["face"][0], ("face", "y"): REST["face"][1], ("pawR", "opacity"): 0, ("pawL", "opacity"): 0}
+                    ("face", "x"): REST["face"][0], ("face", "y"): REST["face"][1]}
     for s_ in ("R", "L"):
         rest[(HANDS[s_], "tx")], rest[(HANDS[s_], "ty")] = HAND0[s_]
         rest[(FEET[s_], "tx")], rest[(FEET[s_], "ty")] = FOOT0[s_]
     short = {"hx": ("hips", "x"), "hy": ("hips", "y"), "tilt": ("torso", "rotation"), "tsx": ("torso", "sx"), "tsy": ("torso", "sy"),
              "head": ("head", "y"), "hrot": ("head", "rotation"), "hsx": ("head", "sx"), "hsy": ("head", "sy"),
-             "earL": ("earL", "rotation"), "earR": ("earR", "rotation"), "fx": ("face", "x"), "fy": ("face", "y"),
-             "pawR": ("pawR", "opacity"), "pawL": ("pawL", "opacity")}
+             "earL": ("earL", "rotation"), "earR": ("earR", "rotation"), "fx": ("face", "x"), "fy": ("face", "y")}
     for s_ in ("R", "L"):
         short["h" + s_ + "x"], short["h" + s_ + "y"] = (HANDS[s_], "tx"), (HANDS[s_], "ty")
         short["f" + s_ + "x"], short["f" + s_ + "y"] = (FEET[s_], "tx"), (FEET[s_], "ty")
@@ -208,9 +182,9 @@ RIGHT = [(0, R0, SMOOTH),
          (760, pose(hips=(0, -2), head=(0, -2), face=(0, -4), hR=(35, -260), hL=(-35, -260)), SMOOTH),
          (1300, R0, SMOOTH)]
 # Wrong, "oops", after Pengu covering its eyes on Tenor (the owner's pick, 5 Nov 2026): a flinch, the ears up; the hands fly
-# up to his eyes (the paws coming on in front as the hands cross the head's edge) landing with a little overshoot; hunched
-# behind them, the ears drooping, a small lean; the hands down (the paws off as they leave the head), and settled. Every part
-# once, no double wiggles
+# up to his eyes (the arms drawn in front of the head from as they cross its edge) landing with a little overshoot; hunched
+# behind them, the ears drooping, a small lean; the hands down (the arms back under the head as they leave it), and
+# settled. Every part once, no double wiggles
 EYE = {"R": (L0["patchR"]["x"], L0["patchR"]["y"]), "L": (L0["patchL"]["x"], L0["patchL"]["y"])}
 
 
@@ -219,6 +193,7 @@ def hand_at(s_, x, y):
 
 
 # (held a little below the eyes: right over them, the dark paws read as his dark eye patches, not as paws in front)
+WRONG2_ABOVE = {"armR": [(200, "mouth"), (940, "")], "armL": [(200, "mouth"), (940, "")]}   # (in front of the face's top layer)
 def hands_at(dx, dy, out=0):
     """both hands on his eyes, moved by (dx, dy), `out` further apart"""
     return {**hand_at("R", EYE["R"][0] + out + dx, EYE["R"][1] + dy), **hand_at("L", EYE["L"][0] - out + dx, EYE["L"][1] + dy)}
@@ -228,15 +203,11 @@ WRONG2 = [(0, REST_ALL, SMOOTH),
           (90, dict(hy=10, tsx=1.05, tsy=0.94, head=8, hrot=-3, earL=-12, earR=12), OUT),
           (100, arms(-30, rr=0.95), SMOOTH),
           (180, hands_at(0, 170, out=90), SMOOTH),
-          (195, dict(pawR=0, pawL=0), HOLD),
-          (200, dict(pawR=1, pawL=1), HOLD),
           (260, hands_at(0, 30, out=8), OUT),
           (340, {**hands_at(0, 48, out=10), **dict(hy=14, tsx=1.03, tsy=0.96, head=10, hsx=1, hsy=1, tilt=0, hrot=0)}, SMOOTH),
           (420, dict(earL=10, earR=-10), SMOOTH),
           (760, {**hands_at(3, 52, out=10), **dict(hy=16, tilt=3, hrot=3, earL=20, earR=-20)}, SMOOTH),
           (930, hands_at(0, 170, out=90), IN),
-          (935, dict(pawR=1, pawL=1), HOLD),
-          (940, dict(pawR=0, pawL=0), HOLD),
           (1040, {**arms(-62), **dict(hy=-4, tilt=0, hrot=0, head=-3, tsx=0.99, tsy=1.02, earL=-6, earR=6)}, OUT),
           (1180, REST_ALL, SMOOTH),
           (1400, REST_ALL, SMOOTH)]
@@ -319,7 +290,7 @@ def loosen(ch, duration, fps=30):
     return ch
 
 
-def made(name, duration, loop, timeline, sparse=False):
+def made(name, duration, loop, timeline, sparse=False, above=None):
     """the document with this animation on its layers and bones (its own keys only on what it moves)"""
     d = copy.deepcopy(base)
     d["turn"]["keys"] = [{"t": 0, "v": [v["id"] for v in d["turn"]["views"]].index("front"), "ease": HOLD}]
@@ -337,6 +308,8 @@ def made(name, duration, loop, timeline, sparse=False):
             L[who]["keys"][prop] = k
         else:
             B[who]["ik"]["keys"][prop] = k
+    for lid, ks in (above or {}).items():
+        L[lid]["above"] = [{"t": t, "id": i} for t, i in ks]
     d["duration"], d["loop"] = duration, loop
     return d
 
@@ -349,7 +322,7 @@ def waved():
     return d
 
 
-anims = [("Idle", made("Idle", 3200, True, IDLE)), ("Right", made("Right", 1300, False, RIGHT2, sparse=True)), ("Wrong", made("Wrong", 1400, False, WRONG2, sparse=True)),
+anims = [("Idle", made("Idle", 3200, True, IDLE)), ("Right", made("Right", 1300, False, RIGHT2, sparse=True)), ("Wrong", made("Wrong", 1400, False, WRONG2, sparse=True, above=WRONG2_ABOVE)),
          ("Wave", waved()), ("Cheer", made("Cheer", 1600, False, CHEER))]
 
 
@@ -357,26 +330,13 @@ def capture(d, id_, name):
     bones = {b["id"]: {"keys": b["keys"], "loop": b.get("loop", 0), "rotation": b.get("rotation", 0), "x": b.get("x", 0), "y": b.get("y", 0), "scale": b.get("scale", 1),
                        **({"ik": {"keys": b["ik"]["keys"], "tx": b["ik"]["tx"], "ty": b["ik"]["ty"], "mix": b["ik"]["mix"], "bend": b["ik"]["bend"]}} if b.get("ik") else {})}
              for b in d["bones"]}
-    layers = {l["id"]: {"keys": l["keys"], "loop": l.get("loop", 0), "blink": l.get("blink", 0)} for l in d["layers"]}
+    layers = {l["id"]: {"keys": l["keys"], "loop": l.get("loop", 0), "blink": l.get("blink", 0), **({"above": l["above"]} if l.get("above") else {})}
+              for l in d["layers"]}
     return {"id": id_, "name": name, "duration": d["duration"], "loop": d["loop"], "bones": bones, "layers": layers}
 
 
 os.makedirs(out_dir, exist_ok=True)
-ART_IN = os.path.join(src_dir, "..", "art", "puppet-views")
-
-
-def paw_art(doc_id):
-    to = os.path.join(out_dir, "..", "art", doc_id)
-    if not os.path.isdir(to):
-        return
-    L = {l["id"]: l for l in base["layers"]}
-    for s_, (arm, cx, cy, r) in PAWS.items():
-        svg = open(os.path.join(ART_IN, L[arm]["art"]), encoding="utf-8").read()
-        open(os.path.join(to, "paw" + s_ + ".svg"), "w", encoding="utf-8").write(paw_svg(svg, cx, cy, r))
-
-
 for name, d in anims:
-    paw_art(f"bubu-lesson-{name.lower()}")
     one = copy.deepcopy(d)
     one["id"], one["name"] = f"bubu-lesson-{name.lower()}", f"Bùbù lesson: {name}"
     # (the preview's room to jump: the frame taller, the front moved down into it, its feet's controls with it)
@@ -396,7 +356,6 @@ for name, d in anims:
 # carried up and down with the jump)
 spin = json.load(open(os.path.join(out_dir, "bubu-lesson-right.json"), encoding="utf-8"))
 spin["id"], spin["name"] = "bubu-lesson-spin", "Bùbù lesson: spin test"
-paw_art("bubu-lesson-spin")
 order = [v["id"] for v in spin["turn"]["views"]]
 spin["turn"]["keys"] = [{"t": t, "v": order.index(v), "ease": HOLD} for t, v in
                         [(0, "front"), (380, "quarter-r"), (430, "side-r"), (480, "side-l"), (530, "quarter-l"), (580, "front")]]
@@ -436,7 +395,6 @@ for hand, ks in SPIN_ARMS.items():
 json.dump(spin, open(os.path.join(out_dir, "bubu-lesson-spin.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 all_ = copy.deepcopy(anims[0][1])
 all_["id"], all_["name"] = "bubu-lesson", "Bùbù lesson"
-paw_art("bubu-lesson")
 all_["anims"] = [capture(d, f"A{name.lower()}", name) for name, d in anims]
 all_["anim"] = "Aidle"
 json.dump(all_, open(os.path.join(out_dir, "bubu-lesson.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
