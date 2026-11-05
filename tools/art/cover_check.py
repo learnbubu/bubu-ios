@@ -15,7 +15,7 @@ import sys
 ROOT = "C:/Users/domch/Documents/Projects/bubu-studio/projects/bubu"
 DOC = sys.argv[1] if len(sys.argv) > 1 else "puppet-views"
 VIEW = sys.argv[2] if len(sys.argv) > 2 else "q"
-OUT = f"{DOC}-cover" + ("-side" if VIEW == "s" else "")
+OUT = f"{DOC}-cover" + {"s": "-side", "f": "-front"}.get(VIEW, "")
 d = json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))
 d["id"], d["name"] = OUT, d["name"] + " (cover check)"
 q = VIEW in ("q", "s")
@@ -28,6 +28,8 @@ B = {b["id"]: b for b in d.get("bones", [])}
 head, arm_l, arm_r = (f"{pre}Head", f"{pre}armL4", f"{pre}armR4") if q else ("head", "armL4", "armR4")
 face, torso, hips = (f"{pre}Face", f"{pre}Torso", f"{pre}Hips") if q else ("face", "torso", "hips")
 leg_l, leg_r = (f"{pre}legL4", f"{pre}legR4") if q else ("legL4", "legR4")
+if VIEW == "f":       # (the front's bones, as the owner's front puppet names them)
+    arm_l, arm_r, leg_l, leg_r = "bForearmL2", "Bizhnq98", "bShinL2", "bShinR2"
 key = lambda v, t: {"t": t, "v": v, "ease": [0, 0, 1, 1]}
 # poses, a second each: rest; head tilted back; head tilted forward; near arm up; near arm out; far arm up; both up, head tilted;
 # the ears turned back; the ears turned forward; then the rest of the rig, a control at a time: the face looking back, then forward
