@@ -482,5 +482,40 @@
    "torso: a round body, not a hull's box"
   ],
   "applied": "puppet_side.py: near leg takes his thigh; far arm whole; strap_over re-run on his strap"
+ },
+ {
+  "id": "side-face-fix",
+  "date": "2026-11-05",
+  "by": "owner fixing Claude",
+  "part": "side head, ears, brow, eye, nose, mouth, torso (puppet-views)",
+  "owner": [
+   "Head-side--edit-58.svg",
+   "EarR-side--edit-14.svg",
+   "EarL-side--edit-2.svg",
+   "Brow-side--edit-32.svg",
+   "Eye-side--edit-28.svg",
+   "Nose-side--edit-12.svg",
+   "Mouth-side--edit-38.svg",
+   "Torso-side--edit-45.svg"
+  ],
+  "claude": [
+   "sHead-claude-before.svg",
+   "sEarR-claude-before.svg",
+   "sEarL-claude-before.svg",
+   "sBrow-claude-before.svg",
+   "sEye-claude-before.svg",
+   "sNose-claude-before.svg",
+   "sMouth-claude-before.svg"
+  ],
+  "recordings": [
+   "2026-11-05-02-11-34.jsonl",
+   "2026-11-05-01-38-55.jsonl"
+  ],
+  "learnt": [
+   "the far ear is the whole ear, mostly hidden behind the head, not the bit that peeks",
+   "small features (brow, eye, nose) fit to the edge's middle: Claude's sat 1 to 2 px outside, counting the soft outer pixels",
+   "the torso's top is wide and flat under the head, like shoulders"
+  ],
+  "applied": "recorded; Studio's point grabbing fixed (nearest, points favoured, 4 px before a move)"
  }
 ]

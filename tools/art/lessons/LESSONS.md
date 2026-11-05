@@ -287,6 +287,26 @@ Studio, from the same session ("got some vector bugs too"):
 - a double-click on the edge for a new point: the first click picked the layer under the edge; now a press on the edited shape's
   edge keeps it
 
+### 20. Side face, head, ears and torso (owner fixing Claude's, in puppet-views, 5 Nov 2026) - `2026-11-05-02-11-34.jsonl` (head, ears, brow, eye, nose, mouth, 6 min); `2026-11-05-01-38-55.jsonl` is his near-leg start, dropped when the near leg became a copy of his far leg (lesson 19); his files `owner/*-side--edit-*.svg`, Claude's `owner/s*-claude-before.svg`; overlay `out/lessons/side/face-fixes.png` (Claude red, his blue); how he worked: `out/lessons/2026-11-05-02-11-34-process.json`
+
+What he changed:
+- **Far ear**: Claude's was a small circle, only the bit that peeks over the head. His is **the whole ear**, an oval about half
+  the near ear's size, most of it hidden behind the head. Lesson 19's rule again: a hidden part is whole, not the scrap that shows.
+- **Brow, eye, nose**: the same points, each pulled 1 to 2 px **in, onto the drawn edge**. Claude's small features sat just outside
+  the edge all round (a stroke's outer pixels, the soft anti-aliased ones, were counted as the stroke). Fit small features to the
+  edge's middle, where the shade is half way.
+- **Mouth**: one point added (8), the stem's tip and the right end tidied.
+- **Head**: 22 points (3 added, 1 taken out); the line under the ear eased.
+- **Near ear**: two handle tweaks only.
+- **Torso** (fixed outside the recording): 9 points, its top wider and flatter under the head, like shoulders.
+- His way, again: tiny moves on visible features (about 1 to 2 px each, nearly all ending on the drawn edge); handle-only steps are
+  a third to a half of all steps.
+
+Studio, from the same recording: 11 of his steps were undone within a second. Each time, a press near a point had grabbed a short
+handle beside it instead (handles were tried first, the first in reach taken). Pulled past its point, the handle flipped, and the
+long handle opposite swung right round with it, 214 px once. Small points also got nudged by a click's own wobble. Now the nearest
+point or handle is taken, points favoured, and a click must move 4 screen px before anything moves.
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut
