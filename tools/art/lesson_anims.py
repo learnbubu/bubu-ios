@@ -162,17 +162,15 @@ ARMS = [(60, dict(hRx=0, hRy=0, hLx=0, hLy=0), SMOOTH),
         (790, arms(6, 10, 0.97, 0.97), OUT),
         (910, arms(-55), SMOOTH),
         (1030, dict(hRx=0, hRy=-4, hLx=0, hLy=0), SMOOTH)]
-# (the legs: "a bit stiff" in v8, held in one shape the whole time in the air: now the kicked leg kicks twice, out of step
-# with the arm's pumps, the dangling one swings in and out, and both stretch down for the ground before landing)
+# (the legs: "a bit stiff" in v8, held in one shape the whole time in the air; v9's two quick kicks were "weird", a shake.
+# Now one kick: the left leg kicks up and eases down slowly through the fall, the right swings once out, and both reach
+# for the ground before landing)
 LEGS = [(230, dict(fRx=0, fRy=0, fLx=0, fLy=0), SMOOTH),
         (290, dict(fRx=0, fRy=0, fLx=0, fLy=0), OUT),
         (330, dict(fRx=-8, fRy=-60, fLx=8, fLy=-60), OUT),
-        (400, dict(fRx=10, fRy=-220, fLx=-50, fLy=-300), SMOOTH),
-        (460, dict(fRx=25, fRy=-230, fLx=-90, fLy=-380), OUT),
-        (520, dict(fRx=5, fRy=-250, fLx=-70, fLy=-330), SMOOTH),
-        (590, dict(fRx=28, fRy=-235, fLx=-92, fLy=-372), OUT),
-        (660, dict(fRx=18, fRy=-170, fLx=-55, fLy=-250), IN),
-        (710, dict(fRx=30, fRy=-60, fLx=-40, fLy=-80), IN),
+        (480, dict(fRx=8, fRy=-235, fLx=-88, fLy=-375), OUT),
+        (600, dict(fRx=26, fRy=-225, fLx=-75, fLy=-320), SMOOTH),
+        (690, dict(fRx=30, fRy=-90, fLx=-45, fLy=-120), IN),
         (740, dict(fRx=35, fRy=0, fLx=-35, fLy=0), OUT)]
 RIGHT2 = sorted(BODY + ARMS + LEGS, key=lambda k: k[0])
 # Right: a little crouch, a hop with both hands up and out, the head back, the ears flicking; landing with a squash, then rest
