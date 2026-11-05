@@ -14,7 +14,7 @@ The parts go under "view-side", in the Layers panel's "Side" group, with the sam
 the side each way (the left one mirrored).
 
 A part the owner has edited (its file no longer the plain s*.svg) or approved is kept as it is on a re-run. Afterwards run
-strap_over.py sStrapL sArmL 870 650 and side_face.py.
+strap_over.py sStrapL sArmL 900 --ref out/raw/rm-rest-side.png and side_face.py.
 From tools/art (Studio saved first, then reload without saving): ../sfx/.venv/Scripts/python -I puppet_side.py
 """
 import json

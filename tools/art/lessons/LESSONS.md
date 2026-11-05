@@ -271,7 +271,10 @@ fills the gap. **A far limb is whole**, the near one's equal.
 Applied (puppet_side.py):
 - the near leg takes his thigh (it's the same leg in front)
 - the far arm is the near arm whole, a little back, not shrunk
-- the over-the-arm strap copy remade from his strap (`strap_over.py sStrapL sArmL 900 650`)
+- the over-the-arm strap copy remade from his strap: `strap_over.py sStrapL sArmL 900 --ref out/raw/rm-rest-side.png`. The copy shows
+  over the arm only where the drawing's red is. The old height cut-off (650) hid the strap down his front ("strap not showing? a
+  bug?" No: the copy was still my old strap, cut off at 650). Without the cut-off, the loop's bottom showed over the arm, where the
+  drawing has it under. **The drawing decides.**
 
 Studio, from the same session ("got some vector bugs too"):
 - a puppet layer's points dragged past its old outline were cut off while dragging (the mesh was the old outline's); now it's drawn

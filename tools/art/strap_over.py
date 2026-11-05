@@ -7,7 +7,7 @@ over the arm, and only the paw comes over it at the bottom. So the copy is the w
 The mask is in the strap's own pixels, so it moves with the chest, and the copy follows his strap's art: it's the same file.
 
 Save Studio first, then run this, then reload Studio without saving.
-From tools/art: ../sfx/.venv/Scripts/python -I strap_over.py [strap layer, default qStrapL] [arm layer, default qArmL] [paw top y, default 770] [stop at this height]
+From tools/art: ../sfx/.venv/Scripts/python -I strap_over.py [strap layer, default qStrapL] [arm layer, default qArmL] [paw top y, default 770] [stop at this height] [--ref <drawing png>]
 """
 import json
 import os
@@ -26,7 +26,7 @@ HEAD = "qHead"
 PAW = int(sys.argv[3]) if len(sys.argv) > 3 else 770   # (the paw, below this, is in front of the strap)
 # (and where only the shoulder's top goes under the strap, as in profile, where the arm hangs in front of the strap's run down his side:
 # the copy stops at this height)
-TOP = int(sys.argv[4]) if len(sys.argv) > 4 else None
+TOP = int(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4] != "--ref" else None
 S = F.S
 path = f"{F.ROOT}/docs/{DOC}.json"
 doc = json.load(open(path, encoding="utf-8"))
@@ -39,6 +39,13 @@ paw[:PAW] = 0
 keep = (1 - paw).astype(np.uint8)
 if TOP is not None:
     keep[TOP:] = 0
+# --ref <drawing>: the drawing decides, over the arm (the owner, 5 Nov 2026, the side: the loop's bottom showed over the arm where his
+# drawing has it under). The copy shows where the drawing's red is, and nowhere else over the arm
+if "--ref" in sys.argv:
+    from PIL import Image
+    im = np.asarray(Image.open(sys.argv[sys.argv.index("--ref") + 1]).convert("RGB").resize((S, S))).astype(int)
+    drawn_red = cv2.dilate((np.abs(im - [244, 95, 68]).sum(-1) < 60).astype(np.uint8), np.ones((7, 7), np.uint8))
+    keep &= (1 - (arm & (1 - drawn_red))).astype(np.uint8)
 region = cv2.dilate(strap, np.ones((9, 9), np.uint8)) & keep
 region = cv2.morphologyEx(region, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
 cs, _ = cv2.findContours(region, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
