@@ -29,6 +29,8 @@ ROOT = "C:/Users/domch/Documents/Projects/bubu-studio/projects/bubu"
 DOC = os.environ.get("VIEWS_DOC", "puppet-views")
 S.DOC = DOC
 # each arm: its layer, its chain's four bones, top to the one with the IK, and its bend (None: as it is)
+# (the front and the three-quarter left are approved as they are, 5 Nov 2026: the owner, "great on the front, lets not change
+# that now", "45 left is okay and dont touch". The three-quarter right is the same bones mirrored. Don't re-run this on them)
 ARMS = [("armR", ["bUpperArmR", "Bkf8450c", "bForearmR", "Bizhnq98"], -1),
         ("armL", ["bUpperArmL", "bUpperArmL2", "bForearmL", "bForearmL2"], 1),
         ("qArmL", ["qarmL1", "qarmL2", "qarmL3", "qarmL4"], 1),
