@@ -328,6 +328,11 @@ for nm, p in P.items():
 # --- into the document ---------------------------------------------------------------------------------------------------------
 d = json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))
 keep_ids = {nm for nm in P if "his" in P[nm]}
+# (side layers this script doesn't make, the owner's own like his strap copy over the arm, are kept, each just above the layer
+# it sat on: a re-run once dropped them all)
+_old = d["layers"]
+_extra = [(l, next((x["id"] for x in _old[i + 1:]), None)) for i, l in enumerate(_old)
+          if l["id"].startswith("s") and l["id"][1:2].isupper() and l["id"] not in P and l["id"] not in ("sHips", "sFace")]
 d["layers"] = [l for l in d["layers"] if not (l["id"].startswith("s") and l["id"][1:2].isupper()) and l["id"] != "view-side"]
 null = lambda id_, x, y, parent=None: {"id": id_, "name": id_, "art": "", "w": 60, "h": 60, "x": x, "y": y, "scale": 1, "rotation": 0,
                                         "flipX": False, "opacity": 1, "visible": True, "locked": False, "pivot": {"x": x, "y": y}, "keys": {},
@@ -372,6 +377,16 @@ for src_, dst in (("out/raw/rm-rest-side.png", "ref-side.png"), ("out/codex/side
     Image.open(src_).convert("RGB").resize((S, S)).save(f"{ART}/{dst}")
 d["layers"] = layers[::-1] + [ships] + [r for r in refs if r["id"] not in {l["id"] for l in d["layers"]}] + d["layers"] + [dict(null("view-side", 627, 1200), group="Views")]
 d["layers"] = [l for i, l in enumerate(d["layers"]) if l["id"] not in {x["id"] for x in d["layers"][:i]}]
+for _l, _below in _extra:
+    _at = next((i for i, x in enumerate(d["layers"]) if x["id"] == _below), 0)
+    d["layers"].insert(_at, _l)
+    print(f"  {_l['id']}: kept, the owner's ({_l.get('art')})")
+# (and the side's layers in the order he left them: he moved the backpack under the torso and ear, and a re-run put it back)
+_was = [l["id"] for l in _old if l["id"].startswith("s") and l["id"][1:2].isupper()]
+_side = [i for i, l in enumerate(d["layers"]) if l["id"] in _was]
+_by = {l["id"]: l for l in d["layers"]}
+for i, lid in zip(_side, sorted((d["layers"][i]["id"] for i in _side), key=_was.index)):
+    d["layers"][i] = _by[lid]
 # (the Turn control: the side each way past the three-quarters, the left one mirrored)
 tn = d["turn"]
 ids = [v["id"] for v in tn["views"]]
@@ -434,6 +449,9 @@ for nm, prefix, follow, kind, end, bulge in (("sArmL", "s armL", "sTorso", "hand
         pins(nm, bs, top, end)
     print(f"  {nm}: 4 bones {tuple(round(float(v)) for v in top)} -> {tuple(round(float(v)) for v in end)}, bends {bs[-1]['ik']['bend']}")
 d["bones"] = bones
+# (the legs as side_legs.py rigs them: a knee and a level foot, in place of four even bones)
+import side_legs  # noqa: E402
+side_legs.apply(d)
 json.dump(d, open(f"{ROOT}/docs/{DOC}.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 # --- check: the parts drawn back over the model ---------------------------------------------------------------------------------
