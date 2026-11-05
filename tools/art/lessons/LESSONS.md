@@ -307,6 +307,17 @@ handle beside it instead (handles were tried first, the first in reach taken). P
 long handle opposite swung right round with it, 214 px once. Small points also got nudged by a click's own wobble. Now the nearest
 point or handle is taken, points favoured, and a click must move 4 screen px before anything moves.
 
+### 21. Where joints and pins go (the owner, 5 Nov 2026, on the side's rig: "arm pins/bones need to follow the shape of the arm more too", "legs as well", "normally takes the centre point along the thickest width where it gets placed")
+
+- Every joint and pin sits on the limb's **centre line**, the middle of its width at that height, read off his outline. Not a
+  straight line from a guessed shoulder or hip.
+- A round top or end: the joint is in its middle, half the limb's widest width in from the end. The hip is in the middle of his round
+  thigh; the shoulder in the middle of the arm's cap.
+- A neck (the leg above the foot) is the ankle; an arm with no neck has its wrist where the paw's round end begins.
+- The knee and elbow are half way between, on the centre line, with two short bones there so the bend gathers at the joint
+  (Studio shares a bend evenly between a chain's joints); the foot is a level bone.
+- `side_limbs.py` does this from his shapes; `puppet_side.py` uses it on a rebuild.
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut

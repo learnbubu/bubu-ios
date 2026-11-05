@@ -449,9 +449,9 @@ for nm, prefix, follow, kind, end, bulge in (("sArmL", "s armL", "sTorso", "hand
         pins(nm, bs, top, end)
     print(f"  {nm}: 4 bones {tuple(round(float(v)) for v in top)} -> {tuple(round(float(v)) for v in end)}, bends {bs[-1]['ik']['bend']}")
 d["bones"] = bones
-# (the legs as side_legs.py rigs them: a knee and a level foot, in place of four even bones)
-import side_legs  # noqa: E402
-side_legs.apply(d)
+# (the arms and legs as side_limbs.py rigs them: on his shapes' centre lines, a rounded joint, a level foot)
+import side_limbs  # noqa: E402
+side_limbs.apply(d)
 json.dump(d, open(f"{ROOT}/docs/{DOC}.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 # --- check: the parts drawn back over the model ---------------------------------------------------------------------------------
