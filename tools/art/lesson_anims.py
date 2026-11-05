@@ -101,15 +101,18 @@ RIGHT2 = [(0, REST_ALL, SMOOTH),
           (230, dict(hy=34, tsx=1.13, tsy=0.84, head=22, hsx=1.05, hsy=0.94, hRx=8, hRy=26, hLx=-6, hLy=22, fy=6), SMOOTH),
           (280, dict(earL=10, earR=-10), OUT),
           (330, dict(hy=-170, fRy=-130, fLy=-120, tsx=0.9, tsy=1.12, head=-14, hsx=0.97, hsy=1.04, tilt=6, fy=-8), OUT),
-          (380, dict(hRx=34, hRy=-290, hLx=-50, hLy=-250, earL=-14, earR=10), OUT),
+          (380, dict(hRx=34, hRy=-290, hLx=-20, hLy=-190, earL=-14, earR=10), OUT),
           (440, dict(hy=-290, fRy=-255, fLy=-245, tsx=0.98, tsy=1.03, head=-8, hsx=1, hsy=1, hrot=-3), SMOOTH),
           (480, dict(earL=-6, earR=16), SMOOTH),
-          (560, dict(hRx=44, hRy=-300, hLx=-42, hLy=-280), SMOOTH),
-          (680, dict(tilt=-5, hrot=4, hRx=36, hRy=-270, hLx=-50, hLy=-300, earL=-14, earR=6), SMOOTH),
-          (800, dict(hy=-275, fRy=-240, fLy=-250), SMOOTH),
-          (860, dict(tilt=5, hrot=-3, hRx=46, hRy=-300, hLx=-40, hLy=-270, earL=-4, earR=14), SMOOTH),
+          (520, dict(hRx=0, hRy=-190, hLx=-50, hLy=-300, fRy=-330, fLy=-315), SMOOTH),        # (the knees tucked)
+          (660, dict(hRx=44, hRy=-300, hLx=-10, hLy=-180), SMOOTH),
+          (680, dict(tilt=-5, hrot=4, earL=-14, earR=6), SMOOTH),
+          (800, dict(hy=-275, fRy=-290, fLy=-300), SMOOTH),
+          (800, dict(hRx=10, hRy=-200, hLx=-48, hLy=-295), SMOOTH),
+          (860, dict(tilt=5, hrot=-3, earL=-4, earR=14), SMOOTH),
+          (940, dict(hRx=40, hRy=-290, hLx=-20, hLy=-200), SMOOTH),
           (1000, dict(hy=-255, fRy=-225, fLy=-220, tilt=3, tsx=1, tsy=1, head=-6, fy=-8), IN),
-          (1020, dict(hRx=40, hRy=-285, hLx=-46, hLy=-285), SMOOTH),
+          (1060, dict(hRx=40, hRy=-260, hLx=-46, hLy=-260), SMOOTH),
           (1140, dict(hy=0, fRy=0, fLy=0, tsx=0.95, tsy=1.07, head=-12, tilt=0), OUT),
           (1200, dict(hy=28, tsx=1.12, tsy=0.86, head=20, hsx=1.04, hsy=0.95, tilt=-4, hrot=4, hRx=30, hRy=-150, hLx=-40, hLy=-180, fy=4), OUT),
           (1240, dict(earL=14, earR=-12), OUT),
@@ -142,6 +145,68 @@ CHEER = [(0, R0, SMOOTH),
          (1600, R0, SMOOTH)]
 
 
+def at(ks, t):
+    """a channel's keys [(t, v, ease)] at t: each key's curve (a cubic bezier, as CSS's) to the next"""
+    if t <= ks[0][0]:
+        return ks[0][1]
+    for (t0, v0, e), (t1, v1, _) in zip(ks, ks[1:]):
+        if t <= t1:
+            u, (x1, y1, x2, y2) = (t - t0) / (t1 - t0) if t1 > t0 else 1, e
+            bz = lambda a, b, s_: 3 * a * s_ * (1 - s_) ** 2 + 3 * b * s_ * s_ * (1 - s_) + s_ ** 3
+            lo, hi = 0.0, 1.0
+            for _ in range(30):
+                m = (lo + hi) / 2
+                lo, hi = (m, hi) if bz(x1, x2, m) < u else (lo, m)
+            return v0 + (v1 - v0) * bz(y1, y2, (lo + hi) / 2)
+    return ks[-1][1]
+
+
+def spring(xs, hz, damp, dt):
+    """xs followed by a spring (hz, damping ratio): what a loose part does carried by xs (it lags, overshoots, settles)"""
+    w, x, v, out = 2 * 3.14159 * hz, xs[0], 0.0, []
+    for target in xs:
+        for _ in range(4):
+            a = w * w * (target - x) - 2 * damp * w * v
+            v += a * dt / 4
+            x += v * dt / 4
+        out.append(x)
+    return out
+
+
+LINEAR = [0, 0, 1, 1]
+
+
+def loosen(ch, duration, fps=30):
+    """the follow-through (the owner, 5 Nov 2026: "feels stiff still"): what hangs off the body lags behind it and overshoots,
+    as springs carried by the body's motion: the head (dropping into the body on take-off, bobbing on landing, turning after
+    the body's tilt), each ear (flopping the other way to the head's motion), each hand (dragging behind, the two at different
+    rates). Baked a key a frame on those channels."""
+    dt, n = 1 / fps, int(duration * fps / 1000) + 1
+    ts = [min(duration, i * 1000 / fps) for i in range(n)]
+    get = lambda c: [at(ch[c], t) for t in ts]
+    hy = get(("hips", "y"))
+    head, hrot, tilt = get(("head", "y")), get(("head", "rotation")), get(("torso", "rotation"))
+    lag = lambda xs, hz, damp: [s_ - x for s_, x in zip(spring(xs, hz, damp, dt), xs)]
+    body = lag(hy, 3.2, 0.32)                          # (+: the body has gone up and the loose part is still below)
+    head2 = [h + 0.3 * b for h, b in zip(head, body)]
+    hrot2 = [r + 0.8 * l for r, l in zip(hrot, lag(tilt, 2.6, 0.3))]
+    world = [y + h for y, h in zip(hy, head2)]
+    # (the body's own wobble: its squash still going a moment after the jump's and the landing's)
+    tsx, tsy = get(("torso", "sx")), get(("torso", "sy"))
+    jig = lag(hy, 4.5, 0.28)
+    out = {("head", "y"): head2, ("head", "rotation"): hrot2,
+           ("torso", "sy"): [v - 0.0007 * j for v, j in zip(tsy, jig)], ("torso", "sx"): [v + 0.0005 * j for v, j in zip(tsx, jig)]}
+    for ear, sign, hz in (("earL", 1, 4.2), ("earR", -1, 3.7)):
+        e = get((ear, "rotation"))
+        out[(ear, "rotation")] = [v + sign * 0.12 * l for v, l in zip(e, lag(world, hz, 0.22))]
+    for s_, hz, k in (("R", 2.9, 0.45), ("L", 2.5, 0.5)):
+        c = (HANDS[s_], "ty")
+        out[c] = [v + k * l for v, l in zip(get(c), lag(hy, hz, 0.3))]
+    for c, vs in out.items():
+        ch[c] = [(t, v, LINEAR) for t, v in zip(ts, vs)]
+    return ch
+
+
 def made(name, duration, loop, timeline, sparse=False):
     """the document with this animation on its layers and bones (its own keys only on what it moves)"""
     d = copy.deepcopy(base)
@@ -154,7 +219,7 @@ def made(name, duration, loop, timeline, sparse=False):
             b["ik"]["keys"] = {}
     L = {l["id"]: l for l in d["layers"]}
     B = {b["id"]: b for b in d["bones"]}
-    for (who, prop), ks in (sparse_keys(timeline) if sparse else keys_of(timeline)).items():
+    for (who, prop), ks in (loosen(sparse_keys(timeline), duration) if sparse else keys_of(timeline)).items():
         k = [{"t": t, "v": round(v, 2), "ease": e} for t, v, e in ks]
         if who in L:
             L[who]["keys"][prop] = k
