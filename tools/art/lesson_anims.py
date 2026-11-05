@@ -397,6 +397,126 @@ for hand, ks in SPIN_ARMS.items():
     ik["keys"]["tx"] = [{"t": t, "v": xy[0], "ease": HOLD} for t, xy in pts]
     ik["keys"]["ty"] = [{"t": t, "v": xy[1], "ease": HOLD} for t, xy in pts]
 json.dump(spin, open(os.path.join(out_dir, "bubu-lesson-spin.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+# (a test for Wrong, the owner's idea, 6 Nov 2026, the oops being "kinda static": "a desk slides in from the right and he
+# slams his arms on it, he can turn 45 degrees". The desk slides in, he notices, turns to the three-quarter right, winds up
+# leaning back with his arms back, slams both hands down on it (the body squashed, the head dropping, the desk jolting),
+# slumps over it a moment, then lets go, turns back and the desk slides away. He stands behind it: from the three-quarter
+# his near arm (the back one) is too short to reach a desk out to his side)
+SLAM_FRONT = [(0, REST_ALL, SMOOTH),
+              (110, dict(hy=8, tsx=1.04, tsy=0.95, earL=-14, earR=14, fx=14, fy=-4), OUT),
+              (220, dict(hy=0, tsx=1, tsy=1), SMOOTH),
+              (1150, dict(hy=10, tsx=1.04, tsy=0.96, head=8, earL=16, earR=-16, fx=6, fy=10), SMOOTH),
+              (1300, dict(earL=12, earR=-12), SMOOTH),
+              (1450, REST_ALL, SMOOTH),
+              (1700, REST_ALL, SMOOTH)]
+slam = made("Slam", 1700, False, SLAM_FRONT, sparse=True)
+slam["id"], slam["name"] = "bubu-lesson-slam", "Bùbù lesson: desk slam test"
+order = [v["id"] for v in slam["turn"]["views"]]
+slam["turn"]["keys"] = [{"t": t, "v": order.index(v), "ease": HOLD} for t, v in [(0, "front"), (230, "quarter-r"), (1130, "front")]]
+SL = {l["id"]: l for l in slam["layers"]}
+SLB = {b["id"]: b for b in slam["bones"]}
+
+
+def lk(lid, prop, ks):
+    """keys on a layer: [(t, offset from rest, ease)]"""
+    l = SL[lid]
+    if prop in ("sx", "sy", "scale"):   # (scales: as given, times its own)
+        r = l.get(prop, 1)
+        l["keys"][prop] = [{"t": t, "v": round(r * v, 3), "ease": e} for t, v, e in ks]
+        return
+    r = l.get(prop, 0)
+    l["keys"][prop] = [{"t": t, "v": round(r + v, 3), "ease": e} for t, v, e in ks]
+
+
+# the three-quarter body: (t, hips dy, torso turn, torso sx, sy, head dy, head turn, ease)
+Q = [(230, 0, 0, 1, 1, 0, 0, SMOOTH),
+     (390, -20, -7, 0.95, 1.07, -10, -6, SMOOTH),      # (the wind-up: up, leaning back)
+     (455, 24, 6, 1.09, 0.89, 26, 9, OUT),             # (the slam, arrived at fast)
+     (530, 12, 4, 1.03, 0.97, 18, 6, SMOOTH),          # (the rebound)
+     (680, 18, 5, 1.05, 0.95, 30, 11, SMOOTH),         # (slumped, the head hanging)
+     (980, 20, 5, 1.04, 0.96, 34, 12, SMOOTH),
+     (1080, -6, -2, 0.98, 1.03, -4, -2, OUT),          # (letting go, up)
+     (1130, 0, 0, 1, 1, 0, 0, SMOOTH)]
+IN_FAST = [0.6, 0, 1, 0.6]
+ease_into = {455: IN_FAST}
+lk("qHips", "y", [(t, hy, e) for t, hy, *_, e in Q])
+lk("qTorso", "rotation", [(t, r, e) for t, _, r, *_r, e in Q])
+lk("qTorso", "sx", [(t, x, e) for t, _, _, x, *_r, e in Q])
+lk("qTorso", "sy", [(t, y, e) for t, _, _, _, y, *_r, e in Q])
+lk("qHead", "y", [(t, v, e) for t, *_a, v, _r, e in Q])
+lk("qHead", "rotation", [(t, v, e) for t, *_a, v, e in Q])
+# (the ears: flung up by the slam, once, then drooping)
+lk("qEarL", "rotation", [(230, 0, SMOOTH), (390, 6, SMOOTH), (470, -18, OUT), (560, 10, SMOOTH), (700, 14, SMOOTH), (1080, 0, SMOOTH)])
+lk("qEarR", "rotation", [(230, 0, SMOOTH), (390, -4, SMOOTH), (475, 16, OUT), (570, -8, SMOOTH), (700, -12, SMOOTH), (1080, 0, SMOOTH)])
+# the eases: the slam itself accelerating in
+for lid in ("qHips", "qTorso", "qHead"):
+    for ks in SL[lid]["keys"].values():
+        for k in ks:
+            if k["t"] == 390:
+                k["ease"] = IN_FAST
+
+# the hands, where they go in the document (then put in the torso's space as it is then)
+TQ = (SL["qTorso"]["pivot"]["x"], SL["qTorso"]["pivot"]["y"]) if SL["qTorso"].get("pivot") else (SL["qTorso"]["x"], SL["qTorso"]["y"])
+DESK_TOP = 792
+
+
+def torso_space(t, x, y):
+    qs = {c: at([(k["t"], k["v"], k["ease"]) for k in SL[lid]["keys"][prop]], t) for c, (lid, prop) in
+          {"hy": ("qHips", "y"), "r": ("qTorso", "rotation"), "sx": ("qTorso", "sx"), "sy": ("qTorso", "sy")}.items()}
+    dy = qs["hy"] - SL["qHips"]["y"]
+    a = math.radians(qs["r"])
+    px, py = x - TQ[0], y - TQ[1] - dy
+    rx, ry = px * math.cos(a) + py * math.sin(a), -px * math.sin(a) + py * math.cos(a)
+    return round(TQ[0] + rx / qs["sx"], 1), round(TQ[1] + ry / qs["sy"], 1)
+
+
+HANDS_Q = {  # hand: [(t, doc place or None for rest, ease)]
+    "qarmL4": [(230, None, SMOOTH), (390, (318, 520), IN_FAST), (455, (585, DESK_TOP), OUT), (1040, (585, DESK_TOP), SMOOTH), (1120, None, SMOOTH)],
+    "qarmR4": [(230, None, SMOOTH), (390, (790, 560), IN_FAST), (455, (885, DESK_TOP + 4), OUT), (1040, (885, DESK_TOP + 4), SMOOTH), (1120, None, SMOOTH)]}
+for hand, ks in HANDS_Q.items():
+    ik = SLB[hand]["ik"]
+    pts = []
+    for t, xy, e in ks:
+        pts.append((t, (ik["tx"], ik["ty"]) if xy is None else torso_space(t, *xy), e))
+        if xy is not None and t == 455:   # (held on the desk while the body squashes and slumps: a key a frame)
+            for t2 in range(470, 1041, 33):
+                pts.append((t2, torso_space(t2, *xy), LINEAR))
+    pts.sort(key=lambda p: p[0])
+    ik["keys"]["tx"] = [{"t": t, "v": xy[0], "ease": e} for t, xy, e in pts]
+    ik["keys"]["ty"] = [{"t": t, "v": xy[1], "ease": e} for t, xy, e in pts]
+
+# the desk: drawn over his lower body and under his near arm, the far arm brought over it
+DESK = {"x0": 370, "x1": 1520, "top": 770, "floor": 1232}
+desk = copy.deepcopy(SL["qBelly"])
+for k_ in ("shade", "skin", "mask", "masks", "clip", "cut", "above", "warp", "deform", "paintMask"):
+    desk.pop(k_, None)
+desk.update({"id": "desk", "name": "desk (slam test)", "art": "desk.svg", "parent": None,
+             "x": (DESK["x0"] + DESK["x1"]) / 2, "y": (DESK["top"] + DESK["floor"]) / 2,
+             "w": DESK["x1"] - DESK["x0"], "h": DESK["floor"] - DESK["top"], "keys": {}, "loop": 0, "blink": 0, "group": "Props"})
+desk["pivot"] = {"x": desk["x"], "y": desk["y"]}
+slam["layers"].insert([l["id"] for l in slam["layers"]].index("qBelly"), desk)
+SL["desk"] = desk
+lk("desk", "x", [(0, 1250, HOLD), (40, 1250, OUT), (270, -22, SMOOTH), (360, 0, SMOOTH),
+                 (1100, 0, IN), (1380, 1250, HOLD)])
+lk("desk", "y", [(0, 0, SMOOTH), (455, 0, OUT), (480, 16, SMOOTH), (540, -5, SMOOTH), (620, 0, SMOOTH)])
+lk("desk", "rotation", [(0, 0, SMOOTH), (455, 0, OUT), (480, 1.2, SMOOTH), (560, -0.4, SMOOTH), (640, 0, SMOOTH)])
+SL["qArmR"]["above"] = [{"t": 430, "id": "desk"}, {"t": 1080, "id": ""}]   # (over it only once it's on it: wound up, it's behind him)
+
+# the preview's room above him, as the others
+slam["height"] += ROOM
+for l in slam["layers"]:
+    if l["id"] in ("view-front", "view-quarter"):
+        l["keys"]["y"] = [{"t": 0, "v": l["y"] + ROOM, "ease": HOLD}]
+for k in desk["keys"]["y"]:
+    k["v"] += ROOM
+desk["y"] += ROOM
+desk["pivot"]["y"] += ROOM
+for b in slam["bones"]:
+    if b["id"] in FEET.values():   # (the front's feet are the document's; the three-quarter's move with its view)
+        b["ik"]["ty"] += ROOM
+        for k in b["ik"]["keys"].get("ty", []):
+            k["v"] += ROOM
+json.dump(slam, open(os.path.join(out_dir, "bubu-lesson-slam.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 all_ = copy.deepcopy(anims[0][1])
 all_["id"], all_["name"] = "bubu-lesson", "Bùbù lesson"
 all_["anims"] = [capture(d, f"A{name.lower()}", name) for name, d in anims]
