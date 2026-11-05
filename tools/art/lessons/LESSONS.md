@@ -318,6 +318,16 @@ point or handle is taken, points favoured, and a click must move 4 screen px bef
   (Studio shares a bend evenly between a chain's joints); the foot is a level bone.
 - `side_limbs.py` does this from his shapes; `puppet_side.py` uses it on a rebuild.
 
+### 22. Which way elbows bend (the owner, 5 Nov 2026: "you keep changing the elbows for all of them... check all and make sure you know what way they bend - default elbow down when arm up")
+
+- **The rule: with the hand raised, the elbow points down.** Knees point forward.
+- Don't reason it out from bend signs. Claude flipped them by rule ("forearm forward", "out from the middle") and got different
+  arms wrong each time. **Measure it**: raise the hand (up and out to its own side; in profile, up in front) with Studio's own
+  IK at bend -1 and +1, and keep the one with the elbow below the shoulder-to-hand line.
+- Measured: front screen-right -1, screen-left +1; three-quarter near (hanging left of its shoulder) +1, far -1; side both -1.
+- Bend keys in an animation count too: the front's right arm had keys flipping it to +1, elbow up, for most of its first second.
+- bubu-studio's `tests/unit/puppet-elbows.test.ts` checks every arm of every view, at its bend and every bend key.
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut

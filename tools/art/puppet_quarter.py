@@ -451,10 +451,10 @@ for nm, prefix, follow, kind in (("qArmL", "q armL", "qTorso", "hand"), ("qArmR"
         end = np.array([float(np.mean(xs)) if xs else top[0], y_ank])
     joint = (top + end) / 2
     bs = chain(prefix, top, joint, end, follow, kind, 0)
-    # (which way the elbow or knee goes: not the front's "out from the body's middle", but as he faces, to the right. A joint
-    # turning +1 is clockwise on screen: the forearm comes forward, -1, the shin goes back, +1. The owner, 5 Nov 2026: "legs knee
-    # joint wrong way by default same with the eblow arms")
-    bs[-1]["ik"]["bend"] = -1 if kind == "hand" else 1
+    # (which way the elbow or knee goes. A knee forward, +1. An elbow down with the hand raised up and out to its side (the owner,
+    # 5 Nov 2026: "default elbow down when arm up"), measured with Studio's IK: +1 for the arm hanging left of its shoulder (the
+    # near one), -1 for the one hanging right. bubu-studio's tests/unit/puppet-elbows.test.ts checks every arm)
+    bs[-1]["ik"]["bend"] = (1 if end[0] < top[0] else -1) if kind == "hand" else 1
     if kind == "foot":
         # (the foot's control under the foot, clear of it)
         l = LAYER[nm]

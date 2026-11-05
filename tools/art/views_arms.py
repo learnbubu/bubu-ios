@@ -31,8 +31,10 @@ S.DOC = DOC
 # each arm: its layer, its chain's four bones, top to the one with the IK, and its bend (None: as it is)
 ARMS = [("armR", ["bUpperArmR", "Bkf8450c", "bForearmR", "Bizhnq98"], None),
         ("armL", ["bUpperArmL", "bUpperArmL2", "bForearmL", "bForearmL2"], 1),
-        ("qArmL", ["qarmL1", "qarmL2", "qarmL3", "qarmL4"], None),
-        ("qArmR", ["qarmR1", "qarmR2", "qarmR3", "qarmR4"], None)]
+        ("qArmL", ["qarmL1", "qarmL2", "qarmL3", "qarmL4"], 1),
+        ("qArmR", ["qarmR1", "qarmR2", "qarmR3", "qarmR4"], -1)]
+# (the bends: the elbow down with the hand raised up and out to its side (the owner, 5 Nov 2026: "default elbow down when arm
+# up"), as measured with Studio's own IK; bubu-studio's tests/unit/puppet-elbows.test.ts checks every arm of every view)
 
 
 def section(pts, c, n):
