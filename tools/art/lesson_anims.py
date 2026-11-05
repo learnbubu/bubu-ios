@@ -327,6 +327,29 @@ for l in spin["layers"]:
     if l["id"] in ("view-side", "view-quarter"):
         l["keys"]["y"] = [{"t": t, "v": round(l["y"] + ROOM + at(hips_y, t) - REST["hips"][1], 2), "ease": LINEAR}
                           for t in range(0, spin["duration"] + 1, 33)]
+# (the arms on the turned views, the owner: "match arm pose as if they were lagging behind rather than at the sides": flung
+# out and trailing the turn. He turns one way all through, so on screen they trail to the left throughout: behind him in the
+# right-facing views, and in the mirrored left-facing ones keyed the other way in the rig, which the mirror brings back left.
+# Each held (HOLD) for the frames its view shows; an arm aimed from its shoulder at degrees from the rig's +x, upward)
+import math
+SB = {b["id"]: b for b in spin["bones"]}
+
+
+def flung(hand, deg, reach):
+    ik, r = SB[hand]["ik"], SB[SB[hand]["ik"]["root"]]
+    return (round(r["hx"] + reach * math.cos(math.radians(deg)), 1), round(r["hy"] - reach * math.sin(math.radians(deg)), 1))
+
+
+SPIN_ARMS = {  # hand: [(t, (deg, reach) or None for rest)]
+    "qarmL4": [(0, None), (370, (165, 224)), (420, None), (520, (10, 200)), (590, None)],
+    "qarmR4": [(0, None), (370, (170, 200)), (420, None), (520, (15, 224)), (590, None)],
+    "sarmL4": [(0, None), (420, (155, 200)), (475, (25, 200)), (540, None)],
+    "sarmR4": [(0, None), (420, (165, 200)), (475, (15, 200)), (540, None)]}
+for hand, ks in SPIN_ARMS.items():
+    ik = SB[hand]["ik"]
+    pts = [(t, (ik["tx"], ik["ty"]) if a_ is None else flung(hand, *a_)) for t, a_ in ks]
+    ik["keys"]["tx"] = [{"t": t, "v": xy[0], "ease": HOLD} for t, xy in pts]
+    ik["keys"]["ty"] = [{"t": t, "v": xy[1], "ease": HOLD} for t, xy in pts]
 json.dump(spin, open(os.path.join(out_dir, "bubu-lesson-spin.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 all_ = copy.deepcopy(anims[0][1])
 all_["id"], all_["name"] = "bubu-lesson", "Bùbù lesson"
