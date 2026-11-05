@@ -101,16 +101,16 @@ BODY = [(0, REST_ALL, SMOOTH),
         (60, dict(hy=0, tsy=1, tsx=1, head=0), OUT),
         (230, dict(hy=34, tsx=1.13, tsy=0.84, head=22, hsx=1.05, hsy=0.94, fy=6), SMOOTH),
         (280, dict(earL=10, earR=-10), OUT),
-        (330, dict(hy=-170, tsx=0.9, tsy=1.12, head=-14, hsx=0.97, hsy=1.04, tilt=6, fy=-8), OUT),
+        (330, dict(hy=-170, tsx=0.9, tsy=1.12, head=-14, hsx=0.97, hsy=1.04, tilt=-6, fy=-8), OUT),
         (380, dict(earL=-14, earR=10), OUT),
-        (440, dict(hy=-290, tsx=0.98, tsy=1.03, head=-8, hsx=1, hsy=1, hrot=-3), SMOOTH),
+        (440, dict(hy=-290, tsx=0.98, tsy=1.03, head=-8, hsx=1, hsy=1, hrot=-3, tilt=-9), SMOOTH),
         (480, dict(earL=-6, earR=16), SMOOTH),
-        (680, dict(tilt=-5, hrot=4, earL=-14, earR=6), SMOOTH),
+        (680, dict(tilt=-7, hrot=4, earL=-14, earR=6), SMOOTH),
         (800, dict(hy=-275), SMOOTH),
-        (860, dict(tilt=5, hrot=-3, earL=-4, earR=14), SMOOTH),
-        (1000, dict(hy=-255, tilt=3, tsx=1, tsy=1, head=-6, fy=-8), IN),
+        (860, dict(tilt=-10, hrot=-3, earL=-4, earR=14), SMOOTH),
+        (1000, dict(hy=-255, tilt=-5, tsx=1, tsy=1, head=-6, fy=-8), IN),
         (1140, dict(hy=0, tsx=0.95, tsy=1.07, head=-12, tilt=0), OUT),
-        (1200, dict(hy=40, tsx=1.12, tsy=0.86, head=20, hsx=1.04, hsy=0.95, tilt=-4, hrot=4, fy=4), OUT),
+        (1200, dict(hy=40, tsx=1.12, tsy=0.86, head=20, hsx=1.04, hsy=0.95, tilt=4, hrot=-3, fy=4), OUT),
         (1240, dict(earL=14, earR=-12), OUT),
         (1320, dict(hy=-6, tsx=0.98, tsy=1.03, head=-4, hsx=1, hsy=1, tilt=1, hrot=-1, fy=0), SMOOTH),
         (1400, dict(earL=-5, earR=4), SMOOTH),
@@ -121,28 +121,53 @@ BODY = [(0, REST_ALL, SMOOTH),
 # v4's were "not at all" right): at take-off the arms straight down along the body and the legs straight together; rising,
 # the arms swing out wide and on up into a V while the legs tuck right up into a frog-sit (feet up by the hips, knees out);
 # held so in the air; falling, the legs reach down for the ground; landing in a wide squat, the arms out flat, then down)
+# (v6's arms, as v5's were "still odd": after a penguin's cheer on Tenor ("cheer arms up", a chunky body with short arms
+# like his): snapped in on the crouch, down along the body at take-off, up out through the sides into a high V (never flat out
+# like planks), and in the air pumping a little from the shoulders out of step rather than bending; out flat on landing)
+# (where a hand goes for its arm at an angle: the hand controls are measured from where the hand rests, out at his side, so
+# "up 310" had been up and out from there, and v6's V came out nearly flat. Aimed from the shoulder instead: degrees above
+# the level, outward, at a share of the arm's full reach (under 1 keeps a soft elbow))
+SHOULDER = {"R": (B0["bUpperArmR"]["hx"], B0["bUpperArmR"]["hy"]), "L": (B0["bUpperArmL"]["hx"], B0["bUpperArmL"]["hy"])}
+ARM_LEN = 282
+
+
+def aim(s_, deg, reach=0.95):
+    import math
+    out = 1 if s_ == "R" else -1
+    x = SHOULDER[s_][0] + out * ARM_LEN * reach * math.cos(math.radians(deg))
+    y = SHOULDER[s_][1] - ARM_LEN * reach * math.sin(math.radians(deg))
+    return {"h" + s_ + "x": round(x - HAND0[s_][0], 1), "h" + s_ + "y": round(y - HAND0[s_][1], 1)}
+
+
+def arms(r, l=None, rr=0.95, lr=None):
+    return {**aim("R", r, rr), **aim("L", r if l is None else l, rr if lr is None else lr)}
+
+
+# (v7, after Pengu's jump on Tenor ("excited", the owner's pick): one-sided, never mirrored: in the air the left arm (on
+# screen) shoots up by the head and waves while the right sticks out to the side; the left foot kicks up bent while the right
+# dangles; the body leans toward the raised arm. The raised arm no steeper than 52 degrees, so it stays beside his big head)
 ARMS = [(60, dict(hRx=0, hRy=0, hLx=0, hLy=0), SMOOTH),
-        (230, dict(hRx=30, hRy=20, hLx=-30, hLy=20), OUT),
-        (300, dict(hRx=-10, hRy=14, hLx=10, hLy=14), OUT),
-        (340, dict(hRx=-15, hRy=30, hLx=15, hLy=30), OUT),
-        (400, dict(hRx=170, hRy=-90, hLx=-170, hLy=-80), SMOOTH),
-        (470, dict(hRx=110, hRy=-270, hLx=-100, hLy=-260), OUT),
-        (620, dict(hRx=120, hRy=-250, hLx=-110, hLy=-280), SMOOTH),
-        (800, dict(hRx=100, hRy=-280, hLx=-120, hLy=-250), SMOOTH),
-        (960, dict(hRx=115, hRy=-265, hLx=-105, hLy=-270), SMOOTH),
-        (1060, dict(hRx=100, hRy=-300, hLx=-100, hLy=-300), IN),
-        (1140, dict(hRx=170, hRy=-140, hLx=-170, hLy=-130), OUT),
-        (1200, dict(hRx=180, hRy=-110, hLx=-180, hLy=-100), OUT),
-        (1320, dict(hRx=40, hRy=20, hLx=-36, hLy=24), SMOOTH),
+        (230, arms(-62, rr=0.93), OUT),
+        (340, arms(-72, rr=0.98), OUT),
+        (400, arms(-10, 30, 0.97, 0.97), SMOOTH),
+        (450, arms(4, 56, 0.97, 0.98), OUT),
+        (540, arms(-4, 44, 0.96, 0.95), SMOOTH),
+        (640, arms(4, 54, 0.95, 0.98), SMOOTH),
+        (740, arms(-4, 42, 0.96, 0.94), SMOOTH),
+        (840, arms(4, 54, 0.95, 0.98), SMOOTH),
+        (950, arms(-2, 44, 0.96, 0.95), SMOOTH),
+        (1080, arms(8, 52, 0.96, 0.97), IN),
+        (1200, arms(6, 10, 0.97, 0.97), OUT),
+        (1320, arms(-55), SMOOTH),
         (1420, dict(hRx=0, hRy=-4, hLx=0, hLy=0), SMOOTH)]
 LEGS = [(230, dict(fRx=0, fRy=0, fLx=0, fLy=0), SMOOTH),
         (300, dict(fRx=0, fRy=0, fLx=0, fLy=0), OUT),
         (340, dict(fRx=-8, fRy=-60, fLx=8, fLy=-60), OUT),
-        (400, dict(fRx=40, fRy=-330, fLx=-40, fLy=-320), SMOOTH),
-        (470, dict(fRx=70, fRy=-440, fLx=-70, fLy=-440), OUT),
-        (700, dict(fRx=65, fRy=-430, fLx=-72, fLy=-445), SMOOTH),
-        (900, dict(fRx=72, fRy=-440, fLx=-65, fLy=-430), SMOOTH),
-        (1040, dict(fRx=30, fRy=-170, fLx=-30, fLy=-170), IN),
+        (420, dict(fRx=15, fRy=-230, fLx=-60, fLy=-330), SMOOTH),
+        (480, dict(fRx=20, fRy=-210, fLx=-85, fLy=-365), OUT),
+        (700, dict(fRx=16, fRy=-200, fLx=-80, fLy=-355), SMOOTH),
+        (900, dict(fRx=22, fRy=-205, fLx=-88, fLy=-368), SMOOTH),
+        (1040, dict(fRx=25, fRy=-170, fLx=-35, fLy=-190), IN),
         (1140, dict(fRx=35, fRy=0, fLx=-35, fLy=0), OUT)]
 RIGHT2 = sorted(BODY + ARMS + LEGS, key=lambda k: k[0])
 # Right: a little crouch, a hop with both hands up and out, the head back, the ears flicking; landing with a squash, then rest
