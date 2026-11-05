@@ -117,33 +117,33 @@ BODY = [(0, REST_ALL, SMOOTH),
         (1460, REST_ALL, SMOOTH),
         (1560, dict(earL=0, earR=0), SMOOTH),
         (1700, REST_ALL, SMOOTH)]
-# (the arms: "not at all" as v3 had them, the hands sliding between poses: now swinging on arcs out through the sides, a beat
-# behind the body going up and coming down, overshooting each way; in the air pumping, one bent while the other reaches)
+# (the arms and legs, after a teddy bear's jump on Tenor ("bear jump", a chunky bear much like him, read frame by frame, as
+# v4's were "not at all" right): at take-off the arms straight down along the body and the legs straight together; rising,
+# the arms swing out wide and on up into a V while the legs tuck right up into a frog-sit (feet up by the hips, knees out);
+# held so in the air; falling, the legs reach down for the ground; landing in a wide squat, the arms out flat, then down)
 ARMS = [(60, dict(hRx=0, hRy=0, hLx=0, hLy=0), SMOOTH),
-        (230, dict(hRx=20, hRy=30, hLx=-18, hLy=26), OUT),
-        (320, dict(hRx=70, hRy=0, hLx=-60, hLy=10), OUT),
-        (380, dict(hRx=150, hRy=-170, hLx=-140, hLy=-140), SMOOTH),
-        (450, dict(hRx=40, hRy=-330, hLx=-60, hLy=-290), OUT),
-        (520, dict(hRx=0, hRy=-190, hLx=-50, hLy=-310), SMOOTH),
-        (660, dict(hRx=44, hRy=-300, hLx=-10, hLy=-180), SMOOTH),
-        (800, dict(hRx=10, hRy=-200, hLx=-48, hLy=-295), SMOOTH),
-        (940, dict(hRx=40, hRy=-290, hLx=-20, hLy=-200), SMOOTH),
-        (1080, dict(hRx=35, hRy=-310, hLx=-40, hLy=-305), IN),
-        (1180, dict(hRx=60, hRy=-260, hLx=-60, hLy=-270), OUT),
-        (1250, dict(hRx=150, hRy=-130, hLx=-150, hLy=-110), SMOOTH),
-        (1330, dict(hRx=40, hRy=30, hLx=-36, hLy=34), SMOOTH),
+        (230, dict(hRx=30, hRy=20, hLx=-30, hLy=20), OUT),
+        (300, dict(hRx=-10, hRy=14, hLx=10, hLy=14), OUT),
+        (340, dict(hRx=-15, hRy=30, hLx=15, hLy=30), OUT),
+        (400, dict(hRx=170, hRy=-90, hLx=-170, hLy=-80), SMOOTH),
+        (470, dict(hRx=110, hRy=-270, hLx=-100, hLy=-260), OUT),
+        (620, dict(hRx=120, hRy=-250, hLx=-110, hLy=-280), SMOOTH),
+        (800, dict(hRx=100, hRy=-280, hLx=-120, hLy=-250), SMOOTH),
+        (960, dict(hRx=115, hRy=-265, hLx=-105, hLy=-270), SMOOTH),
+        (1060, dict(hRx=100, hRy=-300, hLx=-100, hLy=-300), IN),
+        (1140, dict(hRx=170, hRy=-140, hLx=-170, hLy=-130), OUT),
+        (1200, dict(hRx=180, hRy=-110, hLx=-180, hLy=-100), OUT),
+        (1320, dict(hRx=40, hRy=20, hLx=-36, hLy=24), SMOOTH),
         (1420, dict(hRx=0, hRy=-4, hLx=0, hLy=0), SMOOTH)]
-# (the legs: "not at all" either, straight stumps whether standing or flying: now pushing off a moment after the body rises,
-# trailing straight, then kicking out of step in the air (one knee tucked, the other dangling and out), reaching for the
-# ground before it, landing wider with the knees giving)
 LEGS = [(230, dict(fRx=0, fRy=0, fLx=0, fLy=0), SMOOTH),
-        (300, dict(fRy=0, fLy=0), OUT),
-        (360, dict(fRx=-6, fRy=-120, fLx=4, fLy=-90), OUT),
-        (450, dict(fRx=10, fRy=-370, fLx=-30, fLy=-240), SMOOTH),
-        (640, dict(fRx=28, fRy=-250, fLx=-8, fLy=-355), SMOOTH),
-        (830, dict(fRx=8, fRy=-345, fLx=-26, fLy=-250), SMOOTH),
-        (1000, dict(fRx=18, fRy=-215, fLx=-18, fLy=-205), IN),
-        (1140, dict(fRx=18, fRy=0, fLx=-18, fLy=0), OUT)]
+        (300, dict(fRx=0, fRy=0, fLx=0, fLy=0), OUT),
+        (340, dict(fRx=-8, fRy=-60, fLx=8, fLy=-60), OUT),
+        (400, dict(fRx=40, fRy=-330, fLx=-40, fLy=-320), SMOOTH),
+        (470, dict(fRx=70, fRy=-440, fLx=-70, fLy=-440), OUT),
+        (700, dict(fRx=65, fRy=-430, fLx=-72, fLy=-445), SMOOTH),
+        (900, dict(fRx=72, fRy=-440, fLx=-65, fLy=-430), SMOOTH),
+        (1040, dict(fRx=30, fRy=-170, fLx=-30, fLy=-170), IN),
+        (1140, dict(fRx=35, fRy=0, fLx=-35, fLy=0), OUT)]
 RIGHT2 = sorted(BODY + ARMS + LEGS, key=lambda k: k[0])
 # Right: a little crouch, a hop with both hands up and out, the head back, the ears flicking; landing with a squash, then rest
 RIGHT = [(0, R0, SMOOTH),
