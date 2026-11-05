@@ -276,6 +276,11 @@ Applied (puppet_side.py):
   bug?" No: the copy was still my old strap, cut off at 650). Without the cut-off, the loop's bottom showed over the arm, where the
   drawing has it under. **The drawing decides.**
 
+Then, starting to fix the near leg himself (5 Nov 2026): "not sure why we're not just copying the LegR as they'll be the same".
+**In profile the near and far limb are the same shape: copy his finished one, don't cut the other.** The near leg is now his far
+leg (`LegL-side--from-LegR.svg`): same box and pins, with the near leg's toe lines on top. His half-done near-leg edit is left in
+the art folder.
+
 Studio, from the same session ("got some vector bugs too"):
 - a puppet layer's points dragged past its old outline were cut off while dragging (the mesh was the old outline's); now it's drawn
   flat while dragging
