@@ -351,9 +351,14 @@ refs = [{"id": rid, "name": name, "art": art, "w": 1254, "h": 1254, "x": 627, "y
          "parent": "view-side", "group": "Side"}
         for rid, name, art, vis in (("refSide", "ref (side)", "ref-side.png", True), ("refSideNoArm", "ref (side, no near arm, Codex)", "ref-side-no-arm.png", False),
                                     ("refSideNoHead", "ref (side, no head or near arm, Codex)", "ref-side-no-head.png", False),
-                                    ("refSideNoLeg", "ref (side, no near leg, Codex)", "ref-side-no-leg.png", False))]
+                                    ("refSideNoLeg", "ref (side, no near leg, Codex)", "ref-side-no-leg.png", False),
+                                    ("refSide2NoArm", "ref (side, no near arm, Codex 2)", "ref-side2-no-arm.png", False),
+                                    ("refSide2NoHead", "ref (side, no head, Codex 2)", "ref-side2-no-head.png", False),
+                                    ("refSide2NoBoth", "ref (side, no head or near arm, Codex 2)", "ref-side2-no-both.png", False))]
 for src_, dst in (("out/raw/rm-rest-side.png", "ref-side.png"), ("out/codex/side-no-arm/no-arm.png", "ref-side-no-arm.png"),
-                  ("out/codex/side-no-head/no-head.png", "ref-side-no-head.png"), ("out/codex/side-no-leg/no-leg.png", "ref-side-no-leg.png")):
+                  ("out/codex/side-no-head/no-head.png", "ref-side-no-head.png"), ("out/codex/side-no-leg/no-leg.png", "ref-side-no-leg.png"),
+                  ("out/codex/side2-no-arm/out.png", "ref-side2-no-arm.png"), ("out/codex/side2-no-head/out.png", "ref-side2-no-head.png"),
+                  ("out/codex/side2-no-both/out.png", "ref-side2-no-both.png")):
     Image.open(src_).convert("RGB").resize((S, S)).save(f"{ART}/{dst}")
 d["layers"] = layers[::-1] + [ships] + [r for r in refs if r["id"] not in {l["id"] for l in d["layers"]}] + d["layers"] + [dict(null("view-side", 627, 1200), group="Views")]
 d["layers"] = [l for i, l in enumerate(d["layers"]) if l["id"] not in {x["id"] for x in d["layers"][:i]}]
