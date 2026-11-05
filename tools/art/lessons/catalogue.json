@@ -451,5 +451,36 @@
    "approved unchanged: his front brow carried over by owner_transfer (moved, turned, sized, his proportions kept, not refitted) was right for the near side"
   ],
   "applied": "kept; APPROVED in puppet_quarter.py"
+ },
+ {
+  "id": "side-body-fix",
+  "date": "2026-11-05",
+  "by": "owner fixing Claude",
+  "part": "side near strap, backpack, torso, belly, far leg (puppet-views)",
+  "owner": [
+   "StrapL-side--edit-44.svg",
+   "Pack-side--edit-20.svg",
+   "Torso-side--edit-22.svg",
+   "Belly-side--edit-23.svg",
+   "LegR-side--edit-60.svg"
+  ],
+  "claude": [
+   "sStrapL-claude-before.svg",
+   "sPack-claude-before.svg",
+   "sTorso-claude-before.svg",
+   "sBelly-claude-before.svg",
+   "sLegR-claude-before.svg"
+  ],
+  "recordings": [
+   "2026-11-05-00-27-27.jsonl",
+   "2026-11-05-00-34-55.jsonl"
+  ],
+  "learnt": [
+   "hidden parts are simple, round, generous forms: a full round thigh up under the belly, a plain rounded block of a bag",
+   "a far limb is whole, the near one's equal, not shrunk",
+   "a strap is a slim band hugging its drawn edges; its hidden run ends in the bag's corner",
+   "torso: a round body, not a hull's box"
+  ],
+  "applied": "puppet_side.py: near leg takes his thigh; far arm whole; strap_over re-run on his strap"
  }
 ]

@@ -250,6 +250,35 @@ we made things from the recording. Things will be different shapes etc but the s
 - the three-quarter's near brow, Claude's carry-over of his front brow (4 Nov 2026: "brows are good")
 - they're kept, and never re-cut (`APPROVED` in puppet_quarter.py)
 
+### 19. Side: near strap, backpack, torso, belly and far leg (owner fixing Claude's second side cut, in puppet-views, 5 Nov 2026) - `2026-11-05-00-27-27.jsonl` (far leg, torso, belly), `2026-11-05-00-34-55.jsonl` (strap, backpack); `owner/*-side--edit-*.svg`, Claude's as `owner/s*-claude-before.svg`; overlays `out/lessons/side/overlay-parts.png` (Claude red, his blue); how he worked: `out/lessons/2026-11-05-00-*-process.json`
+
+He asked: "have a look if that helps cleaning up other pieces". What he did:
+- **Far leg** (3 min, the longest): Claude's was the near leg shrunk. His is a **whole leg with a big round thigh**, as wide as the
+  hip, reaching high up under the belly (y 810, 150 px over the hip). The far limb isn't smaller; it's the same limb, behind.
+- **Backpack**: Claude's hull bulged. His is a plain **rounded block**, 6 points (one taken out). Its hidden side runs straight down
+  under the arm and the strap, to x 490 at the top.
+- **Torso**: rounder all round, a body not a box. The top follows under the head, the back comes in from the bag, the bottom is one
+  round sweep under the belly. Big moves first (215 px), then small ones and handles.
+- **Belly**: as cut, but for its one hidden point, under the arm, pulled into the hidden part.
+- **Near strap**: a **slim band hugging the drawn strap's edges**, round the shoulder; its back run goes down to the bag's bottom
+  corner (x 430, y 850 to 875). He added one point at the shoulder (11).
+- His way, again: biggest error first, then round the outline; handle-only steps are about half of all steps; hidden points are
+  placed by eye, off any drawn edge.
+
+The rule it gives: **hidden parts are simple, round, generous forms**, a full thigh or a plain block, never a scrap that only just
+fills the gap. **A far limb is whole**, the near one's equal.
+
+Applied (puppet_side.py):
+- the near leg takes his thigh (it's the same leg in front)
+- the far arm is the near arm whole, a little back, not shrunk
+- the over-the-arm strap copy remade from his strap (`strap_over.py sStrapL sArmL 900 650`)
+
+Studio, from the same session ("got some vector bugs too"):
+- a puppet layer's points dragged past its old outline were cut off while dragging (the mesh was the old outline's); now it's drawn
+  flat while dragging
+- a double-click on the edge for a new point: the first click picked the layer under the edge; now a press on the edited shape's
+  edge keeps it
+
 ## Other views (the three-quarter, 4 Nov 2026)
 
 The owner: "make sure we're following what we learnt from those recordings and apply it to these turns". A view's parts aren't cut

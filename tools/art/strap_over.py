@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # (run with -I,
 import lesson_fit as F  # noqa: E402
 import owner_transfer as T  # noqa: E402
 
-DOC = "puppet-views"
+DOC = os.environ.get("SIDE_DOC", "puppet-views")   # (a copy to try on: SIDE_DOC=<doc id>)
 STRAP = sys.argv[1] if len(sys.argv) > 1 else "qStrapL"
 ARM = sys.argv[2] if len(sys.argv) > 2 else "qArmL"
 HEAD = "qHead"

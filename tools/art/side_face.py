@@ -7,9 +7,10 @@ Save Studio first, then run this, then reload Studio without saving.
 From tools/art: ../sfx/.venv/Scripts/python -I side_face.py
 """
 import json
+import os
 
 ROOT = "C:/Users/domch/Documents/Projects/bubu-studio/projects/bubu"
-DOC = "puppet-views"
+DOC = os.environ.get("SIDE_DOC", "puppet-views")   # (a copy to try on: SIDE_DOC=<doc id>)
 path = f"{ROOT}/docs/{DOC}.json"
 d = json.load(open(path, encoding="utf-8"))
 L = {l["id"]: l for l in d["layers"]}

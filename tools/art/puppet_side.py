@@ -32,7 +32,7 @@ import principle_cut as PC  # noqa: E402
 
 S, ROOT = F.S, F.ROOT
 SRC = "out/raw/rm-rest-side.png"
-DOC = "puppet-views"
+DOC = os.environ.get("SIDE_DOC", "puppet-views")   # (a copy to try on: SIDE_DOC=<doc id>)
 ART = f"{ROOT}/art/{DOC}"
 OUT = "out/puppet"
 APPROVED = set()            # (parts the owner has looked at and said are good, unchanged)
@@ -270,15 +270,25 @@ arm = cv2.morphologyEx(arm, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH
 arm = cv2.morphologyEx(arm, cv2.MORPH_OPEN, np.ones((7, 7), np.uint8))
 put("sArmL", DARK, arm, edge_of(red, cream), why="(paw round, cap under the strap's arch)", most=8)
 # the far arm: hangs behind the body, the same arm a little back (hidden at rest; there when he swings it)
-put("sArmR", DARK, np.roll(np.roll(cv2.erode(arm, np.ones((9, 9), np.uint8)), 25, axis=1), -5, axis=0), np.zeros((S, S), np.uint8), tol_hidden=10, why="(behind the body)")
+# (whole, not shrunk: the owner drew the far leg as full as the near one, lesson 19)
+put("sArmR", DARK, np.roll(np.roll(arm, 25, axis=1), -5, axis=0), np.zeros((S, S), np.uint8), tol_hidden=10, why="(behind the body, whole)", most=8)
 # the near leg: as drawn below the belly and the paw, its foot's own bump at the top front (lesson 10), and a tall round cap well up
 # under the belly (lesson 16)
 leg = (dark & box(440, 940, 760, 1215) & (1 - cv2.dilate(paw, np.ones((5, 5), np.uint8)))).astype(np.uint8)
 leg = comp_at(leg, 580, 1100)
 ys, xs = np.nonzero(leg & (yy < 1010))
 lx0, lx1 = int(np.percentile(xs, 2)), int(np.percentile(xs, 98))
-cv2.ellipse(leg, ((lx0 + lx1) // 2, 960), ((lx1 - lx0) // 2, 85), 0, 180, 360, 1, -1)
-cv2.rectangle(leg, (lx0, 960), (lx1, 1010), 1, -1)
+_art_of = lambda nm: next((l.get("art") for l in json.load(open(f"{ROOT}/docs/{DOC}.json", encoding="utf-8"))["layers"] if l["id"] == nm), None)
+# (the thigh: the owner's far leg (lesson 19) has a big round thigh up under the belly, as wide as the hip. The near leg is the same
+# leg in front, so it takes his thigh; before he'd drawn it, a round cap the leg's width)
+his_leg = [sh for f, sh in T.shapes_of("puppet-views", "sLegR") if f.lower() == DARK.lower()] if _art_of("sLegR") not in (None, "sLegR.svg") else []
+if his_leg:
+    th = np.zeros((S, S), np.uint8)
+    cv2.fillPoly(th, [np.array(T.sample(his_leg[0], 200)).round().astype(np.int32)], 1)
+    leg |= th & (yy < 1010)
+else:
+    cv2.ellipse(leg, ((lx0 + lx1) // 2, 960), ((lx1 - lx0) // 2, 85), 0, 180, 360, 1, -1)
+    cv2.rectangle(leg, (lx0, 960), (lx1, 1010), 1, -1)
 leg = cv2.morphologyEx(leg, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
 foot_top = next((x, y) for y in range(1080, 1180) for x in range(760, 600, -1) if leg[y, x])
 put("sLegL", DARK, leg, edge_of(magenta, cream), extra=(foot_top,), why="(cap high under the belly; the foot's bump)", most=12)
