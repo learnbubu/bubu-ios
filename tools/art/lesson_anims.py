@@ -486,7 +486,7 @@ for hand, ks in HANDS_Q.items():
     ik["keys"]["ty"] = [{"t": t, "v": xy[1], "ease": e} for t, xy, e in pts]
 
 # the desk: drawn over his lower body and under his near arm, the far arm brought over it
-DESK = {"x0": 370, "x1": 1520, "top": 770, "floor": 1232}
+DESK = {"x0": 370, "x1": 1520, "top": 700, "floor": 1260}   # (drawn at 45 degrees as he is, the owner: "table comes in at 45 degrees too")
 desk = copy.deepcopy(SL["qBelly"])
 for k_ in ("shade", "skin", "mask", "masks", "clip", "cut", "above", "warp", "deform", "paintMask"):
     desk.pop(k_, None)
@@ -500,6 +500,9 @@ lk("desk", "x", [(0, 1250, HOLD), (40, 1250, OUT), (270, -22, SMOOTH), (360, 0, 
                  (1100, 0, IN), (1380, 1250, HOLD)])
 lk("desk", "y", [(0, 0, SMOOTH), (455, 0, OUT), (480, 16, SMOOTH), (540, -5, SMOOTH), (620, 0, SMOOTH)])
 lk("desk", "rotation", [(0, 0, SMOOTH), (455, 0, OUT), (480, 1.2, SMOOTH), (560, -0.4, SMOOTH), (640, 0, SMOOTH)])
+# (his near arm comes over the strap's strand down his shoulder while it moves: drawn for the arm hanging at his side, it
+# covered the arm swung forward, the owner: "not sure why arm is behind the strap? we didnt set it up like that")
+SL["qArmL"]["above"] = [{"t": 300, "id": "qStrapLOver"}, {"t": 1110, "id": ""}]
 SL["qArmR"]["above"] = [{"t": 430, "id": "desk"}, {"t": 1080, "id": ""}]   # (over it only once it's on it: wound up, it's behind him)
 
 # the preview's room above him, as the others
