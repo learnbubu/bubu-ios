@@ -269,9 +269,12 @@ The owner: "think we need the other angles now... we want it all in one rig". To
     - The near ear is whole, in front of the head.
     - The torso is the whole body, under the strap and the belly.
   - It's 0.97% of pixels off the drawing at rest.
-  - After it runs: `strap_over.py sStrapL sArmL 900 650` (over the shoulder only) and `side_face.py`. Checked with
-    `cover_check.py puppet-views s`, whose arm and leg poses face the way he faces.
-  - **The owner hasn't reviewed the second cut yet.**
+  - Checked with `cover_check.py puppet-views s`, whose arm and leg poses face the way he faces.
+  - **Shapes done (5 Nov 2026, the owner: "think thats the side done!")**. Every part is his fix (lessons 19 and 20) but the patch,
+    cheek and far arm, which he approved as they are (`APPROVED`). The near leg is a copy of his far leg. The strap's copy over
+    the arm is his own edit, hidden by him; `strap_over.py` won't remake it. Re-running `puppet_side.py` keeps all of it.
+  - Elbows and knees bend the way he faces: forearm forward, shin back.
+  - Still to do: polishing the side's rig.
 - **Not yet:**
   - poses don't carry between views (each view is keyed on its own, as in Toon Boom)
 - **Re-running `puppet_quarter.py`** keeps every part the owner has edited or approved. It still rebuilds the q-bones and pins, and

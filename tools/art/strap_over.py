@@ -65,6 +65,10 @@ for c in cs:
                            "ix": float(raw[3 * k - 1][0]) if k else float(raw[-2][0]), "iy": float(raw[3 * k - 1][1]) if k else float(raw[-2][1]),
                            "ox": float(raw[3 * k + 1][0]), "oy": float(raw[3 * k + 1][1])} for k in range(n)],
                   "feather": 0, "mode": "show", "on": True})
+# (a copy the owner has edited himself, its art no longer his strap's, or hidden by him, is his: never remade over it)
+had = L.get(STRAP + "Over")
+if had and (had.get("art") != s["art"] or had.get("visible") is False) and "--force" not in sys.argv:
+    sys.exit(f"{STRAP}Over is the owner's now ({had.get('art')}, {'hidden' if had.get('visible') is False else 'shown'}): left as it is")
 copy = json.loads(json.dumps(s))
 copy.update({"id": STRAP + "Over", "name": s["name"].replace(" (3/4)", " over the shoulder (3/4)").replace(" (side)", " over the shoulder (side)"), "keys": {}})
 copy.pop("puppet", None)

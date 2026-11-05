@@ -35,7 +35,7 @@ SRC = "out/raw/rm-rest-side.png"
 DOC = os.environ.get("SIDE_DOC", "puppet-views")   # (a copy to try on: SIDE_DOC=<doc id>)
 ART = f"{ROOT}/art/{DOC}"
 OUT = "out/puppet"
-APPROVED = set()            # (parts the owner has looked at and said are good, unchanged)
+APPROVED = {"sPatch", "sCheek", "sArmR"}   # (parts the owner has looked at and said are good, unchanged: "think thats the side done!", 5 Nov 2026)
 
 F.im = np.asarray(Image.open(SRC).convert("RGB").resize((S, S))).astype(float)
 F.label = np.argmin(((F.im[:, :, None, :] - np.array(list(F.PALETTE.values()), float)[None, None]) ** 2).sum(-1), -1)
