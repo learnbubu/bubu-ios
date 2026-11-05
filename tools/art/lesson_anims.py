@@ -341,10 +341,15 @@ def flung(hand, deg, reach):
 
 
 SPIN_ARMS = {  # hand: [(t, (deg, reach) or None for rest)]
-    "qarmL4": [(0, None), (370, (165, 224)), (420, None), (520, (10, 200)), (590, None)],
-    "qarmR4": [(0, None), (370, (170, 200)), (420, None), (520, (15, 224)), (590, None)],
-    "sarmL4": [(0, None), (420, (155, 200)), (475, (25, 200)), (540, None)],
-    "sarmR4": [(0, None), (420, (165, 200)), (475, (15, 200)), (540, None)]}
+    # (the three-quarters likewise: the arm to the back trailing, the one to the front forward and out; the mirror again
+    # serves the left-facing one)
+    "qarmL4": [(0, None), (370, (165, 224)), (590, None)],
+    "qarmR4": [(0, None), (370, (20, 224)), (590, None)],
+    # (the side views, as the owner put it: the near arm trailing back, the far one, behind him, forward. The mirror turns
+    # the left-facing view round whole, so the same keys serve it. The far arm is too short to clear his belly, so forward
+    # it's hidden: there for if the belly or the arm changes)
+    "sarmL4": [(0, None), (420, (155, 200)), (540, None)],
+    "sarmR4": [(0, None), (420, (40, 212)), (540, None)]}
 for hand, ks in SPIN_ARMS.items():
     ik = SB[hand]["ik"]
     pts = [(t, (ik["tx"], ik["ty"]) if a_ is None else flung(hand, *a_)) for t, a_ in ks]
