@@ -132,7 +132,8 @@ def aim(s_, deg, reach=0.95):
 
 def bent(s_, upper, fore):
     """an arm bent at the elbow: the upper arm at `upper` degrees above the level (outward), the forearm at `fore` (90: straight
-    up), the hand where they end (the owner: "arm could be more 90 degrees ish": a fist pump's L. His head is far wider than
+    up), the hand where they end (the owner: "arm could be more 90 degrees ish", then "too 90 degree": a fist pump's elbow
+    at about 125 degrees. His head is far wider than
     his shoulders, so a forearm straight up from a level upper arm is behind it: the L is tipped out instead, the upper arm
     down and out, the forearm up and out, the hand by his cheek)"""
     import math
@@ -153,21 +154,25 @@ def arms(r, l=None, rr=0.95, lr=None):
 ARMS = [(60, dict(hRx=0, hRy=0, hLx=0, hLy=0), SMOOTH),
         (230, arms(-62, rr=0.93), OUT),
         (320, arms(-72, rr=0.98), OUT),
-        (380, {**aim("R", -6, 0.97), **bent("L", -40, 30)}, SMOOTH),
-        (440, {**aim("R", 4, 0.97), **bent("L", -28, 65)}, OUT),
-        (510, {**aim("R", -2, 0.96), **bent("L", -32, 52)}, SMOOTH),
-        (580, {**aim("R", 4, 0.96), **bent("L", -26, 68)}, SMOOTH),
-        (690, {**aim("R", 8, 0.96), **bent("L", -24, 62)}, IN),
+        (380, {**aim("R", -6, 0.97), **bent("L", -45, 10)}, SMOOTH),
+        (440, {**aim("R", 4, 0.97), **bent("L", -14, 44)}, OUT),
+        (510, {**aim("R", -2, 0.96), **bent("L", -20, 32)}, SMOOTH),
+        (580, {**aim("R", 4, 0.96), **bent("L", -12, 46)}, SMOOTH),
+        (690, {**aim("R", 8, 0.96), **bent("L", -14, 40)}, IN),
         (790, arms(6, 10, 0.97, 0.97), OUT),
         (910, arms(-55), SMOOTH),
         (1030, dict(hRx=0, hRy=-4, hLx=0, hLy=0), SMOOTH)]
+# (the legs: "a bit stiff" in v8, held in one shape the whole time in the air: now the kicked leg kicks twice, out of step
+# with the arm's pumps, the dangling one swings in and out, and both stretch down for the ground before landing)
 LEGS = [(230, dict(fRx=0, fRy=0, fLx=0, fLy=0), SMOOTH),
         (290, dict(fRx=0, fRy=0, fLx=0, fLy=0), OUT),
         (330, dict(fRx=-8, fRy=-60, fLx=8, fLy=-60), OUT),
-        (410, dict(fRx=15, fRy=-230, fLx=-60, fLy=-330), SMOOTH),
-        (480, dict(fRx=20, fRy=-215, fLx=-85, fLy=-365), SMOOTH),
-        (560, dict(fRx=20, fRy=-210, fLx=-80, fLy=-355), IN),
-        (690, dict(fRx=25, fRy=-110, fLx=-35, fLy=-130), IN),
+        (400, dict(fRx=10, fRy=-220, fLx=-50, fLy=-300), SMOOTH),
+        (460, dict(fRx=25, fRy=-230, fLx=-90, fLy=-380), OUT),
+        (520, dict(fRx=5, fRy=-250, fLx=-70, fLy=-330), SMOOTH),
+        (590, dict(fRx=28, fRy=-235, fLx=-92, fLy=-372), OUT),
+        (660, dict(fRx=18, fRy=-170, fLx=-55, fLy=-250), IN),
+        (710, dict(fRx=30, fRy=-60, fLx=-40, fLy=-80), IN),
         (740, dict(fRx=35, fRy=0, fLx=-35, fLy=0), OUT)]
 RIGHT2 = sorted(BODY + ARMS + LEGS, key=lambda k: k[0])
 # Right: a little crouch, a hop with both hands up and out, the head back, the ears flicking; landing with a squash, then rest
