@@ -193,7 +193,10 @@ def hand_at(s_, x, y):
 
 
 # (held a little below the eyes: right over them, the dark paws read as his dark eye patches, not as paws in front)
-WRONG2_ABOVE = {"armR": [(200, "mouth"), (940, "")], "armL": [(200, "mouth"), (940, "")]}   # (in front of the face's top layer)
+# (the straps brought forward too, on top: the upper arms stay under them, the owner: "part needs to stay behind the
+# straps still")
+WRONG2_ABOVE = {"strapR": [(200, "mouth"), (940, "")], "strapL": [(200, "mouth"), (940, "")],
+                "armR": [(200, "mouth"), (940, "")], "armL": [(200, "mouth"), (940, "")]}
 def hands_at(dx, dy, out=0):
     """both hands on his eyes, moved by (dx, dy), `out` further apart"""
     return {**hand_at("R", EYE["R"][0] + out + dx, EYE["R"][1] + dy), **hand_at("L", EYE["L"][0] - out + dx, EYE["L"][1] + dy)}
