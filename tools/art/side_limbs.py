@@ -73,16 +73,23 @@ def bone(id_, parent, a, b, follow=None, **extra):
     return out
 
 
-def chain(prefix, top, joint, end, follow, old_ik, kind):
+def chain(prefix, top, joint, end, follow, old_ik, kind, bend=None):
     """the four bones: upper, two short ones either side of the joint, lower (with the IK); the IK's control kept where it was"""
     top, joint, end = (np.asarray(p, float) for p in (top, joint, end))
+    bend = old_ik["bend"] if bend is None else bend
+    # (drawn leaning the other way from its bend, Studio's Rest pose turns the bend round to lie as drawn, and the elbow flipped:
+    # the owner, 5 Nov 2026, "the elbow should be the other way round... by default". Then the joint goes on the straight line)
+    a, b = joint - top, end - joint
+    if np.sign(a[0] * b[1] - a[1] * b[0]) == -bend:
+        d = (end - top) / np.linalg.norm(end - top)
+        joint = top + d * float((joint - top) @ d)
     u, v = (joint - top) / np.linalg.norm(joint - top), (end - joint) / np.linalg.norm(end - joint)
     j0, j2 = joint - u * JOINT_LEN / 2, joint + v * JOINT_LEN / 2
     ids = [f"{prefix}{i}" for i in range(1, 5)]
     ik = dict(old_ik)
     # (the control where it was on the canvas: its offset from the new end)
     cx, cy = old_ik["tx"] + old_ik.get("ox", 0), old_ik["ty"] + old_ik.get("oy", 0)
-    ik.update({"root": ids[0], "tx": round(float(end[0]), 1), "ty": round(float(end[1]), 1), "kind": kind,
+    ik.update({"root": ids[0], "tx": round(float(end[0]), 1), "ty": round(float(end[1]), 1), "kind": kind, "bend": bend,
                "ox": round(float(cx - end[0]), 1), "oy": round(float(cy - end[1]), 1)})
     return [bone(ids[0], None, top, j0, follow=follow, color=COLS[0]), bone(ids[1], ids[0], j0, joint, color=COLS[1]),
             bone(ids[2], ids[1], joint, j2, color=COLS[2]), bone(ids[3], ids[2], j2, end, color=COLS[3], ik=ik)], (j0, j2)
@@ -96,7 +103,7 @@ def leg(lid, prefix, old):
     ankle_y = narrowest(pts, hip_y + 100, sole - 50)                  # (the neck above the foot)
     hip, ankle = centre(pts, hip_y), centre(pts, ankle_y)
     knee = centre(pts, (hip_y + ankle_y) / 2)
-    bones, (k0, k2) = chain(prefix, hip, knee, ankle, old[f"{prefix}1"].get("follow", "sHips"), old[f"{prefix}4"]["ik"], "foot")
+    bones, (k0, k2) = chain(prefix, hip, knee, ankle, old[f"{prefix}1"].get("follow", "sHips"), old[f"{prefix}4"]["ik"], "foot", 1)   # (knee forward)
     # (the foot: a level bone from the ankle to the toes, along the sole 25 px up; heel and toes the outline's ends there)
     y = sole - 25
     heel, toe = np.array([across(pts, y)[0] + 15, y]), np.array([across(pts, y)[1] - 15, y])
@@ -117,7 +124,7 @@ def arm(lid, prefix, old):
     shoulder, wrist = centre(pts, shoulder_y), centre(pts, wrist_y)
     elbow = centre(pts, (shoulder_y + wrist_y) / 2)
     paw = centre(pts, (wrist_y + bottom) / 2)
-    bones, (e0, e2) = chain(prefix, shoulder, elbow, wrist, old[f"{prefix}1"].get("follow", "sTorso"), old[f"{prefix}4"]["ik"], "hand")
+    bones, (e0, e2) = chain(prefix, shoulder, elbow, wrist, old[f"{prefix}1"].get("follow", "sTorso"), old[f"{prefix}4"]["ik"], "hand", -1)   # (elbow down, measured)
     ids = [b["id"] for b in bones]
     pins = [("top", shoulder, ids[0]), ("upper", (shoulder + e0) / 2, ids[0]), ("elbow", elbow, ids[2]),
             ("fore", (e2 + wrist) / 2, ids[3]), ("wrist", wrist, ids[3]), ("paw", paw, ids[3])]

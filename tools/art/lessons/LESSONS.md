@@ -326,7 +326,11 @@ point or handle is taken, points favoured, and a click must move 4 screen px bef
   IK at bend -1 and +1, and keep the one with the elbow below the shoulder-to-hand line.
 - Measured: front screen-right -1, screen-left +1; three-quarter near (hanging left of its shoulder) +1, far -1; side both -1.
 - Bend keys in an animation count too: the front's right arm had keys flipping it to +1, elbow up, for most of its first second.
-- bubu-studio's `tests/unit/puppet-elbows.test.ts` checks every arm of every view, at its bend and every bend key.
+- **Rest pose sets each bend to how its chain is drawn.** A chain drawn leaning against its bend (the centre line curving the other
+  way) got its elbow or knee flipped on every reset; the owner: "the elbow should be the other way round... by default". Now the
+  joint goes on the straight line when the centre line leans the wrong way (side_limbs.chain).
+- bubu-studio's `tests/unit/puppet-elbows.test.ts` checks every arm of every view, at its bend and every bend key, and that no
+  arm or leg is drawn leaning against its bend.
 
 ## Other views (the three-quarter, 4 Nov 2026)
 

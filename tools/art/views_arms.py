@@ -29,7 +29,7 @@ ROOT = "C:/Users/domch/Documents/Projects/bubu-studio/projects/bubu"
 DOC = os.environ.get("VIEWS_DOC", "puppet-views")
 S.DOC = DOC
 # each arm: its layer, its chain's four bones, top to the one with the IK, and its bend (None: as it is)
-ARMS = [("armR", ["bUpperArmR", "Bkf8450c", "bForearmR", "Bizhnq98"], None),
+ARMS = [("armR", ["bUpperArmR", "Bkf8450c", "bForearmR", "Bizhnq98"], -1),
         ("armL", ["bUpperArmL", "bUpperArmL2", "bForearmL", "bForearmL2"], 1),
         ("qArmL", ["qarmL1", "qarmL2", "qarmL3", "qarmL4"], 1),
         ("qArmR", ["qarmR1", "qarmR2", "qarmR3", "qarmR4"], -1)]
@@ -76,7 +76,7 @@ def arm(doc, lid, ids, bend):
     elbow, _ = centre_at(pts, o, u, n, (s0 + s1) / 2)
     paw, _ = centre_at(pts, o, u, n, s1 - w / 4)
     # (the four bones, renamed as they were: chain() names them prefix1..4, so they're given their own names after)
-    made, (e0, e2) = S.chain("x", shoulder, elbow, wrist, top.get("follow"), ik, ik.get("kind", "hand"))
+    made, (e0, e2) = S.chain("x", shoulder, elbow, wrist, top.get("follow"), ik, ik.get("kind", "hand"), bend)
     rename = {f"x{i + 1}": ids[i] for i in range(4)}
     for b in made:
         b["id"] = b["name"] = rename[b["id"]]
@@ -88,8 +88,9 @@ def arm(doc, lid, ids, bend):
             b[k] = old.get(k, b[k])
     made[-1]["ik"]["root"] = ids[0]
     made[-1]["ik"]["keys"] = ik.get("keys", {})
-    if bend is not None:
-        made[-1]["ik"]["bend"] = bend
+    # (and its bend keys the same way: the front's wave had keys flipping its elbow up)
+    for k in made[-1]["ik"]["keys"].get("bend", []):
+        k["v"] = made[-1]["ik"]["bend"]
     doc["bones"] = [made[ids.index(b["id"])] if b["id"] in ids else b for b in doc["bones"]]
     l = next(x for x in doc["layers"] if x["id"] == lid)
     x0, y0 = l["x"] - l["w"] / 2, l["y"] - l["h"] / 2
