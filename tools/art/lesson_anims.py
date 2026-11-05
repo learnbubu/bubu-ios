@@ -103,18 +103,15 @@ BODY = [(0, REST_ALL, SMOOTH),
         (230, dict(hy=34, tsx=1.13, tsy=0.84, head=22, hsx=1.05, hsy=0.94, fy=6), SMOOTH),
         (280, dict(earL=10, earR=-10), OUT),
         (320, dict(hy=-150, tsx=0.9, tsy=1.12, head=-14, hsx=0.97, hsy=1.04, tilt=-6, fy=-8), OUT),
-        (370, dict(earL=-14, earR=10), OUT),
+        (380, dict(earL=-14, earR=12), OUT),
         (470, dict(hy=-290, tsx=0.98, tsy=1.03, head=-8, hsx=1, hsy=1, hrot=-3, tilt=-9), SMOOTH),
-        (500, dict(earL=-6, earR=16), SMOOTH),
-        (540, dict(hy=-282, tsx=1, tsy=1, head=-6, hrot=2, tilt=-8, earL=-12, earR=6), IN),
+                (540, dict(hy=-282, tsx=1, tsy=1, head=-6, hrot=-2, tilt=-8, earL=-9, earR=9), IN),
         (740, dict(hy=0, tsx=0.95, tsy=1.07, head=-12, tilt=-2), OUT),
         (800, dict(hy=40, tsx=1.12, tsy=0.86, head=20, hsx=1.04, hsy=0.95, tilt=4, hrot=-3, fy=4), OUT),
         (840, dict(earL=14, earR=-12), OUT),
         (920, dict(hy=-6, tsx=0.98, tsy=1.03, head=-4, hsx=1, hsy=1, tilt=1, hrot=-1, fy=0), SMOOTH),
-        (1000, dict(earL=-5, earR=4), SMOOTH),
-        (1060, REST_ALL, SMOOTH),
-        (1160, dict(earL=0, earR=0), SMOOTH),
-        (1300, REST_ALL, SMOOTH)]
+                (1060, REST_ALL, SMOOTH),
+                (1300, REST_ALL, SMOOTH)]
 # (where a hand goes for its arm at an angle: the hand controls are measured from where the hand rests, out at his side, so
 # "up 310" had been up and out from there, and v6's V came out nearly flat. Aimed from the shoulder instead: degrees above
 # the level, outward, at a share of the arm's full reach (under 1 keeps a soft elbow))
@@ -156,9 +153,8 @@ ARMS = [(60, dict(hRx=0, hRy=0, hLx=0, hLy=0), SMOOTH),
         (320, arms(-72, rr=0.98), OUT),
         (380, {**aim("R", -6, 0.97), **bent("L", -45, 10)}, SMOOTH),
         (440, {**aim("R", 4, 0.97), **bent("L", -14, 44)}, OUT),
-        (510, {**aim("R", -2, 0.96), **bent("L", -20, 32)}, SMOOTH),
-        (580, {**aim("R", 4, 0.96), **bent("L", -12, 46)}, SMOOTH),
-        (690, {**aim("R", 8, 0.96), **bent("L", -14, 40)}, IN),
+        (560, {**aim("R", 0, 0.96), **bent("L", -18, 38)}, SMOOTH),
+        (690, {**aim("R", 6, 0.96), **bent("L", -14, 42)}, IN),
         (790, arms(6, 10, 0.97, 0.97), OUT),
         (910, arms(-55), SMOOTH),
         (1030, dict(hRx=0, hRy=-4, hLx=0, hLy=0), SMOOTH)]
@@ -233,27 +229,28 @@ def loosen(ch, duration, fps=30):
     as springs carried by the body's motion: the head (dropping into the body on take-off, bobbing on landing, turning after
     the body's tilt), each ear (flopping the other way to the head's motion), each hand (dragging behind, the two at different
     rates). Baked a key a frame on those channels."""
+    # (damped so each overshoots once and settles: looser, they bounced two and three times, "double wiggles of stuff")
     dt, n = 1 / fps, int(duration * fps / 1000) + 1
     ts = [min(duration, i * 1000 / fps) for i in range(n)]
     get = lambda c: [at(ch[c], t) for t in ts]
     hy = get(("hips", "y"))
     head, hrot, tilt = get(("head", "y")), get(("head", "rotation")), get(("torso", "rotation"))
     lag = lambda xs, hz, damp: [s_ - x for s_, x in zip(spring(xs, hz, damp, dt), xs)]
-    body = lag(hy, 3.2, 0.32)                          # (+: the body has gone up and the loose part is still below)
+    body = lag(hy, 3.2, 0.6)                          # (+: the body has gone up and the loose part is still below)
     head2 = [h + 0.3 * b for h, b in zip(head, body)]
-    hrot2 = [r + 0.8 * l for r, l in zip(hrot, lag(tilt, 2.6, 0.3))]
+    hrot2 = [r + 0.8 * l for r, l in zip(hrot, lag(tilt, 2.6, 0.6))]
     world = [y + h for y, h in zip(hy, head2)]
     # (the body's own wobble: its squash still going a moment after the jump's and the landing's)
     tsx, tsy = get(("torso", "sx")), get(("torso", "sy"))
-    jig = lag(hy, 4.5, 0.28)
+    jig = lag(hy, 4.5, 0.6)
     out = {("head", "y"): head2, ("head", "rotation"): hrot2,
            ("torso", "sy"): [v - 0.0007 * j for v, j in zip(tsy, jig)], ("torso", "sx"): [v + 0.0005 * j for v, j in zip(tsx, jig)]}
     for ear, sign, hz in (("earL", 1, 4.2), ("earR", -1, 3.7)):
         e = get((ear, "rotation"))
-        out[(ear, "rotation")] = [v + sign * 0.12 * l for v, l in zip(e, lag(world, hz, 0.22))]
+        out[(ear, "rotation")] = [v + sign * 0.12 * l for v, l in zip(e, lag(world, hz, 0.5))]
     for s_, hz, k in (("R", 2.9, 0.45), ("L", 2.5, 0.5)):
         c = (HANDS[s_], "ty")
-        out[c] = [v + k * l for v, l in zip(get(c), lag(hy, hz, 0.3))]
+        out[c] = [v + k * l for v, l in zip(get(c), lag(hy, hz, 0.6))]
     for c, vs in out.items():
         ch[c] = [(t, v, LINEAR) for t, v in zip(ts, vs)]
     return ch
@@ -316,6 +313,21 @@ for name, d in anims:
             for k in b["ik"]["keys"].get("ty", []):
                 k["v"] += ROOM
     json.dump(one, open(os.path.join(out_dir, one["id"] + ".json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+# (a test, the owner, 5 Nov 2026: "see what a spin looks like with what we have": Right with a spin in the air through the
+# five views there are: the front, three-quarter right, side right, then side left (the back, not drawn, skipped), three-quarter
+# left and the front again, each for about a frame and a half. The other views aren't keyed, so they spin in their rest pose,
+# carried up and down with the jump)
+spin = json.load(open(os.path.join(out_dir, "bubu-lesson-right.json"), encoding="utf-8"))
+spin["id"], spin["name"] = "bubu-lesson-spin", "Bùbù lesson: spin test"
+order = [v["id"] for v in spin["turn"]["views"]]
+spin["turn"]["keys"] = [{"t": t, "v": order.index(v), "ease": HOLD} for t, v in
+                        [(0, "front"), (380, "quarter-r"), (430, "side-r"), (480, "side-l"), (530, "quarter-l"), (580, "front")]]
+hips_y = [(k["t"], k["v"], k["ease"]) for k in next(l for l in spin["layers"] if l["id"] == "hips")["keys"]["y"]]
+for l in spin["layers"]:
+    if l["id"] in ("view-side", "view-quarter"):
+        l["keys"]["y"] = [{"t": t, "v": round(l["y"] + ROOM + at(hips_y, t) - REST["hips"][1], 2), "ease": LINEAR}
+                          for t in range(0, spin["duration"] + 1, 33)]
+json.dump(spin, open(os.path.join(out_dir, "bubu-lesson-spin.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 all_ = copy.deepcopy(anims[0][1])
 all_["id"], all_["name"] = "bubu-lesson", "Bùbù lesson"
 all_["anims"] = [capture(d, f"A{name.lower()}", name) for name, d in anims]
