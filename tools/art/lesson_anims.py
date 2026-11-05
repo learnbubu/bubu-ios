@@ -405,14 +405,14 @@ json.dump(spin, open(os.path.join(out_dir, "bubu-lesson-spin.json"), "w", encodi
 SLAM_FRONT = [(0, REST_ALL, SMOOTH),
               (110, dict(hy=8, tsx=1.04, tsy=0.95, earL=-14, earR=14, fx=14, fy=-4), OUT),
               (220, dict(hy=0, tsx=1, tsy=1), SMOOTH),
-              (1150, dict(hy=10, tsx=1.04, tsy=0.96, head=8, earL=16, earR=-16, fx=6, fy=10), SMOOTH),
-              (1300, dict(earL=12, earR=-12), SMOOTH),
-              (1450, REST_ALL, SMOOTH),
-              (1700, REST_ALL, SMOOTH)]
-slam = made("Slam", 1700, False, SLAM_FRONT, sparse=True)
+              (1200, dict(hy=10, tsx=1.04, tsy=0.96, head=8, earL=16, earR=-16, fx=6, fy=10), SMOOTH),
+              (1350, dict(earL=12, earR=-12), SMOOTH),
+              (1500, REST_ALL, SMOOTH),
+              (1750, REST_ALL, SMOOTH)]
+slam = made("Slam", 1750, False, SLAM_FRONT, sparse=True)
 slam["id"], slam["name"] = "bubu-lesson-slam", "Bùbù lesson: desk slam test"
 order = [v["id"] for v in slam["turn"]["views"]]
-slam["turn"]["keys"] = [{"t": t, "v": order.index(v), "ease": HOLD} for t, v in [(0, "front"), (230, "quarter-r"), (1130, "front")]]
+slam["turn"]["keys"] = [{"t": t, "v": order.index(v), "ease": HOLD} for t, v in [(0, "front"), (230, "quarter-r"), (1175, "front")]]
 SL = {l["id"]: l for l in slam["layers"]}
 SLB = {b["id"]: b for b in slam["bones"]}
 
@@ -430,13 +430,14 @@ def lk(lid, prop, ks):
 
 # the three-quarter body: (t, hips dy, torso turn, torso sx, sy, head dy, head turn, ease)
 Q = [(230, 0, 0, 1, 1, 0, 0, SMOOTH),
-     (390, -20, -7, 0.95, 1.07, -10, -6, SMOOTH),      # (the wind-up: up, leaning back)
-     (455, 24, 6, 1.09, 0.89, 26, 9, OUT),             # (the slam, arrived at fast)
-     (530, 12, 4, 1.03, 0.97, 18, 6, SMOOTH),          # (the rebound)
-     (680, 18, 5, 1.05, 0.95, 30, 11, SMOOTH),         # (slumped, the head hanging)
-     (980, 20, 5, 1.04, 0.96, 34, 12, SMOOTH),
-     (1080, -6, -2, 0.98, 1.03, -4, -2, OUT),          # (letting go, up)
-     (1130, 0, 0, 1, 1, 0, 0, SMOOTH)]
+     (330, 10, -2, 1.04, 0.96, 6, -2, SMOOTH),         # (gathering: a little crouch, the elbows back)
+     (430, -20, -7, 0.95, 1.07, -10, -6, SMOOTH),      # (the wind-up: up, leaning back, the hands up)
+     (495, 24, 6, 1.09, 0.89, 26, 9, OUT),             # (the slam, arrived at fast)
+     (570, 12, 4, 1.03, 0.97, 18, 6, SMOOTH),          # (the rebound)
+     (720, 18, 5, 1.05, 0.95, 30, 11, SMOOTH),         # (slumped, the head hanging)
+     (1020, 20, 5, 1.04, 0.96, 34, 12, SMOOTH),
+     (1120, -6, -2, 0.98, 1.03, -4, -2, OUT),          # (letting go, up)
+     (1175, 0, 0, 1, 1, 0, 0, SMOOTH)]
 IN_FAST = [0.6, 0, 1, 0.6]
 ease_into = {455: IN_FAST}
 lk("qHips", "y", [(t, hy, e) for t, hy, *_, e in Q])
@@ -446,13 +447,13 @@ lk("qTorso", "sy", [(t, y, e) for t, _, _, _, y, *_r, e in Q])
 lk("qHead", "y", [(t, v, e) for t, *_a, v, _r, e in Q])
 lk("qHead", "rotation", [(t, v, e) for t, *_a, v, e in Q])
 # (the ears: flung up by the slam, once, then drooping)
-lk("qEarL", "rotation", [(230, 0, SMOOTH), (390, 6, SMOOTH), (470, -18, OUT), (560, 10, SMOOTH), (700, 14, SMOOTH), (1080, 0, SMOOTH)])
-lk("qEarR", "rotation", [(230, 0, SMOOTH), (390, -4, SMOOTH), (475, 16, OUT), (570, -8, SMOOTH), (700, -12, SMOOTH), (1080, 0, SMOOTH)])
+lk("qEarL", "rotation", [(230, 0, SMOOTH), (430, 6, SMOOTH), (510, -18, OUT), (600, 10, SMOOTH), (740, 14, SMOOTH), (1120, 0, SMOOTH)])
+lk("qEarR", "rotation", [(230, 0, SMOOTH), (430, -4, SMOOTH), (515, 16, OUT), (610, -8, SMOOTH), (740, -12, SMOOTH), (1120, 0, SMOOTH)])
 # the eases: the slam itself accelerating in
 for lid in ("qHips", "qTorso", "qHead"):
     for ks in SL[lid]["keys"].values():
         for k in ks:
-            if k["t"] == 390:
+            if k["t"] == 430:
                 k["ease"] = IN_FAST
 
 # the hands, where they go in the document (then put in the torso's space as it is then)
@@ -470,23 +471,25 @@ def torso_space(t, x, y):
     return round(TQ[0] + rx / qs["sx"], 1), round(TQ[1] + ry / qs["sy"], 1)
 
 
+# (the build-up as the owner drew it, 6 Nov 2026, "arms should build up like this": first the elbows back, the hands low by
+# his belly, then both hands up in front of his face, the elbows down, then the slam)
 HANDS_Q = {  # hand: [(t, doc place or None for rest, ease)]
-    "qarmL4": [(230, None, SMOOTH), (390, (318, 520), IN_FAST), (455, (585, DESK_TOP), OUT), (1040, (585, DESK_TOP), SMOOTH), (1120, None, SMOOTH)],
-    "qarmR4": [(230, None, SMOOTH), (390, (790, 560), IN_FAST), (455, (885, DESK_TOP + 4), OUT), (1040, (885, DESK_TOP + 4), SMOOTH), (1120, None, SMOOTH)]}
+    "qarmL4": [(230, None, SMOOTH), (330, (415, 830), SMOOTH), (430, (650, 468), IN_FAST), (495, (585, DESK_TOP), OUT), (1080, (585, DESK_TOP), SMOOTH), (1160, None, SMOOTH)],
+    "qarmR4": [(230, None, SMOOTH), (330, (760, 800), SMOOTH), (430, (930, 470), IN_FAST), (495, (885, DESK_TOP - 36), OUT), (1080, (885, DESK_TOP - 36), SMOOTH), (1160, None, SMOOTH)]}
 for hand, ks in HANDS_Q.items():
     ik = SLB[hand]["ik"]
     pts = []
     for t, xy, e in ks:
         pts.append((t, (ik["tx"], ik["ty"]) if xy is None else torso_space(t, *xy), e))
-        if xy is not None and t == 455:   # (held on the desk while the body squashes and slumps: a key a frame)
-            for t2 in range(470, 1041, 33):
+        if xy is not None and t == 495:   # (held on the desk while the body squashes and slumps: a key a frame)
+            for t2 in range(510, 1081, 33):
                 pts.append((t2, torso_space(t2, *xy), LINEAR))
     pts.sort(key=lambda p: p[0])
     ik["keys"]["tx"] = [{"t": t, "v": xy[0], "ease": e} for t, xy, e in pts]
     ik["keys"]["ty"] = [{"t": t, "v": xy[1], "ease": e} for t, xy, e in pts]
 
 # the desk: drawn over his lower body and under his near arm, the far arm brought over it
-DESK = {"x0": 370, "x1": 1520, "top": 700, "floor": 1260}   # (drawn at 45 degrees as he is, the owner: "table comes in at 45 degrees too")
+DESK = {"x0": 370, "x1": 1520, "top": 500, "floor": 1260}   # (drawn at 45 degrees as he is, the owner: "table comes in at 45 degrees too")
 desk = copy.deepcopy(SL["qBelly"])
 for k_ in ("shade", "skin", "mask", "masks", "clip", "cut", "above", "warp", "deform", "paintMask"):
     desk.pop(k_, None)
@@ -496,14 +499,19 @@ desk.update({"id": "desk", "name": "desk (slam test)", "art": "desk.svg", "paren
 desk["pivot"] = {"x": desk["x"], "y": desk["y"]}
 slam["layers"].insert([l["id"] for l in slam["layers"]].index("qBelly"), desk)
 SL["desk"] = desk
-lk("desk", "x", [(0, 1250, HOLD), (40, 1250, OUT), (270, -22, SMOOTH), (360, 0, SMOOTH),
-                 (1100, 0, IN), (1380, 1250, HOLD)])
-lk("desk", "y", [(0, 0, SMOOTH), (455, 0, OUT), (480, 16, SMOOTH), (540, -5, SMOOTH), (620, 0, SMOOTH)])
-lk("desk", "rotation", [(0, 0, SMOOTH), (455, 0, OUT), (480, 1.2, SMOOTH), (560, -0.4, SMOOTH), (640, 0, SMOOTH)])
+# (sliding in along its own length, from the back right, the owner: "desk feels like its still sliding in from the side
+# rather than a 45 degrees"; and out the same way)
+ALONG = (0.958, -0.287)
+lk("desk", "x", [(0, 1300 * ALONG[0], HOLD), (40, 1300 * ALONG[0], OUT), (270, -22 * ALONG[0], SMOOTH), (360, 0, SMOOTH),
+                 (1140, 0, IN), (1420, 1300 * ALONG[0], HOLD)])
+lk("desk", "y", [(0, 1300 * ALONG[1], HOLD), (40, 1300 * ALONG[1], OUT), (270, -22 * ALONG[1], SMOOTH), (360, 0, SMOOTH),
+                 (495, 0, OUT), (520, 16, SMOOTH), (580, -5, SMOOTH), (660, 0, SMOOTH), (1140, 0, IN), (1420, 1300 * ALONG[1], HOLD)])
+lk("desk", "rotation", [(0, 0, SMOOTH), (495, 0, OUT), (520, 1.2, SMOOTH), (600, -0.4, SMOOTH), (680, 0, SMOOTH)])
 # (his near arm comes over the strap's strand down his shoulder while it moves: drawn for the arm hanging at his side, it
 # covered the arm swung forward, the owner: "not sure why arm is behind the strap? we didnt set it up like that")
-SL["qArmL"]["above"] = [{"t": 300, "id": "qStrapLOver"}, {"t": 1110, "id": ""}]
-SL["qArmR"]["above"] = [{"t": 430, "id": "desk"}, {"t": 1080, "id": ""}]   # (over it only once it's on it: wound up, it's behind him)
+# (up in front of his face for the wind-up, over everything of the three-quarter)
+SL["qArmL"]["above"] = [{"t": 290, "id": "qStrapLOver"}, {"t": 380, "id": "qMouth"}, {"t": 470, "id": "qStrapLOver"}, {"t": 1150, "id": ""}]
+SL["qArmR"]["above"] = [{"t": 470, "id": "desk"}, {"t": 1120, "id": ""}]   # (over it only once it's on it: wound up, it's behind him)
 
 # the preview's room above him, as the others
 slam["height"] += ROOM
