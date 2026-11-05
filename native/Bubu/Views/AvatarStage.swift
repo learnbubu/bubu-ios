@@ -106,7 +106,7 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
     private var worn: [String: Int] = [:]
     private var uvBufs: [MTLBuffer] = [], idxBufs: [MTLBuffer] = [], posBufs: [MTLBuffer] = []
     private var pts: [[Float]]
-    private var edgePts: [Float] = []
+    private var edgePts: [Float] = [], oldPts: [Float] = []
     private let none: MTLTexture
     private var masks: [MTLTexture] = [], softened: [MTLTexture] = [], stencil: MTLTexture?, maskSize = (w: 0, h: 0)
     /// the part of the document it shows (every pose of every animation fits)
@@ -298,9 +298,10 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
         guard let rpd = view.currentRenderPassDescriptor, let drawable = view.currentDrawable, let cb = queue.makeCommandBuffer() else { return }
         let now = CACurrentMediaTime()
         let (anim, ms) = direct(now)
-        guard anim.frames > 0, !anim.mats.isEmpty else { return }
+        guard anim.frames > 0, !anim.mats.isEmpty || anim.points != nil else { return }
         var (mats, op) = rig.sample(anim, at: ms)
         // just after a change: blended from what played before (it carrying on, eased out as the new one eases in)
+        var blend: (anim: AvatarRig.Anim, at: Double, w: Float)?
         if let b = before, let ba = rig.anims[b.name] {
             let t = (now - changedAt) / blendTime
             if t >= 1 { before = nil } else {
@@ -308,13 +309,18 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
                 if b.name != idle { at = min(at, ba.duration - 0.01) }
                 let old = rig.sample(ba, at: at).mats, w = Float(t * t * (3 - 2 * t))
                 for k in 0..<mats.count { mats[k] = old[k] * (1 - w) + mats[k] * w }
+                blend = (ba, at, w)
             }
         }
         let parts = rig.parts, n = parts.count
-        // every part bent to this pose, and the box it's in
+        // every part bent to this pose (a mesh part as baked, blended the same way), and the box it's in
         var boxes = [SIMD4<Float>](repeating: .zero, count: n)
         for i in 0..<n {
-            rig.points(parts[i], mats: mats, into: &pts[i])
+            rig.points(i, anim, at: ms, mats: mats, into: &pts[i])
+            if parts[i].isMesh, let b = blend {
+                rig.meshPoints(i, b.anim, at: b.at, into: &oldPts)
+                for k in 0..<min(oldPts.count, pts[i].count) { pts[i][k] = oldPts[k] * (1 - b.w) + pts[i][k] * b.w }
+            }
             pts[i].withUnsafeBytes { posBufs[i].contents().copyMemory(from: $0.baseAddress!, byteCount: $0.count) }
             var x0 = Float.greatestFiniteMagnitude, y0 = x0, x1 = -x0, y1 = -x0
             for k in stride(from: 0, to: pts[i].count, by: 2) { x0 = min(x0, pts[i][k]); x1 = max(x1, pts[i][k]); y0 = min(y0, pts[i][k + 1]); y1 = max(y1, pts[i][k + 1]) }
@@ -336,7 +342,9 @@ final class AvatarRenderer: NSObject, MTKViewDelegate {
             var middle = [SIMD2<Float>](repeating: .zero, count: n)
             for c in 0..<n where parts[c].cast && shows[c] {
                 // (its middle: of its whole grid's outline, as Studio measures it)
-                if let e = parts[c].edge { rig.bend(e.verts, e.bones, e.weights, mats: mats, into: &edgePts) } else { edgePts = pts[c] }
+                if let e = parts[c].edge { rig.bend(e.verts, e.bones, e.weights, mats: mats, into: &edgePts) }
+                else if let rim = parts[c].rim, !rim.isEmpty { edgePts = rim.flatMap { [pts[c][$0 * 2], pts[c][$0 * 2 + 1]] } }   // (a mesh part's outline)
+                else { edgePts = pts[c] }
                 var x0 = Float.greatestFiniteMagnitude, y0 = x0, x1 = -x0, y1 = -x0
                 for k in stride(from: 0, to: edgePts.count, by: 2) { x0 = min(x0, edgePts[k]); x1 = max(x1, edgePts[k]); y0 = min(y0, edgePts[k + 1]); y1 = max(y1, edgePts[k + 1]) }
                 middle[c] = SIMD2((x0 + x1) / 2, (y0 + y1) / 2)

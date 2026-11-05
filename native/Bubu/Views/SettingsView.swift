@@ -354,8 +354,15 @@ private struct TesterPage: View {
             SettingsGroup("Appearance") {
                 Segments(options: [("system", "Auto"), ("light", "Light"), ("dark", "Dark")], value: $p.prefs.theme).padding(10)
             }
+            // the turnaround Bùbù from the Studio (its app export, version 2: puppet-pinned limbs, five views), going round
+            // his views on the native player, before he's put anywhere in the app (the owner, 5 Nov 2026: "the proper route")
+            SettingsGroup("Turnaround Bùbù (test)") {
+                AvatarStage(name: "bubu-turn", box: Self.turnBox)
+                    .frame(height: 340).frame(maxWidth: .infinity).padding(.vertical, 8)
+            }
         }
     }
+    private static let turnBox: AvatarRig.Box = AvatarRig.load("bubu-turn")?.fitAll() ?? (0, 0, 1254, 1254)
 }
 
 /// How it works (web: #helpModal), written for the app: the words of it, on a Settings page.
