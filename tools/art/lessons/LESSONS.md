@@ -324,7 +324,11 @@ point or handle is taken, points favoured, and a click must move 4 screen px bef
 - Don't reason it out from bend signs. Claude flipped them by rule ("forearm forward", "out from the middle") and got different
   arms wrong each time. **Measure it**: raise the hand (up and out to its own side; in profile, up in front) with Studio's own
   IK at bend -1 and +1, and keep the one with the elbow below the shoulder-to-hand line.
-- Measured: front screen-right -1, screen-left +1; three-quarter near (hanging left of its shoulder) +1, far -1; side both -1.
+- **"Arm up" in a turned view means up in front of him, the way he faces**, not out to the side. Measured with the arm raised to
+  the side, the three-quarter near arm came out +1; the owner set it to -1 in Studio ("have the directions of the elbows set up
+  how i have it now"), which is elbow down raised in front.
+- His bends (5 Nov 2026): front screen-right -1, screen-left +1; three-quarter both -1; side both -1; knees +1 (the front's legs
+  mirrored, +1 and -1). When he sets them himself in Studio, take his; don't re-derive.
 - Bend keys in an animation count too: the front's right arm had keys flipping it to +1, elbow up, for most of its first second.
 - **Rest pose sets each bend to how its chain is drawn.** A chain drawn leaning against its bend (the centre line curving the other
   way) got its elbow or knee flipped on every reset; the owner: "the elbow should be the other way round... by default". Now the

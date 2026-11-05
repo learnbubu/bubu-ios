@@ -33,10 +33,11 @@ S.DOC = DOC
 # that now", "45 left is okay and dont touch". The three-quarter right is the same bones mirrored. Don't re-run this on them)
 ARMS = [("armR", ["bUpperArmR", "Bkf8450c", "bForearmR", "Bizhnq98"], -1),
         ("armL", ["bUpperArmL", "bUpperArmL2", "bForearmL", "bForearmL2"], 1),
-        ("qArmL", ["qarmL1", "qarmL2", "qarmL3", "qarmL4"], 1),
+        ("qArmL", ["qarmL1", "qarmL2", "qarmL3", "qarmL4"], -1),
         ("qArmR", ["qarmR1", "qarmR2", "qarmR3", "qarmR4"], -1)]
-# (the bends: the elbow down with the hand raised up and out to its side (the owner, 5 Nov 2026: "default elbow down when arm
-# up"), as measured with Studio's own IK; bubu-studio's tests/unit/puppet-elbows.test.ts checks every arm of every view)
+# (the bends, as the owner set them in Studio, 5 Nov 2026 ("have the directions of the elbows set up how i have it now"): the
+# elbow down with the hand raised; on the front up and out to its side, in the turned views up in front of him, the way he
+# faces. bubu-studio's tests/unit/puppet-elbows.test.ts checks every arm of every view)
 
 
 def section(pts, c, n):
