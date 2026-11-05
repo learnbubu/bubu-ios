@@ -274,7 +274,14 @@ The owner: "think we need the other angles now... we want it all in one rig". To
     cheek and far arm, which he approved as they are (`APPROVED`). The near leg is a copy of his far leg. The strap's copy over
     the arm is his own edit, hidden by him; `strap_over.py` won't remake it. Re-running `puppet_side.py` keeps all of it.
   - Elbows and knees bend the way he faces: forearm forward, shin back.
-  - Still to do: polishing the side's rig.
+- **Rig done (5 Nov 2026, the owner: "think thats all now for the rig").** All three views:
+  - joints and pins on his shapes' centre lines (`side_limbs.py`, `views_arms.py`; lesson 21)
+  - rounded knees and elbows (two short bones at the joint), the side's feet level bones
+  - elbows as he set them in Studio (lesson 22); no limb drawn leaning against its bend, so Rest pose never flips one
+  - colours matched to the front and every view lit (`views_look.py`)
+  - bubu-studio's `tests/unit/puppet-elbows.test.ts` checks the elbows
+  - Approved, not to be rebuilt: the front's arms and the three-quarter's (`views_arms.py` says so). Re-running `puppet_quarter.py`
+    rebuilds the three-quarter's arm bones, so don't, without putting his bends back.
 - **Not yet:**
   - poses don't carry between views (each view is keyed on its own, as in Toon Boom)
 - **Re-running `puppet_quarter.py`** keeps every part the owner has edited or approved. It still rebuilds the q-bones and pins, and
