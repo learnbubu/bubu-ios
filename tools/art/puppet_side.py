@@ -422,9 +422,10 @@ for nm, prefix, follow, kind, end, bulge in (("sArmL", "s armL", "sTorso", "hand
     top, end = np.array(P[nm]["pivot"], float), np.array(end, float)
     joint = (top + end) / 2
     bs = chain(prefix, top, joint, end, follow, kind, 0)
-    d_ = end - top
-    left = np.array([d_[1], -d_[0]])
-    bs[-1]["ik"]["bend"] = 1 if left[0] * bulge < 0 else -1
+    # (a joint turning +1 is clockwise on screen: a bone pointing down turns back, to the left. Facing right, the forearm comes
+    # forward, -1, and the shin goes back, +1. The first rig had them the wrong way round: "legs knee joint wrong way by
+    # default same with the elbow arms", the owner, 5 Nov 2026)
+    bs[-1]["ik"]["bend"] = -1 if kind == "hand" else 1
     if kind == "foot":
         l = LAYER[nm]
         bs[-1]["ik"]["oy"] = round(float(l["y"] + l["h"] / 2 - end[1] + 26), 1)

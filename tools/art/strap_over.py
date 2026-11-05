@@ -18,6 +18,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # (run with -I, which leaves this folder off the path)
 import lesson_fit as F  # noqa: E402
 import owner_transfer as T  # noqa: E402
+import principle_cut as PC  # noqa: E402
 
 DOC = os.environ.get("SIDE_DOC", "puppet-views")   # (a copy to try on: SIDE_DOC=<doc id>)
 STRAP = sys.argv[1] if len(sys.argv) > 1 else "qStrapL"
@@ -54,9 +55,15 @@ s = L[STRAP]
 x0, y0 = s["x"] - s["w"] / 2, s["y"] - s["h"] / 2
 masks = []
 for c in cs:
-    c = cv2.approxPolyDP(c, 1.5, True)[:, 0, :]
-    # (a mask's handles are positions in the layer, not offsets: straight lines have them on the point)
-    masks.append({"pts": [(lambda x, y: {"x": x, "y": y, "ix": x, "iy": y, "ox": x, "oy": y})(float(p[0] - x0), float(p[1] - y0)) for p in c],
+    # (cut as he cuts a shape, principle_cut.py: points at its extremes and corners, curves with handles along the edge, as few as
+    # hold it, so he can refine it by hand. A mask's handles are positions in the layer, not offsets)
+    one = np.zeros((S, S), np.uint8)
+    cv2.drawContours(one, [c], -1, 1, -1)
+    raw = PC.cut(one, tol=2.0, max_points=12)[0]["raw"] - [x0, y0]
+    n = (len(raw) - 1) // 3
+    masks.append({"pts": [{"x": float(raw[3 * k][0]), "y": float(raw[3 * k][1]),
+                           "ix": float(raw[3 * k - 1][0]) if k else float(raw[-2][0]), "iy": float(raw[3 * k - 1][1]) if k else float(raw[-2][1]),
+                           "ox": float(raw[3 * k + 1][0]), "oy": float(raw[3 * k + 1][1])} for k in range(n)],
                   "feather": 0, "mode": "show", "on": True})
 copy = json.loads(json.dumps(s))
 copy.update({"id": STRAP + "Over", "name": s["name"].replace(" (3/4)", " over the shoulder (3/4)").replace(" (side)", " over the shoulder (side)"), "keys": {}})

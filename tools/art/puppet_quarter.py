@@ -450,13 +450,11 @@ for nm, prefix, follow, kind in (("qArmL", "q armL", "qTorso", "hand"), ("qArmR"
         xs = [a[0] for a in an if abs(a[1] - y_ank) < 60]
         end = np.array([float(np.mean(xs)) if xs else top[0], y_ank])
     joint = (top + end) / 2
-    # (which way the elbow or knee goes: out, away from the body's middle)
-    side = 1 if (top[0] + end[0]) / 2 > 620 else -1
     bs = chain(prefix, top, joint, end, follow, kind, 0)
-    d_ = end - top
-    # bend sign: a joint turning +1 (clockwise on screen) curves the chain so its middle bulges to the left of its way down
-    left = np.array([d_[1], -d_[0]])
-    bs[-1]["ik"]["bend"] = 1 if left[0] * side > 0 else -1
+    # (which way the elbow or knee goes: not the front's "out from the body's middle", but as he faces, to the right. A joint
+    # turning +1 is clockwise on screen: the forearm comes forward, -1, the shin goes back, +1. The owner, 5 Nov 2026: "legs knee
+    # joint wrong way by default same with the eblow arms")
+    bs[-1]["ik"]["bend"] = -1 if kind == "hand" else 1
     if kind == "foot":
         # (the foot's control under the foot, clear of it)
         l = LAYER[nm]
