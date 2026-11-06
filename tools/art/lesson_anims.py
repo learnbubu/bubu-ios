@@ -450,9 +450,7 @@ lk("qTorso", "sx", [(t, x, e) for t, _, _, x, *_r, e in Q])
 lk("qTorso", "sy", [(t, y, e) for t, _, _, _, y, *_r, e in Q])
 lk("qHead", "y", [(t, v, e) for t, *_a, v, _r, e in Q])
 lk("qHead", "rotation", [(t, v, e) for t, *_a, v, e in Q])
-# (the ears: flung up by the slam, once, then drooping)
-lk("qEarL", "rotation", [(230, 0, SMOOTH), (340, -4, OUT), (540, 13, SMOOTH), (600, 8, SMOOTH), (675, -18, OUT), (765, 10, SMOOTH), (905, 14, SMOOTH), (1285, 0, SMOOTH)])
-lk("qEarR", "rotation", [(230, 0, SMOOTH), (340, 3, OUT), (545, -10, SMOOTH), (600, -6, SMOOTH), (680, 16, OUT), (775, -8, SMOOTH), (905, -12, SMOOTH), (1285, 0, SMOOTH)])
+# (the ears left to the head: keyed, flung up by the slam and drooping, the owner, 6 Nov 2026: "not a fan of the ear animtion")
 # the eases: the slam itself accelerating in
 for lid in ("qHips", "qTorso", "qHead"):
     for ks in SL[lid]["keys"].values():
@@ -478,8 +476,10 @@ def torso_space(t, x, y):
 # (the build-up as the owner drew it, 6 Nov 2026, "arms should build up like this": first the elbows back, the hands low by
 # his belly, then both hands up in front of his face, the elbows down, then the slam)
 HANDS_Q = {  # hand: [(t, doc place or None for rest, ease)]
+    # (the far arm no higher than about 30 degrees: turned further from hanging, its mesh bent like a banana at the wrist, the
+    # owner: "this arm breaks weirdly")
     "qarmL4": [(230, None, SMOOTH), (340, (415, 830), OUT), (520, (625, 418), SMOOTH), (600, (650, 468), IN_FAST), (660, (585, DESK_TOP), OUT), (1245, (585, DESK_TOP), SMOOTH), (1325, None, SMOOTH)],
-    "qarmR4": [(230, None, SMOOTH), (340, (760, 800), OUT), (520, (912, 424), SMOOTH), (600, (930, 470), IN_FAST), (660, (885, DESK_TOP + 4), OUT), (1245, (885, DESK_TOP + 4), SMOOTH), (1325, None, SMOOTH)]}
+    "qarmR4": [(230, None, SMOOTH), (340, (760, 800), OUT), (520, (942, 486), SMOOTH), (600, (950, 512), IN_FAST), (660, (885, DESK_TOP + 4), OUT), (1245, (885, DESK_TOP + 4), SMOOTH), (1325, None, SMOOTH)]}
 for hand, ks in HANDS_Q.items():
     ik = SLB[hand]["ik"]
     pts = []
