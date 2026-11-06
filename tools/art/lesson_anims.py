@@ -482,7 +482,7 @@ HANDS_Q = {  # hand: [(t, doc place or None for rest, ease)]
     # (the far arm folded at the top, the upper arm forward, the elbow low, the forearm up, as the owner drew it: "elbow
     # still wrong... be like this"; reaching out straight, turned that far from hanging its mesh had bent like a banana)
     "qarmL4": [(230, None, SMOOTH), (340, (415, 830), OUT), (520, (625, 418), SMOOTH), (600, (650, 468), IN_FAST), (660, (585, DESK_TOP), OUT), (1245, (585, DESK_TOP), SMOOTH), (1325, None, SMOOTH)],
-    "qarmR4": [(230, None, SMOOTH), (340, (760, 800), OUT), (520, (845, 470), SMOOTH), (600, (860, 500), IN_FAST), (660, (885, DESK_TOP + 4), OUT), (1245, (885, DESK_TOP + 4), SMOOTH), (1325, None, SMOOTH)]}
+    "qarmR4": [(230, None, SMOOTH), (340, (760, 800), OUT), (520, (845, 470), SMOOTH), (600, (860, 500), IN_FAST), (660, (945, DESK_TOP - 8), OUT), (1245, (945, DESK_TOP - 8), SMOOTH), (1325, None, SMOOTH)]}
 for hand, ks in HANDS_Q.items():
     ik = SLB[hand]["ik"]
     pts = []
@@ -509,7 +509,7 @@ SL["desk"] = desk
 # (sliding in along its own length, its top's front edge, from the back right, the owner: "desk feels like its still sliding
 # in from the side rather than a 45 degrees", then of a steeper desk, "desk before was better" with an arrow along that edge;
 # and out the same way)
-ALONG = (0.982, -0.187)   # (its top's front edge)
+ALONG = (-0.982, 0.187)   # (its top's front edge, from the left, the owner: "table may be better coming in from the left side")
 lk("desk", "x", [(0, 1300 * ALONG[0], HOLD), (40, 1300 * ALONG[0], OUT), (270, -22 * ALONG[0], SMOOTH), (360, 0, SMOOTH),
                  (1305, 0, IN), (1585, 1300 * ALONG[0], HOLD)])
 lk("desk", "y", [(0, 1300 * ALONG[1], HOLD), (40, 1300 * ALONG[1], OUT), (270, -22 * ALONG[1], SMOOTH), (360, 0, SMOOTH),
@@ -520,8 +520,11 @@ lk("desk", "rotation", [(0, 0, SMOOTH), (660, 0, OUT), (685, 1.2, SMOOTH), (765,
 # (up in front of his face for the wind-up, over everything of the three-quarter)
 SL["qArmL"]["above"] = [{"t": 290, "id": "qStrapLOver"}, {"t": 400, "id": "qMouth"}, {"t": 640, "id": "desk"}, {"t": 1315, "id": ""}]
 # (the desk in front of all of him, the owner, 6 Nov 2026: "also table in front of everything", but his near arm once it's
-# on it (behind it, the hand was gone); the far arm, screen right, stays behind it all through, "SR arm still needs to just
-# stay behind")
+# on it (behind it, the hand was gone); the far arm, screen right, over the desk too but still behind his body, "SR arm
+# still needs to just stay behind", "when I say behind I dont mean the table": cut out where his body draws)
+SL["qArmR"]["above"] = [{"t": 640, "id": "desk"}, {"t": 1285, "id": ""}]
+SL["qArmR"]["cut"] = ["qTorso", "qBelly", "qStrapR", "qPack"]
+SL["qArmR"]["shade"]["cast"] = False   # (its shadow on his chest showed through the cut)
 
 # the preview's room above him, as the others
 slam["height"] += ROOM
