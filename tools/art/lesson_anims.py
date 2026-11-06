@@ -460,7 +460,10 @@ for lid in ("qHips", "qTorso", "qHead"):
 
 # the hands, where they go in the document (then put in the torso's space as it is then)
 TQ = (SL["qTorso"]["pivot"]["x"], SL["qTorso"]["pivot"]["y"]) if SL["qTorso"].get("pivot") else (SL["qTorso"]["x"], SL["qTorso"]["y"])
-DESK_TOP = 792
+# (the desk moved left to the middle, the owner: "table needs to be more in the middle": along its top's edge, which rises to
+# the right, the top where his hands land comes up by the slope)
+DESK_SHIFT = -190
+DESK_TOP = round(792 + DESK_SHIFT * 0.187)
 
 
 def torso_space(t, x, y):
@@ -493,7 +496,7 @@ for hand, ks in HANDS_Q.items():
     ik["keys"]["ty"] = [{"t": t, "v": xy[1], "ease": e} for t, xy, e in pts]
 
 # the desk: drawn in front of all of him
-DESK = {"x0": 316, "x1": 316 + 1075.2, "top": 591, "floor": 591 + 716.8}   # (Codex's desk, 1536x1024 at 0.7: its top where his hands land)   # (drawn at 45 degrees as he is, the owner: "table comes in at 45 degrees too")
+DESK = {"x0": 316 + DESK_SHIFT, "x1": 316 + DESK_SHIFT + 1075.2, "top": 591, "floor": 591 + 716.8}   # (Codex's desk, 1536x1024 at 0.7: its top where his hands land)   # (drawn at 45 degrees as he is, the owner: "table comes in at 45 degrees too")
 desk = copy.deepcopy(SL["qBelly"])
 for k_ in ("shade", "skin", "mask", "masks", "clip", "cut", "above", "warp", "deform", "paintMask"):
     desk.pop(k_, None)
@@ -516,11 +519,9 @@ lk("desk", "rotation", [(0, 0, SMOOTH), (660, 0, OUT), (685, 1.2, SMOOTH), (765,
 # covered the arm swung forward, the owner: "not sure why arm is behind the strap? we didnt set it up like that")
 # (up in front of his face for the wind-up, over everything of the three-quarter)
 SL["qArmL"]["above"] = [{"t": 290, "id": "qStrapLOver"}, {"t": 400, "id": "qMouth"}, {"t": 640, "id": "desk"}, {"t": 1315, "id": ""}]
-# (the desk in front of all of him, the owner, 6 Nov 2026: "also table in front of everything", but his arms once they're
-# on it (behind it, the hands were gone); the far arm's strap kept over it, "arm needs to stay behind on SR one": the strap
-# earlier in the list, put just above the desk first, the arm lands under it)
-SL["qStrapR"]["above"] = [{"t": 640, "id": "desk"}, {"t": 1285, "id": ""}]
-SL["qArmR"]["above"] = [{"t": 640, "id": "desk"}, {"t": 1285, "id": ""}]   # (over it only once it's on it: wound up, it's behind him)
+# (the desk in front of all of him, the owner, 6 Nov 2026: "also table in front of everything", but his near arm once it's
+# on it (behind it, the hand was gone); the far arm, screen right, stays behind it all through, "SR arm still needs to just
+# stay behind")
 
 # the preview's room above him, as the others
 slam["height"] += ROOM
