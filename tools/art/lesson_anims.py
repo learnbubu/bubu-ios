@@ -493,11 +493,11 @@ for hand, ks in HANDS_Q.items():
     ik["keys"]["ty"] = [{"t": t, "v": xy[1], "ease": e} for t, xy, e in pts]
 
 # the desk: drawn in front of all of him
-DESK = {"x0": 370, "x1": 1520, "top": 700, "floor": 1260}   # (drawn at 45 degrees as he is, the owner: "table comes in at 45 degrees too")
+DESK = {"x0": 316, "x1": 316 + 1075.2, "top": 591, "floor": 591 + 716.8}   # (Codex's desk, 1536x1024 at 0.7: its top where his hands land)   # (drawn at 45 degrees as he is, the owner: "table comes in at 45 degrees too")
 desk = copy.deepcopy(SL["qBelly"])
 for k_ in ("shade", "skin", "mask", "masks", "clip", "cut", "above", "warp", "deform", "paintMask"):
     desk.pop(k_, None)
-desk.update({"id": "desk", "name": "desk (slam test)", "art": "desk.svg", "parent": None,
+desk.update({"id": "desk", "name": "desk (slam test)", "art": "desk.png", "parent": None,
              "x": (DESK["x0"] + DESK["x1"]) / 2, "y": (DESK["top"] + DESK["floor"]) / 2,
              "w": DESK["x1"] - DESK["x0"], "h": DESK["floor"] - DESK["top"], "keys": {}, "loop": 0, "blink": 0, "group": "Props"})
 desk["pivot"] = {"x": desk["x"], "y": desk["y"]}
@@ -506,7 +506,7 @@ SL["desk"] = desk
 # (sliding in along its own length, its top's front edge, from the back right, the owner: "desk feels like its still sliding
 # in from the side rather than a 45 degrees", then of a steeper desk, "desk before was better" with an arrow along that edge;
 # and out the same way)
-ALONG = (0.9965, -0.0839)
+ALONG = (0.982, -0.187)   # (its top's front edge)
 lk("desk", "x", [(0, 1300 * ALONG[0], HOLD), (40, 1300 * ALONG[0], OUT), (270, -22 * ALONG[0], SMOOTH), (360, 0, SMOOTH),
                  (1305, 0, IN), (1585, 1300 * ALONG[0], HOLD)])
 lk("desk", "y", [(0, 1300 * ALONG[1], HOLD), (40, 1300 * ALONG[1], OUT), (270, -22 * ALONG[1], SMOOTH), (360, 0, SMOOTH),
