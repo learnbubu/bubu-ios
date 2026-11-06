@@ -475,7 +475,7 @@ def torso_space(t, x, y):
 # his belly, then both hands up in front of his face, the elbows down, then the slam)
 HANDS_Q = {  # hand: [(t, doc place or None for rest, ease)]
     "qarmL4": [(230, None, SMOOTH), (330, (415, 830), SMOOTH), (430, (650, 468), IN_FAST), (495, (585, DESK_TOP), OUT), (1080, (585, DESK_TOP), SMOOTH), (1160, None, SMOOTH)],
-    "qarmR4": [(230, None, SMOOTH), (330, (760, 800), SMOOTH), (430, (930, 470), IN_FAST), (495, (885, DESK_TOP - 36), OUT), (1080, (885, DESK_TOP - 36), SMOOTH), (1160, None, SMOOTH)]}
+    "qarmR4": [(230, None, SMOOTH), (330, (760, 800), SMOOTH), (430, (930, 470), IN_FAST), (495, (885, DESK_TOP + 4), OUT), (1080, (885, DESK_TOP + 4), SMOOTH), (1160, None, SMOOTH)]}
 for hand, ks in HANDS_Q.items():
     ik = SLB[hand]["ik"]
     pts = []
@@ -489,7 +489,7 @@ for hand, ks in HANDS_Q.items():
     ik["keys"]["ty"] = [{"t": t, "v": xy[1], "ease": e} for t, xy, e in pts]
 
 # the desk: drawn over his lower body and under his near arm, the far arm brought over it
-DESK = {"x0": 370, "x1": 1520, "top": 500, "floor": 1260}   # (drawn at 45 degrees as he is, the owner: "table comes in at 45 degrees too")
+DESK = {"x0": 370, "x1": 1520, "top": 700, "floor": 1260}   # (drawn at 45 degrees as he is, the owner: "table comes in at 45 degrees too")
 desk = copy.deepcopy(SL["qBelly"])
 for k_ in ("shade", "skin", "mask", "masks", "clip", "cut", "above", "warp", "deform", "paintMask"):
     desk.pop(k_, None)
@@ -499,9 +499,10 @@ desk.update({"id": "desk", "name": "desk (slam test)", "art": "desk.svg", "paren
 desk["pivot"] = {"x": desk["x"], "y": desk["y"]}
 slam["layers"].insert([l["id"] for l in slam["layers"]].index("qBelly"), desk)
 SL["desk"] = desk
-# (sliding in along its own length, from the back right, the owner: "desk feels like its still sliding in from the side
-# rather than a 45 degrees"; and out the same way)
-ALONG = (0.958, -0.287)
+# (sliding in along its own length, its top's front edge, from the back right, the owner: "desk feels like its still sliding
+# in from the side rather than a 45 degrees", then of a steeper desk, "desk before was better" with an arrow along that edge;
+# and out the same way)
+ALONG = (0.9965, -0.0839)
 lk("desk", "x", [(0, 1300 * ALONG[0], HOLD), (40, 1300 * ALONG[0], OUT), (270, -22 * ALONG[0], SMOOTH), (360, 0, SMOOTH),
                  (1140, 0, IN), (1420, 1300 * ALONG[0], HOLD)])
 lk("desk", "y", [(0, 1300 * ALONG[1], HOLD), (40, 1300 * ALONG[1], OUT), (270, -22 * ALONG[1], SMOOTH), (360, 0, SMOOTH),
