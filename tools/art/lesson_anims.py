@@ -492,7 +492,7 @@ for hand, ks in HANDS_Q.items():
     ik["keys"]["tx"] = [{"t": t, "v": xy[0], "ease": e} for t, xy, e in pts]
     ik["keys"]["ty"] = [{"t": t, "v": xy[1], "ease": e} for t, xy, e in pts]
 
-# the desk: drawn over his lower body and under his near arm, the far arm brought over it
+# the desk: drawn in front of all of him
 DESK = {"x0": 370, "x1": 1520, "top": 700, "floor": 1260}   # (drawn at 45 degrees as he is, the owner: "table comes in at 45 degrees too")
 desk = copy.deepcopy(SL["qBelly"])
 for k_ in ("shade", "skin", "mask", "masks", "clip", "cut", "above", "warp", "deform", "paintMask"):
@@ -501,7 +501,7 @@ desk.update({"id": "desk", "name": "desk (slam test)", "art": "desk.svg", "paren
              "x": (DESK["x0"] + DESK["x1"]) / 2, "y": (DESK["top"] + DESK["floor"]) / 2,
              "w": DESK["x1"] - DESK["x0"], "h": DESK["floor"] - DESK["top"], "keys": {}, "loop": 0, "blink": 0, "group": "Props"})
 desk["pivot"] = {"x": desk["x"], "y": desk["y"]}
-slam["layers"].insert([l["id"] for l in slam["layers"]].index("qBelly"), desk)
+slam["layers"].insert(0, desk)
 SL["desk"] = desk
 # (sliding in along its own length, its top's front edge, from the back right, the owner: "desk feels like its still sliding
 # in from the side rather than a 45 degrees", then of a steeper desk, "desk before was better" with an arrow along that edge;
@@ -515,7 +515,11 @@ lk("desk", "rotation", [(0, 0, SMOOTH), (660, 0, OUT), (685, 1.2, SMOOTH), (765,
 # (his near arm comes over the strap's strand down his shoulder while it moves: drawn for the arm hanging at his side, it
 # covered the arm swung forward, the owner: "not sure why arm is behind the strap? we didnt set it up like that")
 # (up in front of his face for the wind-up, over everything of the three-quarter)
-SL["qArmL"]["above"] = [{"t": 290, "id": "qStrapLOver"}, {"t": 400, "id": "qMouth"}, {"t": 640, "id": "qStrapLOver"}, {"t": 1315, "id": ""}]
+SL["qArmL"]["above"] = [{"t": 290, "id": "qStrapLOver"}, {"t": 400, "id": "qMouth"}, {"t": 640, "id": "desk"}, {"t": 1315, "id": ""}]
+# (the desk in front of all of him, the owner, 6 Nov 2026: "also table in front of everything", but his arms once they're
+# on it (behind it, the hands were gone); the far arm's strap kept over it, "arm needs to stay behind on SR one": the strap
+# earlier in the list, put just above the desk first, the arm lands under it)
+SL["qStrapR"]["above"] = [{"t": 640, "id": "desk"}, {"t": 1285, "id": ""}]
 SL["qArmR"]["above"] = [{"t": 640, "id": "desk"}, {"t": 1285, "id": ""}]   # (over it only once it's on it: wound up, it's behind him)
 
 # the preview's room above him, as the others
