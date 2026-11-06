@@ -482,7 +482,7 @@ HANDS_Q = {  # hand: [(t, doc place or None for rest, ease)]
     # (the far arm folded at the top, the upper arm forward, the elbow low, the forearm up, as the owner drew it: "elbow
     # still wrong... be like this"; reaching out straight, turned that far from hanging its mesh had bent like a banana)
     "qarmL4": [(230, None, SMOOTH), (340, (415, 830), OUT), (520, (625, 418), SMOOTH), (600, (650, 468), IN_FAST), (660, (585, DESK_TOP), OUT), (1245, (585, DESK_TOP), SMOOTH), (1325, None, SMOOTH)],
-    "qarmR4": [(230, None, SMOOTH), (340, (760, 800), OUT), (520, (845, 470), SMOOTH), (600, (860, 500), IN_FAST), (660, (945, DESK_TOP - 8), OUT), (1245, (945, DESK_TOP - 8), SMOOTH), (1325, None, SMOOTH)]}
+    "qarmR4": [(230, None, SMOOTH), (340, (760, 800), OUT), (520, (845, 470), SMOOTH), (600, (860, 500), IN_FAST), (660, (755, DESK_TOP - 4), OUT), (1245, (755, DESK_TOP - 4), SMOOTH), (1325, None, SMOOTH)]}
 for hand, ks in HANDS_Q.items():
     ik = SLB[hand]["ik"]
     pts = []
@@ -521,12 +521,21 @@ lk("desk", "rotation", [(0, 0, SMOOTH), (660, 0, OUT), (685, 1.2, SMOOTH), (765,
 # (up in front of his face for the wind-up, over everything of the three-quarter)
 SL["qArmL"]["above"] = [{"t": 290, "id": "qStrapLOver"}, {"t": 640, "id": "desk"}, {"t": 1315, "id": ""}]
 # (the desk in front of all of him, the owner, 6 Nov 2026: "also table in front of everything", but his near arm once it's
-# on it (behind it, the hand was gone); his far arm (screen right) over the desk but behind his body, the owner: "SR arm,
-# behind the body, but over the table". In layers that's a loop (arm under body, body under desk, desk under arm), so the arm
-# goes over the desk and is cut out where his body draws; its hand out past his body on the desk)
+# on it (behind it, the hand was gone); his far arm (screen right) too, down over his chest from under his chin, its hand
+# on the desk nearer the near one, as the owner painted it, 6 Nov 2026: out past his body it seemed to go through the table)
+# (and still under his right strap, the owner: "arm on SR still behind the body/strap too". The whole strap over the desk
+# laid its end on the desk top, so as the near side's strand over his shoulder: a copy of it, only its upper part (above
+# the desk's back edge), drawn where it is and brought over the desk with the arm, earlier in the list so over the arm)
+strap_over = copy.deepcopy(SL["qStrapR"])
+STRAP_CUT = 105   # (in its picture, of 230: the desk's back edge with him slumped)
+strap_over.update({"id": "qStrapROver", "name": "qStrapROver (slam test)", "keys": {},
+                   "mask": {"pts": [{"x": x, "y": y, "ix": x, "iy": y, "ox": x, "oy": y} for x, y in
+                                    [(0, 0), (strap_over["w"], 0), (strap_over["w"], STRAP_CUT), (0, STRAP_CUT)]],
+                            "feather": 0, "mode": "show", "on": True}})
+slam["layers"].insert([l["id"] for l in slam["layers"]].index("qStrapR"), strap_over)
+SL["qStrapROver"] = strap_over
+strap_over["above"] = [{"t": 640, "id": "desk"}, {"t": 1285, "id": ""}]
 SL["qArmR"]["above"] = [{"t": 640, "id": "desk"}, {"t": 1285, "id": ""}]
-SL["qArmR"]["cut"] = ["qTorso", "qBelly", "qStrapR", "qPack"]
-SL["qArmR"]["shade"]["cast"] = False   # (its shadow on his chest showed through the cut)
 
 # the preview's room above him, as the others
 slam["height"] += ROOM
