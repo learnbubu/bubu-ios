@@ -476,10 +476,10 @@ def torso_space(t, x, y):
 # (the build-up as the owner drew it, 6 Nov 2026, "arms should build up like this": first the elbows back, the hands low by
 # his belly, then both hands up in front of his face, the elbows down, then the slam)
 HANDS_Q = {  # hand: [(t, doc place or None for rest, ease)]
-    # (the far arm no higher than about 30 degrees: turned further from hanging, its mesh bent like a banana at the wrist, the
-    # owner: "this arm breaks weirdly")
+    # (the far arm folded at the top, the upper arm forward, the elbow low, the forearm up, as the owner drew it: "elbow
+    # still wrong... be like this"; reaching out straight, turned that far from hanging its mesh had bent like a banana)
     "qarmL4": [(230, None, SMOOTH), (340, (415, 830), OUT), (520, (625, 418), SMOOTH), (600, (650, 468), IN_FAST), (660, (585, DESK_TOP), OUT), (1245, (585, DESK_TOP), SMOOTH), (1325, None, SMOOTH)],
-    "qarmR4": [(230, None, SMOOTH), (340, (760, 800), OUT), (520, (942, 486), SMOOTH), (600, (950, 512), IN_FAST), (660, (885, DESK_TOP + 4), OUT), (1245, (885, DESK_TOP + 4), SMOOTH), (1325, None, SMOOTH)]}
+    "qarmR4": [(230, None, SMOOTH), (340, (760, 800), OUT), (520, (845, 470), SMOOTH), (600, (860, 500), IN_FAST), (660, (885, DESK_TOP + 4), OUT), (1245, (885, DESK_TOP + 4), SMOOTH), (1325, None, SMOOTH)]}
 for hand, ks in HANDS_Q.items():
     ik = SLB[hand]["ik"]
     pts = []
