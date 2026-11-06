@@ -527,7 +527,7 @@ SL["qArmL"]["above"] = [{"t": 290, "id": "qStrapLOver"}, {"t": 640, "id": "desk"
 # laid its end on the desk top, so as the near side's strand over his shoulder: a copy of it, only its upper part (above
 # the desk's back edge), drawn where it is and brought over the desk with the arm, earlier in the list so over the arm)
 strap_over = copy.deepcopy(SL["qStrapR"])
-STRAP_CUT = 105   # (in its picture, of 230: the desk's back edge with him slumped)
+STRAP_CUT = 230   # (all of it: with the hand out on the desk the arm covers where it ends, the owner: "sr arm is going through the strap")
 strap_over.update({"id": "qStrapROver", "name": "qStrapROver (slam test)", "keys": {},
                    "mask": {"pts": [{"x": x, "y": y, "ix": x, "iy": y, "ox": x, "oy": y} for x, y in
                                     [(0, 0), (strap_over["w"], 0), (strap_over["w"], STRAP_CUT), (0, STRAP_CUT)]],
