@@ -517,5 +517,27 @@
    "the torso's top is wide and flat under the head, like shoulders"
   ],
   "applied": "recorded; Studio's point grabbing fixed (nearest, points favoured, 4 px before a move)"
+ },
+ {
+  "id": "sit-leg-fix",
+  "date": "2026-11-08",
+  "by": "owner fixing Claude",
+  "part": "front sitting leg (scratch bubu-lesson-sitd)",
+  "owner": [
+   "sit-leg-l-fix.svg"
+  ],
+  "claude": [
+   "sit-leg-l-claude-before.svg"
+  ],
+  "recordings": [
+   "2026-11-08-07-52-05.jsonl"
+  ],
+  "learnt": [
+   "a limb seen end-on is its round end (the sole) as its own piece on top, with a short stub behind tucking under the belly; no tall thigh",
+   "6 + 6 points, fewer than a standing leg's 12",
+   "the stub a touch different dark (#3c3c38)",
+   "sized down to 0.891 against the body"
+  ],
+  "applied": "mirrored exactly to sitLegR"
  }
 ]

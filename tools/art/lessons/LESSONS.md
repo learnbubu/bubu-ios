@@ -369,3 +369,22 @@ A part he has edited is never rebuilt.
   nothing.
 - The copy uses his strap's file: if he edits the strap, re-run it.
 
+
+### 23. Sitting leg, front (owner fixing Claude's, in the scratch lesson project's `bubu-lesson-sitd`, 8 Nov 2026) - `2026-11-08-07-52-05.jsonl` (5 min), `owner/sit-leg-l-fix.svg`, Claude's `owner/sit-leg-l-claude-before.svg`; sheet `out/lessons/2026-11-08-07-52-05.png`; how he worked: `out/lessons/2026-11-08-07-52-05-process.json` (and `.txt`); model `out/raw/rm-sit-front.png` (Codex's sit, `out/codex/sit/`, placed in the hips' rest frame)
+
+Claude's cut (principle_cut from Codex's legs-only picture) was one 11-point outline with a tall round thigh up under the strap.
+What he did:
+- **Two pieces, not one.** A **round foot of 6 points** on top (the sole facing us), and behind it a **short stub of 6 points**
+  running in from the foot's inner side to under the belly. Claude's tall thigh dome is gone: sitting, the leg barely shows, so the
+  hidden part is only the stub that tucks under the belly, not a whole thigh.
+- The stub got its own dark (`#3c3c38`, picked at 259 s), a touch off the foot's `#393a36`.
+- **The sole pad and toe pads** kept as round 4-point pieces, the sole pad redrawn as an oval and the toe pads moved and resized.
+- **The whole layer sized down to 0.891** and moved: the feet were too big against the body.
+- His way, again: deletes first (9 points taken out, 4 added), biggest moves first (about 21 px), then down to 3 px; 36 of 91
+  steps were handle-only. Most of his points sit off any drawn edge: he shaped it by eye against the reference rather than tracing.
+
+The rule it gives: **a limb seen end-on (a sole facing us) is its end as its own round piece, with only a short stub behind it**,
+not the standing leg's outline with a thigh. Fewer points than a standing leg (6 + 6, not 12).
+
+Mirrored to sitLegR exactly (same shapes, pads and scale, flipped about 626.5, the pivot mirrored); nothing refitted.
+part_kinks: the stub has a sharp tuck at each end (163 degrees), where it goes under the foot: asked whether it's meant.
