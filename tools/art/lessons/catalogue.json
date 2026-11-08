@@ -539,5 +539,23 @@
    "sized down to 0.891 against the body"
   ],
   "applied": "mirrored exactly to sitLegR"
+ },
+ {
+  "id": "sad-mouth-his-way",
+  "date": "2026-11-09",
+  "by": "owner's note on Claude's",
+  "part": "front sad mouth (scratch bubu-lesson-flop)",
+  "owner": [],
+  "claude": [
+   "sad-mouth-claude-before.svg",
+   "sad-mouth-claude-his-way.svg"
+  ],
+  "recordings": [],
+  "learnt": [
+   "an expression is his part reshaped, not a new cut: keep his 18 points, stroke thickness, stem width and length, three-point caps",
+   "the drawing only says where the curves go; his points carried onto it in his order, at the same share along each stretch",
+   "Codex's long thin stem read as 'weird': his stem, 18 px under the nose"
+  ],
+  "applied": "sad_face_cut.py, the flop's mouthSad layer"
  }
 ]

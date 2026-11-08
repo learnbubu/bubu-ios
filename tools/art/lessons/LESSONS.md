@@ -388,3 +388,16 @@ not the standing leg's outline with a thigh. Fewer points than a standing leg (6
 
 Mirrored to sitLegR exactly (same shapes, pads and scale, flipped about 626.5, the pivot mirrored); nothing refitted.
 part_kinks: the stub has a sharp tuck at each end (163 degrees), where it goes under the foot: asked whether it's meant.
+
+### 24. A new expression starts from his part (the owner, 9 Nov 2026, of Claude's sad mouth for the Wrong flop: "the line in the middle leading up to his nose is weird", then "look at how we've been doing the mouth and learn please, done it a few times now") - Claude's from-scratch cut `owner/sad-mouth-claude-before.svg`, the redo `owner/sad-mouth-claude-his-way.svg`; model `out/codex/sad-face.png` (Codex's sad head, approved); cutter `sad_face_cut.py`
+
+Claude cut the frown fresh from Codex's picture with principle_cut, as for a new part. It fitted the drawing (0.1% off) but wasn't his mouth:
+Codex's stem was long (25 px showing under the nose, his is 18) and its stroke thin (9 px, his 11), and it had 14 points, not his 18.
+- **An expression is his part reshaped, not a new part.** A sad mouth is his mouth (lesson 5), so it keeps what his has: one outline of
+  **18 points**, **his stroke thickness**, **his stem's width and length** (its top tucked up under the nose, lesson 18), **round caps
+  of three points**. The drawing only says where the curves go.
+- How `sad_face_cut.py` does it: the drawing's frown is redrawn at his stroke and lifted so the stem shows his length; then his 18
+  points go onto its outline in his order (stem down the left, the arm's upper edge to its cap, the cap, under the arm to the middle,
+  the same on the right, the stem back up), each at the same share along its stretch as on his, and only the curves between them are
+  fitted to the drawing (worst 1.1 px off).
+- The same goes for eyes and brows (lessons 6, 7): start from his, keep his counts and fuller ends.
