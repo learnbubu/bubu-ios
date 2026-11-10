@@ -557,5 +557,27 @@
    "Codex's long thin stem read as 'weird': his stem, 18 px under the nose"
   ],
   "applied": "sad_face_cut.py, the flop's mouthSad layer"
+ },
+ {
+  "id": "sad-mouth-fix",
+  "date": "2026-11-10",
+  "by": "owner fixing Claude",
+  "part": "front sad mouth (scratch bubu-lesson-flop)",
+  "owner": [
+   "sad-mouth-fix.svg"
+  ],
+  "claude": [
+   "sad-mouth-claude-his-way.svg"
+  ],
+  "recordings": [
+   "2026-11-10-05-19-10.jsonl"
+  ],
+  "learnt": [
+   "16 points: one point under the frown's middle, not three; the underside is one smooth arch",
+   "arms about 9.8 px across, no thicker than the stem (10.25); lesson 24's 11 was too thick",
+   "the stem's sides straight, no pinch",
+   "rounder caps, still three points each"
+  ],
+  "applied": "kept as the flop's mouthSad; sad_face_cut.py not yet updated"
  }
 ]

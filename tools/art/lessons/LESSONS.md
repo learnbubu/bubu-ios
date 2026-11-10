@@ -401,3 +401,17 @@ Codex's stem was long (25 px showing under the nose, his is 18) and its stroke t
   the same on the right, the stem back up), each at the same share along its stretch as on his, and only the curves between them are
   fitted to the drawing (worst 1.1 px off).
 - The same goes for eyes and brows (lessons 6, 7): start from his, keep his counts and fuller ends.
+
+### 25. Sad mouth (owner fixing Claude's, in the scratch lesson project's `bubu-lesson-flop`, 10 Nov 2026) - `2026-11-10-05-19-10.jsonl` (3 min), `owner/sad-mouth-fix.svg`, Claude's `owner/sad-mouth-claude-his-way.svg` (lesson 24's cut); overlay `out/lessons/2026-11-10-05-19-10.png` (Claude's only red, his only blue, both grey); reference he worked against: Codex's sad mouth solo'd as the guide layer "ref sad mouth (Claude)"
+- **16 points, not 18.** He took out two of the three points under the frown's middle (at 31.6 s and 42.8 s) and moved the one left to
+  the centre. The underside of a frown is one smooth arch with one point at its top. On the happy mouth the middle point sits under
+  the stem; here too it's one point, right under the stem.
+- **Thinner arms:** about 9.8 px across, against Claude's 11.7 and his happy mouth's 10.5. That's close to the stem's width (10.25).
+  Lesson 24 measured his stroke as 11; that figure was wrong, or at least too thick for a frown. Keep the arms no thicker than the stem.
+- **Straight stem sides.** Claude's stem pinched in a little halfway down. His runs straight from under the nose into the arms.
+- **The arms' upper edges sit lower near the tips and the caps are rounder.** The ends lost Claude's points poking out past the curve.
+  Each cap is still three points.
+- How he worked: from the left cap inward (5, 4, 3, 2, 1), then the points he removed in the middle, then the right arm, then back
+  round both sides by eye. 74 steps, 38 of them handles only. His moves shrank from about 4 px to 1 px.
+- `sad_face_cut.py` still makes 18 points at the old stroke. Change it before cutting another expression: 16 points, one middle
+  point under the frown, arms at the stem's width.
