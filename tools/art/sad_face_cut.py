@@ -2,8 +2,8 @@
 9 Nov 2026), in the head's own layer space:
 - the picture put on the rig by its unchanged parts: the two eye patches and the nose (their boxes' centres against the layers')
 - each feature's edge at the half-shade (labels by nearest palette colour: lesson 20, fit to the edge's middle)
-- his point counts: the eye as his eye (10), the brow as his (8), the mouth one outline with its stem (18, lesson 5), the stem
-  carried up under the nose (hidden, generous: lesson 19)
+- his point counts: the eye as his eye (10), the brow as his (8), the mouth one outline with its stem as his sad mouth (16,
+  lesson 25: one point under the frown's middle), the stem carried up under the nose (hidden, generous: lesson 19)
 - the screen-left eye and brow cut, the right ones his mirror about 626.5 (lessons 6, 7); the mouth cut whole
 - his colours: eye #fef8e8, brow #393a36, mouth #363733
 Writes <out>/{eyeL,eyeR,browL,browR,mouth}-sad.svg, place.json, check.png"""
@@ -129,11 +129,21 @@ _p = np.array([float(v) for v in _re.findall(r"-?[\d.]+(?:e-?\d+)?", _re.search(
 his = _p + [HIS_LAYER['x'] - HIS_LAYER['w'] / 2, HIS_LAYER['y'] - HIS_LAYER['h'] / 2]
 ha = his[0:-1:3]                                      # (his 18 points, in order)
 assert len(ha) == 18, len(ha)
-# his measures (doc px): the stroke, the stem's width and its length showing below the nose
+# his measures (doc px): the stem's width and its length showing below the nose
 nose_bottom = Ly['nose']['y'] + Ly['nose']['h'] / 2
-his_stroke = float(np.linalg.norm(ha[2] - ha[6]))     # (the left arm, inner edge to outer)
+his_stem_w = float(ha[15][0] - ha[1][0])
 his_stem_len = float(ha[1][1] - nose_bottom)
-print("his mouth: stroke %.1f, stem %.1f wide, %.1f showing" % (his_stroke, ha[15][0] - ha[1][0], his_stem_len))
+# (lesson 25, 10 Nov 2026: his own sad mouth's arms are about 9.8 px across, no thicker than the stem; lesson 24's 11, measured
+# off his happy mouth, came out too thick)
+his_stroke = his_stem_w
+print("his mouth: stem %.1f wide, %.1f showing; the frown's arms at the stem's width" % (his_stem_w, his_stem_len))
+# (lesson 25: his sad mouth is the template for the points: 16 of them, the underside of the frown one smooth arch with a single
+# point under the stem, the caps three points each. Its own box only gives the order and the shares along each stretch)
+_tp = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lessons', 'owner', 'sad-mouth-fix.svg')).read()
+_tp = np.array([float(v) for v in _re.findall(r"-?[\d.]+(?:e-?\d+)?", _re.search(r' d="([^"]+)"', _tp).group(1))]).reshape(-1, 2)
+ta = _tp[0:-1:3]
+NP = len(ta)
+assert NP == 16, NP
 # the drawing's frown, at his stroke and his stem's length
 dist = cv2.distanceTransform(m, cv2.DIST_L2, 5)
 sk = cv2.ximgproc.thinning(m * 255) if hasattr(cv2, 'ximgproc') else None
@@ -151,7 +161,7 @@ elif grow < 0:
     arms_ = cv2.erode(arms_, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (-2 * grow + 1, -2 * grow + 1)))
 lift = int(round(J - (nose_bottom + his_stem_len) * Z))   # (the frown brought up so the stem shows his length)
 arms_ = np.roll(arms_, -lift, axis=0)
-hx_ = (ha[1][0] + ha[15][0]) / 2 * Z; hw_ = (ha[15][0] - ha[1][0]) * Z
+hx_ = (ha[1][0] + ha[15][0]) / 2 * Z; hw_ = his_stem_w * Z
 m2 = arms_.copy()
 m2[int((nose_bottom - 12) * Z): J - lift + 4 * Z, int(hx_ - hw_ / 2): int(hx_ + hw_ / 2) + 1] = 1   # (his stem, up under the nose)
 n6, c6, s6, _ = cv2.connectedComponentsWithStats(m2)
@@ -175,9 +185,14 @@ footL = corner_near(np.array([hx_ - hw_ / 2, J - lift]))
 footR = corner_near(np.array([hx_ + hw_ / 2, J - lift]))
 stem_tl, stem_tr = nearest(np.array([hx_ - hw_ / 2, top_y + 4 * Z])), nearest(np.array([hx_ + hw_ / 2, top_y + 4 * Z]))
 stem_top = nearest(np.array([hx_, top_y]))
-# his landmarks (indices of his 18): 0 stem top left, 1 stem foot left, 4 left tip, 8 middle, 12 right tip, 15 stem foot right,
-# 16 stem top right, 17 stem top
-H_land = [0, 1, 4, 8, 12, 15, 16, 17]
+# the template's landmarks, found on it the same way: 0 stem top left, 1 stem foot left, the left tip (leftmost), the middle
+# (lowest of the underside's points near the centre: the underside is its upper edge there), the right tip, the stem foot right,
+# the stem top right, the stem top (the last two before closing)
+_tl, _tr = int(np.argmin(ta[:, 0])), int(np.argmax(ta[:, 0]))
+_cx = (ta[1][0] + ta[NP - 3][0]) / 2
+_mid = min((i for i in range(_tl + 1, _tr) if abs(ta[i][0] - _cx) < 6), key=lambda i: abs(ta[i][0] - _cx))
+H_land = [0, 1, _tl, _mid, _tr, NP - 3, NP - 2, NP - 1]
+ha = ta
 D_land = [stem_tl, footL, tipL, mid, tipR, footR, stem_tr, stem_top]
 # (the outline's direction: his goes stem down the left first; the drawing's must go the same way)
 fwd = lambda a, b: (b - a) % N
@@ -185,7 +200,7 @@ if fwd(stem_tl, footL) > fwd(footL, stem_tl):
     cm = cm[::-1].copy(); N = len(cm)
     D_land = [N - 1 - i for i in D_land]
 def his_len(i, j):
-    seg = list(range(i, j + 1)) if j > i else list(range(i, 18)) + list(range(0, j + 1))
+    seg = list(range(i, j + 1)) if j > i else list(range(i, NP)) + list(range(0, j + 1))
     pts = np.array([ha[k] for k in seg])
     return np.r_[0, np.cumsum(np.linalg.norm(np.diff(pts, axis=0), axis=1))]
 keys = {}
@@ -193,13 +208,20 @@ for (h0, d0), (h1, d1) in zip(zip(H_land, D_land), list(zip(H_land, D_land))[1:]
     keys[h0] = d0
     cum = his_len(h0, h1)
     span = fwd(d0, d1)
-    inner = (list(range(h0 + 1, h1)) if h1 > h0 else list(range(h0 + 1, 18)) + list(range(0, h1)))
+    inner = (list(range(h0 + 1, h1)) if h1 > h0 else list(range(h0 + 1, NP)) + list(range(0, h1)))
     for k_, h in enumerate(inner, 1):
         keys[h] = (d0 + int(round(span * cum[k_] / cum[-1]))) % N
-order = [keys[h] for h in range(18)]
-corner = {footL, footR, stem_tl, stem_tr}
+order = [keys[h] for h in range(NP)]
+# (by D_land: if the outline was turned round above, the named indices are the old way's)
+corner = {D_land[0], D_land[1], D_land[5], D_land[6]}
+# (lesson 25: the stem's sides are straight from under the nose to the arms; Claude's pinched in half way down)
+straight = {(D_land[0], D_land[1]), (D_land[5], D_land[6])}
 segs = []
 for a_, b_ in zip(order, order[1:] + order[:1]):
+    if (a_, b_) in straight:
+        ch = cm[b_] - cm[a_]; L_ = float(np.linalg.norm(ch)); u = ch / (L_ + 1e-9)
+        segs.append((a_, b_, u, u, (L_ / 3, L_ / 3), 0.0))
+        continue
     t0 = PC.tangent(cm, a_, 1) if a_ in corner else PC.tangent(cm, a_, 1)
     t3 = PC.tangent(cm, b_, -1)
     if a_ not in corner:
@@ -214,8 +236,8 @@ for a_, b_, t0, t3, v, e in segs:
 sh = {"raw": np.array(raw)}
 m = m2
 worst = max(e for *_, e in segs) / Z
-print("mouth, his 18 points on the frown: worst segment %.2f px off" % worst)
-P["mouth-sad"] = ("#363733", ({"raw": sh["raw"] / Z}, 18, worst))
+print("mouth, his %d points on the frown: worst segment %.2f px off" % (NP, worst))
+P["mouth-sad"] = ("#363733", ({"raw": sh["raw"] / Z}, NP, worst))
 # (a close check at 4x: the picture, the mask's edge in yellow, the cut in blue)
 pic4 = cv2.warpAffine(np.asarray(img), M * Z, (CW * Z, CH * Z), flags=cv2.INTER_LINEAR).copy()
 ys4, xs4 = np.nonzero(m)

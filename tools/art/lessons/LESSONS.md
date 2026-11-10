@@ -413,5 +413,8 @@ Codex's stem was long (25 px showing under the nose, his is 18) and its stroke t
   Each cap is still three points.
 - How he worked: from the left cap inward (5, 4, 3, 2, 1), then the points he removed in the middle, then the right arm, then back
   round both sides by eye. 74 steps, 38 of them handles only. His moves shrank from about 4 px to 1 px.
-- `sad_face_cut.py` still makes 18 points at the old stroke. Change it before cutting another expression: 16 points, one middle
-  point under the frown, arms at the stem's width.
+- `sad_face_cut.py` now follows this (10 Nov 2026): his sad mouth is its template for the points (16, landmarks found on it), the
+  arms are drawn at his stem's width, and the stem's two sides are straight lines. Run again on Codex's sad face, it lands much
+  nearer his: 1241 px² against his 1195 (lesson 24's cut was 1331), arms 10.5 across against his 9.8, worst segment 1.6 px off the
+  drawing. Overlay `out/lessons/sad-mouth-cut25-vs-his.png`. What's left is his by eye: he set the arms a little lower than Codex
+  draws them, and his middle point is dead centre (the cut's sits 3.6 px left).
