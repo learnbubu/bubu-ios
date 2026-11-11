@@ -418,3 +418,12 @@ Codex's stem was long (25 px showing under the nose, his is 18) and its stroke t
   nearer his: 1241 px² against his 1195 (lesson 24's cut was 1331), arms 10.5 across against his 9.8, worst segment 1.6 px off the
   drawing. Overlay `out/lessons/sad-mouth-cut25-vs-his.png`. What's left is his by eye: he set the arms a little lower than Codex
   draws them, and his middle point is dead centre (the cut's sits 3.6 px left).
+
+### 26. Teary open eye (owner fixing Claude's, in the scratch lesson project's `bubu-lesson-flop`, 11 Nov 2026) - `2026-11-11-00-47-48.jsonl` (3 min), `owner/teary-eye-l-fix.svg`, `owner/teary-tear-l-fix.svg`, Claude's `owner/teary-*-claude-before.svg` (cut by `teary_eye_cut.py` from Codex's option 3, `out/codex/sad-eyes/`); how he worked: `out/lessons/2026-11-11-00-47-48-process.txt`
+- **The open eye is 4 points, not 6.** He took out the cut's points at the bottom (it had kinked round the tear's corner) and let the
+  bottom run as one round curve, a little lower and fuller. A round eye is lesson 1's round form: 4 points at its extremes.
+  `teary_eye_cut.py` should ask for 4 (`max_points=4`) next time.
+- **The tear kept its 8 points,** moved about a pixel down and reshaped by eye to sit on the eye's new bottom.
+- He tried moving patchL and undid it, so the patch is his as before.
+- Only the screen-left eye; the right is his left mirrored exactly (lesson 6), eye and tear (`eyeR-teary-his-mirror.svg`,
+  `tearR-teary-his-mirror.svg`).

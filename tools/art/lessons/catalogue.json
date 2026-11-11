@@ -579,5 +579,27 @@
    "rounder caps, still three points each"
   ],
   "applied": "kept as the flop's mouthSad; sad_face_cut.py: his sad mouth as the 16-point template, arms at the stem's width, straight stem sides"
+ },
+ {
+  "id": "teary-eye-fix",
+  "date": "2026-11-11",
+  "by": "owner fixing Claude",
+  "part": "front teary open eye and tear (scratch bubu-lesson-flop)",
+  "owner": [
+   "teary-eye-l-fix.svg",
+   "teary-tear-l-fix.svg"
+  ],
+  "claude": [
+   "teary-eye-l-claude-before.svg",
+   "teary-tear-l-claude-before.svg"
+  ],
+  "recordings": [
+   "2026-11-11-00-47-48.jsonl"
+  ],
+  "learnt": [
+   "a round open eye is 4 points at its extremes; the cut's 6 kinked round the tear",
+   "the tear keeps 8 points, nudged by eye onto the eye's bottom"
+  ],
+  "applied": "mirrored exactly to the right; teary_eye_cut.py asks for 4 points"
  }
 ]

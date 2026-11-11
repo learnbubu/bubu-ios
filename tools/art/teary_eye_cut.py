@@ -90,7 +90,7 @@ P = {}
 def cut(name, m, fill_, maxp, tol=0.5):
     sh, npts, worst = PC.cut(m, None, tol=tol * Z, max_points=maxp)
     P[name] = (fill_, [({"raw": sh["raw"] / Z}, npts, worst / Z)])
-cut("eyeL-teary", eye, "#fef8e8", 6)
+cut("eyeL-teary", eye, "#fef8e8", 4)   # (lesson 26: a round eye is 4 points; he took the cut's 6 to 4)
 cut("tearL-teary", tear, "#98e0f9", 8)
 cut("pupilL-teary", pupil, "#363733", 4)
 P["glintL-teary"] = ("#ffffff", [])
